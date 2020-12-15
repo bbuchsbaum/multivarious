@@ -11,8 +11,9 @@
 #' 
 #' @examples 
 #' 
-#' X <- matrix(rnorm(10*20), 10, 20)
-#' res <- pca(X, ncomp=10, preproc=center())
+#' data(iris)
+#' X <- as.matrix(iris[,1:4])
+#' res <- pca(X, ncomp=4)
 pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("base", "fast", "irlba","propack", "rsvd", "svds"), ...) {
   chk::chkor(chk::chk_matrix(X), chk::chk_s4_class("Matrix"))
   
@@ -25,7 +26,7 @@ pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("base", "fast
   }
   
 
-  attr(svdres, "class") <- c("pca", attr(res, "class"))
+  attr(svdres, "class") <- c("pca", attr(svdres, "class"))
   svdres
   
   

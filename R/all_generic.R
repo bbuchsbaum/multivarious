@@ -218,10 +218,21 @@ block_indices <- function(x) UseMethod("block_indices")
 init_transform <- function(x, X, ...) UseMethod("init_transform")
 
 #' @inheritParams init_transform
-apply_transform <- function(x, X, ...) UseMethod("apply_transform")
+apply_transform <- function(x, X, colind, ...) UseMethod("apply_transform")
 
 #' @inheritParams init_transform
-reverse_transform <- function(x, X, ...) UseMethod("reverse_transform")
+reverse_transform <- function(x, X, colind, ...) UseMethod("reverse_transform")
+
+#' bootstrap resampling
+#' 
+#' bootstrap a multivariate model to estimate component and score variability
+#' 
+#' @param x the model fit
+#' @param nboot the number of bootstrap resamples
+#' @param ... extra args
+#' @export
+bootstrap <- function(x, nboot, ...) UseMethod("bootstrap")
+
 
 
 

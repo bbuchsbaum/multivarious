@@ -28,6 +28,7 @@ Compute the directions of maximal variance in a matrix via the singula value dec
 }
 \examples{
 
-X <- matrix(rnorm(10*20), 10, 20)
-res <- pca(X, ncomp=10, preproc=center())
+data(iris)
+X <- as.matrix(iris[,1:4])
+res <- pca(X, ncomp=4)
 }
