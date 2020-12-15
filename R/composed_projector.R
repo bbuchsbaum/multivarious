@@ -1,16 +1,25 @@
 
 compose_projector <- function(...) {
   args <- list(...)
+  sapply(args, function(p) chk::chk_s3_class(p, "projector"))
+  if (length(args) == 1) {
+    return(args[[1]])
+  }
+  
+  shapelist <- lapply(args, shape)
+  for (i in 2:length(args)) {
+    chk::chk_equal(shapelist[[i-1]][2], shapelist[[i]][1])
+  }
+  
   out <- lapply(args, function(arg) {
-    chk::chk_s3_class(arg, "projector")
     f <- function(new_data) {
       project(arg, new_data)
     }
   })
 
-  f <- do.call(purrr::combine, out,.dir="forward")
+  f <- do.call(purrr::compose, c(out,.dir="forward"))
   
-  out <- structure(fun,
+  out <- structure(f,
     class=c("composed_projector", "function")
   )
 }
@@ -25,9 +34,9 @@ compose_partial_projector <- function(...) {
     }
   })
   
-  f <- do.call(purrr::combine, out,.dir="forward")
+  f <- do.call(purrr::compose, c(out,.dir="forward"))
   
-  out <- structure(fun,
+  out <- structure(f,
                    class=c("composed_partial_projector", "composed_projector", "function")
   )
 }

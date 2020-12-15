@@ -119,8 +119,9 @@ reprocess.projector <- function(x, new_data, colind=NULL) {
   
 }
 
-
-  
+shape.projector <- function(x) {
+  c(nrow(x$v), ncol(x$v))
+}
 
 print.projector <- function(x) {
   cat("projector: ", paste0(class(x)), "\n")

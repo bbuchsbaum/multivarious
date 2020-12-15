@@ -40,3 +40,12 @@ test_that("can test for orthogonality", {
 })
 
 
+test_that("can compose two projectors", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  s <- svd(mat1)
+  proj1 <- projector(s$v)
+  proj2 <- projector(s$v[1:10,1:3])
+  proj3 <- compose_projector(proj1,proj2)
+})
+
+
