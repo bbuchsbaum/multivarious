@@ -1,11 +1,11 @@
 Package: multivarious
-Title: What the Package Does (One Line, Title Case)
+Title: Basic Data structures for multivariate analysis with an aim toward generalizability and extension
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Bradley",
+           family = "Buchsbaum",
            role = c("aut", "cre"),
-           email = "first.last@example.com",
+           email = "brad.buchsbaumt@gmail.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: What the package does (one paragraph).
 License: `use_mit_license()`, `use_gpl3_license()` or friends to
@@ -15,4 +15,6 @@ LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.0
 Imports: 
-    chk
+    chk,
+    glmnet,
+    corpcor

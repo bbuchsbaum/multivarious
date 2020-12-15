@@ -29,7 +29,7 @@ partial_project <- function(x, new_data, colind) UseMethod("partial_project")
 #' @inheritParams project
 #' @param block the block id to select in the block projection matrix
 #' @export
-project_block <- function(x, new_data, block_index,...) UseMethod("project_block")
+project_block <- function(x, new_data, block,...) UseMethod("project_block")
 
 
 
@@ -89,6 +89,48 @@ scores <- function(x,...) UseMethod("scores")
 components <- function(x,...) UseMethod("components")
 
 
+#' inverse of the component matrix
+#' 
+#' return the inverse projection matrix. Can be used to map back to data space.
+#' If the component matrix is orthogonal, then the inverse projection is the transpose of the component matrix.
+#' 
+#' 
+#' @param x the model fit
+#' @param ... extra args
+#' @export
+inverse_projection <- function(x, ...) UseMethod("inverse_projection")
+
+
+
+#' Get a fresh pre-processing node cleared of any cached data
+#' 
+#' @param x the processing pipeline
+#' @param ... extra args
+#' 
+fresh <- function(x,...) UseMethod("fresh")
+
+
+
+#' add a pre-processing stage
+#' 
+#' @param x the processing pipeline
+#' @param step the pre-processing step to add
+#' @param ... extra args
+#' @export
+add_node <- function(x, step, ...) UseMethod("add_node")
+
+
+#' prepare a dataset by applying a pre-processing pipeline
+#' 
+#' @param x the pipeline
+#' @param ... extra args
+#' @export
+prep <- function(x, ...) UseMethod("prep")
+
+
+
+
+
 
 #' apply pre-processing parameters to a new data matrix
 #' 
@@ -129,7 +171,39 @@ is_orthogonal <- function(x) UseMethod("is_orthogonal")
 #' take the first n components of a decomposition
 #' 
 #' @param x the object to truncate
-truncate <- function(x) UseMethod("trucate")
+truncate <- function(x, ncomp) UseMethod("truncate")
+
+
+#' get block_lengths
+#' 
+#' extract the lengths of each block in a multiblock object
+#' 
+#' @param x the object
+#' @export
+block_lengths <- function(x) UseMethod("block_lengths")
+
+#' get block_indices 
+#' 
+#' extract the list of indices associated with each block in a multiblock object
+#' 
+#' @param x the object
+#' @export
+block_indices <- function(x) UseMethod("block_indices")
+
+
+
+#' initialize a transform
+#' 
+#' @param x the pre_processor
+#' @param X the data matrix
+#' @keywords internal
+init_transform <- function(x, X) UseMethod("init_transform")
+
+#' @inheritParams init_transform
+apply_transform <- function(x, X) UseMethod("apply_transform")
+
+#' @inheritParams init_transform
+reverse_transform <- function(x, X) UseMethod("reverse_transform")
 
 
 

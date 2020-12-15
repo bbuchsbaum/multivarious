@@ -5,8 +5,9 @@
 #' 
 #' @export
 #' @param v a matrix of coefficients with dimension `nrow(v)` by `ncol(v)` (number of columns = number of components)
-#' @param preproc a pre-processing object
+#' @param preproc a prepped pre-processing object (default is the no-processing `pass()` pre_processor)
 #' @param classes additional class information used for creating subtypes of `projector`
+#' @param ... extra args
 #' 
 #' 
 #' @return 
@@ -22,12 +23,14 @@
 #' 
 #' p <- projector(svdfit$v)
 #' 
-projector <- function(v, preproc=NULL, ..., classes=NULL) {
+projector <- function(v, preproc=prep(pass()), ..., classes=NULL) {
+  chk::chkor(chk::chk_matrix(v), chk::chk_s4_class(v, "Matrix"))
+  chk::chk_s3_class(preproc, "pre_processor")
+  
   out <- structure(
     list(
-      preproc=preproc,
-      ncomp=ncomp,
       v=v,
+      preproc=preproc,
       ...),
     class= c(classes, "projector")
   )
@@ -78,6 +81,11 @@ is_orthogonal.projector <- function(x) {
   Matrix::isDiagonal(zapsmall(z))
 }
 
+
+inverse_projection.projector <- function(x) {
+  ## assume orthogonal
+  t(components(x))
+}
 
 truncate.projector <- function(x, ncomp) {
   chk_range(ncomp, c(1, ncomp(x)))

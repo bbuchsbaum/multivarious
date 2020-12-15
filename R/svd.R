@@ -11,12 +11,21 @@
 #' @importFrom rsvd rsvd
 #' @importFrom irlba irlba
 #' @importFrom corpcor fast.svd
-#' @importFrom svd propack
+#' @importFrom svd propack.svd
 #' 
 #' @return 
 #' 
-#' a `projector` object
+#' @examples 
+#' 
+#' data(iris)
+#' X <- iris[,1:4]
+#' 
+#' fit <- svd_wrapper(X, ncomp=3, preproc=center(), method="base")
+#' 
+#' 
+#' an `svd` object that extends `projector`
 svd_wrapper <- function(X, ncomp=min(dim(X)), 
+                        preproc=pass(),
                         method=c("base", "fast", "irlba", 
                                  "propack", "rsvd", "svds"), 
                         q=2,
@@ -25,6 +34,10 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
                         tol=.Machine$double.eps,
                         ...) {
   method <- match.arg(method)
+  chk::chk_s3_class(preproc, "prepper")
+  
+  proc <- prep(preproc)
+  X <- init_transform(proc, X)
   
   res <- switch(method,
                 base=svd(X,...),
@@ -42,7 +55,6 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
   res$u <- res$u[,keep, drop=FALSE]
   res$v <- res$v[,keep, drop=FALSE]
   res$ncomp <- length(keep)
-  
-  bi_projector(res$v, s=res$u %*% diag(res$d), sdev=res$d, preproc=NULL, classes="svd", method=method)
+  bi_projector(res$v, s=res$u %*% diag(res$d), sdev=res$d, preproc=proc, classes="svd", method=method)
 }
 

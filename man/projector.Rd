@@ -4,12 +4,14 @@
 \alias{projector}
 \title{construct a \code{projector} instance}
 \usage{
-projector(v, preproc = NULL, ..., classes = NULL)
+projector(v, preproc = prep(pass()), ..., classes = NULL)
 }
 \arguments{
 \item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
 
-\item{preproc}{a pre-processing object}
+\item{preproc}{a prepped pre-processing object (default is the no-processing \code{pass()} pre_processor)}
+
+\item{...}{extra args}
 
 \item{classes}{additional class information used for creating subtypes of \code{projector}}
 }

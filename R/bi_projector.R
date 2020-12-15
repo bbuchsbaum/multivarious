@@ -18,8 +18,8 @@
 #' svdfit <- svd(X)
 #' 
 #' p <- bi_projector(svdfit$v, s = svdfit$u %*% diag(svdfit$d), sdev=svdfit$d)
-#' pcres <- prcomp(X, center=FALSE, scale=FALSE)
-bi_projector <- function(v, s, sdev, preproc=NULL, classes=NULL, ...) {
+#' 
+bi_projector <- function(v, s, sdev, preproc=prep(pass()), classes=NULL, ...) {
   chk::vld_matrix(v)
   chk::vld_matrix(s)
   chk::vld_numeric(sdev)
@@ -38,7 +38,7 @@ sdev.bi_projector <- function(x) {
 }
 
 
-project_vars <- function(x, new_data) {
+project_vars.bi_projector <- function(x, new_data) {
   if (is.vector(new_data)) {
     new_data <- matrix(new_data)
   }
@@ -46,23 +46,25 @@ project_vars <- function(x, new_data) {
   chk::chk_equal(nrow(new_data), nrow(scores(x)))
   
   variance <- sdev(x)^2
-  t(new_data) %*% (scores(x)) %*% diag(1/variance, nrow=length(variaance), ncol=length(variance))
+  t(new_data) %*% (scores(x)) %*% diag(1/variance, nrow=length(variance), ncol=length(variance))
 }
 
 
 genreconstruct <- function(x, comp, rowind, colind) {
-  scores(x)[rowind,comp] %*% t(components(x)[,comp,drop=FALSE])[,colind]
+  ip <- inverse_projection(x)
+  out <- scores(x)[rowind,comp] %*% ip[,comp,drop=FALSE][,colind]
+  reverse_transform(x$preproc, out)
 }
 
-#' @export
-reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)), colind=1:nrow(components(x))) {
-  chk_numeric(comp)
-  chk_true(max(comp) <= ncomp(x))
-  chk_numeric(rowind)
-  chk_numeric(colind)
-  chk_range(comp, c(1,ncomp(x)))
-  chk_range(rowind, c(1,nrow(scores(x))))
-  chk_range(colind, c(1,nrow(components(x))))
+reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)), 
+                                     colind=1:nrow(components(x))) {
+  chk::chk_numeric(comp)
+  chk::chk_true(max(comp) <= ncomp(x))
+  chk::chk_numeric(rowind)
+  chk::chk_numeric(colind)
+  chk::chk_range(comp, c(1,ncomp(x)))
+  chk::chk_range(rowind, c(1,nrow(scores(x))))
+  chk::chk_range(colind, c(1,nrow(components(x))))
   genreconstruct(x,comp, rowind, colind)
 }
 

@@ -7,6 +7,7 @@
 svd_wrapper(
   X,
   ncomp = min(dim(X)),
+  preproc = pass(),
   method = c("base", "fast", "irlba", "propack", "rsvd", "svds"),
   q = 2,
   p = 10,
@@ -28,8 +29,18 @@ svd_wrapper(
 \item{tol}{minimum eigenvalue magnitude, otherwise component is dropped}
 }
 \value{
-a \code{projector} object
+
 }
 \description{
 svd_wrapper
+}
+\examples{
+
+data(iris)
+X <- iris[,1:4]
+
+fit <- svd_wrapper(X, ncomp=3, preproc=center(), method="base")
+
+
+an `svd` object that extends `projector`
 }

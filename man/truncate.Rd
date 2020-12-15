@@ -4,7 +4,7 @@
 \alias{truncate}
 \title{truncate a component fit}
 \usage{
-truncate(x)
+truncate(x, ncomp)
 }
 \arguments{
 \item{x}{the object to truncate}

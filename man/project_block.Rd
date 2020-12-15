@@ -4,16 +4,16 @@
 \alias{project_block}
 \title{project a single "block" of data onto the subspace}
 \usage{
-project_block(x, new_data, block_index, ...)
+project_block(x, new_data, block, ...)
 }
 \arguments{
 \item{x}{the model fit}
 
 \item{new_data}{a matrix or vector of new observations(s) with the same number of columns as the original data.}
 
-\item{...}{extra args}
-
 \item{block}{the block id to select in the block projection matrix}
+
+\item{...}{extra args}
 }
 \description{
 When observations are concatenated into "blocks", it may be useful to project one block from the set.

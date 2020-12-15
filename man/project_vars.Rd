@@ -4,7 +4,7 @@
 \alias{project_vars}
 \title{new variable projection}
 \usage{
-project_vars(x, new_data)
+project_vars(x, new_data, ...)
 }
 \arguments{
 \item{x}{the model fit}

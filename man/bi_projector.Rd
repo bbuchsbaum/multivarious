@@ -4,7 +4,7 @@
 \alias{bi_projector}
 \title{construct a \code{bi_projector} instance}
 \usage{
-bi_projector(v, s, sdev, preproc = NULL, classes = NULL, ...)
+bi_projector(v, s, sdev, preproc = prep(pass()), classes = NULL, ...)
 }
 \arguments{
 \item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
@@ -13,9 +13,11 @@ bi_projector(v, s, sdev, preproc = NULL, classes = NULL, ...)
 
 \item{sdev}{the standard deviations of th score matrix}
 
-\item{preproc}{a pre-processing object}
+\item{preproc}{a prepped pre-processing object (default is the no-processing \code{pass()} pre_processor)}
 
 \item{classes}{additional class information used for creating subtypes of \code{projector}}
+
+\item{...}{extra args}
 }
 \description{
 A \code{bi_projector} offers a two-way mapping from from samples (rows) to scores and from variables (columns) to components.
