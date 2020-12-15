@@ -77,12 +77,12 @@ init_transform.pre_processor <- function(x, X) {
   x$init(X)
 }
 
-apply_transform.pre_processor <- function(x, X) {
-  x$transform(X)
+apply_transform.pre_processor <- function(x, X, colind=NULL) {
+  x$transform(X,colind)
 }
 
-reverse_transform.pre_processor <- function(x, X) {
-  x$reverse_transform(X)
+reverse_transform.pre_processor <- function(x, X, colind=NULL) {
+  x$reverse_transform(X, colind)
 }
 
 fresh.pre_processor <- function(x, preproc=prepper()) {

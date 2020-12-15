@@ -60,13 +60,16 @@ project_vars <- function(x, new_data, ...) UseMethod("project_vars")
 reconstruct <- function(x, comp, rowind, colind, ...) UseMethod("reconstruct")
 
 
-
+#' get residuals of component model fit
+#'
 #' Extract the residuals of a model, after removing the first \code{ncomp} components
 #' 
 #' @param x the model fit
 #' @param ncomp the number of components to factor out
+#' @param xorig the original X data matrix
 #' @param ... extra arguments
-residuals <- function(x, ncomp, ...) UseMethod("residuals")
+#' @export
+residuals <- function(x, ncomp, xorig, ...) UseMethod("residuals")
 
 
 #' get the component scores
@@ -77,6 +80,19 @@ residuals <- function(x, ncomp, ...) UseMethod("residuals")
 #' @param ... extra args
 #' @export
 scores <- function(x,...) UseMethod("scores")
+
+#' compute standardized scores
+#' 
+#' 
+#' @param the model fit
+#' @param ... extra args
+#' @export 
+std_scores <- function(x, ...) UseMethod("std_scores")
+
+#' extract loadings of a model fit
+#' 
+#' loadings are defined as the principal directions scaled by the 
+loadings <- function(x, ...) UseMethod("loadings")
 
 
 #' get the components
@@ -137,8 +153,10 @@ prep <- function(x, ...) UseMethod("prep")
 #' Given a new dataset, process it in the same way the original data was processed (e.g. centering, scaling, etc.)
 #' 
 #' @param x the model fit object
+#' @param new_data the new data to process
+#' @param colind the column indices of the new data
 #' @export
-reprocess <- function(x, ...) UseMethod("reprocess")
+reprocess <- function(x, new_data, colind, ...) UseMethod("reprocess")
 
 
 #' get the number of components
@@ -197,13 +215,13 @@ block_indices <- function(x) UseMethod("block_indices")
 #' @param x the pre_processor
 #' @param X the data matrix
 #' @keywords internal
-init_transform <- function(x, X) UseMethod("init_transform")
+init_transform <- function(x, X, ...) UseMethod("init_transform")
 
 #' @inheritParams init_transform
-apply_transform <- function(x, X) UseMethod("apply_transform")
+apply_transform <- function(x, X, ...) UseMethod("apply_transform")
 
 #' @inheritParams init_transform
-reverse_transform <- function(x, X) UseMethod("reverse_transform")
+reverse_transform <- function(x, X, ...) UseMethod("reverse_transform")
 
 
 

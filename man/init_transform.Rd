@@ -4,7 +4,7 @@
 \alias{init_transform}
 \title{initialize a transform}
 \usage{
-init_transform(x, X)
+init_transform(x, X, ...)
 }
 \arguments{
 \item{x}{the pre_processor}

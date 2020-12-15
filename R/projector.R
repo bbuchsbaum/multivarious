@@ -53,7 +53,7 @@ project.projector <- function(x, new_data) {
   chk::vld_matrix(new_data)
   chk::check_dim(new_data, ncol, values=nrow(components(x)))
   
-  new_data %*% components(x)
+  reprocess(x, new_data) %*% components(x)
 }
 
 partial_project.projector <- function(x, new_data, colind) {
@@ -65,7 +65,7 @@ partial_project.projector <- function(x, new_data, colind) {
   chk::check_dim(new_data, ncol, length(colind))
   comp <- components(x)
   
-  new_data %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
+  reprocess(new_data, colind) %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
 }
 
 
@@ -90,6 +90,18 @@ inverse_projection.projector <- function(x) {
 truncate.projector <- function(x, ncomp) {
   chk_range(ncomp, c(1, ncomp(x)))
   projector(components(x)[,1:ncomp,drop=FALSE], ncomp=ncomp, preprox=x$preproc)
+}
+
+
+reprocess.projector <- function(x, new_data, colind=NULL) {
+  if (is.null(colind)) {
+    assert_that(ncol(new_data) == nrow(components(x)))
+    x$preproc$transform(newdata)
+  } else {
+    chk::chk_equal(length(colind), ncol(newdata)) 
+    apply_transform(x$preproc, new_data, colind)
+  }
+  
 }
 
 

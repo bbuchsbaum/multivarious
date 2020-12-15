@@ -4,10 +4,14 @@
 \alias{reprocess}
 \title{apply pre-processing parameters to a new data matrix}
 \usage{
-reprocess(x, ...)
+reprocess(x, new_data, colind, ...)
 }
 \arguments{
 \item{x}{the model fit object}
+
+\item{new_data}{the new data to process}
+
+\item{colind}{the column indices of the new data}
 }
 \description{
 Given a new dataset, process it in the same way the original data was processed (e.g. centering, scaling, etc.)

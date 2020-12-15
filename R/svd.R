@@ -34,6 +34,7 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
                         tol=.Machine$double.eps,
                         ...) {
   method <- match.arg(method)
+  
   chk::chk_s3_class(preproc, "prepper")
   
   proc <- prep(preproc)
@@ -55,6 +56,13 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
   res$u <- res$u[,keep, drop=FALSE]
   res$v <- res$v[,keep, drop=FALSE]
   res$ncomp <- length(keep)
-  bi_projector(res$v, s=res$u %*% diag(res$d), sdev=res$d, preproc=proc, classes="svd", method=method)
+  bi_projector(res$v, s=res$u %*% diag(res$d), sdev=res$d, u=res$u, preproc=proc, classes="svd", method=method)
 }
+
+std_scores.svd <- function(x) {
+  sqrt(nrow(x$u)-1) * x$u 
+}
+
+
+
 

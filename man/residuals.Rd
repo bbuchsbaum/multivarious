@@ -2,14 +2,16 @@
 % Please edit documentation in R/all_generic.R
 \name{residuals}
 \alias{residuals}
-\title{Extract the residuals of a model, after removing the first \code{ncomp} components}
+\title{get residuals of component model fit}
 \usage{
-residuals(x, ncomp, ...)
+residuals(x, ncomp, xorig, ...)
 }
 \arguments{
 \item{x}{the model fit}
 
 \item{ncomp}{the number of components to factor out}
+
+\item{xorig}{the original X data matrix}
 
 \item{...}{extra arguments}
 }

@@ -29,6 +29,8 @@ bi_projector <- function(v, s, sdev, preproc=prep(pass()), classes=NULL, ...) {
   out <- projector(v, preproc=preproc, s=s, sdev=sdev, classes=c(classes, "bi_projector"), ...)
 }
 
+
+
 scores.bi_projector <- function(x) {
   x$s
 }
@@ -67,6 +69,13 @@ reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)
   chk::chk_range(colind, c(1,nrow(components(x))))
   genreconstruct(x,comp, rowind, colind)
 }
+
+ 
+residuals.bi_projector <- function(x, ncomp, xorig) {
+  recon <- reconstruct(x, comp=1:ncomp)
+  xorig - recon
+}
+
 
   
 
