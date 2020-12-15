@@ -17,7 +17,7 @@ bootstrap(x, nboot, ...)
 \item{...}{extra args}
 }
 \value{
-A list with the bootstrap z-scores for the loadings (\code{zboot_loadings}) and scores (\code{zboot_scores})
+A \code{list} containing bootstrap z-scores for the loadings (\code{zboot_loadings}) and scores (\code{zboot_scores})
 }
 \description{
 bootstrap a multivariate model to estimate component and score variability

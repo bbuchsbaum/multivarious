@@ -14,5 +14,5 @@ reconstruct(x, comp, rowind, colind, ...)
 \item{...}{extra args}
 }
 \description{
-Reconstruct a data set from its (possibly) low-rank represenation.
+Reconstruct a data set from its (possibly) low-rank representation.
 }
