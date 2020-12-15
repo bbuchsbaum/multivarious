@@ -38,6 +38,7 @@ projector <- function(v, preproc=prep(pass()), ..., classes=NULL) {
   out
 }
 
+
 components.projector <- function(x) {
   x$v
 }
@@ -48,7 +49,7 @@ ncomp.projector <- function(x) {
 
 project.projector <- function(x, new_data) {
   if (is.vector(new_data)) {
-    new_data <- matrix(new_data, byrow=TRUE)
+    new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
   }
   chk::vld_matrix(new_data)
   chk::check_dim(new_data, ncol, values=nrow(components(x)))
@@ -58,14 +59,14 @@ project.projector <- function(x, new_data) {
 
 partial_project.projector <- function(x, new_data, colind) {
   if (is.vector(new_data) && length(colind) > 1) {
-    new_data <- matrix(new_data, byrow=TRUE)
+    new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
   } 
   
   chk::vld_matrix(new_data)
   chk::check_dim(new_data, ncol, length(colind))
   comp <- components(x)
   
-  reprocess(new_data, colind) %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
+  reprocess(x,new_data, colind) %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
 }
 
 
@@ -74,12 +75,17 @@ is_orthogonal.projector <- function(x) {
   comp <- components(x)
   
   z <- if (nrow(comp) > ncol(comp)) {
-    crosssprod(comp)
+    crossprod(comp)
   } else {
     tcrossprod(comp)
   }
   
   Matrix::isDiagonal(zapsmall(z))
+}
+
+compose_projector.projector <- function(x,y) {
+  chk::chk_s3_class(y, "projector")
+  ## functional projector?
 }
 
 
@@ -104,10 +110,10 @@ truncate.projector <- function(x, ncomp) {
 
 reprocess.projector <- function(x, new_data, colind=NULL) {
   if (is.null(colind)) {
-    assert_that(ncol(new_data) == nrow(components(x)))
-    x$preproc$transform(newdata)
+    chk::chk_equal(ncol(new_data), nrow(components(x)))
+    apply_transform(x$preproc, new_data)
   } else {
-    chk::chk_equal(length(colind), ncol(newdata)) 
+    chk::chk_equal(length(colind), ncol(new_data)) 
     apply_transform(x$preproc, new_data, colind)
   }
   

@@ -122,6 +122,9 @@ loadings <- function(x, ...) UseMethod("loadings")
 components <- function(x,...) UseMethod("components")
 
 
+
+
+
 #' inverse of the component matrix
 #' 
 #' return the inverse projection matrix. Can be used to map back to data space.
@@ -147,6 +150,11 @@ inverse_projection <- function(x, ...) UseMethod("inverse_projection")
 partial_inverse_projection <- function(x, colind, ...) UseMethod("partial_inverse_projection")
 
 
+#' compose two projectors
+#' 
+#' @param x the first projector
+#' @param y the second projector
+compose_projector <- function(x,y,...) UseMethod("compose_projector")
 
 
 #' Get a fresh pre-processing node cleared of any cached data
