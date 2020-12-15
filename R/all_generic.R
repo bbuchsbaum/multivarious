@@ -50,7 +50,7 @@ project_vars <- function(x, new_data, ...) UseMethod("project_vars")
 
 #' reconstruct the data
 #' 
-#' Reconstruct a data set from its (possibly) low-rank represenation.
+#' Reconstruct a data set from its (possibly) low-rank representation.
 #' 
 #' 
 #' @param x the model fit
@@ -58,6 +58,23 @@ project_vars <- function(x, new_data, ...) UseMethod("project_vars")
 #' @param ... extra args
 #' @export
 reconstruct <- function(x, comp, rowind, colind, ...) UseMethod("reconstruct")
+
+
+
+#' transfer data from one input domain to another via c ommon latent space
+#' 
+#' Convert between data representations in a multiblock decomposition/alignment
+#' 
+#' 
+#' @param x the model fit
+#' @param new_data the data to transfer
+#' @param i the index of the source data block
+#' @param j the index of the destination data block
+#' @param comp a vector of component indices to use in the reconstruction.
+#' @param ... extra args
+#' @export
+transfer <- function(x, comp, rowind, colind, ...) UseMethod("transfer")
+
 
 
 #' get residuals of component model fit
@@ -115,6 +132,20 @@ components <- function(x,...) UseMethod("components")
 #' @param ... extra args
 #' @export
 inverse_projection <- function(x, ...) UseMethod("inverse_projection")
+
+
+#' inverse projection of a columnwise subset of component matrix (e.g. a sub-block)
+#' 
+#' If the component matrix is orthogonal, then the inverse projection is the transpose of the component matrix.
+#' However, even when the full component matrix is orthogonal, there is no guarantee that the *partial* component matrix is
+#' orthogonal.
+#' 
+#' 
+#' @param x the model fit
+#' @param ... extra args
+#' @export
+partial_inverse_projection <- function(x, colind, ...) UseMethod("partial_inverse_projection")
+
 
 
 

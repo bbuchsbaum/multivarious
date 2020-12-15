@@ -69,6 +69,7 @@ partial_project.projector <- function(x, new_data, colind) {
 }
 
 
+
 is_orthogonal.projector <- function(x) {
   comp <- components(x)
   
@@ -86,6 +87,14 @@ inverse_projection.projector <- function(x) {
   ## assume orthogonal
   t(components(x))
 }
+
+partial_inverse_projection.projector <- function(x, colind) {
+  chk::chk_range(max(colind), c(1, nrow(components(x))))
+  chk::chk_range(min(colind), c(1, nrow(components(x))))
+  cx <- components(x)
+  corpcor::pseudoinverse(cx[colind,,drop=FALSE])
+}
+
 
 truncate.projector <- function(x, ncomp) {
   chk_range(ncomp, c(1, ncomp(x)))

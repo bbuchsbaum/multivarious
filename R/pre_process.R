@@ -259,6 +259,66 @@ colscale <- function(preproc = prepper(),
   prep_node(preproc, "colscale", create)
 }
 
+#' center and scale each vector of a matrix
+#' 
+#' @param cmeans an optional vector of column means
+#' @param sds an optional vector of sds
+#' @param sds
+#' @inheritParams pass
+#' @export
+standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
+  create <- function() {
+    env = new.env()
+    
+    list(
+      forward = function(X) {
+        if (is.null(sds)) {
+          sds <- matrixStats::colSds(X)
+        } else {
+          assert_that(length(sds) == ncol(X))
+        }
+        
+        if (is.null(cmeans)) {
+          cmeans <- colMeans(X)
+        } else {
+          assert_that(length(cmeans) == ncol(X))
+        }
+        
+        sds[sds == 0] <- mean(sds)
+        
+        env[["sds"]] <- sds
+        env[["cmeans"]] <- cmeans
+        
+        x1 <- sweep(X, 2, cmeans, "-")
+        sweep(x1, 2, sds, "/")
+      },
+      
+      apply = function(X, colind = NULL) {
+        if (is.null(colind)) {
+          x1 <- sweep(X, 2, env[["cmeans"]], "-")
+          sweep(x1, 2, env[["sds"]], "/")
+        } else {
+          assert_that(ncol(X) == length(colind))
+          x1 <- sweep(X, 2, env[["cmeans"]][colind], "-")
+          sweep(x1, 2, env[["sds"]][colind], "/")
+        }
+      },
+      
+      reverse = function(X, colind = NULL) {
+        if (is.null(colind)) {
+          x0 <- sweep(X, 2, env[["sds"]], "*")
+          sweep(x0, 2, env[["cmeans"]], "+")
+        } else {
+          assert_that(ncol(X) == length(colind))
+          x0 <- sweep(X, 2, env[["sds"]][colind], "*")
+          sweep(x0, 2, env[["cmeans"]][colind], "+")
+        }
+      }
+    )
+  }
+  prep_node(preproc, "standardize", create)
+}
+
 
 print.prepper <- function(object) {
   nn <- sapply(object$steps, function(x) x$name)
