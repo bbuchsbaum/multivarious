@@ -59,6 +59,7 @@ project.projector <- function(x, new_data) {
   reprocess(x, new_data) %*% components(x)
 }
 
+#' @export
 partial_project.projector <- function(x, new_data, colind) {
   if (is.vector(new_data) && length(colind) > 1) {
     new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
@@ -72,7 +73,7 @@ partial_project.projector <- function(x, new_data, colind) {
 }
 
 
-
+#' @export
 is_orthogonal.projector <- function(x) {
   comp <- components(x)
   
@@ -85,10 +86,10 @@ is_orthogonal.projector <- function(x) {
   Matrix::isDiagonal(zapsmall(z))
 }
 
-compose_projector.projector <- function(x,y) {
-  chk::chk_s3_class(y, "projector")
-  ## functional projector?
-}
+# compose_projector.projector <- function(x,y) {
+#   chk::chk_s3_class(y, "projector")
+#   ## functional projector?
+# }
 
 #' @export
 inverse_projection.projector <- function(x) {

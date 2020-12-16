@@ -98,6 +98,8 @@ residuals <- function(x, ncomp, xorig, ...) UseMethod("residuals")
 #' @export
 scores <- function(x,...) UseMethod("scores")
 
+
+
 #' compute standardized scores
 #' 
 #' 
@@ -105,6 +107,8 @@ scores <- function(x,...) UseMethod("scores")
 #' @param ... extra args
 #' @export 
 std_scores <- function(x, ...) UseMethod("std_scores")
+
+
 
 #' extract loadings of a model fit
 #' 
@@ -120,6 +124,8 @@ loadings <- function(x, ...) UseMethod("loadings")
 #' @param ... extra args
 #' @export
 components <- function(x,...) UseMethod("components")
+
+
 
 #' shape of the projector
 #' 
@@ -255,6 +261,16 @@ block_lengths <- function(x) UseMethod("block_lengths")
 #' @param x the object
 #' @export
 block_indices <- function(x) UseMethod("block_indices")
+
+
+#' get the number of blocks
+#' 
+#' The number of data blocks in a multiblock element
+#' 
+#' @param x the object
+#' @export
+nblocks <- function(x) UseMethod("nblocks")
+
 
 
 
