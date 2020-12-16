@@ -263,12 +263,15 @@ block_indices <- function(x) UseMethod("block_indices")
 #' @param x the pre_processor
 #' @param X the data matrix
 #' @keywords internal
+#' @export
 init_transform <- function(x, X, ...) UseMethod("init_transform")
 
 #' @inheritParams init_transform
+#' @export
 apply_transform <- function(x, X, colind, ...) UseMethod("apply_transform")
 
 #' @inheritParams init_transform
+#' @export
 reverse_transform <- function(x, X, colind, ...) UseMethod("reverse_transform")
 
 #' bootstrap resampling
