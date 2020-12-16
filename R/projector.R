@@ -90,12 +90,13 @@ compose_projector.projector <- function(x,y) {
   ## functional projector?
 }
 
-
+#' @export
 inverse_projection.projector <- function(x) {
   ## assume orthogonal
   t(components(x))
 }
 
+#' @export
 partial_inverse_projection.projector <- function(x, colind) {
   chk::chk_range(max(colind), c(1, nrow(components(x))))
   chk::chk_range(min(colind), c(1, nrow(components(x))))
@@ -121,10 +122,13 @@ reprocess.projector <- function(x, new_data, colind=NULL) {
   
 }
 
+#' @export
 shape.projector <- function(x) {
   c(nrow(x$v), ncol(x$v))
 }
 
+
+#' @export
 print.projector <- function(x) {
   cat("projector: ", paste0(class(x)), "\n")
   cat("input dim: ", nrow(x$v), "\n")
