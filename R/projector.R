@@ -103,13 +103,13 @@ partial_inverse_projection.projector <- function(x, colind) {
   corpcor::pseudoinverse(cx[colind,,drop=FALSE])
 }
 
-
+#' @export
 truncate.projector <- function(x, ncomp) {
   chk_range(ncomp, c(1, ncomp(x)))
   projector(components(x)[,1:ncomp,drop=FALSE], ncomp=ncomp, preprox=x$preproc)
 }
 
-
+#' @export
 reprocess.projector <- function(x, new_data, colind=NULL) {
   if (is.null(colind)) {
     chk::chk_equal(ncol(new_data), nrow(components(x)))

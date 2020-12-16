@@ -31,15 +31,17 @@ bi_projector <- function(v, s, sdev, preproc=prep(pass()), classes=NULL, ...) {
 
 
 
+#' @export
 scores.bi_projector <- function(x) {
   x$s
 }
 
+#' @export
 sdev.bi_projector <- function(x) {
   x$sdev
 }
 
-
+#' @export
 project_vars.bi_projector <- function(x, new_data) {
   if (is.vector(new_data)) {
     new_data <- matrix(new_data)
@@ -58,6 +60,7 @@ genreconstruct <- function(x, comp, rowind, colind) {
   reverse_transform(x$preproc, out)
 }
 
+#' @export
 reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)), 
                                      colind=1:nrow(components(x))) {
   chk::chk_numeric(comp)
@@ -70,7 +73,7 @@ reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)
   genreconstruct(x,comp, rowind, colind)
 }
 
- 
+#' @export
 residuals.bi_projector <- function(x, ncomp, xorig) {
   recon <- reconstruct(x, comp=1:ncomp)
   xorig - recon
