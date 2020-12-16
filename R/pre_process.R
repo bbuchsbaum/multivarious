@@ -65,6 +65,7 @@ prep.prepper <- function(x) {
   
 }
 
+#' @export
 fresh.prepper <- function(x) {
   p <- prepper()
   for (step in x$steps) {
@@ -73,18 +74,22 @@ fresh.prepper <- function(x) {
   p
 }
 
+#' @export
 init_transform.pre_processor <- function(x, X) {
   x$init(X)
 }
 
+#' @export
 apply_transform.pre_processor <- function(x, X, colind=NULL) {
   x$transform(X,colind)
 }
 
+#' @export
 reverse_transform.pre_processor <- function(x, X, colind=NULL) {
   x$reverse_transform(X, colind)
 }
 
+#' @export
 fresh.pre_processor <- function(x, preproc=prepper()) {
   p <- x$create()
 }
