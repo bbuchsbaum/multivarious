@@ -38,15 +38,17 @@ projector <- function(v, preproc=prep(pass()), ..., classes=NULL) {
   out
 }
 
-
+#' @export
 components.projector <- function(x) {
   x$v
 }
 
+#' @export
 ncomp.projector <- function(x) {
   ncol(components(x))
 }
 
+#' @export
 project.projector <- function(x, new_data) {
   if (is.vector(new_data)) {
     new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
