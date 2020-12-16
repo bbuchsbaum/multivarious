@@ -1,0 +1,50 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# multivarious
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+This is an idea stage ... 
+
+This package is intended to provide some basic abstractions and default implementations of basic computational aspects of multivariate component-based modeling such as principal components analysis.
+
+The main idea is to model multivariate decompositions as involving projections from an input data space to a lower dimensional component space. This idea is encapsulated by the `projector` class and the `project` function. Support for two-way mapping (row projection and column projection) is provided by the derived class `bi-projector`. Generic functions for common operations are alos, included:
+
+- `project` for mapping from input space into (usually) reduced-dimensional output space
+- `partial_project` for mapping a subset of input space into output space
+- `project_vars` for mapping new variables ("supplementary variables") to output space
+- `reconstruct` for reconstructing input data from its low-dimensional representation
+- `residuals` for extracting residuals of a fit with `n` components.
+
+
+## Installation
+
+You can install the development version from [GitHub](https://github.com/) with:
+
+``` r
+# install.packages("devtools")
+devtools::install_github("bbuchsbaum/multivarious")
+```
+## Example
+
+This is a basic example which shows you how to solve a common problem:
+
+```{r example}
+library(multivarious)
+## basic example code
+```
+
