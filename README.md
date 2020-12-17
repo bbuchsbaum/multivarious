@@ -7,10 +7,10 @@
 
 <!-- badges: end -->
 
-This is an idea stage …
+This is all very preliminary …
 
 This package is intended to provide some basic abstractions and default
-implementations of basic computational aspects of multivariate
+implementations of basic computational infrastructure for multivariate
 component-based modeling such as principal components analysis.
 
 The main idea is to model multivariate decompositions as involving
@@ -18,7 +18,7 @@ projections from an input data space to a lower dimensional component
 space. This idea is encapsulated by the `projector` class and the
 `project` function. Support for two-way mapping (row projection and
 column projection) is provided by the derived class `bi-projector`.
-Generic functions for common operations are alos, included:
+Generic functions for common operations are included:
 
   - `project` for mapping from input space into (usually)
     reduced-dimensional output space

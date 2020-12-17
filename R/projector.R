@@ -44,8 +44,13 @@ components.projector <- function(x) {
 }
 
 #' @export
+coefficients.projector <- function(object) {
+  x$v
+}
+
+#' @export
 ncomp.projector <- function(x) {
-  ncol(components(x))
+  ncol(coefficients(x))
 }
 
 #' @export
@@ -54,7 +59,7 @@ project.projector <- function(x, new_data) {
     new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
   }
   chk::vld_matrix(new_data)
-  chk::check_dim(new_data, ncol, values=nrow(components(x)))
+  chk::check_dim(new_data, ncol, values=nrow(coefficients(x)))
   
   reprocess(x, new_data) %*% components(x)
 }
@@ -67,7 +72,7 @@ partial_project.projector <- function(x, new_data, colind) {
   
   chk::vld_matrix(new_data)
   chk::check_dim(new_data, ncol, length(colind))
-  comp <- components(x)
+  comp <- coefficients(x)
   
   reprocess(x,new_data, colind) %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
 }
@@ -75,7 +80,7 @@ partial_project.projector <- function(x, new_data, colind) {
 
 #' @export
 is_orthogonal.projector <- function(x) {
-  comp <- components(x)
+  comp <- coefficients(x)
   
   z <- if (nrow(comp) > ncol(comp)) {
     crossprod(comp)
@@ -94,27 +99,27 @@ is_orthogonal.projector <- function(x) {
 #' @export
 inverse_projection.projector <- function(x) {
   ## assume orthogonal
-  t(components(x))
+  t(coefficients(x))
 }
 
 #' @export
 partial_inverse_projection.projector <- function(x, colind) {
   chk::chk_range(max(colind), c(1, nrow(components(x))))
   chk::chk_range(min(colind), c(1, nrow(components(x))))
-  cx <- components(x)
+  cx <- coefficients(x)
   corpcor::pseudoinverse(cx[colind,,drop=FALSE])
 }
 
 #' @export
 truncate.projector <- function(x, ncomp) {
   chk_range(ncomp, c(1, ncomp(x)))
-  projector(components(x)[,1:ncomp,drop=FALSE], ncomp=ncomp, preprox=x$preproc)
+  projector(coefficients(x)[,1:ncomp,drop=FALSE], ncomp=ncomp, preprox=x$preproc)
 }
 
 #' @export
 reprocess.projector <- function(x, new_data, colind=NULL) {
   if (is.null(colind)) {
-    chk::chk_equal(ncol(new_data), nrow(components(x)))
+    chk::chk_equal(ncol(new_data), nrow(coefficients(x)))
     apply_transform(x$preproc, new_data)
   } else {
     chk::chk_equal(length(colind), ncol(new_data)) 
