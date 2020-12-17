@@ -22,4 +22,5 @@ X <- matrix(rnorm(20*100), 20, 100)
 Y <- tibble(condition=rep(letters[1:5], 4))
 
 mds <- multidesign(X,Y)
+sdes <- split(mds, condition)
 }
