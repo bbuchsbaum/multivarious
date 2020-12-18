@@ -357,18 +357,22 @@ concat_pre_processors <- function(preprocs, block_indices) {
                       block=blk_ids)
   
 
+  apply_fun <- function(f, X, colind) {
+    chk::chk_equal(ncol(X), length(colind))
+    keep <- idmap$id_global %in% colind
+    blks <- unique(idmap$block[keep])
+    idmap2 <- idmap[keep,]
+    do.call(cbind, lapply(blks, function(i) {
+      loc <- idmap2$id_block[idmap2$block == i]
+      offset <- which(idmap2$block == i)
+      f(preprocs[[i]], X[,offset], colind=loc)
+    }))
+  }
+  
   ret <- list(
     transform = function(X, colind = NULL) {
         if (!is.null(colind)) {
-          chk::chk_equal(ncol(X), length(colind))
-          keep <- idmap$id_global %in% colind
-          blks <- unique(idmap$block[keep])
-          idmap2 <- idmap[keep,]
-          do.call(cbind, lapply(blks, function(i) {
-            loc <- idmap2$id_block[idmap2$block == i]
-            offset <- which(idmap2$block == i)
-            apply_transform(preprocs[[i]], X[,offset], colind=loc)
-          }))
+          apply_fun(apply_transform, X, colind)
         } else {
           chk::chk_equal(ncol(X), length(unraveled_ids))
           do.call(cbind, lapply(1:length(block_indices), function(i) {
@@ -379,15 +383,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
       },
       reverse_transform = function(X, colind = NULL) {
         if (!is.null(colind)) {
-          chk::chk_equal(ncol(X), length(colind))
-          keep <- idmap$id_global %in% colind
-          blks <- unique(idmap$block[keep])
-          idmap2 <- idmap[keep,]
-          do.call(cbind, lapply(blks, function(i) {
-            loc <- idmap2$id_block[idmap2$block == i]
-            offset <- which(idmap2$block == i)
-            reverse_transform(preprocs[[i]], X[,offset], colind=loc)
-          }))
+          apply_fun(reverse_transform, X, colind)
         } else {
           chk::chk_equal(ncol(X), length(unraveled_ids))
           do.call(cbind, lapply(1:length(block_indices), function(i) {
