@@ -325,6 +325,87 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
 }
 
 
+#' bind together blockwise pre-processors
+#' 
+#' 
+#' concatenate a sequence of pre-processors, each previously applied to a block of data.
+#' 
+#' @param preprocs a list of initalized `pre-processor` objects
+#' @param block_indices a list of block indices where each vector in the list 
+#' contains the global indices of the variables.
+#' @examples 
+#' 
+#' p1 <- center() %>% prep()
+#' p2 <- center() %>% prep()
+#' 
+#' x1 <- rbind(1:10, 2:11)
+#' x2 <- rbind(1:10, 2:11)
+#' 
+#' p1a <- init_transform(p1,x1)
+#' p2a <- init_transform(p2,x2)
+#' 
+#' clist <- concat_pre_processors(list(p1,p2), list(1:10, 11:20))
+#' t1 <- apply_transform(clist, cbind(x1,x2))
+#' 
+#' t2 <- apply_transform(clist, cbind(x1,x2[,1:5]), colind=1:15)
+#' @export
+concat_pre_processors <- function(preprocs, block_indices) {
+  unraveled_ids <- unlist(block_indices)
+  blk_ids <- rep(1:length(block_indices), sapply(block_indices,length))
+  idmap <- data.frame(id_global=unraveled_ids, 
+                      id_block=unlist(lapply(block_indices, function(x) seq_along(x))),
+                      block=blk_ids)
+  
+
+  ret <- list(
+    transform = function(X, colind = NULL) {
+        if (!is.null(colind)) {
+          chk::chk_equal(ncol(X), length(colind))
+          keep <- idmap$id_global %in% colind
+          blks <- unique(idmap$block[keep])
+          idmap2 <- idmap[keep,]
+          do.call(cbind, lapply(blks, function(i) {
+            loc <- idmap2$id_block[idmap2$block == i]
+            offset <- which(idmap2$block == i)
+            apply_transform(preprocs[[i]], X[,offset], colind=loc)
+          }))
+        } else {
+          chk::chk_equal(ncol(X), length(unraveled_ids))
+          do.call(cbind, lapply(1:length(block_indices), function(i) {
+            apply_transform(preprocs[[i]], X[,block_indices[[i]]])
+          }))
+        }
+        
+      },
+      reverse_transform = function(X, colind = NULL) {
+        if (!is.null(colind)) {
+          chk::chk_equal(ncol(X), length(colind))
+          keep <- idmap$id_global %in% colind
+          blks <- unique(idmap$block[keep])
+          idmap2 <- idmap[keep,]
+          do.call(cbind, lapply(blks, function(i) {
+            loc <- idmap2$id_block[idmap2$block == i]
+            offset <- which(idmap2$block == i)
+            reverse_transform(preprocs[[i]], X[,offset], colind=loc)
+          }))
+        } else {
+          chk::chk_equal(ncol(X), length(unraveled_ids))
+          do.call(cbind, lapply(1:length(block_indices), function(i) {
+            reverse_transform(preprocs[[i]], X[,block_indices[[i]]])
+          }))
+        }
+        
+      }
+  )
+  
+  class(ret) <- c("concat_pre_processor", "pre_processor")
+  ret
+ 
+}
+  
+
+
+#' @export
 print.prepper <- function(object) {
   nn <- sapply(object$steps, function(x) x$name)
   cat("preprocessor: ", paste(nn, collapse="->"))

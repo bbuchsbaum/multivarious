@@ -121,7 +121,7 @@ split.multidesign <- function(x, ..., collapse=FALSE) {
 
 
 #' @export
-summarize_by.multidesign <- function(x, sfun=colMeans, ...) {
+summarize_by.multidesign <- function(x, sfun=colMeans, extract_data=FALSE, ...) {
   #nested <- split(x, ...)
   nest.by <- rlang::quos(...)
   ret <- x$design %>% nest_by(!!!nest.by)
@@ -130,8 +130,11 @@ summarize_by.multidesign <- function(x, sfun=colMeans, ...) {
       list(sfun(do.call(rbind, lapply(data$.obs, function(o) o()))))
   })
   
-  ret
+  if (extract_data) {
+    ret <- do.call(rbind, ret$data %>% purrr::map( ~ .x))
+  }
   
+  ret
 }
 
 

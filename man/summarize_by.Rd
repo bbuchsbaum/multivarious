@@ -4,14 +4,14 @@
 \alias{summarize_by}
 \title{summarize data over grouping variable(s)}
 \usage{
-summarize_by(x, ..., sfun)
+summarize_by(x, sfun, ...)
 }
 \arguments{
 \item{x}{the multivariate data (a matrix, a list, or other data container)}
 
-\item{...}{the grouping variables}
-
 \item{sfun}{the columnwise summary function (e.g. \code{colMeans})}
+
+\item{...}{the grouping variables}
 }
 \description{
 apply a mutlivariate columnwise summary function (e.g. \code{colMeans}) to subsets

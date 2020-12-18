@@ -171,6 +171,7 @@ compose_projector <- function(x,y,...) UseMethod("compose_projector")
 #' @param x the processing pipeline
 #' @param ... extra args
 #' 
+#' @export
 fresh <- function(x,...) UseMethod("fresh")
 
 
@@ -334,7 +335,7 @@ multidesign <- function(x, y, ...) UseMethod("multidesign")
 #' 
 #' 
 #' @export
-summarize_by <- function(x, ..., sfun) UseMethod("summarize_by")
+summarize_by <- function(x, sfun, ...) UseMethod("summarize_by")
 
 
 
