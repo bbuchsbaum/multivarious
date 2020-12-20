@@ -30,5 +30,5 @@ discriminant_projector(
 \item{...}{extra args}
 }
 \description{
-a \code{bi_projector} that whose projection maximizes class discrimination.
+a \code{discriminant_projector} instance extending \code{bi_projeector} whose projection maximizes class separation.
 }

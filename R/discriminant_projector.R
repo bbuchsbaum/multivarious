@@ -1,11 +1,12 @@
 
 #' construct a discriminant projector
 #' 
-#' a `bi_projector` that whose projection maximizes class discrimination.
+#' a `discriminant_projector` instance extending `bi_projeector` whose projection maximizes class separation.
+#' 
 #' @inheritParams bi_projector
 #' @param labels the training labels
 #' 
-#' 
+#' @export
 discriminant_projector <- function(v, s, sdev, preproc=prep(pass()), labels, classes=NULL, ...) {
   
   chk::vld_matrix(v)
