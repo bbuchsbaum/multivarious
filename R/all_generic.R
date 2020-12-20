@@ -324,6 +324,25 @@ observation <- function(x, i) UseMethod("observation")
 multidesign <- function(x, y, ...) UseMethod("multidesign")
 
 
+#' create an multiframe object
+#' 
+#' construct a new multivariate design object linking vector-valued observation and arbitrary design variables
+#' 
+#' @param x the multivariate data (a matrix, a list, or other data container)
+#' @param y a design matrix with same number of rows/elements as x
+#' @param ... extra args
+#' @export
+#' @examples 
+#' 
+#' X <- matrix(rnorm(20*100), 20, 100)
+#' Y <- tibble(condition=rep(letters[1:5], 4))
+#' 
+#' mds <- multidesign(X,Y)
+#' sdes <- split(mds, condition)
+#' @export
+multidesign <- function(x, y, ...) UseMethod("multidesign")
+
+
 #' summarize data over grouping variable(s)
 #' 
 #' apply a mutlivariate columnwise summary function (e.g. `colMeans`) to subsets

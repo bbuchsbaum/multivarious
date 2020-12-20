@@ -14,7 +14,7 @@ test_that("can project variables using pca result", {
   pres <- pca(mat1)
   
   pv <- project_vars(pres, mat1)
-  expect_equal(pv, components(pres))
+  expect_equal(pv, coefficients(pres))
 })
 
 test_that("can run bootstrap analysis with 100 bootstraps", {

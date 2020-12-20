@@ -5,6 +5,8 @@
 \title{create an multidesign object}
 \usage{
 multidesign(x, y, ...)
+
+multidesign(x, y, ...)
 }
 \arguments{
 \item{x}{the multivariate data (a matrix, a list, or other data container)}
@@ -15,8 +17,16 @@ multidesign(x, y, ...)
 }
 \description{
 construct a new multivariate design object link vector-valued observation and arbitrary design variables
+
+construct a new multivariate design object linking vector-valued observation and arbitrary design variables
 }
 \examples{
+
+X <- matrix(rnorm(20*100), 20, 100)
+Y <- tibble(condition=rep(letters[1:5], 4))
+
+mds <- multidesign(X,Y)
+sdes <- split(mds, condition)
 
 X <- matrix(rnorm(20*100), 20, 100)
 Y <- tibble(condition=rep(letters[1:5], 4))

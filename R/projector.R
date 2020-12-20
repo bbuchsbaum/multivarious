@@ -45,7 +45,7 @@ components.projector <- function(x) {
 
 #' @export
 coefficients.projector <- function(object) {
-  x$v
+  object$v
 }
 
 #' @export
@@ -61,7 +61,7 @@ project.projector <- function(x, new_data) {
   chk::vld_matrix(new_data)
   chk::check_dim(new_data, ncol, values=nrow(coefficients(x)))
   
-  reprocess(x, new_data) %*% components(x)
+  reprocess(x, new_data) %*% coefficients(x)
 }
 
 #' @export
@@ -104,8 +104,8 @@ inverse_projection.projector <- function(x) {
 
 #' @export
 partial_inverse_projection.projector <- function(x, colind) {
-  chk::chk_range(max(colind), c(1, nrow(components(x))))
-  chk::chk_range(min(colind), c(1, nrow(components(x))))
+  chk::chk_range(max(colind), c(1, nrow(coefficients(x))))
+  chk::chk_range(min(colind), c(1, nrow(coefficients(x))))
   cx <- coefficients(x)
   corpcor::pseudoinverse(cx[colind,,drop=FALSE])
 }

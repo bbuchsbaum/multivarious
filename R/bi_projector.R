@@ -61,14 +61,14 @@ genreconstruct <- function(x, comp, rowind, colind) {
 
 #' @export
 reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)), 
-                                     colind=1:nrow(components(x))) {
+                                     colind=1:nrow(coefficients(x))) {
   chk::chk_numeric(comp)
   chk::chk_true(max(comp) <= ncomp(x))
   chk::chk_numeric(rowind)
   chk::chk_numeric(colind)
   chk::chk_range(comp, c(1,ncomp(x)))
   chk::chk_range(rowind, c(1,nrow(scores(x))))
-  chk::chk_range(colind, c(1,nrow(components(x))))
+  chk::chk_range(colind, c(1,nrow(coefficients(x))))
   genreconstruct(x,comp, rowind, colind)
 }
 

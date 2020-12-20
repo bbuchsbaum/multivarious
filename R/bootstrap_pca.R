@@ -20,7 +20,7 @@ bootstrap.pca <- function(x, nboot=100, k=ncomp(x)) {
   }
   
   
-  res <- boot_svd(nboot=nboot, k=k, as.matrix(components(x)), gen)
+  res <- boot_svd(nboot=nboot, k=k, as.matrix(coefficients(x)), gen)
   
   zboot <- do.call(cbind, lapply(1:k, function(ki) {
     res$EVs[[ki]]/res$sdVs[[ki]]

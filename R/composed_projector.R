@@ -30,7 +30,7 @@ compose_partial_projector <- function(...) {
     arg <- args[[i]]
     chk::chk_s3_class(arg, "projector")
     f <- function(new_data, colind) {
-      partial_project(arg, new_data, colind=1:nrow(components(x)))
+      partial_project(arg, new_data, colind=1:nrow(coefficients(x)))
     }
   })
   
