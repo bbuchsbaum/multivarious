@@ -208,6 +208,18 @@ prep <- function(x, ...) UseMethod("prep")
 reprocess <- function(x, new_data, colind, ...) UseMethod("reprocess")
 
 
+#' refit a model
+#' 
+#' refit a model given new data or new parameter(s)
+#'
+#'
+#' @param x the original model fit object
+#' @param new_data the new data to process
+#' @param ... extra args
+#' @export
+refit <- function(x, new_data, ...) UseMethod("refit")
+
+
 #' get the number of components
 #' 
 #' The total number of components in the fitted model

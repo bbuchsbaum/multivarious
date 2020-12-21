@@ -19,3 +19,10 @@ discriminant_projector <- function(v, s, sdev, preproc=prep(pass()), labels, cla
   out <- bi_projector(v, preproc=preproc, s=s, sdev=sdev, labels=labels, 
                       counts=table(labels), classes=c(classes, "discriminant_projector"), ...)
 }
+
+#' @export
+print.discriminant_projector <- function(x) {
+  print.bi_projector(x)
+  cat("label counts: ", x$counts)
+}
+  
