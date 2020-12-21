@@ -26,7 +26,7 @@
 #' an `svd` object that extends `projector`
 svd_wrapper <- function(X, ncomp=min(dim(X)), 
                         preproc=pass(),
-                        method=c("base", "fast", "irlba", 
+                        method=c("fast", "base", "irlba", 
                                  "propack", "rsvd", "svds"), 
                         q=2,
                         p=10,
@@ -48,17 +48,17 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
                 propack=svd::propack.svd(X, neig=ncomp,...),
                 irlba=irlba::irlba(X, nu=min(ncomp, min(dim(X)) -3), nv=min(ncomp, min(dim(X)) -3)), ...)
   
-  
   keep <- which(res$d^2 > tol)
   ncomp <- min(ncomp,length(keep))
   
-  res$d <- res$d[keep]
-  res$u <- res$u[,keep, drop=FALSE]
-  res$v <- res$v[,keep, drop=FALSE]
-  res$ncomp <- length(keep)
+  res$d <- res$d[1:ncomp]
+  res$u <- res$u[,1:ncomp, drop=FALSE]
+  res$v <- res$v[,1:ncomp, drop=FALSE]
+  res$ncomp <- length(1:ncomp)
   bi_projector(res$v, s=res$u %*% diag(res$d), sdev=res$d, u=res$u, preproc=proc, classes="svd", method=method)
 }
 
+#' @export
 std_scores.svd <- function(x) {
   sqrt(nrow(x$u)-1) * x$u 
 }

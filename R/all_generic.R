@@ -352,7 +352,7 @@ multidesign <- function(x, y, ...) UseMethod("multidesign")
 #' mds <- multidesign(X,Y)
 #' sdes <- split(mds, condition)
 #' @export
-multidesign <- function(x, y, ...) UseMethod("multidesign")
+multiframe <- function(x, y, ...) UseMethod("multiframe")
 
 
 #' summarize data over grouping variable(s)
