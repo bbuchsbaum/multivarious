@@ -12,5 +12,5 @@ shape(x, ...)
 \item{...}{extra args}
 }
 \description{
-Get the inout/output shape of the projector
+Get the input/output shape of the projector
 }

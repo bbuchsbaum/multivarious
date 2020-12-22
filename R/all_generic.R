@@ -123,15 +123,12 @@ components <- function(x,...) UseMethod("components")
 
 #' shape of the projector
 #' 
-#' Get the inout/output shape of the projector
+#' Get the input/output shape of the projector
 #' 
 #' @param x the model fit
 #' @param ... extra args
 #' @export
 shape <- function(x,...) UseMethod("shape")
-
-
-
 
 
 #' inverse of the component matrix
