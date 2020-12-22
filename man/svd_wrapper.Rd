@@ -8,7 +8,7 @@ svd_wrapper(
   X,
   ncomp = min(dim(X)),
   preproc = pass(),
-  method = c("base", "fast", "irlba", "propack", "rsvd", "svds"),
+  method = c("fast", "base", "irlba", "propack", "rsvd", "svds"),
   q = 2,
   p = 10,
   tol = .Machine$double.eps,

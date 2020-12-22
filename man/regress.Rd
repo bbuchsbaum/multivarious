@@ -2,13 +2,13 @@
 % Please edit documentation in R/regress.R
 \name{regress}
 \alias{regress}
-\title{Matrix-variate linear regression}
+\title{Multi-output linear regression}
 \usage{
 regress(
   X,
   Y,
   preproc = NULL,
-  method = c("linear", "ridge"),
+  method = c("lm", "ridge"),
   intercept = FALSE,
   lambda = 0.001
 )
@@ -23,7 +23,7 @@ regress(
 \item{method}{the regression method: \code{linear} or \code{ridge}.}
 }
 \value{
-an \code{projector} instance
+an \code{bi-projector} of type \code{regress}
 }
 \description{
 Fit a multivariate regression model for a matrix of basis functions, \code{X}, and a response matrix \code{Y}.

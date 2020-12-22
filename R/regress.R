@@ -1,5 +1,5 @@
 
-#' Matrix-variate linear regression 
+#' Multi-output linear regression 
 #' 
 #' Fit a multivariate regression model for a matrix of basis functions, `X`, and a response matrix `Y`.
 #' The goal is to find a projection matrix that can be used for mapping and reconstruction.
@@ -13,8 +13,8 @@
 #' @importFrom glmnet glmnet
 #' @return 
 #' 
-#' an `projector` instance
-regress <- function(X, Y, preproc=NULL, method=c("linear", "ridge"), 
+#' an `bi-projector` of type `regress`
+regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"), 
                     intercept=FALSE, lambda=.001) {
   method <- match.arg(method)
   
@@ -61,10 +61,13 @@ regress <- function(X, Y, preproc=NULL, method=c("linear", "ridge"),
   
 }
 
+#' @export
 inverse_projection.regress <- function(x) {
   x$coefficients
 }
 
+
+#' @export
 project_vars.regress <- function(x, new_data) {
   if (is.vector(new_data)) {
     new_data <- matrix(new_data)
