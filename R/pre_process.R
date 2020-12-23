@@ -268,7 +268,6 @@ colscale <- function(preproc = prepper(),
 #' 
 #' @param cmeans an optional vector of column means
 #' @param sds an optional vector of sds
-#' @param sds
 #' @inheritParams pass
 #' @export
 standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {

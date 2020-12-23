@@ -4,11 +4,14 @@
 #' 
 #' compute group means
 #' 
-#' @param Y
-#' @param X
+#' @param Y a vector of labels to compute means over disjoint sets
+#' @param X a data matrix from which to compute means
 #' @export
 group_means <- function (Y, X) {
+  chk::chk_equal(nrow(X), length(Y))
+  
   if (all(table(Y) == 1)) {
+    warnings("`Y` does not contain more than one replicate of any level")
     row.names(X) <- names(table(Y))
     X
   }

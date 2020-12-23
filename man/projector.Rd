@@ -22,3 +22,11 @@ a instance of type \code{projector}
 A \code{projector} maps a matrix from D-dimensional space to d-dimensional space, where \code{d} may be less than \code{D}.
 The projection matrix, \code{v} is not necessarily orthogonal.
 }
+\examples{
+ 
+X <- matrix(rnorm(10*10), 10, 10)
+svdfit <- svd(X)
+
+p <- projector(svdfit$v)
+
+}

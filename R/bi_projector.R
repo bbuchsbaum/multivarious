@@ -7,12 +7,10 @@
 #' 
 #' 
 #' @inheritParams projector
-#' @param preproc
-#' @param ncomp
 #' @param s the score matrix
 #' @param sdev the standard deviations of th score matrix
 #' @export
-#' 
+#' @examples
 #' X <- matrix(rnorm(10*20), 10, 20)
 #' svdfit <- svd(X)
 #' 

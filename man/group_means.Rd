@@ -6,6 +6,11 @@
 \usage{
 group_means(Y, X)
 }
+\arguments{
+\item{Y}{a vector of labels to compute means over disjoint sets}
+
+\item{X}{a data matrix from which to compute means}
+}
 \description{
 compute group means
 }

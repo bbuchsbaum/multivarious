@@ -24,3 +24,10 @@ A \code{bi_projector} offers a two-way mapping from from samples (rows) to score
 Thus, one can project from D-dimensional input space to d-dimensional subspace. And one can project (\code{project_vars}) from n-dimensional
 variable space to the d-dimensional component space. The singular value decomposition is a canonical example of such a two-way mapping.
 }
+\examples{
+X <- matrix(rnorm(10*20), 10, 20)
+svdfit <- svd(X)
+
+p <- bi_projector(svdfit$v, s = svdfit$u \%*\% diag(svdfit$d), sdev=svdfit$d)
+
+}

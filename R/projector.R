@@ -11,13 +11,9 @@
 #' 
 #' 
 #' @return 
-#' 
 #' a instance of type `projector`
-#' 
 #' @export
-#' 
-#' @example 
-#' 
+#' @examples  
 #' X <- matrix(rnorm(10*10), 10, 10)
 #' svdfit <- svd(X)
 #' 

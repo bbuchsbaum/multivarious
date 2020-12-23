@@ -6,6 +6,7 @@
 #' Y <- tibble(condition=rep(letters[1:5], 4))
 #' 
 #' mds <- multidesign(X,Y)
+#' @rdname multidesign
 multidesign.matrix <- function(x, y) {
   chk::chk_equal(nrow(x), nrow(y))
   chk::chk_s3_class(y, "data.frame")
