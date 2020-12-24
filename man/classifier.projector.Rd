@@ -4,14 +4,14 @@
 \alias{classifier.projector}
 \title{create a classifier}
 \usage{
-classifier.projector(x, labels, new_data = NULL, colind = NULL, knn = 1)
+\method{classifier}{projector}(x, labels, new_data, colind = NULL, knn = 1)
 }
 \arguments{
 \item{x}{the \code{projector} instance}
 
 \item{labels}{the labels associated with the rows of the projected data (see \code{new_data})}
 
-\item{new_data}{reference data associated with \code{labels} and to be projected into subspace.}
+\item{new_data}{reference data associated with \code{labels} and to be projected into subspace (required).}
 
 \item{colind}{the subset of column indices in the fitted model to use.}
 
@@ -19,4 +19,10 @@ classifier.projector(x, labels, new_data = NULL, colind = NULL, knn = 1)
 }
 \description{
 construct a classifier from a \code{projector} instance
+}
+\examples{
+data(iris)
+X <- iris[,1:4]
+pcres <- pca(as.matrix(X),2)
+cfier <- classifier(pcres, iris[,5])
 }

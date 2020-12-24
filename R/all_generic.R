@@ -77,6 +77,10 @@ transfer <- function(x, comp, rowind, colind, ...) UseMethod("transfer")
 
 
 
+## TODO 
+## partial_residuals?
+## partial_reconstruct?
+
 #' get residuals of component model fit
 #'
 #' Extract the residuals of a model, after removing the first \code{ncomp} components
@@ -366,7 +370,14 @@ multiframe <- function(x, y, ...) UseMethod("multiframe")
 summarize_by <- function(x, sfun, ...) UseMethod("summarize_by")
 
 
-
+#' construct a classifier 
+#' 
+#' Given a model object (e.g. `projector` construct a classifier that can generate predictions for new data points.
+#' 
+#' @param x the model object
+#' @param colind the (optional) column indices used for prediction
+#' @export
+classifier <- function(x, colind, ...) UseMethod("summarize_by")
 
 
 

@@ -1,4 +1,22 @@
 
+#' @export
+classifier.discriminant_projector <- function(x, colind=NULL, knn=1) {
+  if (!is.null(colind)) {
+    chk::chk_true(length(colind) <= shape(x)[1])
+    chk::chk_true(all(colind>0))
+  }
+  
+  structure(
+    list(
+      projector=x,
+      labels=x$labels,
+      scores=scoress(x),
+      colind=colind,
+      knn=knn),
+    class="classifier"
+  )
+  
+}
 
 #' create a classifier
 #' 
@@ -6,17 +24,22 @@
 #' 
 #' @param x the `projector` instance
 #' @param labels the labels associated with the rows of the projected data (see `new_data`)
-#' @param new_data reference data associated with `labels` and to be projected into subspace.
+#' @param new_data reference data associated with `labels` and to be projected into subspace (required).
 #' @param colind the subset of column indices in the fitted model to use.
 #' @param knn the number of nearest neighbors to use when classifying a new point. 
 #' @export
-classifier.projector <- function(x, labels, new_data=NULL, colind=NULL, knn=1) {
+#' 
+#' @examples
+#' data(iris)
+#' X <- iris[,1:4]
+#' pcres <- pca(as.matrix(X),2)
+#' cfier <- classifier(pcres, iris[,5])
+classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
     chk::chk_true(all(colind>0))
   }
   
-
   scores <- if (!is.null(colind)) {
     scores <- partial_project(x, new_data, colind=colind)
   } else {
