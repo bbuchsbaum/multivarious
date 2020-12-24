@@ -22,7 +22,7 @@ discriminant_projector <- function(v, s, sdev, preproc=prep(pass()), labels, cla
 
 #' @export
 print.discriminant_projector <- function(x) {
-  print.bi_projector(x)
+  print(x)
   cat("label counts: ", x$counts)
 }
   
