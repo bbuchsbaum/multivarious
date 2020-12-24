@@ -10,7 +10,7 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1) {
     list(
       projector=x,
       labels=x$labels,
-      scores=scoress(x),
+      scores=scores(x),
       colind=colind,
       knn=knn),
     class="classifier"
