@@ -8,7 +8,7 @@ pca(
   X,
   ncomp = min(dim(X)),
   preproc = center(),
-  method = c("base", "fast", "irlba", "propack", "rsvd", "svds"),
+  method = c("fast", "base", "irlba", "propack", "rsvd", "svds"),
   ...
 )
 }

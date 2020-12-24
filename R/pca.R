@@ -14,7 +14,7 @@
 #' data(iris)
 #' X <- as.matrix(iris[,1:4])
 #' res <- pca(X, ncomp=4)
-pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("base", "fast", "irlba","propack", "rsvd", "svds"), ...) {
+pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("fast", "base", "irlba", "propack", "rsvd", "svds"), ...) {
   chk::chkor(chk::chk_matrix(X), chk::chk_s4_class("Matrix"))
   
   method <- match.arg(method)
