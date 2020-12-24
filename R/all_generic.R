@@ -377,7 +377,7 @@ summarize_by <- function(x, sfun, ...) UseMethod("summarize_by")
 #' @param x the model object
 #' @param colind the (optional) column indices used for prediction
 #' @export
-classifier <- function(x, colind, ...) UseMethod("summarize_by")
+classifier <- function(x, colind, ...) UseMethod("classifier")
 
 
 
