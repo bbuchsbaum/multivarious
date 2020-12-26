@@ -117,7 +117,7 @@ project.classifier <- function(x, new_data) {
 predict.classifier <- function(object, new_data, ncomp=ncomp(object$projector),
                                metric=c("cosine", "euclidean")) {
   if (is.vector(new_data)) {
-    chk::chk_equal(length(new_data), shape(x$projector)[1])
+    chk::chk_equal(length(new_data), shape(object$projector)[1])
     new_data <- matrix(new_data, nrow=1)
   }
   
