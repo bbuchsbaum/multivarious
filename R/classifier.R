@@ -116,12 +116,18 @@ project.classifier <- function(x, new_data, ...) {
 }
 
 #' @export
-predict.classifier <- function(object, new_data, ncomp=ncomp(object$projector),
+predict.classifier <- function(object, new_data, ncomp=NULL,
                                metric=c("cosine", "euclidean"), ...) {
-  browser()
+
   if (is.vector(new_data)) {
     chk::chk_equal(length(new_data), shape(object$projector)[1])
     new_data <- matrix(new_data, nrow=1)
+  }
+  
+  if (is.null(ncomp)) {
+    ncomp <- shape(object$projector)[2]
+  } else {
+    chk::chk_range(ncomp, 1,shape(object$projector)[2])
   }
   
   metric <- match.arg(metric)
