@@ -114,6 +114,20 @@ prep_node <- function(pipeline, name, create,  ...) {
 }
 
 
+new_pre_processor <- function(x) {
+  chk::chk_not_null(x[["forward"]])
+  chk::chk_not_null(x[["apply"]])
+  chk::chk_not_null(x[["reverse"]])
+  chk::chk_function(x[["forward"]])
+  chk::chk_function(x[["apply"]])
+  chk::chk_function(x[["reverse"]])
+  
+  funlist <- x
+  structure(funlist,
+            class="pre_processing_step")
+}
+
+
 #' a no-op pre-processing step
 #' 
 #' `pass` simply passes its data through the chain
@@ -245,7 +259,7 @@ colscale <- function(preproc = prepper(),
         if (is.null(colind)) {
           sweep(X, 2, env[["weights"]], "*")
         } else {
-          assert_that(ncol(X) == length(colind))
+          chk::chk_equal(ncol(X), length(colind))
           sweep(X, 2, env[["weights"]][colind], "*")
         }
       },
@@ -254,7 +268,7 @@ colscale <- function(preproc = prepper(),
         if (is.null(colind)) {
           sweep(X, 2, env[["weights"]], "/")
         } else {
-          assert_that(ncol(X) == length(colind))
+          chk::chk_equal(ncol(X), length(colind))
           sweep(X, 2, env[["weights"]][colind], "/")
         }
       }
@@ -279,13 +293,13 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
         if (is.null(sds)) {
           sds <- matrixStats::colSds(X)
         } else {
-          assert_that(length(sds) == ncol(X))
+          chk::chk_equal(length(sds), ncol(X))
         }
         
         if (is.null(cmeans)) {
           cmeans <- colMeans(X)
         } else {
-          assert_that(length(cmeans) == ncol(X))
+          chk::chk_equal(length(cmeans), ncol(X))
         }
         
         sds[sds == 0] <- mean(sds)
@@ -302,7 +316,7 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
           x1 <- sweep(X, 2, env[["cmeans"]], "-")
           sweep(x1, 2, env[["sds"]], "/")
         } else {
-          assert_that(ncol(X) == length(colind))
+          chk::chk_equal(ncol(X), length(colind))
           x1 <- sweep(X, 2, env[["cmeans"]][colind], "-")
           sweep(x1, 2, env[["sds"]][colind], "/")
         }
@@ -313,7 +327,7 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
           x0 <- sweep(X, 2, env[["sds"]], "*")
           sweep(x0, 2, env[["cmeans"]], "+")
         } else {
-          assert_that(ncol(X) == length(colind))
+          chk::chk_equal(ncol(X), length(colind))
           x0 <- sweep(X, 2, env[["sds"]][colind], "*")
           sweep(x0, 2, env[["cmeans"]][colind], "+")
         }
@@ -397,14 +411,12 @@ concat_pre_processors <- function(preprocs, block_indices) {
   ret
  
 }
-  
 
 
 #' @export
 print.prepper <- function(object) {
   nn <- sapply(object$steps, function(x) x$name)
   cat("preprocessor: ", paste(nn, collapse="->"))
-  
 }
 
 

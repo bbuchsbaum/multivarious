@@ -54,6 +54,7 @@ ncomp.projector <- function(x) {
 #' @importFrom stats coefficients
 project.projector <- function(x, new_data) {
   if (is.vector(new_data)) {
+    chk::chk_equal(length(new_data), shape(x)[1])
     new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
   }
   chk::vld_matrix(new_data)

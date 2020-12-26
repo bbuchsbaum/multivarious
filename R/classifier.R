@@ -64,7 +64,7 @@ classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
 #' @keywords internal
 rank_score <- function(prob, observed) {
   pnames <- colnames(prob)
-  assert_that(all(observed %in% pnames))
+  chk::chk_true(all(observed %in% pnames))
   prank <- apply(prob, 1, function(p) {
     rp <- rank(p, ties.method="random")
     rp/length(rp)
@@ -116,6 +116,11 @@ project.classifier <- function(x, new_data) {
 #' @export
 predict.classifier <- function(object, new_data, ncomp=ncomp(object$projector),
                                metric=c("cosine", "euclidean")) {
+  if (is.vector(new_data)) {
+    chk::chk_equal(length(new_data), shape(x$projector)[1])
+    new_data <- matrix(new_data, nrow=1)
+  }
+  
   metric <- match.arg(metric)
   
   proj <- project(object, new_data)

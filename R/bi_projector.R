@@ -2,7 +2,7 @@
 #' 
 #' 
 #' A `bi_projector` offers a two-way mapping from from samples (rows) to scores and from variables (columns) to components.
-#' Thus, one can project from D-dimensional input space to d-dimensional subspace. And one can project (`project_vars`) from n-dimensional 
+#' Thus, one can project from D-dimensional input space to d-dimensional subspace. And one acan project (`project_vars`) from n-dimensional 
 #' variable space to the d-dimensional component space. The singular value decomposition is a canonical example of such a two-way mapping.
 #' 
 #' 
