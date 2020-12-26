@@ -378,7 +378,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
     do.call(cbind, lapply(blks, function(i) {
       loc <- idmap2$id_block[idmap2$block == i]
       offset <- which(idmap2$block == i)
-      f(preprocs[[i]], X[,offset], colind=loc)
+      f(preprocs[[i]], X[,offset,drop=FALSE], colind=loc)
     }))
   }
   
