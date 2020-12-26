@@ -105,17 +105,20 @@ nearest_class <- function(prob, labels,knn=1) {
 
 
 #' @export
-project.classifier <- function(x, new_data) {
+project.classifier <- function(x, new_data, ...) {
   scores <- if (!is.null(x$colind)) {
-    partial_project(x$projector, new_data, colind=colind)
+    partial_project(x$projector, new_data, colind=colind, ...)
   } else {
-    project(x$projector, new_data)
+    project(x$projector, new_data, ...)
   }
+  
+  scores
 }
 
 #' @export
 predict.classifier <- function(object, new_data, ncomp=ncomp(object$projector),
-                               metric=c("cosine", "euclidean")) {
+                               metric=c("cosine", "euclidean"), ...) {
+  browser()
   if (is.vector(new_data)) {
     chk::chk_equal(length(new_data), shape(object$projector)[1])
     new_data <- matrix(new_data, nrow=1)
@@ -123,7 +126,7 @@ predict.classifier <- function(object, new_data, ncomp=ncomp(object$projector),
   
   metric <- match.arg(metric)
   
-  proj <- project(object, new_data)
+  proj <- project(object$projector, new_data,...)
   
   doit <- function(p) {
     prob <- normalize_probs(p)
@@ -133,13 +136,14 @@ predict.classifier <- function(object, new_data, ncomp=ncomp(object$projector),
     list(class=cls, prob=pmeans)
   }
   
+  sc <- object$scores
   
   if (metric == "cosine") {
-    p <- proxy::simil(as.matrix(object$scores)[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="cosine")
+    p <- proxy::simil(sc[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="cosine")
     doit(p)
     
   } else if (metric == "euclidean") {
-    D <- proxy::dist(as.matrix(object$scores)[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="euclidean")
+    D <- proxy::dist(sc[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="euclidean")
     doit(exp(-D))
   }
   
