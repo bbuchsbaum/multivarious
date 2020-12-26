@@ -127,7 +127,7 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   if (is.null(ncomp)) {
     ncomp <- shape(object$projector)[2]
   } else {
-    chk::chk_range(ncomp, 1,shape(object$projector)[2])
+    chk::chk_range(ncomp, c(1,shape(object$projector)[2]))
   }
   
   metric <- match.arg(metric)
