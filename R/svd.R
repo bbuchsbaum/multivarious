@@ -55,7 +55,7 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
   res$u <- res$u[,1:ncomp, drop=FALSE]
   res$v <- res$v[,1:ncomp, drop=FALSE]
   res$ncomp <- length(1:ncomp)
-  bi_projector(res$v, s=res$u %*% diag(res$d), sdev=res$d, u=res$u, preproc=proc, classes="svd", method=method)
+  bi_projector(res$v, s=res$u %*% diag(res$d, nrow=ncomp, ncol=ncomp), sdev=res$d, u=res$u, preproc=proc, classes="svd", method=method)
 }
 
 #' @export
