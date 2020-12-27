@@ -40,13 +40,15 @@ classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
     chk::chk_true(all(colind>0))
   }
   
+  chk::chk_equal(length(labels), nrow(new_data))
+  
   scores <- if (!is.null(colind)) {
     scores <- partial_project(x, new_data, colind=colind)
   } else {
     project(x, new_data)
   }
   
-  chk::chk_equal(length(labels), nrow(new_data))
+  
   
   structure(
     list(
