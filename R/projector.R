@@ -74,7 +74,7 @@ partial_project.projector <- function(x, new_data, colind) {
   comp <- coef(x)
   
   #reprocess(x,new_data, colind) %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
-  reprocess(x,new_data, colind) %*% comp[colind,] * sqrt(nrow(comp)/length(colind))
+  reprocess(x,new_data, colind) %*% comp[colind,] * nrow(comp)/length(colind)
 }
 
 
