@@ -33,7 +33,7 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1) {
 #' data(iris)
 #' X <- iris[,1:4]
 #' pcres <- pca(as.matrix(X),2)
-#' cfier <- classifier(pcres, iris[,5])
+#' cfier <- classifier(pcres, iris[,5], new_data=iris[,1:4])
 classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
@@ -46,7 +46,7 @@ classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
     project(x, new_data)
   }
   
-  chk::chk_equal(length(labels), nrow(newdata))
+  chk::chk_equal(length(labels), nrow(new_data))
   
   structure(
     list(
