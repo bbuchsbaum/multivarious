@@ -71,9 +71,10 @@ partial_project.projector <- function(x, new_data, colind) {
   
   chk::vld_matrix(new_data)
   chk::check_dim(new_data, ncol, length(colind))
-  comp <- coefficients(x)
+  comp <- coef(x)
   
-  reprocess(x,new_data, colind) %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
+  #reprocess(x,new_data, colind) %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
+  reprocess(x,new_data, colind) %*% comp[colind,] * sqrt(nrow(comp)/length(colind))
 }
 
 
