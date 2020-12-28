@@ -41,7 +41,7 @@ coef.multiblock_projector <- function(object, block) {
   if (missing(block)) {
     NextMethod(object)
   } else {
-    ind <- x$block_indices[[block]]
+    ind <- object$block_indices[[block]]
     object$v[ind,drop=FALSE]
   }
 }
