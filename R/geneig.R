@@ -48,10 +48,10 @@ geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
       W = Matrix::Diagonal(x=Sinv) %*% crossprod(U, (A %*% U)) %*% Matrix::Diagonal(x=Sinv)
     }
     
-    decomp2 = RSpectra::eigs(W, k=ncomp)
+    decomp2 = eigen(W)
     
     vecs <- if (!isDiagonal(B)) {
-      U[,1:ncomp] %*% Matrix::Diagonal(x=Sinv[1:ncomp]) %*% Re(decomp2$vectors)
+      U %*% Matrix::Diagonal(x=Sinv) %*% Re(decomp2$vectors)
     } else {
       decomp2$vectors
     }
