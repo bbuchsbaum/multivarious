@@ -26,10 +26,10 @@
 geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
   method <- match.arg(method)
   
-  chk::check_equal(nrow(A), ncol(A))
-  chk::check_equal(nrow(B), ncol(B))
-  chk::check_equal(nrow(A), nrow(B))
-  
+  chk::chk_equal(nrow(A), ncol(A))
+  chk::chk_equal(nrow(B), ncol(B))
+  chk::chk_equal(nrow(A), nrow(B))
+ 
   if (missing(ncomp)) {
     ncomp <- nrow(A)
   }
