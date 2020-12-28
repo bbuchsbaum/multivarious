@@ -4,7 +4,7 @@
 \alias{geneig}
 \title{generalized eigenvalue decomposition}
 \usage{
-geneig(A, B, ncomp = 2, method = c("robust", "sdiag", "lapack"))
+geneig(A, B, ncomp, method = c("robust", "sdiag", "lapack"))
 }
 \arguments{
 \item{A}{the left hand side matrix}

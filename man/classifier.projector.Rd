@@ -24,5 +24,5 @@ construct a classifier from a \code{projector} instance
 data(iris)
 X <- iris[,1:4]
 pcres <- pca(as.matrix(X),2)
-cfier <- classifier(pcres, iris[,5])
+cfier <- classifier(pcres, iris[,5], new_data=iris[,1:4])
 }
