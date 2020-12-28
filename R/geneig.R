@@ -51,7 +51,7 @@ geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
     decomp2 = RSpectra::eigs(W, k=ncomp)
     
     vecs <- if (!isDiagonal(B)) {
-      U %*% Matrix::Diagonal(x=Sinv) %*% decomp2$vectors
+      U[,1:ncomp] %*% Matrix::Diagonal(x=Sinv[1:ncomp]) %*% Re(decomp2$vectors)
     } else {
       decomp2$vectors
     }
@@ -62,7 +62,7 @@ geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
     Bp <- B_decomp$vectors[,keep,drop=FALSE] %*% diag(1/sqrt(B_decomp$values[keep]))
     Ap <- t(Bp) %*% A %*% Bp
     A_decomp <- RSpectra::eigs(Ap, k=ncomp)
-    keep <- A_decomp$values> 1e-8
+    keep <- Re(A_decomp$values) > 1e-8
     vecs <- Bp %*% A_decomp$vectors[,keep,drop=FALSE]
     list(vectors=vecs, values=A_decomp$values)
   } else {
