@@ -21,9 +21,18 @@
 #'               17, 33, 32,
 #'               26, 32, 34), nrow=3, byrow=TRUE)
 #'               
-#' @importFrom Matrix isDiagonal            
-geneig <- function(A, B, ncomp=2, method=c("robust", "sdiag", "lapack")) {
+#' @importFrom Matrix isDiagonal   
+#' @import Matrix         
+geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
   method <- match.arg(method)
+  
+  chk::check_equal(nrow(A), ncol(A))
+  chk::check_equal(nrow(B), ncol(B))
+  chk::check_equal(nrow(A), nrow(B))
+  
+  if (missing(ncomp)) {
+    ncomp <- nrow(A)
+  }
   #which <- match.arg(ordering)
   
   ret <- if (method == "robust") {
@@ -56,12 +65,11 @@ geneig <- function(A, B, ncomp=2, method=c("robust", "sdiag", "lapack")) {
     list(vectors=vecs, values=A_decomp$values)
   } else {
     res <- geigen(as.matrix(A),as.matrix(B))
-   
     vec <- res$vectors[, nrow(res$vectors):(nrow(res$vectors)-(ncomp-1))]
     list(vectors=vec, values=rev(res$values)[1:ncomp])
   }
   
-  projector(v=ret$vectors, classes="geneig", ordering=ordering, values=ret$values)
+  projector(v=ret$vectors, classes="geneig",values=ret$values)
   
 }
 

@@ -63,6 +63,8 @@ classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
 }
 
 
+
+
 #' @keywords internal
 rank_score <- function(prob, observed) {
   pnames <- colnames(prob)

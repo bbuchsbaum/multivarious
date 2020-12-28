@@ -36,5 +36,21 @@ project_block.multiblock_projector <- function(x, new_data, block) {
   partial_project(x, new_data, colind=ind )
 }
 
+#' @export
+coef.multiblock_projector <- function(object, block) {
+  if (missing(block)) {
+    NextMethod(object)
+  } else {
+    ind <- x$block_indices[[block]]
+    object$v[ind,drop=FALSE]
+  }
+}
+
+#' @export
+print.multiblock_projector <- function(x) {
+  NextMethod(x)
+  cat("number of blocks: ", length(x$block_indices))
+}
+
 
 
