@@ -8,6 +8,8 @@ truncate(x, ncomp)
 }
 \arguments{
 \item{x}{the object to truncate}
+
+\item{ncomp}{number of components to retain}
 }
 \description{
 take the first n components of a decomposition

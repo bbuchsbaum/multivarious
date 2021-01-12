@@ -194,10 +194,6 @@ add_node <- function(x, step, ...) UseMethod("add_node")
 prep <- function(x, ...) UseMethod("prep")
 
 
-
-
-
-
 #' apply pre-processing parameters to a new data matrix
 #' 
 #' Given a new dataset, process it in the same way the original data was processed (e.g. centering, scaling, etc.)
@@ -251,6 +247,8 @@ is_orthogonal <- function(x) UseMethod("is_orthogonal")
 #' take the first n components of a decomposition
 #' 
 #' @param x the object to truncate
+#' @param ncomp number of components to retain
+#' @export
 truncate <- function(x, ncomp) UseMethod("truncate")
 
 
@@ -262,13 +260,15 @@ truncate <- function(x, ncomp) UseMethod("truncate")
 #' @export
 block_lengths <- function(x) UseMethod("block_lengths")
 
+
 #' get block_indices 
 #' 
-#' extract the list of indices associated with each block in a multiblock object
+#' extract the list of indices associated with each block in a `multiblock` object
 #' 
 #' @param x the object
+#' @param ... extra args
 #' @export
-block_indices <- function(x) UseMethod("block_indices")
+block_indices <- function(x, ...) UseMethod("block_indices")
 
 
 #' get the number of blocks
@@ -280,8 +280,6 @@ block_indices <- function(x) UseMethod("block_indices")
 nblocks <- function(x) UseMethod("nblocks")
 
 
-
-
 #' initialize a transform
 #' 
 #' @param x the pre_processor
@@ -290,9 +288,14 @@ nblocks <- function(x) UseMethod("nblocks")
 #' @export
 init_transform <- function(x, X, ...) UseMethod("init_transform")
 
+
+
+
 #' @inheritParams init_transform
 #' @export
 apply_transform <- function(x, X, colind, ...) UseMethod("apply_transform")
+
+
 
 #' @inheritParams init_transform
 #' @export
@@ -307,67 +310,6 @@ reverse_transform <- function(x, X, colind, ...) UseMethod("reverse_transform")
 #' @param ... extra args
 #' @export
 bootstrap <- function(x, nboot, ...) UseMethod("bootstrap")
-
-#' create an observation object
-#' 
-#' construct a new multivariate observation vector 
-#' 
-#' @param x the data source
-#' @param i the index of the observation
-#' @export
-observation <- function(x, i) UseMethod("observation")
-
-
-#' create an multidesign object
-#' 
-#' construct a new multivariate design object link vector-valued observation and arbitrary design variables
-#' 
-#' @param x the multivariate data (a matrix, a list, or other data container)
-#' @param y a design matrix with same number of rows/elements as x
-#' @param ... extra args
-#' @export
-#' @examples 
-#' 
-#' X <- matrix(rnorm(20*100), 20, 100)
-#' Y <- tibble(condition=rep(letters[1:5], 4))
-#' 
-#' mds <- multidesign(X,Y)
-#' sdes <- split(mds, condition)
-#' @export
-multidesign <- function(x, y, ...) UseMethod("multidesign")
-
-
-#' create an multiframe object
-#' 
-#' construct a new multivariate design object linking vector-valued observation and arbitrary design variables
-#' 
-#' @param x the multivariate data (a matrix, a list, or other data container)
-#' @param y a design matrix with same number of rows/elements as x
-#' @param ... extra args
-#' @export
-#' @examples 
-#' 
-#' X <- matrix(rnorm(20*100), 20, 100)
-#' Y <- tibble(condition=rep(letters[1:5], 4))
-#' 
-#' mds <- multidesign(X,Y)
-#' sdes <- split(mds, condition)
-#' @export
-multiframe <- function(x, y, ...) UseMethod("multiframe")
-
-
-#' summarize data over grouping variable(s)
-#' 
-#' apply a mutlivariate columnwise summary function (e.g. `colMeans`) to subsets
-#' of observations formed by one or more grouping variables.
-#' 
-#' @param x the multivariate data (a matrix, a list, or other data container)
-#' @param sfun the columnwise summary function (e.g. `colMeans`)
-#' @param ... the grouping variables
-#' 
-#' 
-#' @export
-summarize_by <- function(x, sfun, ...) UseMethod("summarize_by")
 
 
 #' construct a classifier 

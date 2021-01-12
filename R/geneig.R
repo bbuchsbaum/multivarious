@@ -58,7 +58,7 @@ geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
     list(vectors = vecs, values=decomp2$values)
   } else if (method == "sdiag") {
     B_decomp <- eigen(B)
-    keep <- B_decomp$values > 1e-8
+    keep <- Re(B_decomp$values) > 1e-8
     Bp <- B_decomp$vectors[,keep,drop=FALSE] %*% diag(1/sqrt(B_decomp$values[keep]))
     Ap <- t(Bp) %*% A %*% Bp
     A_decomp <- RSpectra::eigs(Ap, k=ncomp)

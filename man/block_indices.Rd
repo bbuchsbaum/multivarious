@@ -4,11 +4,13 @@
 \alias{block_indices}
 \title{get block_indices}
 \usage{
-block_indices(x)
+block_indices(x, ...)
 }
 \arguments{
 \item{x}{the object}
+
+\item{...}{extra args}
 }
 \description{
-extract the list of indices associated with each block in a multiblock object
+extract the list of indices associated with each block in a \code{multiblock} object
 }

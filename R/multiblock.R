@@ -42,7 +42,7 @@ coef.multiblock_projector <- function(object, block) {
     NextMethod(object)
   } else {
     ind <- object$block_indices[[block]]
-    object$v[ind,drop=FALSE]
+    object$v[ind,,drop=FALSE]
   }
 }
 
