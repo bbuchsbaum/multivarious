@@ -1,3 +1,53 @@
+#' @export
+classifier.multiblock_biprojector <- function(x, labels, new_data=NULL, colind=NULL, block=NULL, knn=1) {
+  if (!is.null(colind)) {
+    chk::chk_true(length(colind) <= shape(x)[1])
+    chk::chk_true(all(colind>0))
+    if (!is.null(block)) {
+      rlang::abort("can either supply `colind` or `block` but not both")
+    }
+  }
+  
+  scores <- if (!is.null(colind)) {
+    chk::chk_not_null(new_data)
+    scores <- partial_project(x, new_data, colind=colind)
+  } else if (!is.null(block)) {
+    chk::chk_whole_number(block)
+    project_block(x, new_data, block)
+  } else {
+    if (!is.null(new_data)) {
+      project(x,new_data)
+    } else {
+      scores(x)
+    }
+  }
+  
+  new_classiifer(x,labels=labels,scores=scores, colind=colind, block=block, knn=knn, classes="multiblock_classifier")
+}
+
+
+#' @export
+classifier.multiblock_projector <- function(x, labels, new_data, colind=NULL, block=NULL, knn=1) {
+  if (!is.null(colind)) {
+    chk::chk_true(length(colind) <= shape(x)[1])
+    chk::chk_true(all(colind>0))
+    if (!is.null(block)) {
+      rlang::abort("can either supply `colind` or `block` but not both")
+    }
+  }
+  
+  scores <- if (!is.null(colind)) {
+    scores <- partial_project(x, new_data, colind=colind)
+  } else if (!is.null(block)) {
+    chk::chk_whole_number(block)
+    project_block(x, new_data, block)
+  }
+  
+  new_classiifer(x,labels,scores, colind, block=block, knn=knn, classes="multiblock_classifier")
+  
+}
+
+
 
 #' @export
 classifier.discriminant_projector <- function(x, colind=NULL, knn=1) {
@@ -6,16 +56,29 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1) {
     chk::chk_true(all(colind>0))
   }
   
+  new_classifier(x, x$labels, scores(x), colind=colind, knn=knn)
+}
+
+#' @keywords internal
+new_classifier <- function(x, labels, scores, colind, knn=1, classes=NULL, ...) {
+  if (!is.null(colind)) {
+    chk::chk_true(length(colind) <= shape(x)[1])
+    chk::chk_true(all(colind>0))
+  }
+  
+  chk::chk_equal(length(labels), nrow(scores))
+  
   structure(
     list(
       projector=x,
-      labels=x$labels,
-      scores=scores(x),
+      labels=labels,
+      scores=scores,
       colind=colind,
-      knn=knn),
-    class="classifier"
+      knn=knn,
+      ...),
+    class=c(classes, "classifier")
   )
-  
+
 }
 
 #' create a classifier
@@ -48,17 +111,7 @@ classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
     project(x, new_data)
   }
   
-  
-  
-  structure(
-    list(
-      projector=x,
-      labels=labels,
-      scores=scores,
-      colind=colind,
-      knn=knn),
-    class="classifier"
-  )
+  new_classifier(x, labels, scores,colind,knn)
   
 }
 
