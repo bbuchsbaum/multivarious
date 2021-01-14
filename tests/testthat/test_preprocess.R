@@ -91,6 +91,36 @@ test_that("can preprocess a matrix with a colind", {
   expect_equal(ret, x[,1:2])
 })
 
+test_that("can concatenate two pre-processors", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  mat2 <- matrix(rnorm(10*15), 10, 15)
+  p <- center()
+  proclist <- lapply(1:2, function(i) {
+    fresh(p) %>% prep()
+  })
+  
+  m1 <- init_transform(proclist[[1]], mat1)
+  m2 <- init_transform(proclist[[2]], mat2)
+  proc <- concat_pre_processors(proclist, list(1:15, 16:30))
+  
+  a1 <- apply_transform(proc, cbind(mat1,mat2))
+  a2 <- apply_transform(proc, mat1, colind=1:15)
+  a3 <- apply_transform(proc, mat2, colind=16:30)
+  
+  pres<- pca(cbind(mat1,mat2), ncomp=12)
+  proj <- multiblock_biprojector(pres$v, s=pres$s, sdev=pres$sdev, proc, block_indices=list(1:15, 16:30))
+  p1 <- project_block(proj, m1, 1)
+  p2 <- project_block(proj, m2, 2)
+  
+  expect_true(!is.null(p1))
+  expect_true(!is.null(p2))
+  
+  proc$transform(mat1, colind=1:15)
+  proc$transform(mat2, colind=16:30)
+  
+  
+})
+
 # 
 # test_that("can preprocess a block projector", {
 #   mat1 <- matrix(rnorm(10*15), 10, 15)

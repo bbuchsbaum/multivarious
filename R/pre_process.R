@@ -363,17 +363,20 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
 #' t2 <- apply_transform(clist, cbind(x1,x2[,1:5]), colind=1:15)
 #' @export
 concat_pre_processors <- function(preprocs, block_indices) {
+  chk::chk_equal(length(preprocs), length(block_indices))
   unraveled_ids <- unlist(block_indices)
-  blk_ids <- rep(1:length(block_indices), sapply(block_indices,length))
+  blk_ids <- rep(seq_along(block_indices), sapply(block_indices,length))
   idmap <- data.frame(id_global=unraveled_ids, 
                       id_block=unlist(lapply(block_indices, function(x) seq_along(x))),
                       block=blk_ids)
   
 
   apply_fun <- function(f, X, colind) {
+    browser()
     chk::chk_equal(ncol(X), length(colind))
     keep <- idmap$id_global %in% colind
-    blks <- unique(idmap$block[keep])
+    blks <- sort(unique(idmap$block[keep]))
+    
     idmap2 <- idmap[keep,]
     do.call(cbind, lapply(blks, function(i) {
       loc <- idmap2$id_block[idmap2$block == i]
