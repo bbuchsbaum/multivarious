@@ -55,7 +55,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"),
   
   p <- bi_projector(v=corpcor::pseudoinverse(betas), 
                     s=scores,
-                    sdev=apply(s,2,sd),
+                    sdev=apply(scores,2,sd),
                     coefficients=betas,
                     classes="regress")
   
