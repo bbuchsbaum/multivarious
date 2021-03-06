@@ -14,6 +14,12 @@
 #' @return 
 #' 
 #' an `bi-projector` of type `regress`
+#' 
+#' @examples
+#' 
+#' X <- matrix(rnorm(100*10), 10, 100)
+#' Y <- matrix(rnorm(10*4), 10, 4)
+#' 
 regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"), 
                     intercept=FALSE, lambda=.001) {
   method <- match.arg(method)
@@ -53,7 +59,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"),
   }
   
   
-  p <- bi_projector(v=corpcor::pseudoinverse(betas), 
+  p <- bi_projector(v=t(corpcor::pseudoinverse(betas)), 
                     s=scores,
                     sdev=apply(scores,2,sd),
                     coefficients=betas,
