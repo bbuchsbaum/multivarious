@@ -17,9 +17,9 @@
 #' 
 #' @examples
 #' 
-#' X <- matrix(rnorm(100*10), 10, 100)
-#' Y <- matrix(rnorm(10*4), 10, 4)
-#' 
+#' Y <- matrix(rnorm(100*10), 10, 100)
+#' X <- matrix(rnorm(10*4), 10, 4)
+#' r <- regress(X,Y, intercept=FALSE)
 regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"), 
                     intercept=FALSE, lambda=.001) {
   method <- match.arg(method)
@@ -35,30 +35,38 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"),
   ## scores(x)[rowind,comp] %*% t(components(x)[,comp,drop=FALSE])[,colind]
   
   
-  if (method == "linear") {
+  betas <- if (method == "lm") {
     lfit = lsfit(X, Y, intercept=intercept)
-    
-    if (intercept) {
-      scores <- cbind(rep(1, nrow(Y)), Y)
-    } else {
-      scores <- Y
-    }
-    
-    betas <- as.matrix(t(coef(lfit)))
-    
-  } else {
-    
-    gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept)
-    betas <- as.matrix(t(do.call(cbind, coef(gfit))))
     
     if (intercept) {
       scores <- cbind(rep(1, nrow(X)), X)
     } else {
       scores <- X
     }
+    
+    as.matrix(t(coef(lfit)))
+    
+  } else {
+    
+    gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept)
+    
+    if (intercept) {
+      scores <- cbind(rep(1, nrow(X)), X)
+    } else {
+      scores <- X
+    }
+    
+    #browser()
+    if (!intercept) {
+      as.matrix(t(do.call(cbind, coef(gfit))))[,-1,drop=FALSE]
+    } else {
+      as.matrix(t(do.call(cbind, coef(gfit))))
+    }
   }
   
+  print(dim(betas))
   
+  #browser()
   p <- bi_projector(v=t(corpcor::pseudoinverse(betas)), 
                     s=scores,
                     sdev=apply(scores,2,sd),
