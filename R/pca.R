@@ -14,6 +14,7 @@
 #' data(iris)
 #' X <- as.matrix(iris[,1:4])
 #' res <- pca(X, ncomp=4)
+#' tres <- truncate(res, 3)
 pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("fast", "base", "irlba", "propack", "rsvd", "svds"), ...) {
   chk::chkor(chk::chk_matrix(X), chk::chk_s4_class("Matrix"))
   
@@ -28,6 +29,14 @@ pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("fast", "base
 
   attr(svdres, "class") <- c("pca", attr(svdres, "class"))
   svdres
-  
-  
+}
+
+#' @export
+truncate.pca <- function(x, ncomp) {
+  chk_range(ncomp, c(1, ncomp(x)))
+  x$v <- x$v[,1:ncomp, drop=FALSE]
+  x$sdev <- x$sdev[1:ncomp]
+  x$s <- x$s[,1:ncomp,drop=FALSE]
+  x$u <- x$u[, 1:ncomp, drop=FALSE]
+  x
 }

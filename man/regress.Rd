@@ -29,3 +29,9 @@ an \code{bi-projector} of type \code{regress}
 Fit a multivariate regression model for a matrix of basis functions, \code{X}, and a response matrix \code{Y}.
 The goal is to find a projection matrix that can be used for mapping and reconstruction.
 }
+\examples{
+
+Y <- matrix(rnorm(100*10), 10, 100)
+X <- matrix(rnorm(10*4), 10, 4)
+r <- regress(X,Y, intercept=FALSE)
+}
