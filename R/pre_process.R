@@ -343,9 +343,10 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
 #' 
 #' concatenate a sequence of pre-processors, each previously applied to a block of data.
 #' 
-#' @param preprocs a list of initalized `pre-processor` objects
+#' @param preprocs a list of initialized `pre-processor` objects
 #' @param block_indices a list of block indices where each vector in the list 
 #' contains the global indices of the variables.
+#' 
 #' @examples 
 #' 
 #' p1 <- center() %>% prep()
@@ -372,7 +373,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
   
 
   apply_fun <- function(f, X, colind) {
-    browser()
+    #browser()
     chk::chk_equal(ncol(X), length(colind))
     keep <- idmap$id_global %in% colind
     blks <- sort(unique(idmap$block[keep]))

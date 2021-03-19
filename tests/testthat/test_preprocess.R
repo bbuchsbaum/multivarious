@@ -95,6 +95,7 @@ test_that("can concatenate two pre-processors", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
   mat2 <- matrix(rnorm(10*15), 10, 15)
   p <- center()
+  
   proclist <- lapply(1:2, function(i) {
     fresh(p) %>% prep()
   })
@@ -120,6 +121,7 @@ test_that("can concatenate two pre-processors", {
   
   
 })
+
 
 # 
 # test_that("can preprocess a block projector", {

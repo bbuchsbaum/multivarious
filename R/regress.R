@@ -18,8 +18,13 @@
 #' @examples
 #' 
 #' Y <- matrix(rnorm(100*10), 10, 100)
-#' X <- matrix(rnorm(10*4), 10, 4)
+#' X <- matrix(rnorm(10*9), 10, 9)
 #' r <- regress(X,Y, intercept=FALSE)
+#' recon <- reconstruct(r)
+#' r <- regress(X,Y, intercept=TRUE)
+#' recon <- reconstruct(r)
+#' r <- regress(X,Y, intercept=TRUE, method="ridge")
+#' recon <- reconstruct(r)
 regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"), 
                     intercept=FALSE, lambda=.001) {
   method <- match.arg(method)
@@ -77,7 +82,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"),
 
 #' @export
 inverse_projection.regress <- function(x) {
-  x$coefficients
+  t(x$coefficients)
 }
 
 
