@@ -9,6 +9,8 @@
 #' @param Y the response matrix
 #' @param preproc the pre-processor
 #' @param method the regression method: `linear` or `ridge`.
+#' @param lambda ridge shrinkage parameter
+#' @param ncomp number of pls components
 #' @export
 #' @importFrom glmnet glmnet
 #' @importFrom pls plsr
