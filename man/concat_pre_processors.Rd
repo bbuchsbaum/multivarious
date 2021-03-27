@@ -7,7 +7,7 @@
 concat_pre_processors(preprocs, block_indices)
 }
 \arguments{
-\item{preprocs}{a list of initalized \code{pre-processor} objects}
+\item{preprocs}{a list of initialized \code{pre-processor} objects}
 
 \item{block_indices}{a list of block indices where each vector in the list
 contains the global indices of the variables.}

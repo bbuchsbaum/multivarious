@@ -11,6 +11,7 @@
 #' @param method the regression method: `linear` or `ridge`.
 #' @export
 #' @importFrom glmnet glmnet
+#' @importFrom pls plsr
 #' @return 
 #' 
 #' an `bi-projector` of type `regress`
@@ -25,8 +26,8 @@
 #' recon <- reconstruct(r)
 #' r <- regress(X,Y, intercept=TRUE, method="ridge")
 #' recon <- reconstruct(r)
-regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"), 
-                    intercept=FALSE, lambda=.001) {
+regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "pls"), 
+                    intercept=FALSE, lambda=.001, ncomp=ceiling(ncol(X)/2)) {
   method <- match.arg(method)
   
   #procres <- prep(preproc, X)
@@ -51,7 +52,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"),
     
     as.matrix(t(coef(lfit)))
     
-  } else {
+  } else if (method == "ridge") {
     
     gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept)
     
@@ -67,11 +68,21 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge"),
     } else {
       as.matrix(t(do.call(cbind, coef(gfit))))
     }
+  } else {
+    ## pls
+    if (intercept) {
+      scores <- cbind(rep(1, nrow(X)), X)
+    } else {
+      scores <- X
+    }
+    
+    dfl <- list(x=scores, y=Y)
+    fit <- plsr(y ~ x, data=dfl, ncomp=ncomp)
+    as.matrix(t(coef(fit)[,,1]))
   }
   
-  print(dim(betas))
+  #print(dim(betas))
   
-  #browser()
   p <- bi_projector(v=t(corpcor::pseudoinverse(betas)), 
                     s=scores,
                     sdev=apply(scores,2,sd),

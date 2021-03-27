@@ -8,9 +8,10 @@ regress(
   X,
   Y,
   preproc = NULL,
-  method = c("lm", "ridge"),
+  method = c("lm", "ridge", "pls"),
   intercept = FALSE,
-  lambda = 0.001
+  lambda = 0.001,
+  ncomp = ceiling(ncol(X)/2)
 )
 }
 \arguments{
@@ -32,6 +33,11 @@ The goal is to find a projection matrix that can be used for mapping and reconst
 \examples{
 
 Y <- matrix(rnorm(100*10), 10, 100)
-X <- matrix(rnorm(10*4), 10, 4)
+X <- matrix(rnorm(10*9), 10, 9)
 r <- regress(X,Y, intercept=FALSE)
+recon <- reconstruct(r)
+r <- regress(X,Y, intercept=TRUE)
+recon <- reconstruct(r)
+r <- regress(X,Y, intercept=TRUE, method="ridge")
+recon <- reconstruct(r)
 }
