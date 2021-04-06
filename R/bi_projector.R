@@ -44,10 +44,11 @@ project_vars.bi_projector <- function(x, new_data) {
     new_data <- matrix(new_data)
   }
   
-  chk::chk_equal(nrow(new_data), nrow(scores(x)))
+  sc <- scores(x)
+  chk::chk_equal(nrow(new_data), nrow(sc))
   
   variance <- sdev(x)^2
-  t(new_data) %*% (scores(x)) %*% diag(1/variance, nrow=length(variance), ncol=length(variance))
+  t(new_data) %*% (sc) %*% diag(1/variance, nrow=length(variance), ncol=length(variance))
 }
 
 
@@ -71,7 +72,7 @@ reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)
 }
 
 #' @export
-residuals.bi_projector <- function(x, ncomp, xorig) {
+residuals.bi_projector <- function(x, ncomp=ncomp(x), xorig) {
   recon <- reconstruct(x, comp=1:ncomp)
   xorig - recon
 }
@@ -80,10 +81,10 @@ residuals.bi_projector <- function(x, ncomp, xorig) {
 print.projector <- function(x) {
   cat("bi-projector: ", paste0(class(x)), "\n")
   
-  cat("input dim: ", nrow(x$v), "\n")
-  cat("output dim: ", ncol(x$v), "\n")
+  cat("input dim: ", nrow(coef(x)), "\n")
+  cat("output dim: ", ncol(coef(x)), "\n")
   
-  cat("dual input dim: ", ncol(x$u), "\n")
-  cat("dual output dim: ", nrow(x$v), "\n")
+  cat("dual input dim: ", ncol(scores(x)), "\n")
+  cat("dual output dim: ", nrow(coef(x)), "\n")
 }
 

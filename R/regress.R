@@ -28,8 +28,8 @@
 #' recon <- reconstruct(r)
 #' r <- regress(X,Y, intercept=TRUE, method="ridge")
 #' recon <- reconstruct(r)
-regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "pls"), 
-                    intercept=FALSE, lambda=.001, ncomp=ceiling(ncol(X)/2)) {
+regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "mridge", "pls"), 
+                    intercept=FALSE, lambda=.001, ncomp=ceiling(ncol(X)/2), ...) {
   method <- match.arg(method)
   
   #procres <- prep(preproc, X)
@@ -54,9 +54,9 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "pls"),
     
     as.matrix(t(coef(lfit)))
     
-  } else if (method == "ridge") {
+  } else if (method == "mridge") {
     
-    gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept)
+    gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept, ...)
     
     if (intercept) {
       scores <- cbind(rep(1, nrow(X)), X)
@@ -64,12 +64,13 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "pls"),
       scores <- X
     }
     
-    #browser()
     if (!intercept) {
       as.matrix(t(do.call(cbind, coef(gfit))))[,-1,drop=FALSE]
     } else {
       as.matrix(t(do.call(cbind, coef(gfit))))
     }
+  } else if ("ridge") {
+    stop("")
   } else {
     ## pls
     if (intercept) {
@@ -79,7 +80,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "pls"),
     }
     
     dfl <- list(x=scores, y=Y)
-    fit <- plsr(y ~ x, data=dfl, ncomp=ncomp)
+    fit <- plsr(y ~ x, data=dfl, ncomp=ncomp,...)
     as.matrix(t(coef(fit)[,,1]))
   }
   

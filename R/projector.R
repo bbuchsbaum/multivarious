@@ -137,8 +137,8 @@ shape.projector <- function(x) {
 #' @export
 print.projector <- function(x) {
   cat("projector: ", paste0(class(x)), "\n")
-  cat("input dim: ", nrow(x$v), "\n")
-  cat("output dim: ", ncol(x$v), "\n")
+  cat("input dim: ", shape(x)[1], "\n")
+  cat("output dim: ", shape(x)[2], "\n")
 }
 
 
