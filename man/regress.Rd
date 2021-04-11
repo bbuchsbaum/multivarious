@@ -8,10 +8,12 @@ regress(
   X,
   Y,
   preproc = NULL,
-  method = c("lm", "ridge", "pls"),
+  method = c("lm", "enet", "mridge", "pls"),
   intercept = FALSE,
   lambda = 0.001,
-  ncomp = ceiling(ncol(X)/2)
+  alpha = 0,
+  ncomp = ceiling(ncol(X)/2),
+  ...
 )
 }
 \arguments{
@@ -21,7 +23,13 @@ regress(
 
 \item{preproc}{the pre-processor}
 
-\item{method}{the regression method: \code{linear} or \code{ridge}.}
+\item{method}{the regression method: \code{linear} or \code{enet} \code{mridge}, or \code{pls}}
+
+\item{lambda}{ridge shrinkage parameter}
+
+\item{alpha}{the elastic net mixing parameter if method is \code{enet}}
+
+\item{ncomp}{number of pls components}
 }
 \value{
 an \code{bi-projector} of type \code{regress}

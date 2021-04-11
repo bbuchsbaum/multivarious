@@ -32,3 +32,24 @@ group_means <- function (Y, X) {
     }
   }
 }
+
+#' principal angles
+#' 
+#' compute principal angles for a set of subspaces
+#' @param fits a list of `bi_projector` instances
+#' @return a numeric vector of principle angles with length equal to minimum dimension of input subspaces
+prinang <- function(fits) {
+  chk::chk_all(fits, chk_fun = chk_s3_class, "bi_projector")
+  
+  mindim <- min(sapply(fits, function(x) shape(x)[2]))
+  sclist <- lapply(fits, function(x) {
+    sc <- scores(x)[,1:mindim,drop=FALSE]
+    apply(sc,2, function(z) z/sqrt(sum(z^2)))
+  })
+  
+  cmat <- do.call(cbind, sclist)
+  sres <- svd(cmat)
+  sqrt(sres$d)[1:mindim]/length(fits)
+}
+
+
