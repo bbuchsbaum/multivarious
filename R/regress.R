@@ -8,8 +8,9 @@
 #' @param X the set of independent (basis) variables
 #' @param Y the response matrix
 #' @param preproc the pre-processor
-#' @param method the regression method: `linear` or `ridge`.
+#' @param method the regression method: `linear` or `enet` `mridge`, or `pls`
 #' @param lambda ridge shrinkage parameter
+#' @param alpha the elastic net mixing parameter if method is `enet`
 #' @param ncomp number of pls components
 #' @export
 #' @importFrom glmnet glmnet
@@ -28,8 +29,8 @@
 #' recon <- reconstruct(r)
 #' r <- regress(X,Y, intercept=TRUE, method="ridge")
 #' recon <- reconstruct(r)
-regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "mridge", "pls"), 
-                    intercept=FALSE, lambda=.001, ncomp=ceiling(ncol(X)/2), ...) {
+regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"), 
+                    intercept=FALSE, lambda=.001, alpha=0, ncomp=ceiling(ncol(X)/2), ...) {
   method <- match.arg(method)
   
   #procres <- prep(preproc, X)
@@ -43,41 +44,34 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "mridge", "pls")
   ## scores(x)[rowind,comp] %*% t(components(x)[,comp,drop=FALSE])[,colind]
   
   
+  if (intercept) {
+    scores <- cbind(rep(1, nrow(X)), X)
+  } else {
+    scores <- X
+  }
+  
   betas <- if (method == "lm") {
     lfit = lsfit(X, Y, intercept=intercept)
-    
-    if (intercept) {
-      scores <- cbind(rep(1, nrow(X)), X)
-    } else {
-      scores <- X
-    }
-    
     as.matrix(t(coef(lfit)))
     
   } else if (method == "mridge") {
     
     gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept, ...)
-    
-    if (intercept) {
-      scores <- cbind(rep(1, nrow(X)), X)
-    } else {
-      scores <- X
-    }
-    
+  
     if (!intercept) {
       as.matrix(t(do.call(cbind, coef(gfit))))[,-1,drop=FALSE]
     } else {
       as.matrix(t(do.call(cbind, coef(gfit))))
     }
-  } else if ("ridge") {
-    stop("")
+  } else if (method == "enet") {
+    out <- do.call(rbind, lapply(1:ncol(Y), function(i) {
+      gfit <- glmnet(X, Y[,i], alpha=alpha, family="gaussian", lambda=lambda, intercept=intercept, ...)
+      #gfit <- glmnet(X, Y[,i], alpha=alpha, family="gaussian", lambda=lambda, intercept=intercept)
+      if (!intercept) coef(gfit)[-1,1] else coef(gfit)[,1]
+    }))
+  
+    
   } else {
-    ## pls
-    if (intercept) {
-      scores <- cbind(rep(1, nrow(X)), X)
-    } else {
-      scores <- X
-    }
     
     dfl <- list(x=scores, y=Y)
     fit <- plsr(y ~ x, data=dfl, ncomp=ncomp,...)
@@ -90,6 +84,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "ridge", "mridge", "pls")
                     s=scores,
                     sdev=apply(scores,2,sd),
                     coefficients=betas,
+                    meethod=method,
                     classes="regress")
   
 }
