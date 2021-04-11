@@ -84,7 +84,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"),
                     s=scores,
                     sdev=apply(scores,2,sd),
                     coefficients=betas,
-                    meethod=method,
+                    method=method,
                     classes="regress")
   
 }
