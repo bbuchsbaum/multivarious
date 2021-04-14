@@ -175,6 +175,7 @@ project.classifier <- function(x, new_data, ...) {
 #' @param ncomp the number of components to use
 #' @param colind the column indices to select in the projection matrix
 #' @param metric the similarity metric ("euclidean" or "cosine")
+#' @param additional arguments to projection function
 #' @export
 predict.classifier <- function(object, new_data, ncomp=NULL,
                                colind=NULL, metric=c("cosine", "euclidean"), ...) {
@@ -190,16 +191,22 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     chk::chk_range(ncomp, c(1,shape(object$projector)[2]))
   }
   
+  metric <- match.arg(metric)
+  
   if (!is.null(colind)) {
     if (length(colind) == 1 && is.vector(new_data)) {
       new_data <- as.matrix(new_data)
     }
     chk::chk_equal(length(colind), ncol(new_data))
+    proj <- partial_project(object$projector, new_data, colind, ...)
+    
+  } else {
+    proj <- project(object$projector, new_data,...)
   }
   
-  metric <- match.arg(metric)
+ 
   
-  proj <- project(object$projector, new_data,...)
+  
   
   doit <- function(p) {
     prob <- normalize_probs(p)
