@@ -77,6 +77,14 @@ residuals.bi_projector <- function(x, ncomp=ncomp(x), xorig) {
   xorig - recon
 }
 
+## @export
+#transpose.bi_projector <- function(x) {
+#  bi_projector(scores(x), coef(x), preproc=pass(), classes=c("trasnposed_bi_projector", "bi_projector"))
+#}
+
+## X = UDV
+## XT = VTDTU
+
 #' @export
 print.projector <- function(x) {
   cat("bi-projector: ", paste0(class(x)), "\n")

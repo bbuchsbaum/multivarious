@@ -47,6 +47,15 @@ project_block <- function(x, new_data, block,...) UseMethod("project_block")
 project_vars <- function(x, new_data, ...) UseMethod("project_vars")
 
 
+#' transpose a model
+#' 
+#' transpose a model by switching coefficients and scores
+#' 
+#' @param x the model fit
+#' @export
+transpose <- function(x,...) UseMethod("transpose")
+
+
 
 #' reconstruct the data
 #' 
