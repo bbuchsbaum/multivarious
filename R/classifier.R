@@ -22,7 +22,7 @@ classifier.multiblock_biprojector <- function(x, labels, new_data=NULL, colind=N
     }
   }
   
-  new_classiifer(x,labels=labels,scores=scores, colind=colind, block=block, knn=knn, classes="multiblock_classifier")
+  new_classifier(x,labels=labels,scores=scores, colind=colind, block=block, knn=knn, classes="multiblock_classifier")
 }
 
 
@@ -43,7 +43,7 @@ classifier.multiblock_projector <- function(x, labels, new_data, colind=NULL, bl
     project_block(x, new_data, block)
   }
   
-  new_classiifer(x,labels,scores, colind, block=block, knn=knn, classes="multiblock_classifier")
+  new_classifier(x,labels,scores, colind, block=block, knn=knn, classes="multiblock_classifier")
   
 }
 
@@ -60,7 +60,8 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1) {
 }
 
 #' @keywords internal
-new_classifier <- function(x, labels, scores, colind, knn=1, classes=NULL, ...) {
+#' @export
+new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, ...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
     chk::chk_true(all(colind>0))
@@ -106,12 +107,12 @@ classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
   chk::chk_equal(length(labels), nrow(new_data))
   
   scores <- if (!is.null(colind)) {
-    scores <- partial_project(x, new_data, colind=colind)
+    partial_project(x, new_data, colind=colind)
   } else {
     project(x, new_data)
   }
   
-  new_classifier(x, labels, scores,colind,knn)
+  new_classifier(x, labels, scores, colind, knn)
   
 }
 
