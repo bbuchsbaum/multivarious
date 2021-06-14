@@ -164,7 +164,7 @@ nearest_class <- function(prob, labels,knn=1) {
 #' @export
 project.classifier <- function(x, new_data, ...) {
   scores <- if (!is.null(x$colind)) {
-    partial_project(x$projector, new_data, colind=colind, ...)
+    partial_project(x$projector, new_data, colind=x$colind, ...)
   } else {
     project(x$projector, new_data, ...)
   }
@@ -193,19 +193,21 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   
   metric <- match.arg(metric)
   
+
   if (!is.null(colind)) {
+    ### colind overrides object$colind, should emit warning?
     if (length(colind) == 1 && is.vector(new_data)) {
       new_data <- as.matrix(new_data)
     }
     chk::chk_equal(length(colind), ncol(new_data))
     proj <- partial_project(object$projector, new_data, colind, ...)
     
-  } else {
+  } else if (!is.null(object$colind)) {
+    chk::chk_equal(length(object$colind), ncol(new_data))
+    proj <- partial_project(object$projector, new_data, oobject$colind, ...)
+  }else {
     proj <- project(object$projector, new_data,...)
   }
-  
- 
-  
   
   
   doit <- function(p) {
@@ -221,7 +223,6 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   if (metric == "cosine") {
     p <- proxy::simil(sc[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="cosine")
     doit(p)
-    
   } else if (metric == "euclidean") {
     D <- proxy::dist(sc[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="euclidean")
     doit(exp(-D))

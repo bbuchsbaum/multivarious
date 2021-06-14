@@ -49,6 +49,11 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
                 irlba=irlba::irlba(X, nu=min(ncomp, min(dim(X)) -3), nv=min(ncomp, min(dim(X)) -3)), ...)
   
   keep <- which(res$d^2 > tol)
+  
+  if (length(keep) == 0) {
+    stop("error: all singular values are zero")
+  }
+  
   ncomp <- min(ncomp,length(keep))
   
   res$d <- res$d[1:ncomp]

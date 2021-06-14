@@ -67,7 +67,9 @@ project.projector <- function(x, new_data) {
 partial_project.projector <- function(x, new_data, colind) {
   if (is.vector(new_data) && length(colind) > 1) {
     new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
-  } 
+  } else if (is.vector(new_data) && length(colind) == 1) {
+    new_data <- matrix(new_data, ncol=1)
+  }
   
   chk::vld_matrix(new_data)
   chk::check_dim(new_data, ncol, length(colind))
