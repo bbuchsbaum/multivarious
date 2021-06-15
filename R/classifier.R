@@ -205,7 +205,7 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     
   } else if (!is.null(object$colind)) {
     chk::chk_equal(length(object$colind), ncol(new_data))
-    proj <- partial_project(object$projector, new_data, oobject$colind, ...)
+    proj <- partial_project(object$projector, new_data, object$colind, ...)
   }else {
     proj <- project(object$projector, new_data,...)
   }
