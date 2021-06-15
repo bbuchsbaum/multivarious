@@ -219,7 +219,7 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     list(class=cls, prob=pmeans)
   }
   
-  sc <- object$scores
+  sc <- as.matrix(object$scores)
   
   if (metric == "cosine") {
     p <- proxy::simil(sc[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="cosine")
