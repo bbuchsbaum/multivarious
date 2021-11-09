@@ -79,6 +79,8 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"),
   }
   
   #print(dim(betas))
+  rm(X)
+  rm(Y)
   
   p <- bi_projector(v=t(corpcor::pseudoinverse(betas)), 
                     s=scores,

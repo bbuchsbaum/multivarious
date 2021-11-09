@@ -21,37 +21,41 @@ add_node.prepper <- function(preproc, step) {
 #' @importFrom purrr compose
 #' @export
 prep.prepper <- function(x) {
-  
+  steps <- x$steps
   tinit <- function(X) {
     xin <- X
-    for (i in 1:length(x$steps)) {
-      xin <- x$steps[[i]]$forward(xin)
+    for (i in 1:length(steps)) {
+      xin <- steps[[i]]$forward(xin)
     }
-    
+    rm(X)
     xin
   }
   
   tform <- function(X, colind=NULL) {
     xin <- X
-    for (i in 1:length(x$steps)) {
-      xin <- x$steps[[i]]$apply(xin, colind)
+    for (i in 1:length(steps)) {
+      xin <- steps[[i]]$apply(xin, colind)
     }
-    
+    rm(X)
     xin
   }
   
   rtform <- function(X, colind=NULL) {
     xin <- X
-    for (i in length(x$steps):1) {
-      xin <- x$steps[[i]]$reverse(xin, colind)
+    for (i in length(steps):1) {
+      xin <- steps[[i]]$reverse(xin, colind)
     }
-    
+    rm(X)
     xin
   }
   
   #Xp <- if (!missing(X)) {
   #  tinit(X)
   #} 
+  
+  #environment(tinit) <- rlang::new_environment()
+  #environment(tform) <- rlang::new_environment()
+  #environment(rtform) <- rlang::new_environment()
   
   ret <- list(
     preproc=x,
