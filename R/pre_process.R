@@ -170,7 +170,8 @@ pass <- function(preproc=prepper()) {
 #' @importFrom Matrix colMeans
 center <- function(preproc = prepper(), cmeans=NULL) {
   create <- function() {
-    env = new.env()
+    #env = new.env()
+    env <- rlang::new_environment()
     env[["cmeans"]] <- cmeans
     
     list(
@@ -234,7 +235,8 @@ colscale <- function(preproc = prepper(),
   }
   
   create <- function() {
-    env = new.env()
+    #env = new.env()
+    env <- rlang::new_environment()
     list(
       forward = function(X) {
         wts <- if (type == "weights") {
@@ -286,8 +288,8 @@ colscale <- function(preproc = prepper(),
 #' @export
 standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
   create <- function() {
-    env = new.env()
-    
+    #env = new.env()
+    env <- rlang::new_environment()
     list(
       forward = function(X) {
         if (is.null(sds)) {
