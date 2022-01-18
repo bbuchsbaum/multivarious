@@ -226,7 +226,9 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     doit(p)
   } else if (metric == "euclidean") {
     D <- proxy::dist(sc[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="euclidean")
+    D <- D/max(D)
     doit(exp(-D))
+    #-D
   }
   
 }

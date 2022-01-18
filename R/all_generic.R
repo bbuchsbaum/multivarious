@@ -331,5 +331,8 @@ bootstrap <- function(x, nboot, ...) UseMethod("bootstrap")
 classifier <- function(x, colind, ...) UseMethod("classifier")
 
 
+perm_ci <- function(x, X, nperm, ...) UseMethod("classifier")
+
+
 
 

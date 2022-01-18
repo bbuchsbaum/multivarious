@@ -1,4 +1,9 @@
 
+split_matrix <- function(X, fac) {
+  idx <- split(1:nrow(X), fac)
+  lapply(idx, function(i) X[i,])
+}
+
 
 #' compute column-wise mean in \code{X} for each factor level of \code{Y}
 #' 
