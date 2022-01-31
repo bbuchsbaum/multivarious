@@ -6,6 +6,7 @@
 #' @param q parameter passed to method `rsvd`
 #' @param p parameter passed to method `rsvd`
 #' @param tol minimum eigenvalue magnitude, otherwise component is dropped
+#' @param ... extra args pased to selected svd function
 #' @export
 #' @importFrom RSpectra svds
 #' @importFrom rsvd rsvd

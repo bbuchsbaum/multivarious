@@ -19,14 +19,14 @@ projector(v, preproc = prep(pass()), ..., classes = NULL)
 a instance of type \code{projector}
 }
 \description{
-A \code{projector} maps a matrix from D-dimensional space to d-dimensional space, where \code{d} may be less than \code{D}.
+A \code{projector} maps a matrix from an N-dimensional space to d-dimensional space, where \code{d} may be less than \code{N}.
 The projection matrix, \code{v} is not necessarily orthogonal.
 }
 \examples{
  
 X <- matrix(rnorm(10*10), 10, 10)
 svdfit <- svd(X)
-
 p <- projector(svdfit$v)
+proj <- project(p, X)
 
 }

@@ -327,6 +327,7 @@ bootstrap <- function(x, nboot, ...) UseMethod("bootstrap")
 #' 
 #' @param x the model object
 #' @param colind the (optional) column indices used for prediction
+#' @param ... extra arguments
 #' @export
 classifier <- function(x, colind, ...) UseMethod("classifier")
 

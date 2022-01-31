@@ -33,7 +33,7 @@ pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("fast", "base
 
 #' @export
 truncate.pca <- function(x, ncomp) {
-  chk_range(ncomp, c(1, ncomp(x)))
+  chk::chk_range(ncomp, c(1, ncomp(x)))
   x$v <- x$v[,1:ncomp, drop=FALSE]
   x$sdev <- x$sdev[1:ncomp]
   x$s <- x$s[,1:ncomp,drop=FALSE]

@@ -4,7 +4,7 @@
 \alias{geneig}
 \title{generalized eigenvalue decomposition}
 \usage{
-geneig(A, B, ncomp, method = c("robust", "sdiag", "lapack"))
+geneig(A, B, ncomp, method = c("robust", "sdiag", "geigen", "primme"), ...)
 }
 \arguments{
 \item{A}{the left hand side matrix}
@@ -15,10 +15,10 @@ geneig(A, B, ncomp, method = c("robust", "sdiag", "lapack"))
 
 \item{method}{robust or lapack (using \code{geigen} package)}
 
-\item{ordering}{the ordering of the eigenvalues/vectors (LM = largest magnitude first, SM = smallest magnitude first)}
+\item{...}{extra args sent to underlying engine}
 }
 \value{
-\code{geneig} instance whcih is a subclass of \code{projector} with added slot for eigenvalues called \code{values}
+\code{geneig} instance which is a subclass of \code{projector} with added slot for eigenvalues called \code{values}
 }
 \description{
 compute generalized eigenvalues and eigenvectors using one of two methods

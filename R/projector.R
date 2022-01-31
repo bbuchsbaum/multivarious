@@ -1,6 +1,6 @@
 #' construct a `projector` instance
 #' 
-#' A `projector` maps a matrix from D-dimensional space to d-dimensional space, where `d` may be less than `D`.
+#' A `projector` maps a matrix from an N-dimensional space to d-dimensional space, where `d` may be less than `N`.
 #' The projection matrix, `v` is not necessarily orthogonal.
 #' 
 #' @export
@@ -16,8 +16,8 @@
 #' @examples  
 #' X <- matrix(rnorm(10*10), 10, 10)
 #' svdfit <- svd(X)
-#' 
 #' p <- projector(svdfit$v)
+#' proj <- project(p, X)
 #' 
 projector <- function(v, preproc=prep(pass()), ..., classes=NULL) {
   chk::chkor(chk::chk_matrix(v), chk::chk_s4_class(v, "Matrix"))

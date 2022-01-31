@@ -82,16 +82,14 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 
 }
 
-#' create a classifier
-#' 
-#' construct a classifier from a `projector` instance
-#' 
-#' @param x the `projector` instance
+
+
 #' @param labels the labels associated with the rows of the projected data (see `new_data`)
 #' @param new_data reference data associated with `labels` and to be projected into subspace (required).
-#' @param colind the subset of column indices in the fitted model to use.
 #' @param knn the number of nearest neighbors to use when classifying a new point. 
 #' @export
+#' 
+#' @rdname classifier
 #' 
 #' @examples
 #' data(iris)

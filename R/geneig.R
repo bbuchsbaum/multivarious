@@ -6,10 +6,10 @@
 #' @param A the left hand side matrix
 #' @param B the right hand side matrix
 #' @param ncomp number of components to return
-#' @param ordering the ordering of the eigenvalues/vectors (LM = largest magnitude first, SM = smallest magnitude first)
 #' @param method robust or lapack (using `geigen` package)
+#' @param ... extra args sent to underlying engine
 #' 
-#' @return `geneig` instance whcih is a subclass of `projector` with added slot for eigenvalues called `values`
+#' @return `geneig` instance which is a subclass of `projector` with added slot for eigenvalues called `values`
 #' @export
 #' @examples 
 #' 
@@ -23,7 +23,7 @@
 #'               
 #' @importFrom Matrix isDiagonal   
 #' @import Matrix         
-geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
+geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "geigen", "primme"), ...) {
   method <- match.arg(method)
   
   chk::chk_equal(nrow(A), ncol(A))
@@ -37,7 +37,7 @@ geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
   
   ret <- if (method == "robust") {
     if (isDiagonal(B)) {
-      Sinv <- Matrix::Diagonal(1/sqrt(diag(B)))
+      Sinv <- Matrix::Diagonal(x=1/sqrt(diag(B)))
       W <- Matrix::Diagonal(x=Sinv) %*% A  %*% Matrix::Diagonal(x=Sinv)
     } else {
       decomp <- eigen(B)
@@ -61,14 +61,17 @@ geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "lapack")) {
     keep <- Re(B_decomp$values) > 1e-8
     Bp <- B_decomp$vectors[,keep,drop=FALSE] %*% diag(1/sqrt(B_decomp$values[keep]))
     Ap <- t(Bp) %*% A %*% Bp
-    A_decomp <- RSpectra::eigs(Ap, k=ncomp)
+    A_decomp <- eigen(Ap)
     keep <- Re(A_decomp$values) > 1e-8
     vecs <- Bp %*% A_decomp$vectors[,keep,drop=FALSE]
     list(vectors=vecs, values=A_decomp$values)
-  } else {
+  } else if (method == "geigen") {
     res <- geigen(as.matrix(A),as.matrix(B))
     vec <- res$vectors[, nrow(res$vectors):(nrow(res$vectors)-(ncomp-1))]
     list(vectors=vec, values=rev(res$values)[1:ncomp])
+  } else if (method == "primme") {
+    res <- PRIMME::eigs_sym(A=A, B=B, NEig=ncomp,...)
+    list(vectors=res$vectors, values=res$values)
   }
   
   projector(v=ret$vectors, classes="geneig",values=ret$values)

@@ -25,4 +25,28 @@ test_that("can run bootstrap analysis with 100 bootstraps", {
   expect_true(length(bres) == 4)
 })
 
+test_that("can reconstruct a PCA and recover X", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  pres <- pca(mat1)
+  
+  recon <- reconstruct(pres)
+  expect_true(all.equal(recon, mat1))
+})
+
+test_that("can compute pca residuals", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  pres <- pca(mat1, ncomp=2)
+  
+  recon <- residuals(pres, 2, mat1)
+  expect_true(all.equal(dim(recon), dim(mat1)))
+})
+
+
+test_that("can truncate a pca", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  pres <- pca(mat1, ncomp=4)
+  pres2 <- truncate(pres, 2)
+
+  expect_true(ncomp(pres2) == 2)
+})
 

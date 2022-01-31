@@ -27,6 +27,8 @@ svd_wrapper(
 \item{p}{parameter passed to method \code{rsvd}}
 
 \item{tol}{minimum eigenvalue magnitude, otherwise component is dropped}
+
+\item{...}{extra args pased to selected svd function}
 }
 \value{
 

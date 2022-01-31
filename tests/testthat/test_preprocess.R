@@ -119,6 +119,12 @@ test_that("can concatenate two pre-processors", {
   proc$transform(mat1, colind=1:15)
   proc$transform(mat2, colind=16:30)
   
+  proj <- multiblock_projector(pres$v, proc, block_indices=list(1:15, 16:30))
+  p1 <- project_block(proj, m1, 1)
+  p2 <- project_block(proj, m2, 2)
+  
+  expect_true(!is.null(p1))
+  expect_true(!is.null(p2))
   
 })
 
