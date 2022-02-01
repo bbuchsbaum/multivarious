@@ -179,8 +179,19 @@ project.classifier <- function(x, new_data, ...) {
 predict.classifier <- function(object, new_data, ncomp=NULL,
                                colind=NULL, metric=c("cosine", "euclidean"), ...) {
 
+  if (is.null(colind)) {
+    colind <- object$colind
+  } else {
+    ### colind overrides object$colind, should emit warning?
+  }
+  
   if (is.vector(new_data)) {
-    chk::chk_equal(length(new_data), shape(object$projector)[1])
+    if (is.null(colind)) {
+      chk::chk_equal(length(new_data), shape(object$projector)[1])
+    } else {
+      chk::chk_equal(length(new_data), length(colind))
+    }
+    
     new_data <- matrix(new_data, nrow=1)
   }
   
@@ -192,18 +203,14 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   
   metric <- match.arg(metric)
   
-
   if (!is.null(colind)) {
-    ### colind overrides object$colind, should emit warning?
     if (length(colind) == 1 && is.vector(new_data)) {
       new_data <- as.matrix(new_data)
     }
+    
     chk::chk_equal(length(colind), ncol(new_data))
     proj <- partial_project(object$projector, new_data, colind, ...)
     
-  } else if (!is.null(object$colind)) {
-    chk::chk_equal(length(object$colind), ncol(new_data))
-    proj <- partial_project(object$projector, new_data, object$colind, ...)
   } else {
     proj <- project(object$projector, new_data,...)
   }

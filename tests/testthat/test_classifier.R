@@ -21,4 +21,18 @@ test_that("can construct a pca classifier with colind", {
   p <- predict(cl, mat1[,1:5])
   expect_true(ncol(p$prob) == 4)
   expect_true(nrow(p$prob) == 10)
+  
+  p2 <- predict(cl, mat1[1,1:5])
+  expect_true(ncol(p2$prob) == 4)
+  expect_true(nrow(p2$prob) == 1)
+  
+  p2 <- predict(cl, mat1[1,1:5], colind=1:5, metric="euclidean")
+  expect_true(ncol(p2$prob) == 4)
+  expect_true(nrow(p2$prob) == 1)
+  
+  p2 <- project(cl, mat1[1,1:5])
+  expect_true(ncol(p2) == ncomp(pres))
+  
+  
+  
 })

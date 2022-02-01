@@ -123,20 +123,20 @@ perm_cdf <- function(vals, distr="norm") {
   
 }
 
-jackstraw.pca <- function(x, X, prop=.1, n=100) {
-  vars <- round(max(1, prop*ncol(X)))
-  Xp <- x$preproc$transform(X)
-  res <- do.call(cbind, lapply(1:n, function(i) {
-    vi <- sample(1:ncol(Xp), vars)
-    ##vi <- 1
-    Xperm <- Xp
-    Xperm[,vi] <- do.call(cbind, lapply(vi, function(i) sample(Xperm[,i])))
-    #pp <- fresh(x$preproc$preproc)
-    fit <- pca(Xperm, ncomp=Q, preproc=pass())
-    fit$v[,vi,drop=FALSE]
-    #cor(Xperm[,vi], fit$s)
-  }))
-  
-}
+# jackstraw.pca <- function(x, X, prop=.1, n=100) {
+#   vars <- round(max(1, prop*ncol(X)))
+#   Xp <- x$preproc$transform(X)
+#   res <- do.call(cbind, lapply(1:n, function(i) {
+#     vi <- sample(1:ncol(Xp), vars)
+#     ##vi <- 1
+#     Xperm <- Xp
+#     Xperm[,vi] <- do.call(cbind, lapply(vi, function(i) sample(Xperm[,i])))
+#     #pp <- fresh(x$preproc$preproc)
+#     fit <- pca(Xperm, ncomp=Q, preproc=pass())
+#     fit$v[,vi,drop=FALSE]
+#     #cor(Xperm[,vi], fit$s)
+#   }))
+#   
+# }
 
 
