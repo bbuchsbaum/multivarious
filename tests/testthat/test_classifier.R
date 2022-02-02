@@ -33,6 +33,24 @@ test_that("can construct a pca classifier with colind", {
   p2 <- project(cl, mat1[1,1:5])
   expect_true(ncol(p2) == ncomp(pres))
   
-  
-  
 })
+
+test_that("can split a matrix", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  Y <- rep(letters[1:3], length.out=nrow(mat1))
+  sm <- split_matrix(mat1,Y)
+  expect_equal(3, length(sm))
+})
+
+test_that("can compute group means of rows of matrix", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  Y <- rep(letters[1:3], length.out=nrow(mat1))
+  gm <- group_means(Y, mat1)
+  expect_equal(nrow(gm), 3)
+  
+  Y <- letters[1:nrow(mat1)]
+  gm <- group_means(Y, mat1)
+  expect_equal(nrow(gm), length(Y))
+})
+
+

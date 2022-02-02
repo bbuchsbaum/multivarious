@@ -50,3 +50,10 @@ test_that("can truncate a pca", {
   expect_true(ncomp(pres2) == 2)
 })
 
+test_that("can compute permutation confidence intervals", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  pres <- pca(mat1, ncomp=4)
+  pci <- perm_ci(pres, mat1, 100)
+  expect_true(!is.null(pci))
+})
+
