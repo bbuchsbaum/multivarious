@@ -59,7 +59,9 @@ test_that("can compute principle angles of a set of pca fits", {
     m <- matrix(rnorm(10*15), 10, 15)
     pca(m, ncomp=10)
   })
-  prinang()
+  
+  pa <- prinang(fits)
+  expect_true(length(pa) == 10)
   
 })
 
