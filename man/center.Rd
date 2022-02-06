@@ -8,6 +8,8 @@ center(preproc = prepper(), cmeans = NULL)
 }
 \arguments{
 \item{preproc}{the pre-processing pipeline}
+
+\item{cmeans}{optional vector of precomputed column means}
 }
 \description{
 remove mean of all columns in matrix

@@ -8,6 +8,8 @@ transpose(x, ...)
 }
 \arguments{
 \item{x}{the model fit}
+
+\item{...}{extra args}
 }
 \description{
 transpose a model by switching coefficients and scores

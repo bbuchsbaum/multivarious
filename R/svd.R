@@ -2,6 +2,7 @@
 #' 
 #' @param X the \code{matrix}
 #' @param ncomp number of components to estimate
+#' @param preproc the pre-processor (e.g. `center()`, `standardize()`, `pass()`)
 #' @param method the svd method to use. One of: 'base', 'fast', 'irlba', 'propack', 'rsvd', 'svds'
 #' @param q parameter passed to method `rsvd`
 #' @param p parameter passed to method `rsvd`
@@ -14,7 +15,7 @@
 #' @importFrom corpcor fast.svd
 #' @importFrom svd propack.svd
 #' 
-#' @return 
+#' @return an `svd` object that extends `projector`
 #' 
 #' @examples 
 #' 
@@ -24,7 +25,7 @@
 #' fit <- svd_wrapper(X, ncomp=3, preproc=center(), method="base")
 #' 
 #' 
-#' an `svd` object that extends `projector`
+#' 
 svd_wrapper <- function(X, ncomp=min(dim(X)), 
                         preproc=pass(),
                         method=c("fast", "base", "irlba", 
@@ -43,7 +44,7 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
   
   res <- switch(method,
                 base=svd(X,...),
-                fast=corpcor:::fast.svd(X, tol),
+                fast=corpcor::fast.svd(X, tol),
                 rsvd=rsvd::rsvd(X, k=ncomp, q=q, p=p, ...),
                 svds=RSpectra::svds(X,k=ncomp),
                 propack=svd::propack.svd(X, neig=ncomp,...),
@@ -70,7 +71,7 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
 }
 
 #' @export
-std_scores.svd <- function(x) {
+std_scores.svd <- function(x,...) {
   sqrt(nrow(x$u)-1) * x$u 
 }
 

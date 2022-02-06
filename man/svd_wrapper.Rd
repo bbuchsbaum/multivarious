@@ -20,6 +20,8 @@ svd_wrapper(
 
 \item{ncomp}{number of components to estimate}
 
+\item{preproc}{the pre-processor (e.g. \code{center()}, \code{standardize()}, \code{pass()})}
+
 \item{method}{the svd method to use. One of: 'base', 'fast', 'irlba', 'propack', 'rsvd', 'svds'}
 
 \item{q}{parameter passed to method \code{rsvd}}
@@ -31,7 +33,7 @@ svd_wrapper(
 \item{...}{extra args pased to selected svd function}
 }
 \value{
-
+an \code{svd} object that extends \code{projector}
 }
 \description{
 svd_wrapper
@@ -44,5 +46,5 @@ X <- iris[,1:4]
 fit <- svd_wrapper(X, ncomp=3, preproc=center(), method="base")
 
 
-an `svd` object that extends `projector`
+
 }

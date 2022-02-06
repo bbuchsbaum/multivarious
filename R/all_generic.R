@@ -52,6 +52,7 @@ project_vars <- function(x, new_data, ...) UseMethod("project_vars")
 #' transpose a model by switching coefficients and scores
 #' 
 #' @param x the model fit
+#' @param ... extra args
 #' @export
 transpose <- function(x,...) UseMethod("transpose")
 
@@ -64,6 +65,8 @@ transpose <- function(x,...) UseMethod("transpose")
 #' 
 #' @param x the model fit
 #' @param comp a vector of component indices to use in the reconstruction.
+#' @param rowind the row indices to reconstruct
+#' @param colind the column indices to reconstruct
 #' @param ... extra args
 #' @export
 reconstruct <- function(x, comp, rowind, colind, ...) UseMethod("reconstruct")
@@ -80,9 +83,11 @@ reconstruct <- function(x, comp, rowind, colind, ...) UseMethod("reconstruct")
 #' @param i the index of the source data block
 #' @param j the index of the destination data block
 #' @param comp a vector of component indices to use in the reconstruction.
+#' @param rowind optional set of row indices
+#' @param colind optional set of column indices
 #' @param ... extra args
 #' @export
-transfer <- function(x, comp, rowind, colind, ...) UseMethod("transfer")
+transfer <- function(x, new_data, i, j, comp, rowind, colind, ...) UseMethod("transfer")
 
 
 
@@ -116,7 +121,7 @@ scores <- function(x,...) UseMethod("scores")
 #' compute standardized scores
 #' 
 #' 
-#' @param the model fit
+#' @param x the model fit
 #' @param ... extra args
 #' @export 
 std_scores <- function(x, ...) UseMethod("std_scores")
@@ -164,15 +169,18 @@ inverse_projection <- function(x, ...) UseMethod("inverse_projection")
 #' 
 #' 
 #' @param x the model fit
+#' @param colind the column indices
 #' @param ... extra args
 #' @export
 partial_inverse_projection <- function(x, colind, ...) UseMethod("partial_inverse_projection")
 
 
 #' compose two projectors
-#' 
+#'
 #' @param x the first projector
 #' @param y the second projector
+#' @param ... extra args
+#' @export
 compose_projector <- function(x,y,...) UseMethod("compose_projector")
 
 
@@ -210,6 +218,7 @@ prep <- function(x, ...) UseMethod("prep")
 #' @param x the model fit object
 #' @param new_data the new data to process
 #' @param colind the column indices of the new data
+#' @param ... extra args
 #' @export
 reprocess <- function(x, new_data, colind, ...) UseMethod("reprocess")
 
@@ -247,7 +256,7 @@ sdev <- function(x) UseMethod("sdev")
 #' 
 #' test whether components are orthogonal
 #' 
-#' @param the object
+#' @param x the object
 is_orthogonal <- function(x) UseMethod("is_orthogonal")
 
 
@@ -299,14 +308,20 @@ init_transform <- function(x, X, ...) UseMethod("init_transform")
 
 
 
-
+#' apply a pre-processing transform
+#' 
 #' @inheritParams init_transform
+#' @param colind column indices
+#' @param ... extra args
 #' @export
 apply_transform <- function(x, X, colind, ...) UseMethod("apply_transform")
 
 
-
+#' reverse a pre-processing transform
+#' 
 #' @inheritParams init_transform
+#' @param colind column indices
+#' @param ... extra args
 #' @export
 reverse_transform <- function(x, X, colind, ...) UseMethod("reverse_transform")
 
@@ -332,6 +347,13 @@ bootstrap <- function(x, nboot, ...) UseMethod("bootstrap")
 classifier <- function(x, colind, ...) UseMethod("classifier")
 
 
+#' permutation confidence intervals
+#' 
+#' @param x the model fit
+#' @param X the original data matrix
+#' @param nperm the number of permutations
+#' @param ... extra args
+#' @export
 perm_ci <- function(x, X, nperm, ...) UseMethod("perm_ci")
 
 

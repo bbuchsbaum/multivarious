@@ -7,7 +7,7 @@
 is_orthogonal(x)
 }
 \arguments{
-\item{the}{object}
+\item{x}{the object}
 }
 \description{
 test whether components are orthogonal

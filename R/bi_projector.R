@@ -29,7 +29,7 @@ bi_projector <- function(v, s, sdev, preproc=prep(pass()), classes=NULL, ...) {
 
 
 #' @export
-scores.bi_projector <- function(x) {
+scores.bi_projector <- function(x,...) {
   x$s
 }
 
@@ -39,7 +39,7 @@ sdev.bi_projector <- function(x) {
 }
 
 #' @export
-project_vars.bi_projector <- function(x, new_data) {
+project_vars.bi_projector <- function(x, new_data,...) {
   if (is.vector(new_data)) {
     new_data <- matrix(new_data)
   }
@@ -60,7 +60,7 @@ genreconstruct <- function(x, comp, rowind, colind) {
 
 #' @export
 reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)), 
-                                     colind=1:nrow(coefficients(x))) {
+                                     colind=1:nrow(coefficients(x)), ...) {
   chk::chk_numeric(comp)
   chk::chk_true(max(comp) <= ncomp(x))
   chk::chk_numeric(rowind)
@@ -72,7 +72,7 @@ reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)
 }
 
 #' @export
-residuals.bi_projector <- function(x, ncomp=ncomp(x), xorig) {
+residuals.bi_projector <- function(x, ncomp=ncomp(x), xorig,...) {
   recon <- reconstruct(x, comp=1:ncomp)
   xorig - recon
 }
@@ -86,13 +86,13 @@ residuals.bi_projector <- function(x, ncomp=ncomp(x), xorig) {
 ## XT = VTDTU
 
 #' @export
-print.projector <- function(x) {
+print.projector <- function(x,...) {
   cat("bi-projector: ", paste0(class(x)), "\n")
   
-  cat("input dim: ", nrow(coef(x)), "\n")
-  cat("output dim: ", ncol(coef(x)), "\n")
+  cat("input dim: ", nrow(components(x)), "\n")
+  cat("output dim: ", ncol(components(x)), "\n")
   
   cat("dual input dim: ", ncol(scores(x)), "\n")
-  cat("dual output dim: ", nrow(coef(x)), "\n")
+  cat("dual output dim: ", nrow(components(x)), "\n")
 }
 

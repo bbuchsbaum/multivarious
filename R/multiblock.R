@@ -1,4 +1,11 @@
 
+
+#' construct a multiblock project
+#' 
+#' @inheritParams projector
+#' 
+#' @param block_indices the list of indices indices of the data blocks
+#' 
 #' @export
 multiblock_projector <- function(v, preproc=prep(pass()), ..., block_indices, classes=NULL) {
   chk::chk_list(block_indices)
@@ -8,6 +15,12 @@ multiblock_projector <- function(v, preproc=prep(pass()), ..., block_indices, cl
   projector(v, preproc, block_indices=block_indices, ..., classes=c(classes, "multiblock_projector"))
 }
 
+
+#' construct a multiblock bi_projector
+#' 
+#' @inheritParams bi_projector
+#' 
+#' @param block_indices the list of indices indices of the data blocks
 #' @export
 multiblock_biprojector <- function(v, s, sdev, preproc=prep(pass()), ..., block_indices, classes=NULL) {
   sumind <- sum(sapply(block_indices, length))
@@ -16,7 +29,7 @@ multiblock_biprojector <- function(v, s, sdev, preproc=prep(pass()), ..., block_
 }
 
 #' @export
-block_indices.multiblock_projector <- function(x,i) {
+block_indices.multiblock_projector <- function(x,i,...) {
   x$block_indices
 }
 
@@ -31,13 +44,13 @@ nblocks.multiblock_projector <- function(x) {
 }
 
 #' @export
-project_block.multiblock_projector <- function(x, new_data, block) {
+project_block.multiblock_projector <- function(x, new_data, block,...) {
   ind <- block_indices(x)[[block]]
   partial_project(x, new_data, colind=ind )
 }
 
 #' @export
-coef.multiblock_projector <- function(object, block) {
+coef.multiblock_projector <- function(object, block,...) {
   if (missing(block)) {
     NextMethod(object)
   } else {
@@ -47,7 +60,7 @@ coef.multiblock_projector <- function(object, block) {
 }
 
 #' @export
-print.multiblock_projector <- function(x) {
+print.multiblock_projector <- function(x,...) {
   NextMethod(x)
   cat("number of blocks: ", length(x$block_indices))
 }

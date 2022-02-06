@@ -45,7 +45,7 @@ test_that("can compose two projectors", {
   s <- svd(mat1)
   proj1 <- projector(s$v)
   proj2 <- projector(s$v[1:10,1:3])
-  proj3 <- compose_projector(proj1,proj2)
+  proj3 <- compose_projectors(proj1,proj2)
 })
 
 

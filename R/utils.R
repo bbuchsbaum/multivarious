@@ -46,6 +46,7 @@ group_means <- function (Y, X) {
 #' @return a numeric vector of principle angles with length equal to minimum dimension of input subspaces
 #' 
 #' @export
+#' @importFrom chk chk_s3_class chk_all
 prinang <- function(fits) {
   chk::chk_all(fits, chk_fun = chk_s3_class, "bi_projector")
   

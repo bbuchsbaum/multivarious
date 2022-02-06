@@ -1,5 +1,8 @@
 
 #' @export
+#' 
+#' @param k the number of components to boootstrap
+#' 
 #' @return A `list` containing bootstrap z-scores for the loadings (`zboot_loadings`) and scores (`zboot_scores`)
 #' @examples 
 #' 
@@ -10,7 +13,7 @@
 #' @references Fisher, Aaron, Brian Caffo, Brian Schwartz, and Vadim Zipunnikov. 2016. 
 #' “Fast, Exact Bootstrap Principal Component Analysis for P > 1 Million.” \emph{Journal of the American Statistical Association} 111 (514): 846–60.
 #' @rdname bootstrap
-bootstrap.pca <- function(x, nboot=100, k=ncomp(x)) {
+bootstrap.pca <- function(x, nboot=100, k=ncomp(x),...) {
   DUt <- t(scores(x))
   n <- dim(DUt)[2]
   
@@ -84,7 +87,7 @@ boot_sum <- function(res,k, v) {
   
   ## sd of scores
   sdScores <- lapply(ScoresByK, function(s) {
-    apply(s, 2, sd, na.rm=TRUE)
+    apply(s, 2, stats::sd, na.rm=TRUE)
   })
   
   
@@ -96,7 +99,7 @@ boot_sum <- function(res,k, v) {
   
   
   ## k nXn covariance matrices
-  varAs <- lapply(AsByK,var) #indexed by k
+  varAs <- lapply(AsByK,stats::var) #indexed by k
   
   varVs <- lapply(1:length(AsByK), function(ki) {
     rowSums((v %*% varAs[[ki]]) * v)

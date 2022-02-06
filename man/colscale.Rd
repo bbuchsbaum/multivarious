@@ -6,6 +6,13 @@
 \usage{
 colscale(preproc = prepper(), type = c("unit", "z", "weights"), weights = NULL)
 }
+\arguments{
+\item{preproc}{the pre-processing pipeline}
+
+\item{type}{the kind of scaling, \code{unit} norm, \code{z}-scoring, or precomputed \code{weights}}
+
+\item{weights}{optional precomputed weights}
+}
 \description{
 normalize each column by a scale factor.
 }

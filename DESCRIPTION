@@ -8,8 +8,7 @@ Authors@R:
            email = "brad.buchsbaumt@gmail.com",
            comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to
-    pick a license
+License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -19,7 +18,18 @@ Imports:
     chk,
     glmnet,
     corpcor,
-    deflist (>= 0.1.0)
+    Matrix,
+    purrr,
+    deflist (>= 0.1.0),
+    rsvd,
+    svd,
+    pls,
+    irlba,
+    RSpectra,
+    proxy,
+    matrixStats,
+    fitdistrplus
 Suggests: 
     covr,
-    testthat
+    testthat,
+    magrittr

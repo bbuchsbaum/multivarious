@@ -1,5 +1,6 @@
 #' @export
-classifier.multiblock_biprojector <- function(x, labels, new_data=NULL, colind=NULL, block=NULL, knn=1) {
+classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=NULL, 
+                                              block=NULL, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
     chk::chk_true(all(colind>0))
@@ -27,7 +28,7 @@ classifier.multiblock_biprojector <- function(x, labels, new_data=NULL, colind=N
 
 
 #' @export
-classifier.multiblock_projector <- function(x, labels, new_data, colind=NULL, block=NULL, knn=1) {
+classifier.multiblock_projector <- function(x, colind=NULL, labels, new_data, block=NULL, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
     chk::chk_true(all(colind>0))
@@ -50,7 +51,7 @@ classifier.multiblock_projector <- function(x, labels, new_data, colind=NULL, bl
 
 
 #' @export
-classifier.discriminant_projector <- function(x, colind=NULL, knn=1) {
+classifier.discriminant_projector <- function(x, colind=NULL, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
     chk::chk_true(all(colind>0))
@@ -59,8 +60,16 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1) {
   new_classifier(x, x$labels, scores(x), colind=colind, knn=knn)
 }
 
+
+#' constrcut a new classifier
+#' 
 #' @keywords internal
-#' @export
+#' @param x the model fit
+#' @param labels the class labels
+#' @param colind the column indices
+#' @param knn the number of nearest neighbors for prediction
+#' @param classes addiitonal s3 classes 
+#' @param ... extra args
 new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, ...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
@@ -95,8 +104,9 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 #' data(iris)
 #' X <- iris[,1:4]
 #' pcres <- pca(as.matrix(X),2)
-#' cfier <- classifier(pcres, iris[,5], new_data=iris[,1:4])
-classifier.projector <- function(x, labels, new_data, colind=NULL, knn=1) {
+#' cfier <- classifier(pcres, labels=iris[,5], new_data=as.matrix(iris[,1:4]))
+#' p <- predict(cfier, as.matrix(iris[,1:4]))
+classifier.projector <- function(x, colind=NULL, labels, new_data, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
     chk::chk_true(all(colind>0))
@@ -171,10 +181,18 @@ project.classifier <- function(x, new_data, ...) {
   scores
 }
 
+
+
+#' predict with a classifier object
+#' 
+#' @param object the model fit
+#' @param new_data new data to predict on
 #' @param ncomp the number of components to use
 #' @param colind the column indices to select in the projection matrix
 #' @param metric the similarity metric ("euclidean" or "cosine")
-#' @param additional arguments to projection function
+#' @param ... additional arguments to projection function
+#' 
+#' @importFrom stats predict
 #' @export
 predict.classifier <- function(object, new_data, ncomp=NULL,
                                colind=NULL, metric=c("cosine", "euclidean"), ...) {

@@ -25,11 +25,15 @@ regress(
 
 \item{method}{the regression method: \code{linear} or \code{enet} \code{mridge}, or \code{pls}}
 
+\item{intercept}{whether to include an intercept term}
+
 \item{lambda}{ridge shrinkage parameter}
 
 \item{alpha}{the elastic net mixing parameter if method is \code{enet}}
 
 \item{ncomp}{number of pls components}
+
+\item{...}{extra args sent to underlying fitting function}
 }
 \value{
 an \code{bi-projector} of type \code{regress}
@@ -46,6 +50,6 @@ r <- regress(X,Y, intercept=FALSE)
 recon <- reconstruct(r)
 r <- regress(X,Y, intercept=TRUE)
 recon <- reconstruct(r)
-r <- regress(X,Y, intercept=TRUE, method="ridge")
+r <- regress(X,Y, intercept=TRUE, method="mridge")
 recon <- reconstruct(r)
 }

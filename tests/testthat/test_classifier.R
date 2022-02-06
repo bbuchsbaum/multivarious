@@ -53,4 +53,14 @@ test_that("can compute group means of rows of matrix", {
   expect_equal(nrow(gm), length(Y))
 })
 
+test_that("can compute principle angles of a set of pca fits", {
+  
+  fits <- lapply(1:4, function(i) {
+    m <- matrix(rnorm(10*15), 10, 15)
+    pca(m, ncomp=10)
+  })
+  prinang()
+  
+})
+
 

@@ -11,6 +11,10 @@ reconstruct(x, comp, rowind, colind, ...)
 
 \item{comp}{a vector of component indices to use in the reconstruction.}
 
+\item{rowind}{the row indices to reconstruct}
+
+\item{colind}{the column indices to reconstruct}
+
 \item{...}{extra args}
 }
 \description{

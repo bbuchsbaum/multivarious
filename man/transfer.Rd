@@ -4,20 +4,24 @@
 \alias{transfer}
 \title{transfer data from one input domain to another via c ommon latent space}
 \usage{
-transfer(x, comp, rowind, colind, ...)
+transfer(x, new_data, i, j, comp, rowind, colind, ...)
 }
 \arguments{
 \item{x}{the model fit}
-
-\item{comp}{a vector of component indices to use in the reconstruction.}
-
-\item{...}{extra args}
 
 \item{new_data}{the data to transfer}
 
 \item{i}{the index of the source data block}
 
 \item{j}{the index of the destination data block}
+
+\item{comp}{a vector of component indices to use in the reconstruction.}
+
+\item{rowind}{optional set of row indices}
+
+\item{colind}{optional set of column indices}
+
+\item{...}{extra args}
 }
 \description{
 Convert between data representations in a multiblock decomposition/alignment

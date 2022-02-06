@@ -6,7 +6,7 @@
 #' @param ncomp the number of requested components to estimate
 #' @param preproc the pre_processor
 #' @param method th svd method (passed to `svd_wrapper`)
-#' @param extra arguments
+#' @param ... extra arguments to send to `svd_wrapper`
 #' @export
 #' 
 #' @examples 
@@ -15,7 +15,8 @@
 #' X <- as.matrix(iris[,1:4])
 #' res <- pca(X, ncomp=4)
 #' tres <- truncate(res, 3)
-pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("fast", "base", "irlba", "propack", "rsvd", "svds"), ...) {
+pca <- function(X, ncomp=min(dim(X)), preproc=center(), 
+                method = c("fast", "base", "irlba", "propack", "rsvd", "svds"), ...) {
   chk::chkor(chk::chk_matrix(X), chk::chk_s4_class("Matrix"))
   
   method <- match.arg(method)
@@ -32,6 +33,7 @@ pca <- function(X, ncomp=min(dim(X)), preproc=center(), method = c("fast", "base
 }
 
 #' @export
+#' @importFrom chk chk_range
 truncate.pca <- function(x, ncomp) {
   chk::chk_range(ncomp, c(1, ncomp(x)))
   x$v <- x$v[,1:ncomp, drop=FALSE]
@@ -42,7 +44,7 @@ truncate.pca <- function(x, ncomp) {
 }
 
 #' @export
-perm_ci.pca <- function(x, X, nperm=100, k=4) {
+perm_ci.pca <- function(x, X, nperm=100, k=4,...) {
   Q <- ncomp(x)
   k <- min(Q-1,k)
   
@@ -93,10 +95,10 @@ perm_ci.pca <- function(x, X, nperm=100, k=4) {
     vals <- Fq[,i]
     fit <- fitdistrplus::fitdist(vals, distr="gamma")
     f <- function(x) {
-      1-pgamma(x,fit$estimate[[1]],fit$estimate[[2]])
+      1-stats::pgamma(x,fit$estimate[[1]],fit$estimate[[2]])
     }
-    ci <- c(qgamma(.025, fit$estimate[[1]],fit$estimate[[2]]),
-            qgamma(.975, fit$estimate[[1]],fit$estimate[[2]]))
+    ci <- c(stats::qgamma(.025, fit$estimate[[1]],fit$estimate[[2]]),
+            stats::qgamma(.975, fit$estimate[[1]],fit$estimate[[2]]))
     
     pval <- f(Fa[1])
     

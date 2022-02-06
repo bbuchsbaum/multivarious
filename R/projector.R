@@ -35,13 +35,13 @@ projector <- function(v, preproc=prep(pass()), ..., classes=NULL) {
 }
 
 #' @export
-components.projector <- function(x) {
+components.projector <- function(x,...) {
   x$v
 }
 
 
 #' @export
-coef.projector <- function(object) {
+coef.projector <- function(object,...) {
   object$v
 }
 
@@ -52,7 +52,7 @@ ncomp.projector <- function(x) {
 
 #' @export
 #' @importFrom stats coefficients
-project.projector <- function(x, new_data) {
+project.projector <- function(x, new_data,...) {
   if (is.vector(new_data)) {
     chk::chk_equal(length(new_data), shape(x)[1])
     new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
@@ -64,7 +64,7 @@ project.projector <- function(x, new_data) {
 }
 
 #' @export
-partial_project.projector <- function(x, new_data, colind) {
+partial_project.projector <- function(x, new_data, colind,...) {
   if (is.vector(new_data) && length(colind) > 1) {
     new_data <- matrix(new_data, byrow=TRUE, ncol=length(new_data))
   } else if (is.vector(new_data) && length(colind) == 1) {
@@ -73,7 +73,7 @@ partial_project.projector <- function(x, new_data, colind) {
   
   chk::vld_matrix(new_data)
   chk::check_dim(new_data, ncol, length(colind))
-  comp <- coef(x)
+  comp <- components(x)
   
   #reprocess(x,new_data, colind) %*% comp[colind,] * sqrt(ncol(comp)/length(colind))
   reprocess(x,new_data, colind) %*% comp[colind,] * nrow(comp)/length(colind)
@@ -99,13 +99,13 @@ is_orthogonal.projector <- function(x) {
 # }
 
 #' @export
-inverse_projection.projector <- function(x) {
+inverse_projection.projector <- function(x,...) {
   ## assume orthogonal
   t(coefficients(x))
 }
 
 #' @export
-partial_inverse_projection.projector <- function(x, colind) {
+partial_inverse_projection.projector <- function(x, colind,...) {
   chk::chk_range(max(colind), c(1, nrow(coefficients(x))))
   chk::chk_range(min(colind), c(1, nrow(coefficients(x))))
   cx <- coefficients(x)
@@ -119,7 +119,7 @@ truncate.projector <- function(x, ncomp) {
 }
 
 #' @export
-reprocess.projector <- function(x, new_data, colind=NULL) {
+reprocess.projector <- function(x, new_data, colind=NULL,...) {
   if (is.null(colind)) {
     chk::chk_equal(ncol(new_data), nrow(coefficients(x)))
     apply_transform(x$preproc, new_data)
@@ -131,13 +131,13 @@ reprocess.projector <- function(x, new_data, colind=NULL) {
 }
 
 #' @export
-shape.projector <- function(x) {
+shape.projector <- function(x,...) {
   c(nrow(x$v), ncol(x$v))
 }
 
 
 #' @export
-print.projector <- function(x) {
+print.projector <- function(x,...) {
   cat("projector: ", paste0(class(x)), "\n")
   cat("input dim: ", shape(x)[1], "\n")
   cat("output dim: ", shape(x)[2], "\n")

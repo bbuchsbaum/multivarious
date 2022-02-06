@@ -4,12 +4,14 @@
 \alias{compose_projector}
 \title{compose two projectors}
 \usage{
-compose_projector(...)
+compose_projector(x, y, ...)
 }
 \arguments{
 \item{x}{the first projector}
 
 \item{y}{the second projector}
+
+\item{...}{extra args}
 }
 \description{
 compose two projectors

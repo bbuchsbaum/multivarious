@@ -7,7 +7,7 @@
 \usage{
 classifier(x, colind, ...)
 
-\method{classifier}{projector}(x, labels, new_data, colind = NULL, knn = 1)
+\method{classifier}{projector}(x, colind = NULL, labels, new_data, knn = 1, ...)
 }
 \arguments{
 \item{x}{the model object}
@@ -29,5 +29,6 @@ Given a model object (e.g. \code{projector} construct a classifier that can gene
 data(iris)
 X <- iris[,1:4]
 pcres <- pca(as.matrix(X),2)
-cfier <- classifier(pcres, iris[,5], new_data=iris[,1:4])
+cfier <- classifier(pcres, labels=iris[,5], new_data=as.matrix(iris[,1:4]))
+p <- predict(cfier, as.matrix(iris[,1:4]))
 }

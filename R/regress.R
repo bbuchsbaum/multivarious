@@ -9,12 +9,16 @@
 #' @param Y the response matrix
 #' @param preproc the pre-processor
 #' @param method the regression method: `linear` or `enet` `mridge`, or `pls`
+#' @param intercept whether to include an intercept term
 #' @param lambda ridge shrinkage parameter
 #' @param alpha the elastic net mixing parameter if method is `enet`
 #' @param ncomp number of pls components
+#' @param ... extra args sent to underlying fitting function
 #' @export
 #' @importFrom glmnet glmnet
+#' @importFrom Matrix t
 #' @importFrom pls plsr
+#' @importFrom stats coef
 #' @return 
 #' 
 #' an `bi-projector` of type `regress`
@@ -27,7 +31,7 @@
 #' recon <- reconstruct(r)
 #' r <- regress(X,Y, intercept=TRUE)
 #' recon <- reconstruct(r)
-#' r <- regress(X,Y, intercept=TRUE, method="ridge")
+#' r <- regress(X,Y, intercept=TRUE, method="mridge")
 #' recon <- reconstruct(r)
 regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"), 
                     intercept=FALSE, lambda=.001, alpha=0, ncomp=ceiling(ncol(X)/2), ...) {
@@ -51,23 +55,22 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"),
   }
   
   betas <- if (method == "lm") {
-    lfit = lsfit(X, Y, intercept=intercept)
+    lfit = stats::lsfit(X, Y, intercept=intercept)
     as.matrix(t(coef(lfit)))
     
   } else if (method == "mridge") {
-    
     gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept, ...)
   
     if (!intercept) {
-      as.matrix(t(do.call(cbind, coef(gfit))))[,-1,drop=FALSE]
+      as.matrix(Matrix::t(do.call(cbind, stats::coef(gfit))))[,-1,drop=FALSE]
     } else {
-      as.matrix(t(do.call(cbind, coef(gfit))))
+      as.matrix(Matrix::t(do.call(cbind, stats::coef(gfit))))
     }
   } else if (method == "enet") {
     out <- do.call(rbind, lapply(1:ncol(Y), function(i) {
       gfit <- glmnet(X, Y[,i], alpha=alpha, family="gaussian", lambda=lambda, intercept=intercept, ...)
       #gfit <- glmnet(X, Y[,i], alpha=alpha, family="gaussian", lambda=lambda, intercept=intercept)
-      if (!intercept) coef(gfit)[-1,1] else coef(gfit)[,1]
+      if (!intercept) coef(gfit)[-1,1] else stats::coef(gfit)[,1]
     }))
   
     
@@ -75,7 +78,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"),
     
     dfl <- list(x=scores, y=Y)
     fit <- plsr(y ~ x, data=dfl, ncomp=ncomp,...)
-    as.matrix(t(coef(fit)[,,1]))
+    as.matrix(t(stats::coef(fit)[,,1]))
   }
   
   #print(dim(betas))
@@ -84,7 +87,7 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"),
   
   p <- bi_projector(v=t(corpcor::pseudoinverse(betas)), 
                     s=scores,
-                    sdev=apply(scores,2,sd),
+                    sdev=apply(scores,2,stats::sd),
                     coefficients=betas,
                     method=method,
                     classes="regress")
@@ -92,13 +95,13 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"),
 }
 
 #' @export
-inverse_projection.regress <- function(x) {
+inverse_projection.regress <- function(x,...) {
   t(x$coefficients)
 }
 
 
 #' @export
-project_vars.regress <- function(x, new_data) {
+project_vars.regress <- function(x, new_data,...) {
   if (is.vector(new_data)) {
     new_data <- matrix(new_data)
   }

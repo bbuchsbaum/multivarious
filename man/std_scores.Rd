@@ -7,9 +7,9 @@
 std_scores(x, ...)
 }
 \arguments{
-\item{...}{extra args}
+\item{x}{the model fit}
 
-\item{the}{model fit}
+\item{...}{extra args}
 }
 \description{
 compute standardized scores

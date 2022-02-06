@@ -9,6 +9,8 @@ partial_inverse_projection(x, colind, ...)
 \arguments{
 \item{x}{the model fit}
 
+\item{colind}{the column indices}
+
 \item{...}{extra args}
 }
 \description{

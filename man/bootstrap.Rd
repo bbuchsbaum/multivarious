@@ -7,7 +7,7 @@
 \usage{
 bootstrap(x, nboot, ...)
 
-\method{bootstrap}{pca}(x, nboot = 100, k = ncomp(x))
+\method{bootstrap}{pca}(x, nboot = 100, k = ncomp(x), ...)
 }
 \arguments{
 \item{x}{the model fit}
@@ -15,6 +15,8 @@ bootstrap(x, nboot, ...)
 \item{nboot}{the number of bootstrap resamples}
 
 \item{...}{extra args}
+
+\item{k}{the number of components to boootstrap}
 }
 \value{
 A \code{list} containing bootstrap z-scores for the loadings (\code{zboot_loadings}) and scores (\code{zboot_scores})

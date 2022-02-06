@@ -12,6 +12,8 @@ reprocess(x, new_data, colind, ...)
 \item{new_data}{the new data to process}
 
 \item{colind}{the column indices of the new data}
+
+\item{...}{extra args}
 }
 \description{
 Given a new dataset, process it in the same way the original data was processed (e.g. centering, scaling, etc.)

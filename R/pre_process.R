@@ -12,15 +12,15 @@ prepper <- function() {
 }
 
 #' @export
-add_node.prepper <- function(preproc, step) {
-  preproc$steps[[length(preproc$steps)+1]] <- step
-  preproc
+add_node.prepper <- function(x, step,...) {
+  x$steps[[length(x$steps)+1]] <- step
+  x
 }
 
 
 #' @importFrom purrr compose
 #' @export
-prep.prepper <- function(x) {
+prep.prepper <- function(x,...) {
   steps <- x$steps
   tinit <- function(X) {
     xin <- X
@@ -70,7 +70,7 @@ prep.prepper <- function(x) {
 }
 
 #' @export
-fresh.prepper <- function(x) {
+fresh.prepper <- function(x,...) {
   p <- prepper()
   for (step in x$steps) {
     p <- prep_node(p, step$name, step$create)
@@ -79,22 +79,22 @@ fresh.prepper <- function(x) {
 }
 
 #' @export
-init_transform.pre_processor <- function(x, X) {
+init_transform.pre_processor <- function(x, X,...) {
   x$init(X)
 }
 
 #' @export
-apply_transform.pre_processor <- function(x, X, colind=NULL) {
+apply_transform.pre_processor <- function(x, X, colind=NULL,...) {
   x$transform(X,colind)
 }
 
 #' @export
-reverse_transform.pre_processor <- function(x, X, colind=NULL) {
+reverse_transform.pre_processor <- function(x, X, colind=NULL,...) {
   x$reverse_transform(X, colind)
 }
 
 #' @export
-fresh.pre_processor <- function(x, preproc=prepper()) {
+fresh.pre_processor <- function(x, preproc=prepper(),...) {
   p <- x$create()
 }
 
@@ -169,9 +169,12 @@ pass <- function(preproc=prepper()) {
 #' 
 #' remove mean of all columns in matrix
 #' 
+#' @param cmeans optional vector of precomputed column means
+#' 
 #' @inheritParams pass
 #' @export
 #' @importFrom Matrix colMeans
+#' 
 center <- function(preproc = prepper(), cmeans=NULL) {
   create <- function() {
     #env = new.env()
@@ -225,6 +228,11 @@ center <- function(preproc = prepper(), cmeans=NULL) {
 #' 
 #' normalize each column by a scale factor.
 #' 
+#' @inheritParams pass
+#' 
+#' @param type the kind of scaling, `unit` norm, `z`-scoring, or precomputed `weights`
+#' @param weights optional precomputed weights
+#' 
 #' @export
 colscale <- function(preproc = prepper(),
                      type = c("unit", "z", "weights"),
@@ -253,7 +261,7 @@ colscale <- function(preproc = prepper(),
             sds <- sds * sqrt(nrow(X) - 1)
           }
           
-          sds[sds == 0] <- median(sds)
+          sds[sds == 0] <- stats::median(sds)
           1 / sds
         }
         env[["weights"]] <- wts
@@ -355,8 +363,8 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
 #' 
 #' @examples 
 #' 
-#' p1 <- center() %>% prep()
-#' p2 <- center() %>% prep()
+#' p1 <- center() |> prep()
+#' p2 <- center() |> prep()
 #' 
 #' x1 <- rbind(1:10, 2:11)
 #' x2 <- rbind(1:10, 2:11)
@@ -424,8 +432,8 @@ concat_pre_processors <- function(preprocs, block_indices) {
 
 
 #' @export
-print.prepper <- function(object) {
-  nn <- sapply(object$steps, function(x) x$name)
+print.prepper <- function(x,...) {
+  nn <- sapply(x$steps, function(x) x$name)
   cat("preprocessor: ", paste(nn, collapse="->"))
 }
 

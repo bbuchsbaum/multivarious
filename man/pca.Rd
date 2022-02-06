@@ -21,7 +21,7 @@ pca(
 
 \item{method}{th svd method (passed to \code{svd_wrapper})}
 
-\item{extra}{arguments}
+\item{...}{extra arguments to send to \code{svd_wrapper}}
 }
 \description{
 Compute the directions of maximal variance in a matrix via the singula value decomposition
