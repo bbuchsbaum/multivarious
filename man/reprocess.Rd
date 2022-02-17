@@ -2,12 +2,12 @@
 % Please edit documentation in R/all_generic.R, R/twoway_projector.R
 \name{reprocess}
 \alias{reprocess}
-\alias{reprocess.twoway_projector}
+\alias{reprocess.cross_projector}
 \title{apply pre-processing parameters to a new data matrix}
 \usage{
 reprocess(x, new_data, colind, ...)
 
-\method{reprocess}{twoway_projector}(x, new_data, colind = NULL, source = c("X", "Y"), ...)
+\method{reprocess}{cross_projector}(x, new_data, colind = NULL, source = c("X", "Y"), ...)
 }
 \arguments{
 \item{x}{the model fit object}

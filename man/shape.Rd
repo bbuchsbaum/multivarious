@@ -2,12 +2,12 @@
 % Please edit documentation in R/all_generic.R, R/twoway_projector.R
 \name{shape}
 \alias{shape}
-\alias{shape.twoway_projector}
+\alias{shape.cross_projector}
 \title{shape of the projector}
 \usage{
 shape(x, ...)
 
-\method{shape}{twoway_projector}(x, source = c("X", "Y"), ...)
+\method{shape}{cross_projector}(x, source = c("X", "Y"), ...)
 }
 \arguments{
 \item{x}{the model fit}

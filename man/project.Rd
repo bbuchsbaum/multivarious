@@ -2,12 +2,12 @@
 % Please edit documentation in R/all_generic.R, R/twoway_projector.R
 \name{project}
 \alias{project}
-\alias{project.twoway_projector}
+\alias{project.cross_projector}
 \title{new sample projection}
 \usage{
 project(x, new_data, ...)
 
-\method{project}{twoway_projector}(x, new_data, source = c("X", "Y"), ...)
+\method{project}{cross_projector}(x, new_data, source = c("X", "Y"), ...)
 }
 \arguments{
 \item{x}{the model fit}
