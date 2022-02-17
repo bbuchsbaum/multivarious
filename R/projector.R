@@ -50,6 +50,9 @@ ncomp.projector <- function(x) {
   ncol(coefficients(x))
 }
 
+
+
+
 #' @export
 #' @importFrom stats coefficients
 project.projector <- function(x, new_data,...) {
