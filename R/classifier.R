@@ -70,6 +70,15 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1,...) {
 #' @param knn the number of nearest neighbors for prediction
 #' @param classes addiitonal s3 classes 
 #' @param ... extra args
+#' 
+#' @examples 
+#' 
+#' X <- matrix(rnorm(10*10), 10,10)
+#' L <- letters[1:10]
+#' pc <- pca(X, ncomp=8)
+#' 
+#' cf <- new_classifier(pc, L, scores(pc), colind=2:7)
+#' predict(cf, X[,2:7], ncomp=3, metric="cosine")
 new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, ...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
@@ -91,6 +100,45 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 
 }
 
+#' create a random forest classifier
+#' 
+#' @export
+#' 
+#' @examples
+#' data(iris)
+#' X <- iris[,1:4]
+#' pcres <- pca(as.matrix(X),2)
+#' cfier <- rf_classifier(pcres, labels=iris[,5], scores=scores(pcres))
+#' p <- predict(cfier, as.matrix(iris[,1:4]))
+rf_classifier.projector <- function(x, labels, scores, colind=NULL, ...) {
+  if (!requireNamespace("randomForest", quietly = TRUE)) {
+    stop("Please install package 'randomForest' when using 'rf_classifier'")
+  }
+  
+  if (!is.null(colind)) {
+    chk::chk_true(length(colind) <= shape(x)[1])
+    chk::chk_true(all(colind>0))
+  }
+  
+  
+  chk::chk_equal(length(labels), nrow(scores))
+  
+  rfres <- randomForest(scores, labels, ...)
+  
+  
+  structure(
+    list(
+      projector=x,
+      rfres=rfres,
+      labels=labels,
+      scores=scores,
+      colind=colind,
+      ...),
+    class=c("rf_classifier", "classifier")
+  )
+  
+  
+}
 
 
 #' @param labels the labels associated with the rows of the projected data (see `new_data`)
@@ -106,6 +154,7 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 #' pcres <- pca(as.matrix(X),2)
 #' cfier <- classifier(pcres, labels=iris[,5], new_data=as.matrix(iris[,1:4]))
 #' p <- predict(cfier, as.matrix(iris[,1:4]))
+#' 
 classifier.projector <- function(x, colind=NULL, labels, new_data, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
@@ -182,21 +231,7 @@ project.classifier <- function(x, new_data, ...) {
 }
 
 
-
-#' predict with a classifier object
-#' 
-#' @param object the model fit
-#' @param new_data new data to predict on
-#' @param ncomp the number of components to use
-#' @param colind the column indices to select in the projection matrix
-#' @param metric the similarity metric ("euclidean" or "cosine")
-#' @param ... additional arguments to projection function
-#' 
-#' @importFrom stats predict
-#' @export
-predict.classifier <- function(object, new_data, ncomp=NULL,
-                               colind=NULL, metric=c("cosine", "euclidean"), ...) {
-
+prepare_predict <- function(object, colind, ncomp, new_data,...) {
   if (is.null(colind)) {
     colind <- object$colind
   } else {
@@ -219,7 +254,6 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     chk::chk_range(ncomp, c(1,shape(object$projector)[2]))
   }
   
-  metric <- match.arg(metric)
   
   if (!is.null(colind)) {
     if (length(colind) == 1 && is.vector(new_data)) {
@@ -233,6 +267,29 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     proj <- project(object$projector, new_data,...)
   }
   
+  list(proj=proj, new_data=new_data,colind=colind, ncomp=ncomp)
+}
+
+
+#' predict with a classifier object
+#' 
+#' @param object the model fit
+#' @param new_data new data to predict on
+#' @param ncomp the number of components to use
+#' @param colind the column indices to select in the projection matrix
+#' @param metric the similarity metric ("euclidean" or "cosine")
+#' @param ... additional arguments to projection function
+#' 
+#' @importFrom stats predict
+#' @export
+predict.classifier <- function(object, new_data, ncomp=NULL,
+                               colind=NULL, metric=c("cosine", "euclidean"), ...) {
+  
+  metric <- match.arg(metric)
+
+  prep <- prepare_predict(object, colind, ncomp, new_data,...) 
+  proj <- prep$proj
+  ncomp <- prep$ncomp
   
   doit <- function(p) {
     prob <- normalize_probs(p)
@@ -253,5 +310,21 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     #-D
   }
   
+}
+
+#' predict with a random forest classifier
+#' 
+#' @export
+predict.rf_classifier <- function(object, new_data, ncomp=NULL,
+                               colind=NULL, ...) {
+  
+  
+  prep <- prepare_predict(object, colind, ncomp, new_data,...) 
+  proj <- prep$proj
+  ncomp <- prep$ncomp
+  
+  cls <- predict(object$rfres, proj)
+  prob <- predict(object$rfres, proj, type="prob")
+  list(class=cls, prob=prob)
 }
 
