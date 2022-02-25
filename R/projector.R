@@ -83,6 +83,8 @@ partial_project.projector <- function(x, new_data, colind,...) {
 }
 
 
+
+
 #' @export
 is_orthogonal.projector <- function(x) {
   comp <- coefficients(x)
@@ -145,5 +147,55 @@ print.projector <- function(x,...) {
   cat("input dim: ", shape(x)[1], "\n")
   cat("output dim: ", shape(x)[2], "\n")
 }
+
+
+#' construct a partial_projector from a `projector` instance
+#' 
+#' @export
+#' @examples 
+#' 
+#' X <- matrix(rnorm(10*10), 10, 10)
+#' pfit <- pca(X, ncomp=9)
+#' proj <- project(pfit, X)
+#' 
+#' pp <- partial_projector(pfit, 1:5)
+partial_projector.projector <- function(x, colind, ...) {
+  projector(x$v[colind,], preproc=x$preproc, colind=colind, porig=x, classes="partial_projector")
+}
+
+#' @export
+reprocess.partial_projector <- function(x, new_data, colind=NULL,...) {
+  if (is.null(colind)) {
+    chk::chk_equal(ncol(new_data), nrow(coefficients(x)))
+    apply_transform(x$preproc, new_data, colind)
+  } else {
+    chk::chk_equal(length(colind), ncol(new_data)) 
+    apply_transform(x$preproc, new_data, x$colind[colind])
+  }
+  
+}
+
+#' @export
+#' @importFrom stats coefficients
+project.partial_projector <- function(x, new_data,...) {
+  partial_project(x$porig, new_data, x$colind, ...)
+}
+
+#' @export
+truncate.partial_projector <- function(x, ncomp) {
+  chk_range(ncomp, c(1, ncomp(x)))
+  
+  porig <- truncate(x,ncomp)
+  projector(porig$v, preproc=x$preproc, colind=x$colind, porig=x$x, 
+            classes="partial_projector")
+  
+}
+
+#' @export
+partial_project.partial_projector <- function(x, new_data, colind, ...) {
+  stop("not implemented")
+}
+
+
 
 

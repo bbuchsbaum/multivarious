@@ -18,6 +18,15 @@ project <- function(x, new_data, ...) UseMethod("project")
 #' @export
 partial_project <- function(x, new_data, colind) UseMethod("partial_project")
 
+#' construct a partial projector
+#' 
+#' Make a new projector instance restricted to a subset of input columns
+#' 
+#' @param x the original `projector` instance
+#' @param colind the column indices to select in the projection matrix
+#' @export
+partial_projector <- function(x, colind, ...) UseMethod("partial_projector")
+  
 
 
 #' project a single "block" of data onto the subspace
