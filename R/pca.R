@@ -32,6 +32,47 @@ pca <- function(X, ncomp=min(dim(X)), preproc=center(),
   svdres
 }
 
+orth_distances.pca <- function(x, ncomp, xorig) {
+  resid <- residuals(x, ncomp, xorig)
+  scores <- scores(x)
+  loadings <- coef(x)
+  
+  scoresn <- x$u
+  
+  Q <- matrix(0, nrow = nrow(scores), ncol = ncomp)
+  
+  for (i in seq_len(ncomp)) {
+    res <- resid
+    if (i < ncomp) {
+      res <- res +
+        tcrossprod(
+          scores[, (i + 1):ncomp, drop = F],
+          loadings[, (i + 1):ncomp, drop = F]
+        )
+    }
+    
+    Q[, i] <- rowSums(res^2)
+    #T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
+  }
+  
+  Q
+}
+
+score_distances.pca <- function(x, ncomp, xorig) {
+  scores <- scores(x)
+  loadings <- coef(x)
+  
+  scoresn <- x$u
+  
+  T2 <- matrix(0, nrow = nrow(scores), ncol = ncomp)
+  for (i in seq_len(ncomp)) {
+    T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
+  }
+  
+  T2
+  
+}
+
 #' @export
 #' @importFrom chk chk_range
 truncate.pca <- function(x, ncomp) {

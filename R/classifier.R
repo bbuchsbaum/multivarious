@@ -61,7 +61,7 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1,...) {
 }
 
 
-#' constrcut a new classifier
+#' construct a new classifier
 #' 
 #' @keywords internal
 #' @param x the model fit
@@ -238,7 +238,6 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     prob <- normalize_probs(p)
     pmeans <- avg_probs(prob, object$labels)
     cls <- nearest_class(prob, object$labels, object$knn)
-    
     list(class=cls, prob=pmeans)
   }
   

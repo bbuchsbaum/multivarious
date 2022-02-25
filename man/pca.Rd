@@ -32,4 +32,6 @@ data(iris)
 X <- as.matrix(iris[,1:4])
 res <- pca(X, ncomp=4)
 tres <- truncate(res, 3)
+
+
 }

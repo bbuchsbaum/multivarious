@@ -31,4 +31,5 @@ X <- iris[,1:4]
 pcres <- pca(as.matrix(X),2)
 cfier <- classifier(pcres, labels=iris[,5], new_data=as.matrix(iris[,1:4]))
 p <- predict(cfier, as.matrix(iris[,1:4]))
+
 }

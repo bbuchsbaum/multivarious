@@ -2,7 +2,7 @@
 % Please edit documentation in R/classifier.R
 \name{new_classifier}
 \alias{new_classifier}
-\title{constrcut a new classifier}
+\title{construct a new classifier}
 \usage{
 new_classifier(x, labels, scores, colind = NULL, knn = 1, classes = NULL, ...)
 }
@@ -20,6 +20,15 @@ new_classifier(x, labels, scores, colind = NULL, knn = 1, classes = NULL, ...)
 \item{...}{extra args}
 }
 \description{
-constrcut a new classifier
+construct a new classifier
+}
+\examples{
+
+X <- matrix(rnorm(10*10), 10,10)
+L <- letters[1:10]
+pc <- pca(X, ncomp=8)
+
+cf <- new_classifier(pc, L, scores(pc), colind=2:7)
+predict(cf, X[,2:7], ncomp=3, metric="cosine")
 }
 \keyword{internal}

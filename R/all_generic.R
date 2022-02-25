@@ -347,6 +347,17 @@ bootstrap <- function(x, nboot, ...) UseMethod("bootstrap")
 classifier <- function(x, colind, ...) UseMethod("classifier")
 
 
+#' construct a random forest wrapper classifier 
+#' 
+#' Given a model object (e.g. `projector` construct a random forest classifier that can generate predictions for new data points.
+#' 
+#' @param x the model object
+#' @param colind the (optional) column indices used for prediction
+#' @param ... extra arguments to `randomForest` function
+#' @export
+rf_classifier <- function(x, colind, ...) UseMethod("classifier")
+
+
 #' permutation confidence intervals
 #' 
 #' @param x the model fit
