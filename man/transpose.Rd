@@ -2,15 +2,23 @@
 % Please edit documentation in R/all_generic.R
 \name{transpose}
 \alias{transpose}
-\title{transpose a model}
+\title{Transpose a model}
 \usage{
 transpose(x, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit, typically an object of a class that implements a \code{transpose} method}
 
-\item{...}{extra args}
+\item{...}{Additional arguments passed to the underlying \code{transpose} method}
+}
+\value{
+A transposed model with coefficients and scores switched
 }
 \description{
-transpose a model by switching coefficients and scores
+This function transposes a model by switching coefficients and scores. It is useful when you want to
+reverse the roles of samples and variables in a model, especially in the context of dimensionality
+reduction methods.
+}
+\seealso{
+\code{\link{bi_projector}} for an example of a two-way mapping model that can be transposed
 }

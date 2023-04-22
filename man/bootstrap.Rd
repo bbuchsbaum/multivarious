@@ -3,35 +3,38 @@
 \name{bootstrap}
 \alias{bootstrap}
 \alias{bootstrap.pca}
-\title{bootstrap resampling}
+\title{Bootstrap Resampling for Multivariate Models}
 \usage{
 bootstrap(x, nboot, ...)
 
 \method{bootstrap}{pca}(x, nboot = 100, k = ncomp(x), ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{A fitted PCA model object.}
 
-\item{nboot}{the number of bootstrap resamples}
+\item{nboot}{The number of bootstrap resamples (default: 100).}
 
-\item{...}{extra args}
+\item{...}{Additional arguments to be passed to the specific model implementation of \code{bootstrap}.}
 
-\item{k}{the number of components to boootstrap}
+\item{k}{The number of components to bootstrap (default: all components in the fitted PCA model).}
 }
 \value{
-A \code{list} containing bootstrap z-scores for the loadings (\code{zboot_loadings}) and scores (\code{zboot_scores})
+A list containing the bootstrap resampled components and scores for the model.
+
+A \code{list} containing bootstrap z-scores for the loadings (\code{zboot_loadings}) and scores (\code{zboot_scores}).
 }
 \description{
-bootstrap a multivariate model to estimate component and score variability
+Perform bootstrap resampling on a multivariate model to estimate the variability of components and scores.
+
+Perform bootstrap resampling for Principal Component Analysis (PCA) to estimate component and score variability.
 }
 \examples{
-
 X <- matrix(rnorm(10*100), 10, 100)
 x = pca(X, ncomp=9)
-
+bootstrap_results <- bootstrap.pca(x)
 
 }
 \references{
 Fisher, Aaron, Brian Caffo, Brian Schwartz, and Vadim Zipunnikov. 2016.
-“Fast, Exact Bootstrap Principal Component Analysis for P > 1 Million.” \emph{Journal of the American Statistical Association} 111 (514): 846–60.
+"Fast, Exact Bootstrap Principal Component Analysis for P > 1 Million." \emph{Journal of the American Statistical Association} 111 (514): 846-60.
 }

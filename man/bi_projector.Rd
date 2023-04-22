@@ -2,32 +2,34 @@
 % Please edit documentation in R/bi_projector.R
 \name{bi_projector}
 \alias{bi_projector}
-\title{construct a \code{bi_projector} instance}
+\title{Construct a bi_projector instance}
 \usage{
 bi_projector(v, s, sdev, preproc = prep(pass()), classes = NULL, ...)
 }
 \arguments{
 \item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
 
-\item{s}{the score matrix}
+\item{s}{The score matrix}
 
-\item{sdev}{the standard deviations of th score matrix}
+\item{sdev}{The standard deviations of the score matrix}
 
-\item{preproc}{a prepped pre-processing object (default is the no-processing \code{pass()} pre_processor)}
+\item{preproc}{(optional) A pre-processing pipeline, default is prep(pass())}
 
-\item{classes}{additional class information used for creating subtypes of \code{projector}}
+\item{classes}{(optional) A character vector specifying the class attributes of the object, default is NULL}
 
 \item{...}{extra args}
 }
+\value{
+A bi_projector object
+}
 \description{
-A \code{bi_projector} offers a two-way mapping from from samples (rows) to scores and from variables (columns) to components.
-Thus, one can project from D-dimensional input space to d-dimensional subspace. And one acan project (\code{project_vars}) from n-dimensional
+A bi_projector offers a two-way mapping from samples (rows) to scores and from variables (columns) to components.
+Thus, one can project from D-dimensional input space to d-dimensional subspace. And one can project (project_vars) from n-dimensional
 variable space to the d-dimensional component space. The singular value decomposition is a canonical example of such a two-way mapping.
 }
 \examples{
-X <- matrix(rnorm(10*20), 10, 20)
+X <- matrix(rnorm(1020), 10, 20)
 svdfit <- svd(X)
 
-p <- bi_projector(svdfit$v, s = svdfit$u \%*\% diag(svdfit$d), sdev=svdfit$d)
-
+p <- bi_projector(svdfit$v, s = svdfit$u \%\% diag(svdfit$d), sdev=svdfit$d)
 }

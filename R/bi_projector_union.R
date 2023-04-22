@@ -2,7 +2,7 @@
 
 #' a union of concatenated `bi_projector` fits
 #' 
-#' given a set of `bi_projector`` fits, join the together to create a new `bi_projector`` instance.
+#' given a set of `bi_projector` fits, join the together to create a new `bi_projector` instance.
 #' The new weights and associated scores will simply be concatenated.
 #' 
 #' @param fits a list of `bi_projector` instances with the same row space.

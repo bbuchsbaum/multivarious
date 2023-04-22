@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiblock.R
 \name{multiblock_biprojector}
 \alias{multiblock_biprojector}
-\title{construct a multiblock bi_projector}
+\title{Create a multiblock bi-projector}
 \usage{
 multiblock_biprojector(
   v,
@@ -15,20 +15,23 @@ multiblock_biprojector(
 )
 }
 \arguments{
-\item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
+\item{v}{the component matrix}
 
 \item{s}{the score matrix}
 
-\item{sdev}{the standard deviations of th score matrix}
+\item{sdev}{the singular values}
 
-\item{preproc}{a prepped pre-processing object (default is the no-processing \code{pass()} pre_processor)}
+\item{preproc}{a function for preprocessing the data (default is a pass-through)}
 
-\item{...}{extra args}
+\item{...}{extra arguments}
 
-\item{block_indices}{the list of indices indices of the data blocks}
+\item{block_indices}{a list of numeric vectors specifying the indices of each data block}
 
-\item{classes}{additional class information used for creating subtypes of \code{projector}}
+\item{classes}{additional S3 classes to assign to the bi-projector object}
+}
+\value{
+a multiblock bi-projector object
 }
 \description{
-construct a multiblock bi_projector
+Constructs a multiblock bi-projector using the given component matrix (v), score matrix (s), singular values (sdev), a preprocessing function, and a list of block indices.
 }

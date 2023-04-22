@@ -2,21 +2,36 @@
 % Please edit documentation in R/all_generic.R
 \name{project_block}
 \alias{project_block}
-\title{project a single "block" of data onto the subspace}
+\title{Project a single "block" of data onto the subspace}
 \usage{
 project_block(x, new_data, block, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit, typically an object of a class that implements a \code{project_block} method}
 
-\item{new_data}{a matrix or vector of new observations(s) with the same number of columns as the original data.}
+\item{new_data}{A matrix or vector of new observation(s) with the same number of columns as the original data}
 
-\item{block}{the block id to select in the block projection matrix}
+\item{block}{An integer representing the block ID to select in the block projection matrix. This ID corresponds to the specific block of data to be projected}
 
-\item{...}{extra args}
+\item{...}{Additional arguments passed to the underlying \code{project_block} method}
+}
+\value{
+A matrix or vector of the projected data for the specified block
 }
 \description{
 When observations are concatenated into "blocks", it may be useful to project one block from the set.
-This is equivalent to a "partial projection" where the column indices are associated with a given block.
-This is therefore a convenience method of multiblock fits.
+This function facilitates the projection of a specific block of data onto a subspace. It is a
+convenience method for multi-block fits and is equivalent to a "partial projection" where the
+column indices are associated with a given block.
+}
+\examples{
+# Example with a custom class that implements a project_block method
+# Assume that MyModel is a class that implements a project_block method
+# Fit the model and project the data for the first block
+mymodel_fit <- MyModel(...)
+new_data <- ...
+projected_data <- project_block(mymodel_fit, new_data, block = 1)
+}
+\seealso{
+\code{\link{project}} for the generic projection function
 }

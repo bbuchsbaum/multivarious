@@ -1,31 +1,30 @@
-#' svd_wrapper
-#' 
-#' @param X the \code{matrix}
-#' @param ncomp number of components to estimate
-#' @param preproc the pre-processor (e.g. `center()`, `standardize()`, `pass()`)
-#' @param method the svd method to use. One of: 'base', 'fast', 'irlba', 'propack', 'rsvd', 'svds'
-#' @param q parameter passed to method `rsvd`
-#' @param p parameter passed to method `rsvd`
-#' @param tol minimum eigenvalue magnitude, otherwise component is dropped
-#' @param ... extra args pased to selected svd function
+#' Singular Value Decomposition (SVD) Wrapper
+#'
+#' Computes the singular value decomposition of a matrix using one of the specified methods.
+#' It is designed to be an easy-to-use wrapper for various SVD methods available in R.
+#'
+#' @param X the input matrix
+#' @param ncomp the number of components to estimate (default: min(dim(X)))
+#' @param preproc the pre-processor to apply on the input matrix (e.g., `center()`, `standardize()`, `pass()`)
+#' @param method the SVD method to use: 'base', 'fast', 'irlba', 'propack', 'rsvd', or 'svds'
+#' @param q parameter passed to method `rsvd` (default: 2)
+#' @param p parameter passed to method `rsvd` (default: 10)
+#' @param tol minimum eigenvalue magnitude, otherwise component is dropped (default: .Machine$double.eps)
+#' @param ... extra arguments passed to the selected SVD function
+#' @return an SVD object that extends `projector`
 #' @export
 #' @importFrom RSpectra svds
 #' @importFrom rsvd rsvd
 #' @importFrom irlba irlba
 #' @importFrom corpcor fast.svd
 #' @importFrom svd propack.svd
-#' 
-#' @return an `svd` object that extends `projector`
-#' 
-#' @examples 
-#' 
+#' @examples
+#' # Load iris dataset and select the first four columns
 #' data(iris)
-#' X <- iris[,1:4]
-#' 
-#' fit <- svd_wrapper(X, ncomp=3, preproc=center(), method="base")
-#' 
-#' 
-#' 
+#' X <- iris[, 1:4]
+#'
+#' # Compute SVD using the base method and 3 components
+#' fit <- svd_wrapper(X, ncomp = 3, preproc = center(), method = "base")
 svd_wrapper <- function(X, ncomp=min(dim(X)), 
                         preproc=pass(),
                         method=c("fast", "base", "irlba", 

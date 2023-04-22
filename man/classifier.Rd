@@ -2,30 +2,58 @@
 % Please edit documentation in R/all_generic.R, R/classifier.R
 \name{classifier}
 \alias{classifier}
+\alias{classifier.multiblock_biprojector}
 \alias{classifier.projector}
-\title{construct a classifier}
+\title{Construct a Classifier}
 \usage{
 classifier(x, colind, ...)
+
+\method{classifier}{multiblock_biprojector}(
+  x,
+  colind = NULL,
+  labels,
+  new_data = NULL,
+  block = NULL,
+  knn = 1,
+  ...
+)
 
 \method{classifier}{projector}(x, colind = NULL, labels, new_data, knn = 1, ...)
 }
 \arguments{
-\item{x}{the model object}
+\item{x}{A fitted multiblock bi-projector model object.}
 
-\item{colind}{the (optional) column indices used for prediction}
+\item{colind}{An optional vector of column indices used for prediction (default: NULL).}
 
-\item{...}{extra arguments}
+\item{...}{Additional arguments to be passed to the specific model implementation of \code{classifier}.}
 
 \item{labels}{the labels associated with the rows of the projected data (see \code{new_data})}
 
 \item{new_data}{reference data associated with \code{labels} and to be projected into subspace (required).}
 
+\item{block}{An optional block index for prediction (default: NULL).}
+
 \item{knn}{the number of nearest neighbors to use when classifying a new point.}
 }
+\value{
+A classifier function that can be used to make predictions on new data points.
+
+A multiblock classifier object.
+}
 \description{
-Given a model object (e.g. \code{projector} construct a classifier that can generate predictions for new data points.
+Create a classifier from a given model object (e.g., \code{projector}). This classifier can generate predictions for new data points.
+
+Constructs a classifier for a multiblock bi-projector model that can generate predictions for new data points.
 }
 \examples{
+# Assuming `x` is a fitted multiblock bi-projector model object, and `labels` are class labels
+# for the training data, you can create a classifier as follows:
+my_classifier <- classifier.multiblock_biprojector(x, labels = labels)
+
+# You can then use this classifier to make predictions for new data points
+# (assuming `new_data` is a data matrix of new observations):
+predictions <- predict(my_classifier, new_data)
+
 data(iris)
 X <- iris[,1:4]
 pcres <- pca(as.matrix(X),2)

@@ -2,15 +2,22 @@
 % Please edit documentation in R/all_generic.R
 \name{std_scores}
 \alias{std_scores}
-\title{compute standardized scores}
+\title{Compute standardized component scores}
 \usage{
 std_scores(x, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit object.}
 
-\item{...}{extra args}
+\item{...}{Additional arguments passed to the method.}
+}
+\value{
+A matrix of standardized factor scores, with rows corresponding to samples and columns to components.
 }
 \description{
-compute standardized scores
+Calculate standardized factor scores from a fitted model. Standardized scores are useful for comparing
+the contributions of different components on the same scale, which can help in interpreting the results.
+}
+\seealso{
+\code{\link{scores}} for retrieving the original component scores.
 }

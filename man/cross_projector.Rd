@@ -26,23 +26,29 @@ cross_projector(
 
 \item{classes}{additional class names}
 }
+\value{
+a cross_projector object
+}
 \description{
-A projector that reduces two blocks of data, X and Y, yielding a pairs of weights for each component.
-This structure can be used for example to store weights derived from canonical correlation analysis.
+A projector that reduces two blocks of data, X and Y, yielding a pair of weights for each component.
+This structure can be used, for example, to store weights derived from canonical correlation analysis.
 }
 \details{
 This class extends \code{projector} and therefore basic operations such as \code{project}, \code{shape}, \code{reprocess},
-and \code{coef} work, but by default it is assumed that the \code{X} block is primary. To access \code{Y} block operations, an
-additional argument \code{source} must be supplied to the relevant functions, e.g. \code{coef(fit, source="Y")}
+and \code{coef} work, but by default, it is assumed that the \code{X} block is primary. To access \code{Y} block operations, an
+additional argument \code{source} must be supplied to the relevant functions, e.g., \code{coef(fit, source = "Y")}
 }
 \examples{
+# Create two scaled matrices X and Y
+X <- scale(matrix(rnorm(10 * 5), 10, 5))
+Y <- scale(matrix(rnorm(10 * 5), 10, 5))
 
-X <- scale(matrix(rnorm(10*5), 10, 5))
-Y <- scale(matrix(rnorm(10*5), 10, 5))
-cres <- cancor(X,Y)
+# Perform canonical correlation analysis on X and Y
+cres <- cancor(X, Y)
 sx <- X \%*\% cres$xcoef
 sy <- Y \%*\% cres$ycoef
-canfit <- cross_projector(cres$xcoef, cres$ycoef, cor=cres$cor, 
-sx=sx, sy=sy, classes="cancor")
 
+# Create a cross_projector object using the canonical correlation analysis results
+canfit <- cross_projector(cres$xcoef, cres$ycoef, cor = cres$cor,
+                          sx = sx, sy = sy, classes = "cancor")
 }

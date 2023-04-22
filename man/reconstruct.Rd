@@ -2,21 +2,28 @@
 % Please edit documentation in R/all_generic.R
 \name{reconstruct}
 \alias{reconstruct}
-\title{reconstruct the data}
+\title{Reconstruct the data}
 \usage{
 reconstruct(x, comp, rowind, colind, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit, typically an object of a class that implements a \code{reconstruct} method}
 
-\item{comp}{a vector of component indices to use in the reconstruction.}
+\item{comp}{A vector of component indices to use in the reconstruction}
 
-\item{rowind}{the row indices to reconstruct}
+\item{rowind}{The row indices to reconstruct (optional). If not provided, all rows are used.}
 
-\item{colind}{the column indices to reconstruct}
+\item{colind}{The column indices to reconstruct (optional). If not provided, all columns are used.}
 
-\item{...}{extra args}
+\item{...}{Additional arguments passed to the underlying \code{reconstruct} method}
+}
+\value{
+A reconstructed data set based on the selected components, rows, and columns
 }
 \description{
-Reconstruct a data set from its (possibly) low-rank representation.
+Reconstruct a data set from its (possibly) low-rank representation. This can be useful when analyzing
+the impact of dimensionality reduction or when visualizing approximations of the original data.
+}
+\seealso{
+\code{\link{bi_projector}} for an example of a two-way mapping model that can be reconstructed
 }

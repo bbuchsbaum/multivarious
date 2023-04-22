@@ -2,13 +2,23 @@
 % Please edit documentation in R/all_generic.R
 \name{ncomp}
 \alias{ncomp}
-\title{get the number of components}
+\title{Get the number of components}
 \usage{
 ncomp(x)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{A fitted model object.}
+}
+\value{
+The number of components in the fitted model.
 }
 \description{
-The total number of components in the fitted model
+This function returns the total number of components in the fitted model.
+}
+\examples{
+# Example using the svd_wrapper function
+data(iris)
+X <- iris[, 1:4]
+fit <- svd_wrapper(X, ncomp = 3, preproc = center(), method = "base")
+ncomp(fit) # Should return 3
 }

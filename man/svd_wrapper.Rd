@@ -2,7 +2,7 @@
 % Please edit documentation in R/svd.R
 \name{svd_wrapper}
 \alias{svd_wrapper}
-\title{svd_wrapper}
+\title{Singular Value Decomposition (SVD) Wrapper}
 \usage{
 svd_wrapper(
   X,
@@ -16,35 +16,34 @@ svd_wrapper(
 )
 }
 \arguments{
-\item{X}{the \code{matrix}}
+\item{X}{the input matrix}
 
-\item{ncomp}{number of components to estimate}
+\item{ncomp}{the number of components to estimate (default: min(dim(X)))}
 
-\item{preproc}{the pre-processor (e.g. \code{center()}, \code{standardize()}, \code{pass()})}
+\item{preproc}{the pre-processor to apply on the input matrix (e.g., \code{center()}, \code{standardize()}, \code{pass()})}
 
-\item{method}{the svd method to use. One of: 'base', 'fast', 'irlba', 'propack', 'rsvd', 'svds'}
+\item{method}{the SVD method to use: 'base', 'fast', 'irlba', 'propack', 'rsvd', or 'svds'}
 
-\item{q}{parameter passed to method \code{rsvd}}
+\item{q}{parameter passed to method \code{rsvd} (default: 2)}
 
-\item{p}{parameter passed to method \code{rsvd}}
+\item{p}{parameter passed to method \code{rsvd} (default: 10)}
 
-\item{tol}{minimum eigenvalue magnitude, otherwise component is dropped}
+\item{tol}{minimum eigenvalue magnitude, otherwise component is dropped (default: .Machine$double.eps)}
 
-\item{...}{extra args pased to selected svd function}
+\item{...}{extra arguments passed to the selected SVD function}
 }
 \value{
-an \code{svd} object that extends \code{projector}
+an SVD object that extends \code{projector}
 }
 \description{
-svd_wrapper
+Computes the singular value decomposition of a matrix using one of the specified methods.
+It is designed to be an easy-to-use wrapper for various SVD methods available in R.
 }
 \examples{
-
+# Load iris dataset and select the first four columns
 data(iris)
-X <- iris[,1:4]
+X <- iris[, 1:4]
 
-fit <- svd_wrapper(X, ncomp=3, preproc=center(), method="base")
-
-
-
+# Compute SVD using the base method and 3 components
+fit <- svd_wrapper(X, ncomp = 3, preproc = center(), method = "base")
 }

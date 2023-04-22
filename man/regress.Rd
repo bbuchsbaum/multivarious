@@ -21,35 +21,38 @@ regress(
 
 \item{Y}{the response matrix}
 
-\item{preproc}{the pre-processor}
+\item{preproc}{the pre-processor (currently unused)}
 
-\item{method}{the regression method: \code{linear} or \code{enet} \code{mridge}, or \code{pls}}
+\item{method}{the regression method: \code{lm}, \code{enet}, \code{mridge}, or \code{pls}}
 
 \item{intercept}{whether to include an intercept term}
 
-\item{lambda}{ridge shrinkage parameter}
+\item{lambda}{ridge shrinkage parameter (for methods \code{mridge} and \code{enet})}
 
 \item{alpha}{the elastic net mixing parameter if method is \code{enet}}
 
-\item{ncomp}{number of pls components}
+\item{ncomp}{number of PLS components if method is \code{pls}}
 
-\item{...}{extra args sent to underlying fitting function}
+\item{...}{extra arguments sent to the underlying fitting function}
 }
 \value{
-an \code{bi-projector} of type \code{regress}
+a bi-projector of type \code{regress}
 }
 \description{
 Fit a multivariate regression model for a matrix of basis functions, \code{X}, and a response matrix \code{Y}.
 The goal is to find a projection matrix that can be used for mapping and reconstruction.
 }
 \examples{
-
-Y <- matrix(rnorm(100*10), 10, 100)
-X <- matrix(rnorm(10*9), 10, 9)
-r <- regress(X,Y, intercept=FALSE)
-recon <- reconstruct(r)
-r <- regress(X,Y, intercept=TRUE)
-recon <- reconstruct(r)
-r <- regress(X,Y, intercept=TRUE, method="mridge")
-recon <- reconstruct(r)
+# Generate synthetic data
+Y <- matrix(rnorm(100 * 10), 10, 100)
+X <- matrix(rnorm(10 * 9), 10, 9)
+# Fit regression models and reconstruct the response matrix
+r_lm <- regress(X, Y, intercept = FALSE, method = "lm")
+recon_lm <- reconstruct(r_lm)
+r_mridge <- regress(X, Y, intercept = TRUE, method = "mridge", lambda = 0.001)
+recon_mridge <- reconstruct(r_mridge)
+r_enet <- regress(X, Y, intercept = TRUE, method = "enet", lambda = 0.001, alpha = 0.5)
+recon_enet <- reconstruct(r_enet)
+r_pls <- regress(X, Y, intercept = TRUE, method = "pls", ncomp = 5)
+recon_pls <- reconstruct(r_pls)
 }

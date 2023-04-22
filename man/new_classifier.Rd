@@ -2,33 +2,29 @@
 % Please edit documentation in R/classifier.R
 \name{new_classifier}
 \alias{new_classifier}
-\title{construct a new classifier}
+\title{Create a new k-NN classifier for a model fit}
 \usage{
 new_classifier(x, labels, scores, colind = NULL, knn = 1, classes = NULL, ...)
 }
 \arguments{
 \item{x}{the model fit}
 
-\item{labels}{the class labels}
+\item{labels}{a vector of class labels corresponding to the data points}
 
-\item{colind}{the column indices}
+\item{scores}{a matrix of scores used for classification}
 
-\item{knn}{the number of nearest neighbors for prediction}
+\item{colind}{an optional vector specifying the column indices of the components to use for prediction (NULL by default)}
 
-\item{classes}{addiitonal s3 classes}
+\item{knn}{the number of nearest neighbors to consider in the k-NN classifier (default is 1)}
 
-\item{...}{extra args}
+\item{classes}{additional S3 classes to assign to the classifier object}
+
+\item{...}{extra arguments}
+}
+\value{
+a classifier object
 }
 \description{
-construct a new classifier
-}
-\examples{
-
-X <- matrix(rnorm(10*10), 10,10)
-L <- letters[1:10]
-pc <- pca(X, ncomp=8)
-
-cf <- new_classifier(pc, L, scores(pc), colind=2:7)
-predict(cf, X[,2:7], ncomp=3, metric="cosine")
+Constructs a new k-NN classifier based on a model fit and the corresponding scores matrix, with an option to use a subset of the components.
 }
 \keyword{internal}

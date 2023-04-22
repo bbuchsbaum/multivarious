@@ -1,17 +1,21 @@
 
+#' PCA Bootstrap Resampling
+#'
+#' Perform bootstrap resampling for Principal Component Analysis (PCA) to estimate component and score variability.
+#'
+#' @param x A fitted PCA model object.
+#' @param nboot The number of bootstrap resamples (default: 100).
+#' @param k The number of components to bootstrap (default: all components in the fitted PCA model).
+#' @param ... Additional arguments to be passed to the specific model implementation of `bootstrap`.
+#' @return A `list` containing bootstrap z-scores for the loadings (`zboot_loadings`) and scores (`zboot_scores`).
 #' @export
-#' 
-#' @param k the number of components to boootstrap
-#' 
-#' @return A `list` containing bootstrap z-scores for the loadings (`zboot_loadings`) and scores (`zboot_scores`)
-#' @examples 
-#' 
+#' @examples
 #' X <- matrix(rnorm(10*100), 10, 100)
 #' x = pca(X, ncomp=9)
-#' 
-#' 
-#' @references Fisher, Aaron, Brian Caffo, Brian Schwartz, and Vadim Zipunnikov. 2016. 
-#' “Fast, Exact Bootstrap Principal Component Analysis for P > 1 Million.” \emph{Journal of the American Statistical Association} 111 (514): 846–60.
+#' bootstrap_results <- bootstrap.pca(x)
+#'
+#' @references Fisher, Aaron, Brian Caffo, Brian Schwartz, and Vadim Zipunnikov. 2016.
+#' "Fast, Exact Bootstrap Principal Component Analysis for P > 1 Million." \emph{Journal of the American Statistical Association} 111 (514): 846-60.
 #' @rdname bootstrap
 bootstrap.pca <- function(x, nboot=100, k=ncomp(x),...) {
   DUt <- t(scores(x))

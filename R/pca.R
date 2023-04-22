@@ -1,22 +1,20 @@
-#' principal components analysis
-#' 
-#' Compute the directions of maximal variance in a matrix via the singula value decomposition
-#' 
-#' @param X the data matrix
-#' @param ncomp the number of requested components to estimate
-#' @param preproc the pre_processor
-#' @param method th svd method (passed to `svd_wrapper`)
-#' @param ... extra arguments to send to `svd_wrapper`
+#' Principal Components Analysis (PCA)
+#'
+#' Compute the directions of maximal variance in a data matrix using the Singular Value Decomposition (SVD).
+#'
+#' @param X The data matrix.
+#' @param ncomp The number of requested components to estimate (default is the minimum dimension of the data matrix).
+#' @param preproc The pre-processing function to apply to the data matrix (default is centering).
+#' @param method The SVD method to use, passed to \code{svd_wrapper} (default is "fast").
+#' @param ... Extra arguments to send to \code{svd_wrapper}.
+#' @return A \code{bi_projector} object containing the PCA results.
 #' @export
-#' 
-#' @examples 
-#' 
+#' @seealso \code{\link{svd_wrapper}} for details on SVD methods.
+#' @examples
 #' data(iris)
-#' X <- as.matrix(iris[,1:4])
-#' res <- pca(X, ncomp=4)
+#' X <- as.matrix(iris[, 1:4])
+#' res <- pca(X, ncomp = 4)
 #' tres <- truncate(res, 3)
-#' 
-#' 
 pca <- function(X, ncomp=min(dim(X)), preproc=center(), 
                 method = c("fast", "base", "irlba", "propack", "rsvd", "svds"), ...) {
   chk::chkor(chk::chk_matrix(X), chk::chk_s4_class("Matrix"))
@@ -34,6 +32,8 @@ pca <- function(X, ncomp=min(dim(X)), preproc=center(),
   svdres
 }
 
+
+#' @keywords internal
 orth_distances.pca <- function(x, ncomp, xorig) {
   resid <- residuals(x, ncomp, xorig)
   scores <- scores(x)
@@ -60,6 +60,8 @@ orth_distances.pca <- function(x, ncomp, xorig) {
   Q
 }
 
+
+#' @keywords internal
 score_distances.pca <- function(x, ncomp, xorig) {
   scores <- scores(x)
   loadings <- coef(x)
@@ -99,30 +101,29 @@ perm_ci.pca <- function(x, X, nperm=100, k=4,...) {
   F1_perm <- sapply(1:nperm, function(i) {
     Xperm <- apply(Xp, 2, function(x) sample(x))
     #pp <- fresh(x$preproc$preproc)
-    fit <- pca(Xperm, ncomp=Q, preproc=pass())
+    fit <- multivarious::pca(Xperm, ncomp=Q, preproc=pass())
     evals <- fit$sdev^2
-    F1_perm <- evals[1]/sum(evals)
+    evals[1]/sum(evals)
   })
   
   ip <- inverse_projection(x)
+  I <- diag(nrow(X))
   
   if (Q > 1) {
     Fq <- parallel::mclapply(2:k, function(a) {
+      uu <- Reduce("+", lapply(1:(a-1), function(i) {
+        x$u[,i,drop=FALSE] %*% t(x$u[,i,drop=FALSE]) 
+      }))
+      
       ret <- sapply(1:nperm, function(j) {
         cnums <- 1:(a-1)
         recon <- scores(x)[,cnums, drop=FALSE] %*% ip[cnums,,drop=FALSE]
         Ea <- Xp-recon
         Ea_perm <- apply(Ea, 2, function(x) sample(x))
         
-        I <- diag(nrow(X))
-        
-        uu <- Reduce("+", lapply(1:(a-1), function(i) {
-          x$u[,i,drop=FALSE] %*% t(x$u[,i,drop=FALSE]) 
-        }))
-        
         Ea_perm_proj <- (I - uu) %*% Ea_perm
         #pp <- fresh(x$preproc$preproc)
-        fit <- pca(Ea_perm_proj, ncomp=Q, preproc=pass())
+        fit <- multivarious::pca(Ea_perm_proj, ncomp=Q, preproc=pass())
         evals <- fit$sdev^2
         Fq_perm <- evals[1]/sum(evals[1:(Q-(a-1))])
       })
@@ -167,6 +168,68 @@ perm_cdf <- function(vals, distr="norm") {
   list(cdf=f, lower_ci=ci[1], upper_ci=ci[2])
   
 }
+# 
+# rotate.pca <- function(x, X, ncomp, type=c("varimax", "promax")) {
+#   type <- match.arg(type)
+#   
+#   L     <- x$v[,1:ncomp] %*% diag(x$sdev, ncomp, ncomp)
+#   
+#   ### these are still scaled
+#   RL <- varimax(L)$loadings
+#   ###
+#   invRL     <- t(corpcor::pseudoinverse(RL))
+#   
+#   scores    <- reprocess(x, X) %*% invRL
+#   
+#   bi_projector(invRL, scores, rotated_loadings=RL, 
+#                sdev=apply(scores,2, function(x) sum(x^2)),
+#                classes=c("rotated", class(x)))
+#      
+# }
+
+#' Rotate PCA loadings
+#' 
+#' Apply a specified rotation to the component loadings of a PCA model.
+#' 
+#' @param x A PCA model object, typically created using the `pca()` function.
+#' @param ncomp The number of components to rotate.
+#' @param type The type of rotation to apply. Supported rotation types are "varimax", "quartimax", and "promax".
+#' @return A modified PCA object with updated components and scores after applying the specified rotation.
+#' @export
+#' @examples
+#' # Perform PCA on the iris dataset
+#' data(iris)
+#' X <- as.matrix(iris[,1:4])
+#' res <- pca(X, ncomp=4)
+#'
+#' # Apply varimax rotation to the first 3 components
+#' rotated_res <- rotate(res, ncomp=3, type="varimax")
+#' @export
+# rotate.pca <- function(x, ncomp, type) {
+#   # Check if rotation type is supported
+#   supported_rotations <- c("varimax", "quartimax", "promax")
+#   if (!(type %in% supported_rotations)) {
+#     stop(sprintf("Unsupported rotation type. Choose from: %s", paste(supported_rotations, collapse = ", ")))
+#   }
+#   
+#   # Load the GPArotation package if not already loaded
+#   if (!requireNamespace("GPArotation", quietly = TRUE)) {
+#     stop("GPArotation package is required to perform rotations. Please install it using 'install.packages(\"GPArotation\")'")
+#   }
+#   
+#   # Extract components and scores from the pca object
+#   components <- x$v
+#   scores <- x$s
+#   
+#   # Perform the rotation
+#   rotation <- GPArotation::rotate(components[, 1:ncomp], type)
+#   
+#   # Update components and scores with rotated values
+#   x$v[, 1:ncomp] <- rotation$loadings
+#   x$s[, 1:ncomp] <- scores %*% rotation$rotation
+#   
+#   return(x)
+# }
 
 # jackstraw.pca <- function(x, X, prop=.1, n=100) {
 #   vars <- round(max(1, prop*ncol(X)))

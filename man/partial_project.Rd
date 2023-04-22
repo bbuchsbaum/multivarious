@@ -2,17 +2,35 @@
 % Please edit documentation in R/all_generic.R
 \name{partial_project}
 \alias{partial_project}
-\title{partially project a new sample onto subspace}
+\title{Partially project a new sample onto subspace}
 \usage{
 partial_project(x, new_data, colind)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit, typically an object of class \code{bi_projector} or any other class that implements a \code{partial_project} method}
 
-\item{new_data}{a matrix or vector of new observations(s) with the same number of columns as the original data.}
+\item{new_data}{A matrix or vector of new observations with the same number of columns as the original data. Rows represent observations and columns represent variables}
 
-\item{colind}{the column indices to select in the projection matrix}
+\item{colind}{A numeric vector of column indices to select in the projection matrix. These indices correspond to the variables used for the partial projection}
+}
+\value{
+A matrix or vector of the partially projected observations, where rows represent observations and columns represent the lower-dimensional space
 }
 \description{
-project a selected subset of column indices onto the subspace
+Project a selected subset of column indices onto the subspace. This function allows for the projection of new data
+onto a lower-dimensional space using only a subset of the variables, as specified by the column indices.
+}
+\examples{
+# Example with the bi_projector class
+X <- matrix(rnorm(10*20), 10, 20)
+svdfit <- svd(X)
+p <- bi_projector(svdfit$v, s = svdfit$u \%*\% diag(svdfit$d), sdev=svdfit$d)
+
+# Partially project new_data onto the same subspace as the original data using only the first 10 variables
+new_data <- matrix(rnorm(5*20), 5, 20)
+colind <- 1:10
+partially_projected_data <- partial_project(p, new_data, colind)
+}
+\seealso{
+\code{\link{bi_projector}} for an example of a class that implements a \code{partial_project} method
 }

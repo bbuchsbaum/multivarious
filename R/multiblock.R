@@ -1,12 +1,27 @@
 
 
-#' construct a multiblock project
-#' 
-#' @inheritParams projector
-#' 
-#' @param block_indices the list of indices indices of the data blocks
-#' 
+#' Create a multiblock projector
+#'
+#' Constructs a multiblock projector using the given component matrix (v), a preprocessing function, and a list of block indices.
+#'
+#' @param v the component matrix
+#' @param preproc a function for preprocessing the data (default is a pass-through)
+#' @param ... extra arguments
+#' @param block_indices a list of numeric vectors specifying the indices of each data block
+#' @param classes additional S3 classes to assign to the projector object
+#' @return a multiblock projector object
 #' @export
+#' @examples
+#' # Generate some example data
+#' X1 <- matrix(rnorm(10 * 5), 10, 5)
+#' X2 <- matrix(rnorm(10 * 5), 10, 5)
+#' X <- cbind(X1, X2)
+#' # Compute PCA on the combined data
+#' pc <- pca(X, ncomp = 8)
+#' # Create a multiblock projector using PCA components and block indices
+#' mb_proj <- multiblock_projector(pc$v, block_indices = list(1:5, 6:10))
+#' # Project the multiblock data using the multiblock projector
+#' mb_scores <- project(mb_proj, X)
 multiblock_projector <- function(v, preproc=prep(pass()), ..., block_indices, classes=NULL) {
   chk::chk_list(block_indices)
   sumind <- sum(sapply(block_indices, length))
@@ -16,17 +31,25 @@ multiblock_projector <- function(v, preproc=prep(pass()), ..., block_indices, cl
 }
 
 
-#' construct a multiblock bi_projector
-#' 
-#' @inheritParams bi_projector
-#' 
-#' @param block_indices the list of indices indices of the data blocks
+#' Create a multiblock bi-projector
+#'
+#' Constructs a multiblock bi-projector using the given component matrix (v), score matrix (s), singular values (sdev), a preprocessing function, and a list of block indices.
+#'
+#' @param v the component matrix
+#' @param s the score matrix
+#' @param sdev the singular values
+#' @param preproc a function for preprocessing the data (default is a pass-through)
+#' @param ... extra arguments
+#' @param block_indices a list of numeric vectors specifying the indices of each data block
+#' @param classes additional S3 classes to assign to the bi-projector object
+#' @return a multiblock bi-projector object
 #' @export
 multiblock_biprojector <- function(v, s, sdev, preproc=prep(pass()), ..., block_indices, classes=NULL) {
   sumind <- sum(sapply(block_indices, length))
   chk::chk_equal(sumind, nrow(v))
   bi_projector(v, s=s, sdev=sdev, preproc=preproc, block_indices=block_indices, ..., classes=c(classes, "multiblock_biprojector", "multiblock_projector"))
 }
+
 
 #' @export
 block_indices.multiblock_projector <- function(x,i,...) {

@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiblock.R
 \name{multiblock_projector}
 \alias{multiblock_projector}
-\title{construct a multiblock project}
+\title{Create a multiblock projector}
 \usage{
 multiblock_projector(
   v,
@@ -13,16 +13,31 @@ multiblock_projector(
 )
 }
 \arguments{
-\item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
+\item{v}{the component matrix}
 
-\item{preproc}{a prepped pre-processing object (default is the no-processing \code{pass()} pre_processor)}
+\item{preproc}{a function for preprocessing the data (default is a pass-through)}
 
-\item{...}{extra args}
+\item{...}{extra arguments}
 
-\item{block_indices}{the list of indices indices of the data blocks}
+\item{block_indices}{a list of numeric vectors specifying the indices of each data block}
 
-\item{classes}{additional class information used for creating subtypes of \code{projector}}
+\item{classes}{additional S3 classes to assign to the projector object}
+}
+\value{
+a multiblock projector object
 }
 \description{
-construct a multiblock project
+Constructs a multiblock projector using the given component matrix (v), a preprocessing function, and a list of block indices.
+}
+\examples{
+# Generate some example data
+X1 <- matrix(rnorm(10 * 5), 10, 5)
+X2 <- matrix(rnorm(10 * 5), 10, 5)
+X <- cbind(X1, X2)
+# Compute PCA on the combined data
+pc <- pca(X, ncomp = 8)
+# Create a multiblock projector using PCA components and block indices
+mb_proj <- multiblock_projector(pc$v, block_indices = list(1:5, 6:10))
+# Project the multiblock data using the multiblock projector
+mb_scores <- project(mb_proj, X)
 }

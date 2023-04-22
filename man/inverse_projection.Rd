@@ -2,16 +2,22 @@
 % Please edit documentation in R/all_generic.R
 \name{inverse_projection}
 \alias{inverse_projection}
-\title{inverse of the component matrix}
+\title{Inverse of the Component Matrix}
 \usage{
 inverse_projection(x, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit.}
 
-\item{...}{extra args}
+\item{...}{Extra arguments.}
+}
+\value{
+The inverse projection matrix.
 }
 \description{
-return the inverse projection matrix. Can be used to map back to data space.
+Return the inverse projection matrix, which can be used to map back to data space.
 If the component matrix is orthogonal, then the inverse projection is the transpose of the component matrix.
+}
+\seealso{
+\code{\link{project}} for projecting data onto the subspace.
 }

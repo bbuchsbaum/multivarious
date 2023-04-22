@@ -17,15 +17,15 @@ discriminant_projector(
 \arguments{
 \item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
 
-\item{s}{the score matrix}
+\item{s}{The score matrix}
 
-\item{sdev}{the standard deviations of th score matrix}
+\item{sdev}{The standard deviations of the score matrix}
 
-\item{preproc}{a prepped pre-processing object (default is the no-processing \code{pass()} pre_processor)}
+\item{preproc}{(optional) A pre-processing pipeline, default is prep(pass())}
 
 \item{labels}{the training labels}
 
-\item{classes}{additional class information used for creating subtypes of \code{projector}}
+\item{classes}{(optional) A character vector specifying the class attributes of the object, default is NULL}
 
 \item{...}{extra args}
 }

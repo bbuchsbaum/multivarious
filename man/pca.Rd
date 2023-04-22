@@ -2,7 +2,7 @@
 % Please edit documentation in R/pca.R
 \name{pca}
 \alias{pca}
-\title{principal components analysis}
+\title{Principal Components Analysis (PCA)}
 \usage{
 pca(
   X,
@@ -13,25 +13,28 @@ pca(
 )
 }
 \arguments{
-\item{X}{the data matrix}
+\item{X}{The data matrix.}
 
-\item{ncomp}{the number of requested components to estimate}
+\item{ncomp}{The number of requested components to estimate (default is the minimum dimension of the data matrix).}
 
-\item{preproc}{the pre_processor}
+\item{preproc}{The pre-processing function to apply to the data matrix (default is centering).}
 
-\item{method}{th svd method (passed to \code{svd_wrapper})}
+\item{method}{The SVD method to use, passed to \code{svd_wrapper} (default is "fast").}
 
-\item{...}{extra arguments to send to \code{svd_wrapper}}
+\item{...}{Extra arguments to send to \code{svd_wrapper}.}
+}
+\value{
+A \code{bi_projector} object containing the PCA results.
 }
 \description{
-Compute the directions of maximal variance in a matrix via the singula value decomposition
+Compute the directions of maximal variance in a data matrix using the Singular Value Decomposition (SVD).
 }
 \examples{
-
 data(iris)
-X <- as.matrix(iris[,1:4])
-res <- pca(X, ncomp=4)
+X <- as.matrix(iris[, 1:4])
+res <- pca(X, ncomp = 4)
 tres <- truncate(res, 3)
-
-
+}
+\seealso{
+\code{\link{svd_wrapper}} for details on SVD methods.
 }

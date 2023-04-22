@@ -2,19 +2,29 @@
 % Please edit documentation in R/all_generic.R
 \name{residuals}
 \alias{residuals}
-\title{get residuals of component model fit}
+\title{Obtain residuals of a component model fit}
 \usage{
 residuals(x, ncomp, xorig, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit object.}
 
-\item{ncomp}{the number of components to factor out}
+\item{ncomp}{The number of components to factor out before calculating residuals.}
 
-\item{xorig}{the original X data matrix}
+\item{xorig}{The original data matrix (X) used to fit the model.}
 
-\item{...}{extra arguments}
+\item{...}{Additional arguments passed to the method.}
+}
+\value{
+A matrix of residuals, with the same dimensions as the original data matrix.
 }
 \description{
-Extract the residuals of a model, after removing the first \code{ncomp} components
+Calculate the residuals of a model after removing the effect of the first \code{ncomp} components.
+This function is useful to assess the quality of the fit or to identify patterns that are not
+captured by the model.
+}
+\examples{
+# Assume you have a fitted model 'model_fit' and the original data matrix 'data_matrix'
+# Calculate residuals after removing the first 2 components:
+res <- residuals(model_fit, ncomp = 2, xorig = data_matrix)
 }

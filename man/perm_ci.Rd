@@ -2,19 +2,22 @@
 % Please edit documentation in R/all_generic.R
 \name{perm_ci}
 \alias{perm_ci}
-\title{permutation confidence intervals}
+\title{Permutation Confidence Intervals}
 \usage{
 perm_ci(x, X, nperm, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{A model fit object.}
 
-\item{X}{the original data matrix}
+\item{X}{The original data matrix used to fit the model.}
 
-\item{nperm}{the number of permutations}
+\item{nperm}{The number of permutations to perform for the confidence interval estimation.}
 
-\item{...}{extra args}
+\item{...}{Additional arguments to be passed to the specific model implementation of \code{perm_ci}.}
+}
+\value{
+A list containing the estimated lower and upper bounds of the confidence intervals for model parameters.
 }
 \description{
-permutation confidence intervals
+Estimate confidence intervals for model parameters using permutation testing.
 }

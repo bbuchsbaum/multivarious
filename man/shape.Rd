@@ -3,19 +3,26 @@
 \name{shape}
 \alias{shape}
 \alias{shape.cross_projector}
-\title{shape of the projector}
+\title{Shape of the Projector}
 \usage{
 shape(x, ...)
 
 \method{shape}{cross_projector}(x, source = c("X", "Y"), ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit.}
 
-\item{...}{extra args}
+\item{...}{Extra arguments.}
 
 \item{source}{the source of the data (X or Y block)}
 }
+\value{
+A vector containing the dimensions of the sample loadings matrix \code{v} (number of rows and columns).
+}
 \description{
-Get the input/output shape of the projector
+Get the input/output shape of the projector.
+}
+\details{
+This function retrieves the dimensions of the sample loadings matrix \code{v} in the form of a vector with two elements.
+The first element is the number of rows in the \code{v} matrix, and the second element is the number of columns.
 }

@@ -3,21 +3,38 @@
 \name{project}
 \alias{project}
 \alias{project.cross_projector}
-\title{new sample projection}
+\title{New sample projection}
 \usage{
 project(x, new_data, ...)
 
 \method{project}{cross_projector}(x, new_data, source = c("X", "Y"), ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit, typically an object of class bi_projector or any other class that implements a project method}
 
-\item{new_data}{a matrix or vector of new observations(s) with the same number of columns as the original data.}
+\item{new_data}{A matrix or vector of new observations with the same number of columns as the original data. Rows represent observations and columns represent variables}
 
-\item{...}{extra args}
+\item{...}{Extra arguments to be passed to the specific project method for the object's class}
 
 \item{source}{the source of the data (X or Y block)}
 }
+\value{
+A matrix or vector of the projected observations, where rows represent observations and columns represent the lower-dimensional space
+}
 \description{
-Project one or more \emph{samples} of onto a subspace.
+Project one or more samples onto a subspace. This function takes a model fit and new observations, and projects them onto the
+subspace defined by the model. This allows for the transformation of new data into the same lower-dimensional space as the original data.
+}
+\examples{
+# Example with the bi_projector class
+X <- matrix(rnorm(1020), 10, 20)
+svdfit <- svd(X)
+p <- bi_projector(svdfit$v, s = svdfit$u \%\% diag(svdfit$d), sdev=svdfit$d)
+
+# Project new_data onto the same subspace as the original data
+new_data <- matrix(rnorm(5*20), 5, 20)
+projected_data <- project(p, new_data)
+}
+\seealso{
+\code{\link{bi_projector}} for an example of a class that implements a project method
 }

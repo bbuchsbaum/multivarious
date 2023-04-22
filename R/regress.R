@@ -1,38 +1,37 @@
 
-#' Multi-output linear regression 
-#' 
+#' Multi-output linear regression
+#'
 #' Fit a multivariate regression model for a matrix of basis functions, `X`, and a response matrix `Y`.
 #' The goal is to find a projection matrix that can be used for mapping and reconstruction.
-#' 
-#' 
+#'
 #' @param X the set of independent (basis) variables
 #' @param Y the response matrix
-#' @param preproc the pre-processor
-#' @param method the regression method: `linear` or `enet` `mridge`, or `pls`
+#' @param preproc the pre-processor (currently unused)
+#' @param method the regression method: `lm`, `enet`, `mridge`, or `pls`
 #' @param intercept whether to include an intercept term
-#' @param lambda ridge shrinkage parameter
+#' @param lambda ridge shrinkage parameter (for methods `mridge` and `enet`)
 #' @param alpha the elastic net mixing parameter if method is `enet`
-#' @param ncomp number of pls components
-#' @param ... extra args sent to underlying fitting function
+#' @param ncomp number of PLS components if method is `pls`
+#' @param ... extra arguments sent to the underlying fitting function
+#' @return a bi-projector of type `regress`
 #' @export
 #' @importFrom glmnet glmnet
 #' @importFrom Matrix t
 #' @importFrom pls plsr
 #' @importFrom stats coef
-#' @return 
-#' 
-#' an `bi-projector` of type `regress`
-#' 
 #' @examples
-#' 
-#' Y <- matrix(rnorm(100*10), 10, 100)
-#' X <- matrix(rnorm(10*9), 10, 9)
-#' r <- regress(X,Y, intercept=FALSE)
-#' recon <- reconstruct(r)
-#' r <- regress(X,Y, intercept=TRUE)
-#' recon <- reconstruct(r)
-#' r <- regress(X,Y, intercept=TRUE, method="mridge")
-#' recon <- reconstruct(r)
+#' # Generate synthetic data
+#' Y <- matrix(rnorm(100 * 10), 10, 100)
+#' X <- matrix(rnorm(10 * 9), 10, 9)
+#' # Fit regression models and reconstruct the response matrix
+#' r_lm <- regress(X, Y, intercept = FALSE, method = "lm")
+#' recon_lm <- reconstruct(r_lm)
+#' r_mridge <- regress(X, Y, intercept = TRUE, method = "mridge", lambda = 0.001)
+#' recon_mridge <- reconstruct(r_mridge)
+#' r_enet <- regress(X, Y, intercept = TRUE, method = "enet", lambda = 0.001, alpha = 0.5)
+#' recon_enet <- reconstruct(r_enet)
+#' r_pls <- regress(X, Y, intercept = TRUE, method = "pls", ncomp = 5)
+#' recon_pls <- reconstruct(r_pls)
 regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"), 
                     intercept=FALSE, lambda=.001, alpha=0, ncomp=ceiling(ncol(X)/2), ...) {
   method <- match.arg(method)

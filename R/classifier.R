@@ -1,4 +1,26 @@
+#' Multiblock Bi-Projector Classifier
+#'
+#' Constructs a classifier for a multiblock bi-projector model that can generate predictions for new data points.
+#'
+#' @param x A fitted multiblock bi-projector model object.
+#' @param colind An optional vector of column indices used for prediction (default: NULL).
+#' @param labels A factor or vector of class labels for the training data.
+#' @param new_data An optional data matrix for which to generate predictions (default: NULL).
+#' @param block An optional block index for prediction (default: NULL).
+#' @param knn The number of nearest neighbors to consider in the classifier (default: 1).
+#' @param ... Additional arguments to be passed to the specific model implementation of `classifier`.
+#' @return A multiblock classifier object.
 #' @export
+#' @examples
+#' # Assuming `x` is a fitted multiblock bi-projector model object, and `labels` are class labels
+#' # for the training data, you can create a classifier as follows:
+#' my_classifier <- classifier.multiblock_biprojector(x, labels = labels)
+#'
+#' # You can then use this classifier to make predictions for new data points
+#' # (assuming `new_data` is a data matrix of new observations):
+#' predictions <- predict(my_classifier, new_data)
+#'
+#' @rdname classifier
 classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=NULL, 
                                               block=NULL, knn=1,...) {
   if (!is.null(colind)) {
@@ -27,29 +49,38 @@ classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=N
 }
 
 
-#' @export
-classifier.multiblock_projector <- function(x, colind=NULL, labels, new_data, block=NULL, knn=1,...) {
-  if (!is.null(colind)) {
-    chk::chk_true(length(colind) <= shape(x)[1])
-    chk::chk_true(all(colind>0))
-    if (!is.null(block)) {
-      rlang::abort("can either supply `colind` or `block` but not both")
-    }
-  }
-  
-  scores <- if (!is.null(colind)) {
-    scores <- partial_project(x, new_data, colind=colind)
-  } else if (!is.null(block)) {
-    chk::chk_whole_number(block)
-    project_block(x, new_data, block)
-  }
-  
-  new_classifier(x,labels,scores, colind, block=block, knn=knn, classes="multiblock_classifier")
-  
-}
+# 
+# classifier.multiblock_projector <- function(x, colind=NULL, labels, new_data, block=NULL, knn=1,...) {
+#   if (!is.null(colind)) {
+#     chk::chk_true(length(colind) <= shape(x)[1])
+#     chk::chk_true(all(colind>0))
+#     if (!is.null(block)) {
+#       rlang::abort("can either supply `colind` or `block` but not both")
+#     }
+#   }
+#   
+#   scores <- if (!is.null(colind)) {
+#     scores <- partial_project(x, new_data, colind=colind)
+#   } else if (!is.null(block)) {
+#     chk::chk_whole_number(block)
+#     project_block(x, new_data, block)
+#   }
+#   
+#   new_classifier(x,labels,scores, colind, block=block, knn=knn, classes="multiblock_classifier")
+#   
+# }
 
 
 
+#' Create a k-NN classifier for a discriminant projector
+#'
+#' Constructs a k-NN classifier for a discriminant projector, with an option to use a subset of the components.
+#' 
+#' @param x the discriminant projector object
+#' @param colind an optional vector specifying the column indices of the components to use for prediction (NULL by default)
+#' @param knn the number of nearest neighbors to consider in the k-NN classifier (default is 1)
+#' @param ... extra arguments
+#' @return a classifier object
 #' @export
 classifier.discriminant_projector <- function(x, colind=NULL, knn=1,...) {
   if (!is.null(colind)) {
@@ -61,24 +92,19 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1,...) {
 }
 
 
-#' construct a new classifier
+#' Create a new k-NN classifier for a model fit
+#'
+#' Constructs a new k-NN classifier based on a model fit and the corresponding scores matrix, with an option to use a subset of the components.
 #' 
-#' @keywords internal
 #' @param x the model fit
-#' @param labels the class labels
-#' @param colind the column indices
-#' @param knn the number of nearest neighbors for prediction
-#' @param classes addiitonal s3 classes 
-#' @param ... extra args
-#' 
-#' @examples 
-#' 
-#' X <- matrix(rnorm(10*10), 10,10)
-#' L <- letters[1:10]
-#' pc <- pca(X, ncomp=8)
-#' 
-#' cf <- new_classifier(pc, L, scores(pc), colind=2:7)
-#' predict(cf, X[,2:7], ncomp=3, metric="cosine")
+#' @param labels a vector of class labels corresponding to the data points
+#' @param scores a matrix of scores used for classification
+#' @param colind an optional vector specifying the column indices of the components to use for prediction (NULL by default)
+#' @param knn the number of nearest neighbors to consider in the k-NN classifier (default is 1)
+#' @param classes additional S3 classes to assign to the classifier object
+#' @param ... extra arguments
+#' @return a classifier object
+#' @keywords internal
 new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, ...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])

@@ -1,31 +1,33 @@
 #' Two-way (cross) projection to latent components
-#' 
-#' A projector that reduces two blocks of data, X and Y, yielding a pairs of weights for each component. 
-#' This structure can be used for example to store weights derived from canonical correlation analysis.
-#' 
-#' @details This class extends `projector` and therefore basic operations such as `project`, `shape`, `reprocess`, 
-#' and `coef` work, but by default it is assumed that the `X` block is primary. To access `Y` block operations, an 
-#' additional argument `source` must be supplied to the relevant functions, e.g. `coef(fit, source="Y")`
-#' 
-#' 
+#'
+#' A projector that reduces two blocks of data, X and Y, yielding a pair of weights for each component.
+#' This structure can be used, for example, to store weights derived from canonical correlation analysis.
+#'
+#' @details This class extends `projector` and therefore basic operations such as `project`, `shape`, `reprocess`,
+#' and `coef` work, but by default, it is assumed that the `X` block is primary. To access `Y` block operations, an
+#' additional argument `source` must be supplied to the relevant functions, e.g., `coef(fit, source = "Y")`
+#'
 #' @param vx the X coefficients
 #' @param vy the Y coefficients
 #' @param preproc_x the X pre-processor
 #' @param preproc_y the Y pre-processor
 #' @param ... extra parameters or results to store
 #' @param classes additional class names
+#' @return a cross_projector object
 #' @export
-#' 
-#' @examples 
-#' 
-#' X <- scale(matrix(rnorm(10*5), 10, 5))
-#' Y <- scale(matrix(rnorm(10*5), 10, 5))
-#' cres <- cancor(X,Y)
+#' @examples
+#' # Create two scaled matrices X and Y
+#' X <- scale(matrix(rnorm(10 * 5), 10, 5))
+#' Y <- scale(matrix(rnorm(10 * 5), 10, 5))
+#'
+#' # Perform canonical correlation analysis on X and Y
+#' cres <- cancor(X, Y)
 #' sx <- X %*% cres$xcoef
 #' sy <- Y %*% cres$ycoef
-#' canfit <- cross_projector(cres$xcoef, cres$ycoef, cor=cres$cor, 
-#' sx=sx, sy=sy, classes="cancor")
-#' 
+#'
+#' # Create a cross_projector object using the canonical correlation analysis results
+#' canfit <- cross_projector(cres$xcoef, cres$ycoef, cor = cres$cor,
+#'                           sx = sx, sy = sy, classes = "cancor")
 cross_projector <- function(vx, vy, preproc_x=prep(pass()), preproc_y=prep(pass()), 
                              ..., classes=NULL) {
   
@@ -67,14 +69,23 @@ project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
 
 }  
 
-#' get coefficients
-#' 
-#' extract X or Y coefficents for two-way projector
-#' 
-#' @param x the model fit
-#' @param source the source of the data (X or Y block)
+#' Project new data using a cross_projector object
+#'
+#' This function projects new data using a cross_projector object derived from a two-way projection of X and Y blocks.
+#'
+#' @param x a cross_projector object
+#' @param new_data the new data to be projected
+#' @param source the source of the data (X or Y block), either "X" or "Y"
+#' @param ... additional arguments passed to the function
+#' @return a projected matrix using the specified cross_projector object
 #' @export
-#' @rdname coef.cross_projector
+#' @examples
+#' # Assuming 'canfit' is a cross_projector object created using the cross_projector function
+#' new_X <- scale(matrix(rnorm(5 * 5), 5, 5))
+#' projected_X <- project(canfit, new_X, source = "X")
+#' 
+#' new_Y <- scale(matrix(rnorm(5 * 5), 5, 5))
+#' projected_Y <- project(canfit, new_Y, source = "Y")
 coef.cross_projector <- function(x, source=c("X", "Y"),...) {
   source <- match.arg(source)
   if (source == "X") {

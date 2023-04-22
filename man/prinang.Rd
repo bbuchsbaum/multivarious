@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{prinang}
 \alias{prinang}
-\title{principal angles}
+\title{Compute principal angles for a set of subspaces}
 \usage{
 prinang(fits)
 }
@@ -10,8 +10,13 @@ prinang(fits)
 \item{fits}{a list of \code{bi_projector} instances}
 }
 \value{
-a numeric vector of principle angles with length equal to minimum dimension of input subspaces
+a numeric vector of principal angles with length equal to the minimum dimension of input subspaces
 }
 \description{
-compute principal angles for a set of subspaces
+This function calculates the principal angles between subspaces derived from a list of bi_projector instances.
+}
+\examples{
+# Assuming 'fit1', 'fit2', and 'fit3' are bi_projector objects created using the svd_wrapper function
+fits_list <- list(fit1, fit2, fit3)
+principal_angles <- prinang(fits_list)
 }

@@ -1,21 +1,21 @@
-#' construct a `bi_projector` instance
-#' 
-#' 
-#' A `bi_projector` offers a two-way mapping from from samples (rows) to scores and from variables (columns) to components.
-#' Thus, one can project from D-dimensional input space to d-dimensional subspace. And one acan project (`project_vars`) from n-dimensional 
+#' Construct a bi_projector instance
+#'
+#' A bi_projector offers a two-way mapping from samples (rows) to scores and from variables (columns) to components.
+#' Thus, one can project from D-dimensional input space to d-dimensional subspace. And one can project (project_vars) from n-dimensional
 #' variable space to the d-dimensional component space. The singular value decomposition is a canonical example of such a two-way mapping.
-#' 
-#' 
+#'
 #' @inheritParams projector
-#' @param s the score matrix
-#' @param sdev the standard deviations of th score matrix
-#' @export
+#' @param s The score matrix
+#' @param sdev The standard deviations of the score matrix
+#' @param preproc (optional) A pre-processing pipeline, default is prep(pass())
+#' @param classes (optional) A character vector specifying the class attributes of the object, default is NULL
+#' @return A bi_projector object
 #' @examples
-#' X <- matrix(rnorm(10*20), 10, 20)
+#' X <- matrix(rnorm(1020), 10, 20)
 #' svdfit <- svd(X)
-#' 
-#' p <- bi_projector(svdfit$v, s = svdfit$u %*% diag(svdfit$d), sdev=svdfit$d)
-#' 
+#'
+#' p <- bi_projector(svdfit$v, s = svdfit$u %% diag(svdfit$d), sdev=svdfit$d)
+#' @export
 bi_projector <- function(v, s, sdev, preproc=prep(pass()), classes=NULL, ...) {
   chk::vld_matrix(v)
   chk::vld_matrix(s)
@@ -51,7 +51,7 @@ project_vars.bi_projector <- function(x, new_data,...) {
   t(new_data) %*% (sc) %*% diag(1/variance, nrow=length(variance), ncol=length(variance))
 }
 
-
+#' @keywords internal
 genreconstruct <- function(x, comp, rowind, colind) {
   ip <- inverse_projection(x)
   out <- scores(x)[rowind,comp,drop=FALSE] %*% ip[comp,,drop=FALSE][,colind,drop=FALSE]
@@ -76,6 +76,8 @@ residuals.bi_projector <- function(x, ncomp=ncomp(x), xorig,...) {
   recon <- reconstruct(x, comp=1:ncomp)
   xorig - recon
 }
+
+
 
 ## @export
 #transpose.bi_projector <- function(x) {

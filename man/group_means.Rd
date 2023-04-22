@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{group_means}
 \alias{group_means}
-\title{compute column-wise mean in \code{X} for each factor level of \code{Y}}
+\title{Compute column-wise mean in X for each factor level of Y}
 \usage{
 group_means(Y, X)
 }
@@ -11,6 +11,17 @@ group_means(Y, X)
 
 \item{X}{a data matrix from which to compute means}
 }
+\value{
+a matrix with row names corresponding to factor levels of Y and column-wise means for each factor level
+}
 \description{
-compute group means
+This function computes group means for each factor level of Y in the provided data matrix X.
+}
+\examples{
+# Example data
+X <- matrix(rnorm(50), 10, 5)
+Y <- factor(rep(1:2, each = 5))
+
+# Compute group means
+gm <- group_means(Y, X)
 }

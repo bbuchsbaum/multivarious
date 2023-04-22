@@ -2,15 +2,35 @@
 % Please edit documentation in R/all_generic.R
 \name{partial_projector}
 \alias{partial_projector}
-\title{construct a partial projector}
+\title{Construct a partial projector}
 \usage{
 partial_projector(x, colind, ...)
 }
 \arguments{
-\item{x}{the original \code{projector} instance}
+\item{x}{The original \code{projector} instance, typically an object of class \code{bi_projector} or any other class that implements a \code{partial_projector} method}
 
-\item{colind}{the column indices to select in the projection matrix}
+\item{colind}{A numeric vector of column indices to select in the projection matrix. These indices correspond to the variables used for the partial projector}
+
+\item{...}{Additional arguments passed to the underlying \code{partial_projector} method}
+}
+\value{
+A new \code{projector} instance, with the same class as the original object, that is restricted to the specified subset of input columns
 }
 \description{
-Make a new projector instance restricted to a subset of input columns
+Create a new projector instance restricted to a subset of input columns. This function allows for the generation of
+a new projection object that focuses only on the specified columns, enabling the projection of data using a limited
+set of variables.
+}
+\examples{
+# Example with the bi_projector class
+X <- matrix(rnorm(10*20), 10, 20)
+svdfit <- svd(X)
+p <- bi_projector(svdfit$v, s = svdfit$u \%*\% diag(svdfit$d), sdev=svdfit$d)
+
+# Create a partial projector using only the first 10 variables
+colind <- 1:10
+partial_p <- partial_projector(p, colind)
+}
+\seealso{
+\code{\link{bi_projector}} for an example of a class that implements a \code{partial_projector} method
 }

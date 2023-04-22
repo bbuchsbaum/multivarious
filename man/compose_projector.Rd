@@ -2,17 +2,20 @@
 % Please edit documentation in R/all_generic.R
 \name{compose_projector}
 \alias{compose_projector}
-\title{compose two projectors}
+\title{Compose Two Projectors}
 \usage{
 compose_projector(x, y, ...)
 }
 \arguments{
-\item{x}{the first projector}
+\item{x}{A fitted model object (e.g., \code{projector}) that has been fit to a dataset and will be applied first in the composition.}
 
-\item{y}{the second projector}
+\item{y}{A second fitted model object (e.g., \code{projector}) that has been fit to a dataset and will be applied after the first projector.}
 
-\item{...}{extra args}
+\item{...}{Additional arguments to be passed to the specific model implementation of \code{compose_projector}.}
+}
+\value{
+A new \code{projector} object representing the composed projector, which can be used to project data onto the combined subspace.
 }
 \description{
-compose two projectors
+Combine two projector models into a single projector by sequentially applying the first projector and then the second projector.
 }

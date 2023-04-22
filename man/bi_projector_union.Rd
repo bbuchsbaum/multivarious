@@ -12,7 +12,7 @@ bi_projector_union(fits, outer_block_indices = NULL)
 \item{outer_block_indices}{list of indices for the outer blocks}
 }
 \description{
-given a set of \verb{bi_projector`` fits, join the together to create a new }bi_projector`` instance.
+given a set of \code{bi_projector} fits, join the together to create a new \code{bi_projector} instance.
 The new weights and associated scores will simply be concatenated.
 }
 \examples{

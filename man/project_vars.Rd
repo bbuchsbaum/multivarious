@@ -2,18 +2,32 @@
 % Please edit documentation in R/all_generic.R
 \name{project_vars}
 \alias{project_vars}
-\title{new variable projection}
+\title{Project one or more variables onto a subspace}
 \usage{
 project_vars(x, new_data, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit, typically an object of a class that implements a \code{project_vars} method}
 
-\item{new_data}{a matrix or vector of new observations(s) with the same number of rows as the original data.}
+\item{new_data}{A matrix or vector of new observation(s) with the same number of rows as the original data}
 
-\item{...}{extra args}
+\item{...}{Additional arguments passed to the underlying \code{project_vars} method}
+}
+\value{
+A matrix or vector of the projected variables in the subspace
 }
 \description{
-project one or more \emph{variables} onto a subspace. This is sometimes called supplementary variable projection and can be computed
-for a biorthogonal decomposition such as SVD.
+This function projects one or more variables onto a subspace. It is often called supplementary variable
+projection and can be computed for a biorthogonal decomposition, such as Singular Value Decomposition (SVD).
+}
+\examples{
+# Example with a custom class that implements a project_vars method
+# Assume that MyModel is a class that implements a project_vars method
+# Fit the model and project the variables
+mymodel_fit <- MyModel(...)
+new_data <- ...
+projected_vars <- project_vars(mymodel_fit, new_data)
+}
+\seealso{
+\code{\link{project}} for the generic projection function for samples
 }

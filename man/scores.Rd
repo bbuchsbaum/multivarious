@@ -2,15 +2,22 @@
 % Please edit documentation in R/all_generic.R
 \name{scores}
 \alias{scores}
-\title{get the component scores}
+\title{Retrieve the component scores}
 \usage{
 scores(x, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{The model fit object.}
 
-\item{...}{extra args}
+\item{...}{Additional arguments passed to the method.}
+}
+\value{
+A matrix of factor scores, with rows corresponding to samples and columns to components.
 }
 \description{
-Extract the factor score matrix from a fit. These are the projections of the data onto the components.
+Extract the factor score matrix from a fitted model. The factor scores represent the projections of the
+data onto the components, which can be used for further analysis or visualization.
+}
+\seealso{
+\code{\link{project}} for projecting new data onto the components.
 }

@@ -2,19 +2,21 @@
 % Please edit documentation in R/all_generic.R
 \name{partial_inverse_projection}
 \alias{partial_inverse_projection}
-\title{inverse projection of a columnwise subset of component matrix (e.g. a sub-block)}
+\title{Partial Inverse Projection of a Columnwise Subset of Component Matrix}
 \usage{
 partial_inverse_projection(x, colind, ...)
 }
 \arguments{
-\item{x}{the model fit}
+\item{x}{A fitted model object, such as a \code{projector}, that has been fit to a dataset.}
 
-\item{colind}{the column indices}
+\item{colind}{A numeric vector specifying the column indices of the component matrix to consider for the partial inverse projection.}
 
-\item{...}{extra args}
+\item{...}{Additional arguments to be passed to the specific model implementation of \code{partial_inverse_projection}.}
+}
+\value{
+A matrix representing the partial inverse projection.
 }
 \description{
-If the component matrix is orthogonal, then the inverse projection is the transpose of the component matrix.
-However, even when the full component matrix is orthogonal, there is no guarantee that the \emph{partial} component matrix is
-orthogonal.
+Compute the inverse projection of a columnwise subset of the component matrix (e.g., a sub-block).
+Even when the full component matrix is orthogonal, there is no guarantee that the partial component matrix is orthogonal.
 }
