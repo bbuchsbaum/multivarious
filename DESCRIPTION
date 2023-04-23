@@ -34,3 +34,4 @@ Suggests:
     testthat,
     magrittr
 URL: https://bbuchsbaum.github.io/multivarious/
+Remotes: https://github.com/bbuchsbaum/deflist
