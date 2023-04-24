@@ -1,25 +1,31 @@
 
 
-#' Create a multiblock projector
+#' Create a Multiblock Projector
 #'
-#' Constructs a multiblock projector using the given component matrix (v), a preprocessing function, and a list of block indices.
+#' Constructs a multiblock projector using the given component matrix (`v`), a preprocessing function, and a list of block indices. 
+#' This allows for the projection of multiblock data, where each block represents a different set of variables or features.
 #'
-#' @param v the component matrix
-#' @param preproc a function for preprocessing the data (default is a pass-through)
-#' @param ... extra arguments
-#' @param block_indices a list of numeric vectors specifying the indices of each data block
-#' @param classes additional S3 classes to assign to the projector object
-#' @return a multiblock projector object
+#' @param v A matrix of components with dimensions `nrow(v)` by `ncol(v)` (number of columns = number of components).
+#' @param preproc A pre-processing function for the data (default is a pass-through with `prep(pass())`).
+#' @param block_indices A list of numeric vectors specifying the indices of each data block.
+#' @param classes (optional) A character vector specifying the class attributes of the object, default is NULL.
+#' @param ... Extra arguments.
+#' @return A `multiblock_projector` object.
+#'
+#' @seealso projector
 #' @export
 #' @examples
 #' # Generate some example data
 #' X1 <- matrix(rnorm(10 * 5), 10, 5)
 #' X2 <- matrix(rnorm(10 * 5), 10, 5)
 #' X <- cbind(X1, X2)
+#'
 #' # Compute PCA on the combined data
 #' pc <- pca(X, ncomp = 8)
+#'
 #' # Create a multiblock projector using PCA components and block indices
 #' mb_proj <- multiblock_projector(pc$v, block_indices = list(1:5, 6:10))
+#'
 #' # Project the multiblock data using the multiblock projector
 #' mb_scores <- project(mb_proj, X)
 multiblock_projector <- function(v, preproc=prep(pass()), ..., block_indices, classes=NULL) {
@@ -31,18 +37,22 @@ multiblock_projector <- function(v, preproc=prep(pass()), ..., block_indices, cl
 }
 
 
-#' Create a multiblock bi-projector
+#' Create a Multiblock Bi-Projector
 #'
-#' Constructs a multiblock bi-projector using the given component matrix (v), score matrix (s), singular values (sdev), a preprocessing function, and a list of block indices.
+#' Constructs a multiblock bi-projector using the given component matrix (`v`), score matrix (`s`), singular values (`sdev`),
+#' a preprocessing function, and a list of block indices. This allows for the projection of multiblock data, where each block 
+#' represents a different set of variables or features, with two-way mapping from samples to scores and from variables to components.
 #'
-#' @param v the component matrix
-#' @param s the score matrix
-#' @param sdev the singular values
-#' @param preproc a function for preprocessing the data (default is a pass-through)
-#' @param ... extra arguments
-#' @param block_indices a list of numeric vectors specifying the indices of each data block
-#' @param classes additional S3 classes to assign to the bi-projector object
-#' @return a multiblock bi-projector object
+#' @param v A matrix of components with dimensions `nrow(v)` by `ncol(v)` (number of columns = number of components).
+#' @param s A matrix of scores.
+#' @param sdev A numeric vector of singular values.
+#' @param preproc A pre-processing function for the data (default is a pass-through with `prep(pass())`).
+#' @param block_indices A list of numeric vectors specifying the indices of each data block.
+#' @param classes (optional) A character vector specifying the class attributes of the object, default is NULL.
+#' @param ... Extra arguments.
+#' @return A `multiblock_biprojector` object.
+#'
+#' @seealso bi_projector, multiblock_projector
 #' @export
 multiblock_biprojector <- function(v, s, sdev, preproc=prep(pass()), ..., block_indices, classes=NULL) {
   sumind <- sum(sapply(block_indices, length))

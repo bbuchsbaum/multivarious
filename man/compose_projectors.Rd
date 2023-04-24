@@ -2,29 +2,35 @@
 % Please edit documentation in R/composed_projector.R
 \name{compose_projectors}
 \alias{compose_projectors}
-\title{projector composition}
+\title{Projector Composition}
 \usage{
 compose_projectors(...)
 }
 \arguments{
-\item{...}{the sequence of projectors}
+\item{...}{The sequence of \code{projector} objects to be composed.}
 }
 \value{
-a class of type \code{composed_projector} that extends \code{function}
+A \code{composed_projector} object that extends the \code{function} class, allowing the composed projectors to be applied to input data.
 }
 \description{
-compose a sequence of \code{projector}s in forward order
+Compose a sequence of \code{projector} objects in forward order.
+This function allows the composition of multiple projectors, applying them sequentially to the input data.
 }
 \examples{
- 
- X <- matrix(rnorm(20*20), 20, 20)
- pca1 <- pca(X, ncomp=10)
- X2 <- scores(pca1)
- pca2 <- pca(X2, ncomp=4)
- 
- cproj <- compose_projectors(pca1,pca2)
+# Create two PCA projectors and compose them
+X <- matrix(rnorm(20*20), 20, 20)
+pca1 <- pca(X, ncomp=10)
+X2 <- scores(pca1)
+pca2 <- pca(X2, ncomp=4)
 
- stopifnot(ncol(cproj(X)) == 4)
- all.equal(project(cproj, X),cproj(X))
- 
+# Compose the PCA projectors
+cproj <- compose_projectors(pca1, pca2)
+
+# Ensure the output of the composed projectors has the expected dimensions
+stopifnot(ncol(cproj(X)) == 4)
+# Check that the composed projectors work as expected
+all.equal(project(cproj, X), cproj(X))
+}
+\seealso{
+\code{\link{projector}}, \code{\link{project}}
 }

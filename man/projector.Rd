@@ -2,28 +2,28 @@
 % Please edit documentation in R/projector.R
 \name{projector}
 \alias{projector}
-\title{construct a \code{projector} instance}
+\title{Construct a \code{projector} instance}
 \usage{
 projector(v, preproc = prep(pass()), ..., classes = NULL)
 }
 \arguments{
-\item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
+\item{v}{A matrix of coefficients with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
 
-\item{preproc}{a prepped pre-processing object (default is the no-processing \code{pass()} pre_processor)}
+\item{preproc}{A prepped pre-processing object. Default is the no-processing \code{pass()} preprocessor.}
 
-\item{...}{extra args}
+\item{...}{Extra arguments to be stored in the \code{projector} object.}
 
-\item{classes}{additional class information used for creating subtypes of \code{projector}}
+\item{classes}{Additional class information used for creating subtypes of \code{projector}. Default is NULL.}
 }
 \value{
-a instance of type \code{projector}
+An instance of type \code{projector}.
 }
 \description{
 A \code{projector} maps a matrix from an N-dimensional space to d-dimensional space, where \code{d} may be less than \code{N}.
-The projection matrix, \code{v} is not necessarily orthogonal.
+The projection matrix, \code{v}, is not necessarily orthogonal. This function constructs a \code{projector} instance which can be
+used for various dimensionality reduction techniques like PCA, LDA, etc.
 }
 \examples{
- 
 X <- matrix(rnorm(10*10), 10, 10)
 svdfit <- svd(X)
 p <- projector(svdfit$v)

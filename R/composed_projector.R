@@ -1,24 +1,29 @@
-
-#'  projector composition
-#' 
-#'  compose a sequence of `projector`s in forward order
+#' Projector Composition
 #'
-#' @param ... the sequence of projectors
-#'  
-#' @return a class of type `composed_projector` that extends `function`
+#' Compose a sequence of `projector` objects in forward order.
+#' This function allows the composition of multiple projectors, applying them sequentially to the input data.
+#'
+#' @param ... The sequence of `projector` objects to be composed.
+#'
+#' @return A `composed_projector` object that extends the `function` class, allowing the composed projectors to be applied to input data.
 #' @export
-#' @examples 
-#'  
-#'  X <- matrix(rnorm(20*20), 20, 20)
-#'  pca1 <- pca(X, ncomp=10)
-#'  X2 <- scores(pca1)
-#'  pca2 <- pca(X2, ncomp=4)
-#'  
-#'  cproj <- compose_projectors(pca1,pca2)
+#' @seealso \code{\link{projector}}, \code{\link{project}}
 #'
-#'  stopifnot(ncol(cproj(X)) == 4)
-#'  all.equal(project(cproj, X),cproj(X))
-#'  
+#' @examples
+#' # Create two PCA projectors and compose them
+#' X <- matrix(rnorm(20*20), 20, 20)
+#' pca1 <- pca(X, ncomp=10)
+#' X2 <- scores(pca1)
+#' pca2 <- pca(X2, ncomp=4)
+#'
+#' # Compose the PCA projectors
+#' cproj <- compose_projectors(pca1, pca2)
+#'
+#' # Ensure the output of the composed projectors has the expected dimensions
+#' stopifnot(ncol(cproj(X)) == 4)
+#' # Check that the composed projectors work as expected
+#' all.equal(project(cproj, X), cproj(X))
+#' @export
 compose_projectors <- function(...) {
   args <- list(...)
   sapply(args, function(p) chk::chk_s3_class(p, "projector"))
@@ -79,5 +84,33 @@ project.composed_projector <- function(x, new_data,...) {
 #   chk::check_dim(new_data, ncol, length(colind))
 #   x(new_data, colind)
 # }
+
+#' Pretty Print Method for `composed_projector` Objects
+#'
+#' Display a human-readable summary of a `composed_projector` object, including information about the number and order of projectors.
+#'
+#' @param x A `composed_projector` object.
+#' @param ... Additional arguments passed to `print()`.
+#'
+#' @examples
+#' # Create two PCA projectors and compose them
+#' X <- matrix(rnorm(20*20), 20, 20)
+#' pca1 <- pca(X, ncomp=10)
+#' X2 <- scores(pca1)
+#' pca2 <- pca(X2, ncomp=4)
+#' cproj <- compose_projectors(pca1, pca2)
+#' print(cproj)
+#' @export
+print.composed_projector <- function(x, ...) {
+  n_proj <- length(unclass(x))
+  cat("Composed projector object:\n")
+  cat("  Number of projectors: ", n_proj, "\n")
+  cat("  Projector order:\n")
+  for (i in seq_len(n_proj)) {
+    cat("    ", i, ": ", class(unclass(x)[[i]]$projector)[1], "\n")
+  }
+  invisible(x)
+}
+
 
 

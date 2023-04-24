@@ -2,7 +2,7 @@
 % Please edit documentation in R/discriminant_projector.R
 \name{discriminant_projector}
 \alias{discriminant_projector}
-\title{construct a discriminant projector}
+\title{Construct a Discriminant Projector}
 \usage{
 discriminant_projector(
   v,
@@ -15,7 +15,7 @@ discriminant_projector(
 )
 }
 \arguments{
-\item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
+\item{v}{A matrix of coefficients with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
 
 \item{s}{The score matrix}
 
@@ -23,12 +23,31 @@ discriminant_projector(
 
 \item{preproc}{(optional) A pre-processing pipeline, default is prep(pass())}
 
-\item{labels}{the training labels}
+\item{labels}{A factor or character vector of class labels corresponding to the rows of the score matrix \code{s}.}
 
 \item{classes}{(optional) A character vector specifying the class attributes of the object, default is NULL}
 
-\item{...}{extra args}
+\item{...}{Extra arguments to be stored in the \code{projector} object.}
+}
+\value{
+A \code{discriminant_projector} object.
 }
 \description{
-a \code{discriminant_projector} instance extending \code{bi_projeector} whose projection maximizes class separation.
+A \code{discriminant_projector} is an instance that extends \code{bi_projector} with a projection that maximizes class separation.
+This can be useful for dimensionality reduction techniques that take class labels into account, such as Linear Discriminant Analysis (LDA).
+}
+\examples{
+# Simulate data and labels
+set.seed(123)
+X <- matrix(rnorm(100 * 10), 100, 10)
+labels <- factor(rep(1:2, each = 50))
+
+# Perform LDA and create a discriminant projector
+library(MASS)
+lda_fit <- lda(X, labels)
+
+dp <- discriminant_projector(lda_fit$scaling, s = lda_fit$scores, sdev = lda_fit$svd, labels = labels)
+}
+\seealso{
+bi_projector
 }

@@ -338,8 +338,7 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   
 }
 
-#' predict with a random forest classifier
-#' 
+
 #' @export
 predict.rf_classifier <- function(object, new_data, ncomp=NULL,
                                colind=NULL, ...) {
@@ -352,5 +351,22 @@ predict.rf_classifier <- function(object, new_data, ncomp=NULL,
   cls <- predict(object$rfres, proj)
   prob <- predict(object$rfres, proj, type="prob")
   list(class=cls, prob=prob)
+}
+
+#' Pretty Print Method for `classifier` Objects
+#'
+#' Display a human-readable summary of a `classifier` object, including information about the k-NN classifier, the model fit, and the dimensions of the scores matrix.
+#'
+#' @param x A `classifier` object.
+#' @param ... Additional arguments passed to `print()`.
+#'
+#' @export
+print.classifier <- function(x, ...) {
+  cat("classifier object:\n")
+  cat("  k-NN classifier with k =", x$knn, "\n")
+  cat("  Model fit: \n")
+  print(x$projector)
+  cat("  Scores matrix dimensions: ", nrow(x$scores), "x", ncol(x$scores), "\n")
+  invisible(x)
 }
 

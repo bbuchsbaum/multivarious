@@ -7,7 +7,7 @@
 bi_projector(v, s, sdev, preproc = prep(pass()), classes = NULL, ...)
 }
 \arguments{
-\item{v}{a matrix of coefficients with dimension \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
+\item{v}{A matrix of coefficients with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
 
 \item{s}{The score matrix}
 
@@ -17,7 +17,7 @@ bi_projector(v, s, sdev, preproc = prep(pass()), classes = NULL, ...)
 
 \item{classes}{(optional) A character vector specifying the class attributes of the object, default is NULL}
 
-\item{...}{extra args}
+\item{...}{Extra arguments to be stored in the \code{projector} object.}
 }
 \value{
 A bi_projector object

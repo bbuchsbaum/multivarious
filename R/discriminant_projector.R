@@ -1,11 +1,26 @@
 
-#' construct a discriminant projector
-#' 
-#' a `discriminant_projector` instance extending `bi_projeector` whose projection maximizes class separation.
-#' 
+#' Construct a Discriminant Projector
+#'
+#' A `discriminant_projector` is an instance that extends `bi_projector` with a projection that maximizes class separation.
+#' This can be useful for dimensionality reduction techniques that take class labels into account, such as Linear Discriminant Analysis (LDA).
+#'
 #' @inheritParams bi_projector
-#' @param labels the training labels
-#' 
+#' @param labels A factor or character vector of class labels corresponding to the rows of the score matrix `s`.
+#' @return A `discriminant_projector` object.
+#'
+#' @seealso bi_projector
+#' @export
+#' @examples
+#' # Simulate data and labels
+#' set.seed(123)
+#' X <- matrix(rnorm(100 * 10), 100, 10)
+#' labels <- factor(rep(1:2, each = 50))
+#'
+#' # Perform LDA and create a discriminant projector
+#' library(MASS)
+#' lda_fit <- lda(X, labels)
+#'
+#' dp <- discriminant_projector(lda_fit$scaling, s = lda_fit$scores, sdev = lda_fit$svd, labels = labels)
 #' @export
 discriminant_projector <- function(v, s, sdev, preproc=prep(pass()), labels, classes=NULL, ...) {
   

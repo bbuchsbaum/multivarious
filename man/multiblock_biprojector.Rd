@@ -2,7 +2,7 @@
 % Please edit documentation in R/multiblock.R
 \name{multiblock_biprojector}
 \alias{multiblock_biprojector}
-\title{Create a multiblock bi-projector}
+\title{Create a Multiblock Bi-Projector}
 \usage{
 multiblock_biprojector(
   v,
@@ -15,23 +15,28 @@ multiblock_biprojector(
 )
 }
 \arguments{
-\item{v}{the component matrix}
+\item{v}{A matrix of components with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components).}
 
-\item{s}{the score matrix}
+\item{s}{A matrix of scores.}
 
-\item{sdev}{the singular values}
+\item{sdev}{A numeric vector of singular values.}
 
-\item{preproc}{a function for preprocessing the data (default is a pass-through)}
+\item{preproc}{A pre-processing function for the data (default is a pass-through with \code{prep(pass())}).}
 
-\item{...}{extra arguments}
+\item{...}{Extra arguments.}
 
-\item{block_indices}{a list of numeric vectors specifying the indices of each data block}
+\item{block_indices}{A list of numeric vectors specifying the indices of each data block.}
 
-\item{classes}{additional S3 classes to assign to the bi-projector object}
+\item{classes}{(optional) A character vector specifying the class attributes of the object, default is NULL.}
 }
 \value{
-a multiblock bi-projector object
+A \code{multiblock_biprojector} object.
 }
 \description{
-Constructs a multiblock bi-projector using the given component matrix (v), score matrix (s), singular values (sdev), a preprocessing function, and a list of block indices.
+Constructs a multiblock bi-projector using the given component matrix (\code{v}), score matrix (\code{s}), singular values (\code{sdev}),
+a preprocessing function, and a list of block indices. This allows for the projection of multiblock data, where each block
+represents a different set of variables or features, with two-way mapping from samples to scores and from variables to components.
+}
+\seealso{
+bi_projector, multiblock_projector
 }

@@ -79,22 +79,26 @@ residuals.bi_projector <- function(x, ncomp=ncomp(x), xorig,...) {
 
 
 
-## @export
-#transpose.bi_projector <- function(x) {
-#  bi_projector(scores(x), coef(x), preproc=pass(), classes=c("trasnposed_bi_projector", "bi_projector"))
-#}
-
-## X = UDV
-## XT = VTDTU
-
+#' Pretty Print S3 Method for bi_projector Class
+#'
+#' @param x A `bi_projector` object
+#' @param ... Additional arguments passed to the print function
+#'
 #' @export
-print.projector <- function(x,...) {
-  cat("bi-projector: ", paste0(class(x)), "\n")
+print.bi_projector <- function(x, ...) {
+  cat("A bi_projector object with the following properties:\n\n")
   
-  cat("input dim: ", nrow(components(x)), "\n")
-  cat("output dim: ", ncol(components(x)), "\n")
+  cat("Dimensions of the weights (v) matrix:\n")
+  cat("  Rows: ", nrow(x$v), " Columns: ", ncol(x$v), "\n")
   
-  cat("dual input dim: ", ncol(scores(x)), "\n")
-  cat("dual output dim: ", nrow(components(x)), "\n")
+  cat("\nDimensions of the scores (s) matrix:\n")
+  cat("  Rows: ", nrow(x$s), " Columns: ", ncol(x$s), "\n")
+  
+  cat("\nLength of the standard deviations (sdev) vector:\n")
+  cat("  Length: ", length(x$sdev), "\n")
+  
+  cat("\nPreprocessing information:\n")
+  print(x$preproc, ...)
+  
+  invisible(x)
 }
-

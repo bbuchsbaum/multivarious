@@ -1,23 +1,29 @@
 
 
-#' a union of concatenated `bi_projector` fits
-#' 
-#' given a set of `bi_projector` fits, join the together to create a new `bi_projector` instance.
-#' The new weights and associated scores will simply be concatenated.
-#' 
-#' @param fits a list of `bi_projector` instances with the same row space.
-#' @param outer_block_indices list of indices for the outer blocks
-#' 
-#' @examples 
-#' 
-#' X1 <- matrix(rnorm(5*5), 5,5)
-#' X2 <- matrix(rnorm(5*5), 5,5)
-#' 
+#' A Union of Concatenated `bi_projector` Fits
+#'
+#' This function combines a set of `bi_projector` fits into a single `bi_projector` instance.
+#' The new instance's weights and associated scores are obtained by concatenating the weights
+#' and scores of the input fits.
+#'
+#' @param fits A list of `bi_projector` instances with the same row space. These instances
+#'   will be combined to create a new `bi_projector` instance.
+#' @param outer_block_indices An optional list of indices for the outer blocks. If not provided,
+#'   the function will compute the indices based on the dimensions of the input fits.
+#'
+#' @examples
+#'
+#' X1 <- matrix(rnorm(5*5), 5, 5)
+#' X2 <- matrix(rnorm(5*5), 5, 5)
+#'
 #' bpu <- bi_projector_union(list(pca(X1), pca(X2)))
-#' 
+#'
+#' @return A new `bi_projector` instance with concatenated weights, scores, and other
+#'   properties from the input `bi_projector` instances.
 #' @export
+#' @import chk
 bi_projector_union <- function(fits, outer_block_indices=NULL) {
-  chk::chk_all(fits, chk_s3_class, "bi_projector")
+  chk::chk_all(fits, chk::chk_s3_class, "bi_projector")
   
   if (is.null(outer_block_indices)) {
     nv <- sapply(fits, function(f) shape(f)[1])
@@ -46,4 +52,35 @@ bi_projector_union <- function(fits, outer_block_indices=NULL) {
     classes="bi_projector_union"
   )
     
+}
+
+#' Pretty Print S3 Method for bi_projector_union Class
+#'
+#' @param x A `bi_projector_union` object
+#' @param ... Additional arguments passed to the print function
+#'
+#' @export
+print.bi_projector_union <- function(x, ...) {
+  cat("A bi_projector_union object with the following properties:\n\n")
+  
+  cat("Combined bi_projector instances:\n")
+  num_instances <- length(x$fits)
+  cat("  Number of instances: ", num_instances, "\n")
+  
+  cat("\nDimensions of the weights (v) matrix:\n")
+  cat("  Rows: ", nrow(x$v), " Columns: ", ncol(x$v), "\n")
+  
+  cat("\nDimensions of the scores (s) matrix:\n")
+  cat("  Rows: ", nrow(x$s), " Columns: ", ncol(x$s), "\n")
+  
+  cat("\nLength of the standard deviations (sdev) vector:\n")
+  cat("  Length: ", length(x$sdev), "\n")
+  
+  cat("\nPreprocessing information:\n")
+  print(x$preproc, ...)
+  
+  cat("\nOuter block indices:\n")
+  print(x$outer_block_indices, ...)
+  
+  invisible(x)
 }

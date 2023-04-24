@@ -1,24 +1,23 @@
-#' construct a `projector` instance
-#' 
+#' Construct a `projector` instance
+#'
 #' A `projector` maps a matrix from an N-dimensional space to d-dimensional space, where `d` may be less than `N`.
-#' The projection matrix, `v` is not necessarily orthogonal.
-#' 
-#' @export
-#' @param v a matrix of coefficients with dimension `nrow(v)` by `ncol(v)` (number of columns = number of components)
-#' @param preproc a prepped pre-processing object (default is the no-processing `pass()` pre_processor)
-#' @param classes additional class information used for creating subtypes of `projector`
-#' @param ... extra args
-#' 
-#' 
-#' @return 
-#' a instance of type `projector`
-#' @export
-#' @examples  
+#' The projection matrix, `v`, is not necessarily orthogonal. This function constructs a `projector` instance which can be
+#' used for various dimensionality reduction techniques like PCA, LDA, etc.
+#'
+#' @param v A matrix of coefficients with dimensions `nrow(v)` by `ncol(v)` (number of columns = number of components)
+#' @param preproc A prepped pre-processing object. Default is the no-processing `pass()` preprocessor.
+#' @param classes Additional class information used for creating subtypes of `projector`. Default is NULL.
+#' @param ... Extra arguments to be stored in the `projector` object.
+#'
+#' @return An instance of type `projector`.
+#'
+#' @examples
 #' X <- matrix(rnorm(10*10), 10, 10)
 #' svdfit <- svd(X)
 #' p <- projector(svdfit$v)
 #' proj <- project(p, X)
-#' 
+#'
+#' @export
 projector <- function(v, preproc=prep(pass()), ..., classes=NULL) {
   chk::chkor(chk::chk_matrix(v), chk::chk_s4_class(v, "Matrix"))
   chk::chk_s3_class(preproc, "pre_processor")
@@ -194,6 +193,25 @@ truncate.partial_projector <- function(x, ncomp) {
 #' @export
 partial_project.partial_projector <- function(x, new_data, colind, ...) {
   stop("not implemented")
+}
+
+#' Pretty Print Method for `projector` Objects
+#'
+#' Display a human-readable summary of a `projector` object, including information about the dimensions of the projection matrix and the pre-processing pipeline.
+#'
+#' @param x A `projector` object.
+#' @param ... Additional arguments passed to `print()`.
+#'
+#' @examples
+#' X <- matrix(rnorm(10*10), 10, 10)
+#' svdfit <- svd(X)
+#' p <- projector(svdfit$v)
+#' print(p)
+#' @export
+print.projector <- function(x, ...) {
+  cat("projector object:\n")
+  cat("  Projection matrix dimensions: ", nrow(x$v), "x", ncol(x$v), "\n")
+  invisible(x)
 }
 
 
