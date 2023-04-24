@@ -136,9 +136,6 @@
     <loc>https://bbuchsbaum.github.io/multivarious/reference/predict.classifier.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/predict.rf_classifier.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/prep.html</loc>
   </url>
   <url>
@@ -149,6 +146,21 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/prinang.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.bi_projector.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.bi_projector_union.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.classifier.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.composed_projector.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.projector.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/project.html</loc>
