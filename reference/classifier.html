@@ -62,10 +62,7 @@ Constructs a classifier for a multiblock bi-projector model that can generate pr
 <span>  block <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  knn <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  <span class="va">...</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># S3 method for projector</span></span>
-<span><span class="fu">classifier</span><span class="op">(</span><span class="va">x</span>, colind <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">labels</span>, <span class="va">new_data</span>, knn <span class="op">=</span> <span class="fl">1</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -83,11 +80,11 @@ Constructs a classifier for a multiblock bi-projector model that can generate pr
 
 
 <dt>labels</dt>
-<dd><p>the labels associated with the rows of the projected data (see <code>new_data</code>)</p></dd>
+<dd><p>A factor or vector of class labels for the training data.</p></dd>
 
 
 <dt>new_data</dt>
-<dd><p>reference data associated with <code>labels</code> and to be projected into subspace (required).</p></dd>
+<dd><p>An optional data matrix for which to generate predictions (default: NULL).</p></dd>
 
 
 <dt>block</dt>
@@ -95,7 +92,7 @@ Constructs a classifier for a multiblock bi-projector model that can generate pr
 
 
 <dt>knn</dt>
-<dd><p>the number of nearest neighbors to use when classifying a new point.</p></dd>
+<dd><p>The number of nearest neighbors to consider in the classifier (default: 1).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -119,12 +116,6 @@ Constructs a classifier for a multiblock bi-projector model that can generate pr
 <span class="r-in"><span><span class="co"># (assuming `new_data` is a data matrix of new observations):</span></span></span>
 <span class="r-in"><span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">my_classifier</span>, <span class="va">new_data</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> object 'my_classifier' not found</span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="va">pcres</span> <span class="op">&lt;-</span> <span class="fu"><a href="pca.html">pca</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>,<span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">cfier</span> <span class="op">&lt;-</span> <span class="fu">classifier</span><span class="op">(</span><span class="va">pcres</span>, labels<span class="op">=</span><span class="va">iris</span><span class="op">[</span>,<span class="fl">5</span><span class="op">]</span>, new_data<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">cfier</span>, <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
