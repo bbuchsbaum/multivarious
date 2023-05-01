@@ -1,8 +1,9 @@
 pandoc: 2.19.2
 pkgdown: 2.0.7
 pkgdown_sha: ~
-articles: {}
-last_built: 2023-04-24T01:20Z
+articles:
+  Introduction: Introduction.html
+last_built: 2023-05-01T01:19Z
 urls:
   reference: https://bbuchsbaum.github.io/multivarious/reference
   article: https://bbuchsbaum.github.io/multivarious/articles

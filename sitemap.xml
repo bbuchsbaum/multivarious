@@ -10,6 +10,12 @@
     <loc>https://bbuchsbaum.github.io/multivarious/LICENSE.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/articles/Introduction.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/articles/index.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/multivarious/authors.html</loc>
   </url>
   <url>
@@ -158,6 +164,9 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/print.composed_projector.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.multiblock_biprojector.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/print.projector.html</loc>
