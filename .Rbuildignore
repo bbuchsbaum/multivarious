@@ -8,3 +8,5 @@
 ^LICENSE\.md$
 ^data-raw$
 ^\.github$
+Generics.yml
+experimental

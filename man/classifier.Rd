@@ -3,7 +3,6 @@
 \name{classifier}
 \alias{classifier}
 \alias{classifier.multiblock_biprojector}
-\alias{classifier.projector}
 \title{Construct a Classifier}
 \usage{
 classifier(x, colind, ...)
@@ -17,8 +16,6 @@ classifier(x, colind, ...)
   knn = 1,
   ...
 )
-
-\method{classifier}{projector}(x, colind = NULL, labels, new_data, knn = 1, ...)
 }
 \arguments{
 \item{x}{A fitted multiblock bi-projector model object.}
@@ -27,13 +24,13 @@ classifier(x, colind, ...)
 
 \item{...}{Additional arguments to be passed to the specific model implementation of \code{classifier}.}
 
-\item{labels}{the labels associated with the rows of the projected data (see \code{new_data})}
+\item{labels}{A factor or vector of class labels for the training data.}
 
-\item{new_data}{reference data associated with \code{labels} and to be projected into subspace (required).}
+\item{new_data}{An optional data matrix for which to generate predictions (default: NULL).}
 
 \item{block}{An optional block index for prediction (default: NULL).}
 
-\item{knn}{the number of nearest neighbors to use when classifying a new point.}
+\item{knn}{The number of nearest neighbors to consider in the classifier (default: 1).}
 }
 \value{
 A classifier function that can be used to make predictions on new data points.
@@ -53,11 +50,5 @@ my_classifier <- classifier.multiblock_biprojector(x, labels = labels)
 # You can then use this classifier to make predictions for new data points
 # (assuming `new_data` is a data matrix of new observations):
 predictions <- predict(my_classifier, new_data)
-
-data(iris)
-X <- iris[,1:4]
-pcres <- pca(as.matrix(X),2)
-cfier <- classifier(pcres, labels=iris[,5], new_data=as.matrix(iris[,1:4]))
-p <- predict(cfier, as.matrix(iris[,1:4]))
 
 }
