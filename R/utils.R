@@ -1,4 +1,6 @@
 
+
+#' @noMd
 split_matrix <- function(X, fac) {
   idx <- split(1:nrow(X), fac)
   lapply(idx, function(i) X[i,])

@@ -172,7 +172,6 @@ rf_classifier.projector <- function(x, labels, scores, colind=NULL, ...) {
 #' @param knn the number of nearest neighbors to use when classifying a new point. 
 #' @export
 #' 
-#' @rdname classifier
 #' 
 #' @examples
 #' data(iris)
@@ -256,7 +255,7 @@ project.classifier <- function(x, new_data, ...) {
   scores
 }
 
-
+#' @noRd
 prepare_predict <- function(object, colind, ncomp, new_data,...) {
   if (is.null(colind)) {
     colind <- object$colind

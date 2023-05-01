@@ -32,6 +32,9 @@ Imports:
 Suggests: 
     covr,
     testthat,
-    magrittr
+    magrittr,
+    knitr,
+    rmarkdown
 URL: https://bbuchsbaum.github.io/multivarious/
 Remotes: https://github.com/bbuchsbaum/deflist
+VignetteBuilder: knitr

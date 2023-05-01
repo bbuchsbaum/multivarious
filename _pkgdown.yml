@@ -2,3 +2,98 @@ url: https://bbuchsbaum.github.io/multivarious/
 template:
   bootstrap: 5
 
+reference:
+- title: "Model construction"
+  desc: "Functions that compute multivariate decompositions"
+  contents:
+  - pca
+  - svd_wrapper
+  - regress
+- title: "Model classes for multivariate decompositions and extension"
+  desc: "Generic S3 classes use to represented multivariate model fits"
+  contents:
+  - projector
+  - bi_projector
+  - bi_projector_union
+  - discriminant_projector
+  - cross_projector
+  - multiblock_biprojector
+  - multiblock_projector
+  - partial_projector.projector
+- title: "Model Fitting and Projections"
+  desc: "Functions for fitting models and applying projections."
+  contents:
+  - project
+  - partial_project
+  - partial_projector
+  - project_block
+  - project_vars
+  - transpose
+  - reconstruct
+  - inverse_projection
+  - partial_inverse_projection
+  - compose_projector
+  - compose_projectors
+  - refit
+  - nystrom_embedding
+  - predict.classifier
+- title: "Model Components and Properties"
+  desc: "Functions for working with model components and properties."
+  contents:
+  - components
+  - scores
+  - std_scores
+  - sdev
+  - ncomp
+  - shape
+  - is_orthogonal
+  - truncate
+  - block_lengths
+  - block_indices
+  - nblocks
+  - prinang
+  - coef.cross_projector
+  - coef.cross_projector
+- title: "Rotation and Transformation"
+  desc: "Functions for rotating and transforming model components."
+  contents:
+  - rotate
+  - apply_rotation
+  - convert_domain
+- title: "Resampling and Confidence Intervals"
+  desc: "Functions for bootstrapping and estimating confidence intervals."
+  contents:
+  - bootstrap
+  - perm_ci
+- title: "Classifier Construction"
+  desc: "Functions for constructing classifiers."
+  contents:
+  - classifier
+  - rf_classifier
+  - classifier.discriminant_projector
+  - rf_classifier.projector
+- title: "Model Diagnostics and Residuals"
+  desc: "Functions for evaluating model fit and residuals."
+  contents:
+  - residuals
+- title: "Pre-processing"
+  desc: "Functions for pre-processing data and managing pipelines."
+  contents:
+  - center
+  - pass
+  - standardize
+  - colscale
+  - add_node
+  - prep
+  - fresh
+  - reprocess
+  - apply_transform
+  - reverse_transform
+  - init_transform
+  - concat_pre_processors
+- title: "Other"
+  desc: "Other functions"
+  contents:
+  - starts_with("print")
+  - group_means
+  

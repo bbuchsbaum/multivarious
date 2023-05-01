@@ -21,6 +21,12 @@
       <ul class="navbar-nav me-auto"><li class="active nav-item">
   <a class="nav-link" href="../reference/index.html">Reference</a>
 </li>
+<li class="nav-item dropdown">
+  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
+  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
+    <a class="dropdown-item" href="../articles/Introduction.html">Introduction to the multivarious Package</a>
+  </div>
+</li>
       </ul><form class="form-inline my-2 my-lg-0" role="search">
         <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off"></form>
 
@@ -35,9 +41,9 @@
     </div>
 
     <div class="section level2">
-      <h2 id="all-functions">All functions<a class="anchor" aria-label="anchor" href="#all-functions"></a></h2>
+      <h2 id="model-construction">Model construction<a class="anchor" aria-label="anchor" href="#model-construction"></a></h2>
       
-      
+      <p class="section-desc"></p><p>Functions that compute multivariate decompositions</p>
 
       
     </div><div id="" class="section level2">
@@ -47,19 +53,35 @@
 
       <dl><dt>
           
-          <code><a href="add_node.html">add_node()</a></code> 
+          <code><a href="pca.html">pca()</a></code> 
         </dt>
-        <dd>add a pre-processing stage</dd>
+        <dd>Principal Components Analysis (PCA)</dd>
       </dl><dl><dt>
           
-          <code><a href="apply_rotation.html">apply_rotation()</a></code> 
+          <code><a href="svd_wrapper.html">svd_wrapper()</a></code> 
         </dt>
-        <dd>Apply rotation</dd>
+        <dd>Singular Value Decomposition (SVD) Wrapper</dd>
       </dl><dl><dt>
           
-          <code><a href="apply_transform.html">apply_transform()</a></code> 
+          <code><a href="regress.html">regress()</a></code> 
         </dt>
-        <dd>apply a pre-processing transform</dd>
+        <dd>Multi-output linear regression</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-classes-for-multivariate-decompositions-and-extension">Model classes for multivariate decompositions and extension<a class="anchor" aria-label="anchor" href="#model-classes-for-multivariate-decompositions-and-extension"></a></h2>
+      
+      <p class="section-desc"></p><p>Generic S3 classes use to represented multivariate model fits</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="projector.html">projector()</a></code> 
+        </dt>
+        <dd>Construct a <code>projector</code> instance</dd>
       </dl><dl><dt>
           
           <code><a href="bi_projector.html">bi_projector()</a></code> 
@@ -69,72 +91,12 @@
           
           <code><a href="bi_projector_union.html">bi_projector_union()</a></code> 
         </dt>
-        <dd>a union of concatenated <code>bi_projector</code> fits</dd>
+        <dd>A Union of Concatenated <code>bi_projector</code> Fits</dd>
       </dl><dl><dt>
           
-          <code><a href="block_indices.html">block_indices()</a></code> 
+          <code><a href="discriminant_projector.html">discriminant_projector()</a></code> 
         </dt>
-        <dd>get block_indices</dd>
-      </dl><dl><dt>
-          
-          <code><a href="block_lengths.html">block_lengths()</a></code> 
-        </dt>
-        <dd>get block_lengths</dd>
-      </dl><dl><dt>
-          
-          <code><a href="bootstrap.html">bootstrap()</a></code> 
-        </dt>
-        <dd>Bootstrap Resampling for Multivariate Models</dd>
-      </dl><dl><dt>
-          
-          <code><a href="center.html">center()</a></code> 
-        </dt>
-        <dd>center a data matrix</dd>
-      </dl><dl><dt>
-          
-          <code><a href="classifier.html">classifier()</a></code> 
-        </dt>
-        <dd>Construct a Classifier</dd>
-      </dl><dl><dt>
-          
-          <code><a href="classifier.discriminant_projector.html">classifier(<i>&lt;discriminant_projector&gt;</i>)</a></code> 
-        </dt>
-        <dd>Create a k-NN classifier for a discriminant projector</dd>
-      </dl><dl><dt>
-          
-          <code><a href="coef.cross_projector.html">coef(<i>&lt;cross_projector&gt;</i>)</a></code> 
-        </dt>
-        <dd>Project new data using a cross_projector object</dd>
-      </dl><dl><dt>
-          
-          <code><a href="colscale.html">colscale()</a></code> 
-        </dt>
-        <dd>scale a data matrix</dd>
-      </dl><dl><dt>
-          
-          <code><a href="components.html">components()</a></code> 
-        </dt>
-        <dd>get the components</dd>
-      </dl><dl><dt>
-          
-          <code><a href="compose_projector.html">compose_projector()</a></code> 
-        </dt>
-        <dd>Compose Two Projectors</dd>
-      </dl><dl><dt>
-          
-          <code><a href="compose_projectors.html">compose_projectors()</a></code> 
-        </dt>
-        <dd>projector composition</dd>
-      </dl><dl><dt>
-          
-          <code><a href="concat_pre_processors.html">concat_pre_processors()</a></code> 
-        </dt>
-        <dd>bind together blockwise pre-processors</dd>
-      </dl><dl><dt>
-          
-          <code><a href="convert_domain.html">convert_domain()</a></code> 
-        </dt>
-        <dd>Transfer data from one input domain to another via common latent space</dd>
+        <dd>Construct a Discriminant Projector</dd>
       </dl><dl><dt>
           
           <code><a href="cross_projector.html">cross_projector()</a></code> 
@@ -142,59 +104,35 @@
         <dd>Two-way (cross) projection to latent components</dd>
       </dl><dl><dt>
           
-          <code><a href="discriminant_projector.html">discriminant_projector()</a></code> 
-        </dt>
-        <dd>construct a discriminant projector</dd>
-      </dl><dl><dt>
-          
-          <code><a href="fresh.html">fresh()</a></code> 
-        </dt>
-        <dd>Get a fresh pre-processing node cleared of any cached data</dd>
-      </dl><dl><dt>
-          
-          <code><a href="group_means.html">group_means()</a></code> 
-        </dt>
-        <dd>Compute column-wise mean in X for each factor level of Y</dd>
-      </dl><dl><dt>
-          
-          <code><a href="inverse_projection.html">inverse_projection()</a></code> 
-        </dt>
-        <dd>Inverse of the Component Matrix</dd>
-      </dl><dl><dt>
-          
-          <code><a href="is_orthogonal.html">is_orthogonal()</a></code> 
-        </dt>
-        <dd>is it orthogonal</dd>
-      </dl><dl><dt>
-          
           <code><a href="multiblock_biprojector.html">multiblock_biprojector()</a></code> 
         </dt>
-        <dd>Create a multiblock bi-projector</dd>
+        <dd>Create a Multiblock Bi-Projector</dd>
       </dl><dl><dt>
           
           <code><a href="multiblock_projector.html">multiblock_projector()</a></code> 
         </dt>
-        <dd>Create a multiblock projector</dd>
+        <dd>Create a Multiblock Projector</dd>
       </dl><dl><dt>
           
-          <code><a href="nblocks.html">nblocks()</a></code> 
+          <code><a href="partial_projector.projector.html">partial_projector(<i>&lt;projector&gt;</i>)</a></code> 
         </dt>
-        <dd>get the number of blocks</dd>
-      </dl><dl><dt>
+        <dd>construct a partial_projector from a <code>projector</code> instance</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-fitting-and-projections">Model Fitting and Projections<a class="anchor" aria-label="anchor" href="#model-fitting-and-projections"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions for fitting models and applying projections.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
-          <code><a href="ncomp.html">ncomp()</a></code> 
+          <code><a href="project.html">project()</a></code> 
         </dt>
-        <dd>Get the number of components</dd>
-      </dl><dl><dt>
-          
-          <code><a href="nystrom_embedding.html">nystrom_embedding()</a></code> 
-        </dt>
-        <dd>Nystrom method for out-of-sample embedding</dd>
-      </dl><dl><dt>
-          
-          <code><a href="partial_inverse_projection.html">partial_inverse_projection()</a></code> 
-        </dt>
-        <dd>Partial Inverse Projection of a Columnwise Subset of Component Matrix</dd>
+        <dd>New sample projection</dd>
       </dl><dl><dt>
           
           <code><a href="partial_project.html">partial_project()</a></code> 
@@ -207,51 +145,6 @@
         <dd>Construct a partial projector</dd>
       </dl><dl><dt>
           
-          <code><a href="partial_projector.projector.html">partial_projector(<i>&lt;projector&gt;</i>)</a></code> 
-        </dt>
-        <dd>construct a partial_projector from a <code>projector</code> instance</dd>
-      </dl><dl><dt>
-          
-          <code><a href="pass.html">pass()</a></code> 
-        </dt>
-        <dd>a no-op pre-processing step</dd>
-      </dl><dl><dt>
-          
-          <code><a href="pca.html">pca()</a></code> 
-        </dt>
-        <dd>Principal Components Analysis (PCA)</dd>
-      </dl><dl><dt>
-          
-          <code><a href="perm_ci.html">perm_ci()</a></code> 
-        </dt>
-        <dd>Permutation Confidence Intervals</dd>
-      </dl><dl><dt>
-          
-          <code><a href="predict.classifier.html">predict(<i>&lt;classifier&gt;</i>)</a></code> 
-        </dt>
-        <dd>predict with a classifier object</dd>
-      </dl><dl><dt>
-          
-          <code><a href="predict.rf_classifier.html">predict(<i>&lt;rf_classifier&gt;</i>)</a></code> 
-        </dt>
-        <dd>predict with a random forest classifier</dd>
-      </dl><dl><dt>
-          
-          <code><a href="prep.html">prep()</a></code> 
-        </dt>
-        <dd>prepare a dataset by applying a pre-processing pipeline</dd>
-      </dl><dl><dt>
-          
-          <code><a href="prinang.html">prinang()</a></code> 
-        </dt>
-        <dd>Compute principal angles for a set of subspaces</dd>
-      </dl><dl><dt>
-          
-          <code><a href="project.html">project()</a></code> 
-        </dt>
-        <dd>New sample projection</dd>
-      </dl><dl><dt>
-          
           <code><a href="project_block.html">project_block()</a></code> 
         </dt>
         <dd>Project a single "block" of data onto the subspace</dd>
@@ -262,9 +155,9 @@
         <dd>Project one or more variables onto a subspace</dd>
       </dl><dl><dt>
           
-          <code><a href="projector.html">projector()</a></code> 
+          <code><a href="transpose.html">transpose()</a></code> 
         </dt>
-        <dd>construct a <code>projector</code> instance</dd>
+        <dd>Transpose a model</dd>
       </dl><dl><dt>
           
           <code><a href="reconstruct.html">reconstruct()</a></code> 
@@ -272,44 +165,55 @@
         <dd>Reconstruct the data</dd>
       </dl><dl><dt>
           
+          <code><a href="inverse_projection.html">inverse_projection()</a></code> 
+        </dt>
+        <dd>Inverse of the Component Matrix</dd>
+      </dl><dl><dt>
+          
+          <code><a href="partial_inverse_projection.html">partial_inverse_projection()</a></code> 
+        </dt>
+        <dd>Partial Inverse Projection of a Columnwise Subset of Component Matrix</dd>
+      </dl><dl><dt>
+          
+          <code><a href="compose_projector.html">compose_projector()</a></code> 
+        </dt>
+        <dd>Compose Two Projectors</dd>
+      </dl><dl><dt>
+          
+          <code><a href="compose_projectors.html">compose_projectors()</a></code> 
+        </dt>
+        <dd>Projector Composition</dd>
+      </dl><dl><dt>
+          
           <code><a href="refit.html">refit()</a></code> 
         </dt>
         <dd>refit a model</dd>
       </dl><dl><dt>
           
-          <code><a href="regress.html">regress()</a></code> 
+          <code><a href="nystrom_embedding.html">nystrom_embedding()</a></code> 
         </dt>
-        <dd>Multi-output linear regression</dd>
+        <dd>Nystrom method for out-of-sample embedding</dd>
       </dl><dl><dt>
           
-          <code><a href="reprocess.html">reprocess()</a></code> 
+          <code><a href="predict.classifier.html">predict(<i>&lt;classifier&gt;</i>)</a></code> 
         </dt>
-        <dd>apply pre-processing parameters to a new data matrix</dd>
-      </dl><dl><dt>
+        <dd>predict with a classifier object</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-components-and-properties">Model Components and Properties<a class="anchor" aria-label="anchor" href="#model-components-and-properties"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions for working with model components and properties.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
           
-          <code><a href="residuals.html">residuals()</a></code> 
+          <code><a href="components.html">components()</a></code> 
         </dt>
-        <dd>Obtain residuals of a component model fit</dd>
-      </dl><dl><dt>
-          
-          <code><a href="reverse_transform.html">reverse_transform()</a></code> 
-        </dt>
-        <dd>reverse a pre-processing transform</dd>
-      </dl><dl><dt>
-          
-          <code><a href="rf_classifier.html">rf_classifier()</a></code> 
-        </dt>
-        <dd>construct a random forest wrapper classifier</dd>
-      </dl><dl><dt>
-          
-          <code><a href="rf_classifier.projector.html">rf_classifier(<i>&lt;projector&gt;</i>)</a></code> 
-        </dt>
-        <dd>create a random forest classifier</dd>
-      </dl><dl><dt>
-          
-          <code><a href="rotate.html">rotate()</a></code> 
-        </dt>
-        <dd>Rotate a Component Solution</dd>
+        <dd>get the components</dd>
       </dl><dl><dt>
           
           <code><a href="scores.html">scores()</a></code> 
@@ -317,9 +221,19 @@
         <dd>Retrieve the component scores</dd>
       </dl><dl><dt>
           
+          <code><a href="std_scores.html">std_scores()</a></code> 
+        </dt>
+        <dd>Compute standardized component scores</dd>
+      </dl><dl><dt>
+          
           <code><a href="sdev.html">sdev()</a></code> 
         </dt>
         <dd>standard deviations</dd>
+      </dl><dl><dt>
+          
+          <code><a href="ncomp.html">ncomp()</a></code> 
+        </dt>
+        <dd>Get the number of components</dd>
       </dl><dl><dt>
           
           <code><a href="shape.html">shape()</a></code> 
@@ -327,31 +241,253 @@
         <dd>Shape of the Projector</dd>
       </dl><dl><dt>
           
-          <code><a href="standardize.html">standardize()</a></code> 
+          <code><a href="is_orthogonal.html">is_orthogonal()</a></code> 
         </dt>
-        <dd>center and scale each vector of a matrix</dd>
-      </dl><dl><dt>
-          
-          <code><a href="std_scores.html">std_scores()</a></code> 
-        </dt>
-        <dd>Compute standardized component scores</dd>
-      </dl><dl><dt>
-          
-          <code><a href="svd_wrapper.html">svd_wrapper()</a></code> 
-        </dt>
-        <dd>Singular Value Decomposition (SVD) Wrapper</dd>
-      </dl><dl><dt>
-          
-          <code><a href="transpose.html">transpose()</a></code> 
-        </dt>
-        <dd>Transpose a model</dd>
+        <dd>is it orthogonal</dd>
       </dl><dl><dt>
           
           <code><a href="truncate.html">truncate()</a></code> 
         </dt>
         <dd>truncate a component fit</dd>
+      </dl><dl><dt>
+          
+          <code><a href="block_lengths.html">block_lengths()</a></code> 
+        </dt>
+        <dd>get block_lengths</dd>
+      </dl><dl><dt>
+          
+          <code><a href="block_indices.html">block_indices()</a></code> 
+        </dt>
+        <dd>get block_indices</dd>
+      </dl><dl><dt>
+          
+          <code><a href="nblocks.html">nblocks()</a></code> 
+        </dt>
+        <dd>get the number of blocks</dd>
+      </dl><dl><dt>
+          
+          <code><a href="prinang.html">prinang()</a></code> 
+        </dt>
+        <dd>Compute principal angles for a set of subspaces</dd>
+      </dl><dl><dt>
+          
+          <code><a href="coef.cross_projector.html">coef(<i>&lt;cross_projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>Project new data using a cross_projector object</dd>
+      </dl></div><div class="section level2">
+      <h2 id="rotation-and-transformation">Rotation and Transformation<a class="anchor" aria-label="anchor" href="#rotation-and-transformation"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions for rotating and transforming model components.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="rotate.html">rotate()</a></code> 
+        </dt>
+        <dd>Rotate a Component Solution</dd>
+      </dl><dl><dt>
+          
+          <code><a href="apply_rotation.html">apply_rotation()</a></code> 
+        </dt>
+        <dd>Apply rotation</dd>
+      </dl><dl><dt>
+          
+          <code><a href="convert_domain.html">convert_domain()</a></code> 
+        </dt>
+        <dd>Transfer data from one input domain to another via common latent space</dd>
+      </dl></div><div class="section level2">
+      <h2 id="resampling-and-confidence-intervals">Resampling and Confidence Intervals<a class="anchor" aria-label="anchor" href="#resampling-and-confidence-intervals"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions for bootstrapping and estimating confidence intervals.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="bootstrap.html">bootstrap()</a></code> 
+        </dt>
+        <dd>Bootstrap Resampling for Multivariate Models</dd>
+      </dl><dl><dt>
+          
+          <code><a href="perm_ci.html">perm_ci()</a></code> 
+        </dt>
+        <dd>Permutation Confidence Intervals</dd>
+      </dl></div><div class="section level2">
+      <h2 id="classifier-construction">Classifier Construction<a class="anchor" aria-label="anchor" href="#classifier-construction"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions for constructing classifiers.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="classifier.html">classifier()</a></code> 
+        </dt>
+        <dd>Construct a Classifier</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rf_classifier.html">rf_classifier()</a></code> 
+        </dt>
+        <dd>construct a random forest wrapper classifier</dd>
+      </dl><dl><dt>
+          
+          <code><a href="classifier.discriminant_projector.html">classifier(<i>&lt;discriminant_projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>Create a k-NN classifier for a discriminant projector</dd>
+      </dl><dl><dt>
+          
+          <code><a href="rf_classifier.projector.html">rf_classifier(<i>&lt;projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>create a random forest classifier</dd>
+      </dl></div><div class="section level2">
+      <h2 id="model-diagnostics-and-residuals">Model Diagnostics and Residuals<a class="anchor" aria-label="anchor" href="#model-diagnostics-and-residuals"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions for evaluating model fit and residuals.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="residuals.html">residuals()</a></code> 
+        </dt>
+        <dd>Obtain residuals of a component model fit</dd>
+      </dl></div><div class="section level2">
+      <h2 id="pre-processing">Pre-processing<a class="anchor" aria-label="anchor" href="#pre-processing"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions for pre-processing data and managing pipelines.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="center.html">center()</a></code> 
+        </dt>
+        <dd>center a data matrix</dd>
+      </dl><dl><dt>
+          
+          <code><a href="pass.html">pass()</a></code> 
+        </dt>
+        <dd>a no-op pre-processing step</dd>
+      </dl><dl><dt>
+          
+          <code><a href="standardize.html">standardize()</a></code> 
+        </dt>
+        <dd>center and scale each vector of a matrix</dd>
+      </dl><dl><dt>
+          
+          <code><a href="colscale.html">colscale()</a></code> 
+        </dt>
+        <dd>scale a data matrix</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_node.html">add_node()</a></code> 
+        </dt>
+        <dd>add a pre-processing stage</dd>
+      </dl><dl><dt>
+          
+          <code><a href="prep.html">prep()</a></code> 
+        </dt>
+        <dd>prepare a dataset by applying a pre-processing pipeline</dd>
+      </dl><dl><dt>
+          
+          <code><a href="fresh.html">fresh()</a></code> 
+        </dt>
+        <dd>Get a fresh pre-processing node cleared of any cached data</dd>
+      </dl><dl><dt>
+          
+          <code><a href="reprocess.html">reprocess()</a></code> 
+        </dt>
+        <dd>apply pre-processing parameters to a new data matrix</dd>
+      </dl><dl><dt>
+          
+          <code><a href="apply_transform.html">apply_transform()</a></code> 
+        </dt>
+        <dd>apply a pre-processing transform</dd>
+      </dl><dl><dt>
+          
+          <code><a href="reverse_transform.html">reverse_transform()</a></code> 
+        </dt>
+        <dd>reverse a pre-processing transform</dd>
+      </dl><dl><dt>
+          
+          <code><a href="init_transform.html">init_transform()</a></code> 
+        </dt>
+        <dd>initialize a transform</dd>
+      </dl><dl><dt>
+          
+          <code><a href="concat_pre_processors.html">concat_pre_processors()</a></code> 
+        </dt>
+        <dd>bind together blockwise pre-processors</dd>
+      </dl></div><div class="section level2">
+      <h2 id="other">Other<a class="anchor" aria-label="anchor" href="#other"></a></h2>
+      
+      <p class="section-desc"></p><p>Other functions</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="print.bi_projector.html">print(<i>&lt;bi_projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>Pretty Print S3 Method for bi_projector Class</dd>
+      </dl><dl><dt>
+          
+          <code><a href="print.bi_projector_union.html">print(<i>&lt;bi_projector_union&gt;</i>)</a></code> 
+        </dt>
+        <dd>Pretty Print S3 Method for bi_projector_union Class</dd>
+      </dl><dl><dt>
+          
+          <code><a href="print.classifier.html">print(<i>&lt;classifier&gt;</i>)</a></code> 
+        </dt>
+        <dd>Pretty Print Method for <code>classifier</code> Objects</dd>
+      </dl><dl><dt>
+          
+          <code><a href="print.composed_projector.html">print(<i>&lt;composed_projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>Pretty Print Method for <code>composed_projector</code> Objects</dd>
+      </dl><dl><dt>
+          
+          <code><a href="print.multiblock_biprojector.html">print(<i>&lt;multiblock_biprojector&gt;</i>)</a></code> 
+        </dt>
+        <dd>Pretty Print Method for <code>multiblock_biprojector</code> Objects</dd>
+      </dl><dl><dt>
+          
+          <code><a href="print.projector.html">print(<i>&lt;projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>Pretty Print Method for <code>projector</code> Objects</dd>
+      </dl><dl><dt>
+          
+          <code><a href="group_means.html">group_means()</a></code> 
+        </dt>
+        <dd>Compute column-wise mean in X for each factor level of Y</dd>
       </dl></div>
-  </main></div>
+  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

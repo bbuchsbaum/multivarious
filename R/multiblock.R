@@ -92,10 +92,30 @@ coef.multiblock_projector <- function(object, block,...) {
   }
 }
 
+#' Pretty Print Method for `multiblock_biprojector` Objects
+#'
+#' Display a human-readable summary of a `multiblock_biprojector` object, including information about the dimensions of the projection matrix, the pre-processing pipeline, and block indices.
+#'
+#' @param x A `multiblock_biprojector` object.
+#' @param ... Additional arguments passed to `print()`.
+#'
+#' @examples
+#' # Generate some example data
+#' X1 <- matrix(rnorm(10 * 5), 10, 5)
+#' X2 <- matrix(rnorm(10 * 5), 10, 5)
+#' X <- cbind(X1, X2)
+#' # Compute PCA on the combined data
+#' pc <- pca(X, ncomp = 8)
+#' # Create a multiblock bi-projector using PCA components and block indices
+#' mb_biproj <- multiblock_biprojector(pc$v, s = pc$u %*% diag(pc$d), sdev = pc$d, block_indices = list(1:5, 6:10))
+#' # Pretty print the multiblock bi-projector object
+#' print(mb_biproj)
 #' @export
-print.multiblock_projector <- function(x,...) {
-  NextMethod(x)
-  cat("number of blocks: ", length(x$block_indices))
+print.multiblock_biprojector <- function(x, ...) {
+  cat("Multiblock Bi-Projector object:\n")
+  cat("  Projection matrix dimensions: ", nrow(x$v), "x", ncol(x$v), "\n")
+  cat("  Block indices: ", toString(x$block_indices), "\n")
+  invisible(x)   
 }
 
 

@@ -1,0 +1,112 @@
+---
+title: "Introduction to the multivarious Package"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to the multivarious Package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+The multivarious package provides generic functions and some basic implementations for dimensionality reduction of high-dimensional data. This vignette focuses on two main classes in the package, projector and bi_projector, and demonstrates how to use the project function for projecting new data onto a lower-dimensional subspace.
+
+## Projector and Bi-projector Classes
+projector and bi_projector are two core classes in the multivarious package. They represent linear transformations from a high-dimensional space to a lower-dimensional space.
+
+## Projector
+A projector instance maps a matrix from an $N$-dimensional space to a $d$-dimensional space, where $d$ may be less than $N$. The projection matrix, $V$, is not necessarily orthogonal. This class can be used for various dimensionality reduction techniques like PCA, LDA, etc.
+
+## Bi-projector
+A bi_projector instance offers a two-way mapping from samples (rows) to scores and from variables (columns) to components. This allows projecting from a $D$-dimensional input space to a $d$-dimensional subspace, and projecting from an $n$-dimensional variable space to the $d$-dimensional component space. The singular value decomposition (SVD) is a canonical example of such a two-way mapping.
+
+## The Project Function
+The project function is a generic function that takes a model fit (typically an object of class bi_projector or any other class that implements a project method) and new observations. It projects these observations onto the subspace defined by the model. This enables the transformation of new data into the same lower-dimensional space as the original data. Mathematically, projection consists of the following:
+
+$$
+X \approx USV^T
+$$
+
+$$
+\text{projected_data} = \text{new_data} \cdot V
+$$
+
+
+## Example
+In this example, we will demonstrate how to create a bi_projector object using the results of an SVD and project new data onto the same subspace as the original data.
+
+```{r}
+
+# Load the multivarious package
+library(multivarious)
+
+# Create a synthetic dataset
+set.seed(42)
+X <- matrix(rnorm(1020), 10, 20)
+
+# Perform SVD on the dataset
+svdfit <- svd(X)
+
+# Create a bi_projector object
+p <- bi_projector(svdfit$v, s = svdfit$u %*% diag(svdfit$d), sdev = svdfit$d)
+
+# Generate new data to project onto the same subspace as the original data
+new_data <- matrix(rnorm(5 * 20), 5, 20)
+
+projected_data <- project(p, new_data)
+print(projected_data)
+
+```
+
+In the multivarious package, the bi_projector class allows you to project new variables into the subspace defined by the model. The project_vars function is a generic function that operates on an object of a class implementing the project_vars method, such as a bi_projector object. This function projects one or more variables onto a subspace, which can be computed for a biorthogonal decomposition like Singular Value Decomposition (SVD).
+
+Remember, given an original data matrix $X$, the SVD of $X$ can be written as:
+
+$$
+X \approx USV^T
+$$
+
+
+Where $U$ contains the left singular vectors (scores), $S$ is a diagonal matrix containing the singular values, and $V^T$ contains the right singular vectors (components). When we have new variables (columns) that we want to project into the same subspace as the original data, we can use the project_vars function.
+
+## Projecting New Variables onto the Subspace
+
+Let's say we have a new data matrix new_data with the same number of rows as the original data. To project these new variables into the subspace, we can compute:
+
+\text{projected_vars} = U^T \cdot \text{new_data}
+
+The result is a matrix or vector of the projected variables in the subspace.
+
+Here's an example of how you can use the `svd_wrapper` function in the multivarious package with the Iris dataset to compute the SVD and project new variables into the subspace.
+
+First, let's load the Iris dataset and compute the SVD using the svd_wrapper function:
+
+
+```{r}
+# Load iris dataset and select the first four columns
+data(iris)
+X <- iris[, 1:4]
+
+# Compute SVD using the base method and 3 components
+fit <- svd_wrapper(X, ncomp = 3, preproc = center(), method = "base")
+
+```
+
+Now, let's assume we have a new data matrix new_data with the same number of rows as the original data. To project these new variables into the subspace, we can use the project_vars function:
+
+```{r}
+# Define new_data
+new_data <- rnorm(nrow(iris))
+
+# Project the new variables into the subspace
+projected_vars <- project_vars(fit, new_data)
+
+```
+
+This example demonstrates how to compute the SVD using the svd_wrapper function and project new variables into the subspace defined by the SVD using the `project_vars` function.
