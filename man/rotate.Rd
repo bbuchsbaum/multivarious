@@ -19,6 +19,3 @@ A modified model fit with the rotated components.
 \description{
 Perform a rotation of the component loadings to improve interpretability.
 }
-\seealso{
-\code{\link{rotate_vars}} for rotation types and options.
-}

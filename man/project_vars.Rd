@@ -20,14 +20,12 @@ A matrix or vector of the projected variables in the subspace
 This function projects one or more variables onto a subspace. It is often called supplementary variable
 projection and can be computed for a biorthogonal decomposition, such as Singular Value Decomposition (SVD).
 }
-\examples{
-# Example with a custom class that implements a project_vars method
-# Assume that MyModel is a class that implements a project_vars method
-# Fit the model and project the variables
-mymodel_fit <- MyModel(...)
-new_data <- ...
-projected_vars <- project_vars(mymodel_fit, new_data)
-}
 \seealso{
 \code{\link{project}} for the generic projection function for samples
+
+Other project: 
+\code{\link{project.cross_projector}()},
+\code{\link{project_block}()},
+\code{\link{project}()}
 }
+\concept{project}

@@ -23,8 +23,4 @@ Calculate the residuals of a model after removing the effect of the first \code{
 This function is useful to assess the quality of the fit or to identify patterns that are not
 captured by the model.
 }
-\examples{
-# Assume you have a fitted model 'model_fit' and the original data matrix 'data_matrix'
-# Calculate residuals after removing the first 2 components:
-res <- residuals(model_fit, ncomp = 2, xorig = data_matrix)
-}
+\concept{residuals}

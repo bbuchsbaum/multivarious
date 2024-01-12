@@ -11,16 +11,7 @@
 #' @param ... Additional arguments to be passed to the specific model implementation of `classifier`.
 #' @return A multiblock classifier object.
 #' @export
-#' @examples
-#' # Assuming `x` is a fitted multiblock bi-projector model object, and `labels` are class labels
-#' # for the training data, you can create a classifier as follows:
-#' my_classifier <- classifier.multiblock_biprojector(x, labels = labels)
-#'
-#' # You can then use this classifier to make predictions for new data points
-#' # (assuming `new_data` is a data matrix of new observations):
-#' predictions <- predict(my_classifier, new_data)
-#'
-#' @rdname classifier
+#' @family classifier
 classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=NULL, 
                                               block=NULL, knn=1,...) {
   if (!is.null(colind)) {
@@ -105,6 +96,7 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1,...) {
 #' @param ... extra arguments
 #' @return a classifier object
 #' @keywords internal
+#' @noRd
 new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, ...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
@@ -128,15 +120,19 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 
 #' create a random forest classifier
 #' 
+#' 
 #' @export
 #' 
+#' @inheritParams rf_classifier
+#' @inheritParams classifier.multiblock_biprojector
+#'
 #' @examples
 #' data(iris)
 #' X <- iris[,1:4]
 #' pcres <- pca(as.matrix(X),2)
 #' cfier <- rf_classifier(pcres, labels=iris[,5], scores=scores(pcres))
-#' p <- predict(cfier, as.matrix(iris[,1:4]))
-rf_classifier.projector <- function(x, labels, scores, colind=NULL, ...) {
+#' p <- predict(cfier, new_data=as.matrix(iris[,1:4]))
+rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
   if (!requireNamespace("randomForest", quietly = TRUE)) {
     stop("Please install package 'randomForest' when using 'rf_classifier'")
   }
@@ -149,7 +145,7 @@ rf_classifier.projector <- function(x, labels, scores, colind=NULL, ...) {
   
   chk::chk_equal(length(labels), nrow(scores))
   
-  rfres <- randomForest(scores, labels, ...)
+  rfres <- randomForest::randomForest(scores, labels, ...)
   
   
   structure(
@@ -166,12 +162,15 @@ rf_classifier.projector <- function(x, labels, scores, colind=NULL, ...) {
   
 }
 
-
+#' create `classifier` from a `projector`
+#' 
+#' @inheritParams classifier
 #' @param labels the labels associated with the rows of the projected data (see `new_data`)
 #' @param new_data reference data associated with `labels` and to be projected into subspace (required).
 #' @param knn the number of nearest neighbors to use when classifying a new point. 
 #' @export
 #' 
+#' @family classifier
 #' 
 #' @examples
 #' data(iris)
@@ -179,7 +178,6 @@ rf_classifier.projector <- function(x, labels, scores, colind=NULL, ...) {
 #' pcres <- pca(as.matrix(X),2)
 #' cfier <- classifier(pcres, labels=iris[,5], new_data=as.matrix(iris[,1:4]))
 #' p <- predict(cfier, as.matrix(iris[,1:4]))
-#' 
 classifier.projector <- function(x, colind=NULL, labels, new_data, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
@@ -199,9 +197,8 @@ classifier.projector <- function(x, colind=NULL, labels, new_data, knn=1,...) {
 }
 
 
-
-
 #' @keywords internal
+#' @noRd
 rank_score <- function(prob, observed) {
   pnames <- colnames(prob)
   chk::chk_true(all(observed %in% pnames))
@@ -217,6 +214,7 @@ rank_score <- function(prob, observed) {
 }
 
 #' @keywords internal
+#' @noRd
 normalize_probs <- function(p) {
   apply(p, 2, function(v) {
     v2 <- v - min(v)
@@ -225,6 +223,7 @@ normalize_probs <- function(p) {
 }
 
 #' @keywords internal
+#' @noRd
 avg_probs <- function(prob, labels) {
   pmeans <- t(group_means(labels, prob))
   t(apply(pmeans, 1, function(v) v/sum(v)))
@@ -232,6 +231,7 @@ avg_probs <- function(prob, labels) {
 
 
 #' @keywords internal
+#' @noRd
 nearest_class <- function(prob, labels,knn=1) {
   
   apply(prob, 2, function(v) {
@@ -351,6 +351,8 @@ predict.rf_classifier <- function(object, new_data, ncomp=NULL,
   prob <- predict(object$rfres, proj, type="prob")
   list(class=cls, prob=prob)
 }
+
+
 
 #' Pretty Print Method for `classifier` Objects
 #'

@@ -21,3 +21,4 @@ data onto the components, which can be used for further analysis or visualizatio
 \seealso{
 \code{\link{project}} for projecting new data onto the components.
 }
+\concept{scores}

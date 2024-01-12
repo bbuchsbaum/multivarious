@@ -4,7 +4,16 @@
 \alias{rf_classifier.projector}
 \title{create a random forest classifier}
 \usage{
-\method{rf_classifier}{projector}(x, labels, scores, colind = NULL, ...)
+\method{rf_classifier}{projector}(x, colind = NULL, labels, scores, ...)
+}
+\arguments{
+\item{x}{the model object}
+
+\item{colind}{the (optional) column indices used for prediction}
+
+\item{labels}{A factor or vector of class labels for the training data.}
+
+\item{...}{extra arguments to \code{randomForest} function}
 }
 \description{
 create a random forest classifier
@@ -14,5 +23,5 @@ data(iris)
 X <- iris[,1:4]
 pcres <- pca(as.matrix(X),2)
 cfier <- rf_classifier(pcres, labels=iris[,5], scores=scores(pcres))
-p <- predict(cfier, as.matrix(iris[,1:4]))
+p <- predict(cfier, new_data=as.matrix(iris[,1:4]))
 }

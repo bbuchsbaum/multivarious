@@ -1,6 +1,6 @@
 
 
-#' @noMd
+#' @noRd
 split_matrix <- function(X, fac) {
   idx <- split(1:nrow(X), fac)
   lapply(idx, function(i) X[i,])
@@ -56,8 +56,11 @@ group_means <- function (Y, X) {
 #' @return a numeric vector of principal angles with length equal to the minimum dimension of input subspaces
 #' @export
 #' @examples
-#' # Assuming 'fit1', 'fit2', and 'fit3' are bi_projector objects created using the svd_wrapper function
-#' fits_list <- list(fit1, fit2, fit3)
+#' 
+#' data(iris)
+#' X <- as.matrix(iris[, 1:4])
+#' res <- pca(X, ncomp = 4)
+#' fits_list <- list(res,res,res)
 #' principal_angles <- prinang(fits_list)
 prinang <- function(fits) {
   chk::chk_all(fits, chk_fun = chk_s3_class, "bi_projector")
@@ -73,4 +76,27 @@ prinang <- function(fits) {
   sqrt(sres$d)/length(fits)
 }
 
+
+#' Compute a regression model for each column in a matrix and return residual matrix
+#' 
+#' @param form the formula defining the model to fit for residuals
+#' @param X the response matrix
+#' @param design the \code{data.frame} containing the design variables specified in \code{form} argument.
+#' @param intercept add an intercept term (default is FALSE)
+#' @examples 
+#' 
+#' X <- matrix(rnorm(20*10), 20, 10)
+#' des <- data.frame(a=rep(letters[1:4], 5), b=factor(rep(1:5, each=4)))
+#' xresid <- residualize(~ a+b, X, design=des)
+#' 
+#' ## design is saturated, residuals should be zero
+#' xresid2 <- residualize(~ a*b, X, design=des)
+#' sum(xresid2) == 0
+#' @export
+#' @importFrom stats model.matrix lsfit resid
+residualize <- function(form, X, design, intercept=FALSE) {
+  options(contrasts = c("contr.sum", "contr.poly"))
+  modmat <- model.matrix(form, data=design)
+  stats::resid(lsfit(modmat, X, intercept=intercept))
+}
 

@@ -16,7 +16,10 @@ a numeric vector of principal angles with length equal to the minimum dimension 
 This function calculates the principal angles between subspaces derived from a list of bi_projector instances.
 }
 \examples{
-# Assuming 'fit1', 'fit2', and 'fit3' are bi_projector objects created using the svd_wrapper function
-fits_list <- list(fit1, fit2, fit3)
+
+data(iris)
+X <- as.matrix(iris[, 1:4])
+res <- pca(X, ncomp = 4)
+fits_list <- list(res,res,res)
 principal_angles <- prinang(fits_list)
 }

@@ -21,5 +21,4 @@ pca1 <- pca(X, ncomp=10)
 X2 <- scores(pca1)
 pca2 <- pca(X2, ncomp=4)
 cproj <- compose_projectors(pca1, pca2)
-print(cproj)
 }

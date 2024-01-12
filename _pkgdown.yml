@@ -24,6 +24,7 @@ reference:
   desc: "Functions for fitting models and applying projections."
   contents:
   - project
+  - residualize
   - partial_project
   - partial_projector
   - project_block
@@ -36,7 +37,13 @@ reference:
   - compose_projectors
   - refit
   - nystrom_embedding
-  - predict.classifier
+- title: "Cross Projection"
+  desc: "Functions for creating and working with cross_projectors for two-way projection between two sets of variables or features."
+  contents:
+  - project.cross_projector
+  - coef.cross_projector
+  - reprocess.cross_projector
+  - shape.cross_projector
 - title: "Model Components and Properties"
   desc: "Functions for working with model components and properties."
   contents:
@@ -52,8 +59,6 @@ reference:
   - block_indices
   - nblocks
   - prinang
-  - coef.cross_projector
-  - coef.cross_projector
 - title: "Rotation and Transformation"
   desc: "Functions for rotating and transforming model components."
   contents:
@@ -63,15 +68,15 @@ reference:
 - title: "Resampling and Confidence Intervals"
   desc: "Functions for bootstrapping and estimating confidence intervals."
   contents:
-  - bootstrap
+  - starts_with("bootstrap")
   - perm_ci
 - title: "Classifier Construction"
   desc: "Functions for constructing classifiers."
   contents:
-  - classifier
+  - starts_with("classifier")
   - rf_classifier
-  - classifier.discriminant_projector
   - rf_classifier.projector
+  - predict.classifier
 - title: "Model Diagnostics and Residuals"
   desc: "Functions for evaluating model fit and residuals."
   contents:
@@ -83,7 +88,6 @@ reference:
   - pass
   - standardize
   - colscale
-  - add_node
   - prep
   - fresh
   - reprocess
@@ -91,9 +95,11 @@ reference:
   - reverse_transform
   - init_transform
   - concat_pre_processors
+  - add_node
 - title: "Other"
   desc: "Other functions"
   contents:
   - starts_with("print")
   - group_means
+  
   

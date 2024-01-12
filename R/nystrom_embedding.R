@@ -38,42 +38,42 @@ nystrom_embedding <- function(new_data, landmark_data, kernel_function, eigenvec
 # @param preproc The pre-processing function to apply to the data matrix (default is centering).
 # @return A `bi_projector` object containing the Nyström approximation results.
 # @export
-nystrom_approx <- function(X, kernel_func=NULL, ncomp=min(dim(X)), landmarks=NULL, nlandmarks=10, preproc=center()) {
-  chk::chkor(chk::chk_matrix(X), chk::chk_s4_class("Matrix"))
-  
-  if (is.null(landmarks)) {
-    landmarks <- sample(nrow(X), nlandmarks)
-  } else {
-    chk::chk_numeric(landmarks)
-    chk::chk_true(all(landmarks > 0 & landmarks <= nrow(X)))
-  }
-  
-  proc <- prep(preproc)
-  X_preprocessed <- init_transform(proc, X)
-  
-  if (is.null(kernel_func)) {
-    K_mm <- cov(X_preprocessed[landmarks,])
-    K_nm <- X_preprocessed[-landmarks,] %*% t(X_preprocessed[landmarks,])
-  } else {
-    K_mm <- kernel_func(X_preprocessed[landmarks, ])
-    K_nm <- kernel_func(X_preprocessed, X_preprocessed[landmarks, ])
-  }
-  
-  eig_mm <- eigen(K_mm)
-  
-  keep <- which(abs(eig_mm$values) > 1e-8)
-  U_mm <- eig_mm$vectors
-  lambda_mm <- eig_mm$values
-  lambda_mm[-keep] <- 0
-  
-  U_nm <- K_nm %*% (U_mm %*% Matrix::Diagonal(x=(1 / sqrt(lambda_mm))))
-  
-  v <- U_nm
-  s <- U_nm * sqrt(lambda_mm)
-  sdev <- sqrt(lambda_mm)
-  
-  bi_projector(v, s=s, sdev=sdev, preproc=proc, classes="nystrom_approx")
-}
+# nystrom_approx <- function(X, kernel_func=NULL, ncomp=min(dim(X)), landmarks=NULL, nlandmarks=10, preproc=center()) {
+#   chk::chkor(chk::chk_matrix(X), chk::chk_s4_class("Matrix"))
+#   
+#   if (is.null(landmarks)) {
+#     landmarks <- sample(nrow(X), nlandmarks)
+#   } else {
+#     chk::chk_numeric(landmarks)
+#     chk::chk_true(all(landmarks > 0 & landmarks <= nrow(X)))
+#   }
+#   
+#   proc <- prep(preproc)
+#   X_preprocessed <- init_transform(proc, X)
+#   
+#   if (is.null(kernel_func)) {
+#     K_mm <- cov(X_preprocessed[landmarks,])
+#     K_nm <- X_preprocessed[-landmarks,] %*% t(X_preprocessed[landmarks,])
+#   } else {
+#     K_mm <- kernel_func(X_preprocessed[landmarks, ])
+#     K_nm <- kernel_func(X_preprocessed, X_preprocessed[landmarks, ])
+#   }
+#   
+#   eig_mm <- eigen(K_mm)
+#   
+#   keep <- which(abs(eig_mm$values) > 1e-8)
+#   U_mm <- eig_mm$vectors
+#   lambda_mm <- eig_mm$values
+#   lambda_mm[-keep] <- 0
+#   
+#   U_nm <- K_nm %*% (U_mm %*% Matrix::Diagonal(x=(1 / sqrt(lambda_mm))))
+#   
+#   v <- U_nm
+#   s <- U_nm * sqrt(lambda_mm)
+#   sdev <- sqrt(lambda_mm)
+#   
+#   bi_projector(v, s=s, sdev=sdev, preproc=proc, classes="nystrom_approx")
+# }
 
 
 

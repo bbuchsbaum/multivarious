@@ -11,12 +11,12 @@
 #' @export
 #' @examples
 #' X <- matrix(rnorm(10*100), 10, 100)
-#' x = pca(X, ncomp=9)
-#' bootstrap_results <- bootstrap.pca(x)
+#' x <- pca(X, ncomp=9)
+#' bootstrap_results <- bootstrap(x)
 #'
 #' @references Fisher, Aaron, Brian Caffo, Brian Schwartz, and Vadim Zipunnikov. 2016.
 #' "Fast, Exact Bootstrap Principal Component Analysis for P > 1 Million." \emph{Journal of the American Statistical Association} 111 (514): 846-60.
-#' @rdname bootstrap
+#' @family bootstrap
 bootstrap.pca <- function(x, nboot=100, k=ncomp(x),...) {
   DUt <- t(scores(x))
   n <- dim(DUt)[2]
@@ -45,6 +45,7 @@ bootstrap.pca <- function(x, nboot=100, k=ncomp(x),...) {
 
 
 #' @keywords internal
+#' @noRd
 svd_dutp <- function(DUtP,k) {
   n<-dim(DUtP)[2]
   svdDUtP <- svd(DUtP)
@@ -66,6 +67,7 @@ svd_dutp <- function(DUtP,k) {
 }
 
 #' @keywords internal
+#' @noRd
 boot_sum <- function(res,k, v) {
   
   ## each of k elements has nboot rows and n columns
@@ -115,6 +117,7 @@ boot_sum <- function(res,k, v) {
 }
 
 #' @keywords internal
+#' @noRd
 boot_svd <- function(nboot, k, v, gen_DUtP) {
   
   ## Generate nboot resamples of scores

@@ -9,7 +9,7 @@ partial_project(x, new_data, colind)
 \arguments{
 \item{x}{The model fit, typically an object of class \code{bi_projector} or any other class that implements a \code{partial_project} method}
 
-\item{new_data}{A matrix or vector of new observations with the same number of columns as the original data. Rows represent observations and columns represent variables}
+\item{new_data}{A matrix or vector of new observations with a subset of columns equal to length of \code{colind}. Rows represent observations and columns represent variables}
 
 \item{colind}{A numeric vector of column indices to select in the projection matrix. These indices correspond to the variables used for the partial projection}
 }
@@ -26,11 +26,13 @@ X <- matrix(rnorm(10*20), 10, 20)
 svdfit <- svd(X)
 p <- bi_projector(svdfit$v, s = svdfit$u \%*\% diag(svdfit$d), sdev=svdfit$d)
 
-# Partially project new_data onto the same subspace as the original data using only the first 10 variables
+# Partially project new_data onto the same subspace as the original data 
+# using only the first 10 variables
 new_data <- matrix(rnorm(5*20), 5, 20)
 colind <- 1:10
-partially_projected_data <- partial_project(p, new_data, colind)
+partially_projected_data <- partial_project(p, new_data[,colind], colind)
 }
 \seealso{
 \code{\link{bi_projector}} for an example of a class that implements a \code{partial_project} method
 }
+\concept{partial_project}

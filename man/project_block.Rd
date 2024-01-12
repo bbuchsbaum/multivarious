@@ -24,14 +24,12 @@ This function facilitates the projection of a specific block of data onto a subs
 convenience method for multi-block fits and is equivalent to a "partial projection" where the
 column indices are associated with a given block.
 }
-\examples{
-# Example with a custom class that implements a project_block method
-# Assume that MyModel is a class that implements a project_block method
-# Fit the model and project the data for the first block
-mymodel_fit <- MyModel(...)
-new_data <- ...
-projected_data <- project_block(mymodel_fit, new_data, block = 1)
-}
 \seealso{
 \code{\link{project}} for the generic projection function
+
+Other project: 
+\code{\link{project.cross_projector}()},
+\code{\link{project_vars}()},
+\code{\link{project}()}
 }
+\concept{project}

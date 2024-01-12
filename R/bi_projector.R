@@ -11,7 +11,7 @@
 #' @param classes (optional) A character vector specifying the class attributes of the object, default is NULL
 #' @return A bi_projector object
 #' @examples
-#' X <- matrix(rnorm(1020), 10, 20)
+#' X <- matrix(rnorm(200), 10, 20)
 #' svdfit <- svd(X)
 #'
 #' p <- bi_projector(svdfit$v, s = svdfit$u %% diag(svdfit$d), sdev=svdfit$d)
@@ -52,6 +52,7 @@ project_vars.bi_projector <- function(x, new_data,...) {
 }
 
 #' @keywords internal
+#' @noRd
 genreconstruct <- function(x, comp, rowind, colind) {
   ip <- inverse_projection(x)
   out <- scores(x)[rowind,comp,drop=FALSE] %*% ip[comp,,drop=FALSE][,colind,drop=FALSE]

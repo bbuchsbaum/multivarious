@@ -17,7 +17,7 @@
 #' tres <- truncate(res, 3)
 pca <- function(X, ncomp=min(dim(X)), preproc=center(), 
                 method = c("fast", "base", "irlba", "propack", "rsvd", "svds"), ...) {
-  chk::chkor(chk::chk_matrix(X), chk::chk_s4_class("Matrix"))
+  chk::chkor_vld(chk::vld_matrix(X), chk::vld_s4_class(X, "Matrix"))
   
   method <- match.arg(method)
   svdres <- svd_wrapper(X, ncomp, preproc, method=method, ...)
@@ -34,6 +34,7 @@ pca <- function(X, ncomp=min(dim(X)), preproc=center(),
 
 
 #' @keywords internal
+#' @noRd
 orth_distances.pca <- function(x, ncomp, xorig) {
   resid <- residuals(x, ncomp, xorig)
   scores <- scores(x)
@@ -62,6 +63,7 @@ orth_distances.pca <- function(x, ncomp, xorig) {
 
 
 #' @keywords internal
+#' @noRd
 score_distances.pca <- function(x, ncomp, xorig) {
   scores <- scores(x)
   loadings <- coef(x)

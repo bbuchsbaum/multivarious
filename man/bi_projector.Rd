@@ -28,7 +28,7 @@ Thus, one can project from D-dimensional input space to d-dimensional subspace. 
 variable space to the d-dimensional component space. The singular value decomposition is a canonical example of such a two-way mapping.
 }
 \examples{
-X <- matrix(rnorm(1020), 10, 20)
+X <- matrix(rnorm(200), 10, 20)
 svdfit <- svd(X)
 
 p <- bi_projector(svdfit$v, s = svdfit$u \%\% diag(svdfit$d), sdev=svdfit$d)

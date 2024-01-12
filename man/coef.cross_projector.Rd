@@ -2,30 +2,17 @@
 % Please edit documentation in R/twoway_projector.R
 \name{coef.cross_projector}
 \alias{coef.cross_projector}
-\title{Project new data using a cross_projector object}
+\title{Extract coefficients from a cross_projector object}
 \usage{
-\method{coef}{cross_projector}(x, source = c("X", "Y"), ...)
+\method{coef}{cross_projector}(object, source = c("X", "Y"), ...)
 }
 \arguments{
-\item{x}{a cross_projector object}
+\item{object}{the model fit}
 
 \item{source}{the source of the data (X or Y block), either "X" or "Y"}
 
-\item{...}{additional arguments passed to the function}
-
-\item{new_data}{the new data to be projected}
-}
-\value{
-a projected matrix using the specified cross_projector object
+\item{...}{extra args}
 }
 \description{
-This function projects new data using a cross_projector object derived from a two-way projection of X and Y blocks.
-}
-\examples{
-# Assuming 'canfit' is a cross_projector object created using the cross_projector function
-new_X <- scale(matrix(rnorm(5 * 5), 5, 5))
-projected_X <- project(canfit, new_X, source = "X")
-
-new_Y <- scale(matrix(rnorm(5 * 5), 5, 5))
-projected_Y <- project(canfit, new_Y, source = "Y")
+Extract coefficients from a cross_projector object
 }

@@ -52,9 +52,11 @@ cross_projector <- function(vx, vy, preproc_x=prep(pass()), preproc_y=prep(pass(
   out
 }
 
+#' project a cross_projector instance
+#' @inheritParams project
 #' @param source the source of the data (X or Y block)
 #' @export
-#' @rdname project
+#' @family project
 project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
   source <- match.arg(source)
   chk::vld_matrix(new_data)
@@ -69,35 +71,27 @@ project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
 
 }  
 
-#' Project new data using a cross_projector object
+#' Extract coefficients from a cross_projector object
 #'
-#' This function projects new data using a cross_projector object derived from a two-way projection of X and Y blocks.
-#'
-#' @param x a cross_projector object
-#' @param new_data the new data to be projected
+#' @param object the model fit
 #' @param source the source of the data (X or Y block), either "X" or "Y"
-#' @param ... additional arguments passed to the function
-#' @return a projected matrix using the specified cross_projector object
+#' @param ... extra args
 #' @export
-#' @examples
-#' # Assuming 'canfit' is a cross_projector object created using the cross_projector function
-#' new_X <- scale(matrix(rnorm(5 * 5), 5, 5))
-#' projected_X <- project(canfit, new_X, source = "X")
-#' 
-#' new_Y <- scale(matrix(rnorm(5 * 5), 5, 5))
-#' projected_Y <- project(canfit, new_Y, source = "Y")
-coef.cross_projector <- function(x, source=c("X", "Y"),...) {
+coef.cross_projector <- function(object, source=c("X", "Y"),...) {
   source <- match.arg(source)
   if (source == "X") {
-    x$vx
+    object$vx
   } else {
-    x$vy
+    object$vy
   }
 }
 
+#' reprocess a cross_projector instance
+#' 
+#' @inheritParams reprocess
 #' @param source the source of the data (X or Y block)
 #' @export
-#' @rdname reprocess
+#' @family reprocess
 reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y"), ...) {
   source <- match.arg(source)
   if (is.null(colind)) {
@@ -115,9 +109,12 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
   
 }
 
+#' shape
+#' 
 #' @param source the source of the data (X or Y block)
 #' @export
-#' @rdname shape
+#' @family shape
+#' @inheritParams shape
 shape.cross_projector <- function(x, source=c("X", "Y"), ...) {
   source <- match.arg(source)
   if (source == "X") {

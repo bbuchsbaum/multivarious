@@ -8,10 +8,11 @@
 #' @param ... Extra arguments to be passed to the specific project method for the object's class
 #' @return A matrix or vector of the projected observations, where rows represent observations and columns represent the lower-dimensional space
 #' @export
+#' @family project
 #' @seealso \code{\link{bi_projector}} for an example of a class that implements a project method
 #' @examples
 #' # Example with the bi_projector class
-#' X <- matrix(rnorm(1020), 10, 20)
+#' X <- matrix(rnorm(10*20), 10, 20)
 #' svdfit <- svd(X)
 #' p <- bi_projector(svdfit$v, s = svdfit$u %% diag(svdfit$d), sdev=svdfit$d)
 #'
@@ -28,10 +29,11 @@ project <- function(x, new_data, ...) UseMethod("project")
 #' onto a lower-dimensional space using only a subset of the variables, as specified by the column indices.
 #'
 #' @param x The model fit, typically an object of class `bi_projector` or any other class that implements a `partial_project` method
-#' @param new_data A matrix or vector of new observations with the same number of columns as the original data. Rows represent observations and columns represent variables
+#' @param new_data A matrix or vector of new observations with a subset of columns equal to length of `colind`. Rows represent observations and columns represent variables
 #' @param colind A numeric vector of column indices to select in the projection matrix. These indices correspond to the variables used for the partial projection
 #' @return A matrix or vector of the partially projected observations, where rows represent observations and columns represent the lower-dimensional space
 #' @export
+#' @family partial_project
 #' @seealso \code{\link{bi_projector}} for an example of a class that implements a `partial_project` method
 #' @examples
 #' # Example with the bi_projector class
@@ -39,10 +41,11 @@ project <- function(x, new_data, ...) UseMethod("project")
 #' svdfit <- svd(X)
 #' p <- bi_projector(svdfit$v, s = svdfit$u %*% diag(svdfit$d), sdev=svdfit$d)
 #'
-#' # Partially project new_data onto the same subspace as the original data using only the first 10 variables
+#' # Partially project new_data onto the same subspace as the original data 
+#' # using only the first 10 variables
 #' new_data <- matrix(rnorm(5*20), 5, 20)
 #' colind <- 1:10
-#' partially_projected_data <- partial_project(p, new_data, colind)
+#' partially_projected_data <- partial_project(p, new_data[,colind], colind)
 partial_project <- function(x, new_data, colind) UseMethod("partial_project")
 
 
@@ -86,14 +89,8 @@ partial_projector <- function(x, colind, ...) UseMethod("partial_projector")
 #' @param ... Additional arguments passed to the underlying `project_block` method
 #' @return A matrix or vector of the projected data for the specified block
 #' @export
+#' @family project
 #' @seealso \code{\link{project}} for the generic projection function
-#' @examples
-#' # Example with a custom class that implements a project_block method
-#' # Assume that MyModel is a class that implements a project_block method
-#' # Fit the model and project the data for the first block
-#' mymodel_fit <- MyModel(...)
-#' new_data <- ...
-#' projected_data <- project_block(mymodel_fit, new_data, block = 1)
 project_block <- function(x, new_data, block,...) UseMethod("project_block")
 
 
@@ -109,14 +106,8 @@ project_block <- function(x, new_data, block,...) UseMethod("project_block")
 #' @param ... Additional arguments passed to the underlying `project_vars` method
 #' @return A matrix or vector of the projected variables in the subspace
 #' @export
+#' @family project
 #' @seealso \code{\link{project}} for the generic projection function for samples
-#' @examples
-#' # Example with a custom class that implements a project_vars method
-#' # Assume that MyModel is a class that implements a project_vars method
-#' # Fit the model and project the variables
-#' mymodel_fit <- MyModel(...)
-#' new_data <- ...
-#' projected_vars <- project_vars(mymodel_fit, new_data)
 project_vars <- function(x, new_data, ...) UseMethod("project_vars")
 
 
@@ -130,6 +121,7 @@ project_vars <- function(x, new_data, ...) UseMethod("project_vars")
 #' @param ... Additional arguments passed to the underlying `transpose` method
 #' @return A transposed model with coefficients and scores switched
 #' @export
+#' @family transpose
 #' @seealso \code{\link{bi_projector}} for an example of a two-way mapping model that can be transposed
 transpose <- function(x,...) UseMethod("transpose")
 
@@ -147,6 +139,7 @@ transpose <- function(x,...) UseMethod("transpose")
 #' @param ... Additional arguments passed to the underlying `reconstruct` method
 #' @return A reconstructed data set based on the selected components, rows, and columns
 #' @export
+#' @family reconstruct
 #' @seealso \code{\link{bi_projector}} for an example of a two-way mapping model that can be reconstructed
 reconstruct <- function(x, comp, rowind, colind, ...) UseMethod("reconstruct")
 
@@ -188,10 +181,7 @@ convert_domain <- function(x, new_data, i, j, comp, rowind, colind, ...) UseMeth
 #' @param ... Additional arguments passed to the method.
 #' @return A matrix of residuals, with the same dimensions as the original data matrix.
 #' @export
-#' @examples
-#' # Assume you have a fitted model 'model_fit' and the original data matrix 'data_matrix'
-#' # Calculate residuals after removing the first 2 components:
-#' res <- residuals(model_fit, ncomp = 2, xorig = data_matrix)
+#' @family residuals
 residuals <- function(x, ncomp, xorig, ...) UseMethod("residuals")
 
 
@@ -204,6 +194,7 @@ residuals <- function(x, ncomp, xorig, ...) UseMethod("residuals")
 #' @param ... Additional arguments passed to the method.
 #' @return A matrix of factor scores, with rows corresponding to samples and columns to components.
 #' @export
+#' @family scores
 #' @seealso \code{\link{project}} for projecting new data onto the components.
 scores <- function(x,...) UseMethod("scores")
 
@@ -468,7 +459,7 @@ classifier <- function(x, colind, ...) UseMethod("classifier")
 #' @param colind the (optional) column indices used for prediction
 #' @param ... extra arguments to `randomForest` function
 #' @export
-rf_classifier <- function(x, colind, ...) UseMethod("classifier")
+rf_classifier <- function(x, colind, ...) UseMethod("rf_classifier")
 
 
 #' Permutation Confidence Intervals
@@ -494,7 +485,6 @@ perm_ci <- function(x, X, nperm, ...) UseMethod("perm_ci")
 #' @param type The type of rotation to apply (e.g., "varimax", "quartimax", "promax").
 #' @return A modified model fit with the rotated components.
 #' @export
-#' @seealso \code{\link{rotate_vars}} for rotation types and options.
 rotate <- function(x, ncomp, type) UseMethod("rotate")
 
 
@@ -505,8 +495,8 @@ rotate <- function(x, ncomp, type) UseMethod("rotate")
 #' Apply a specified rotation to the fitted model
 #' 
 #' @param x A model object, possibly created using the `pca()` function.
-#' @param ncomp The number of components to rotate.
-#' @param type The type of rotation to apply. 
+#' @param rotation_matrix \code{matrix} reprsenting the rotation.
+#' @param ... extra args
 #' @return A modified object with updated components and scores after applying the specified rotation.
 #' @export
 apply_rotation <- function(x, rotation_matrix, ...) { UseMethod("apply_rotation") }

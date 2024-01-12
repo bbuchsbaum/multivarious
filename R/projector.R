@@ -151,6 +151,7 @@ print.projector <- function(x,...) {
 #' construct a partial_projector from a `projector` instance
 #' 
 #' @export
+#' @inheritParams partial_projector
 #' @examples 
 #' 
 #' X <- matrix(rnorm(10*10), 10, 10)

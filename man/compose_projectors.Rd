@@ -10,7 +10,8 @@ compose_projectors(...)
 \item{...}{The sequence of \code{projector} objects to be composed.}
 }
 \value{
-A \code{composed_projector} object that extends the \code{function} class, allowing the composed projectors to be applied to input data.
+A \code{composed_projector} object that extends the \code{function} class, allowing the composed projectors to be
+applied to input data.
 }
 \description{
 Compose a sequence of \code{projector} objects in forward order.

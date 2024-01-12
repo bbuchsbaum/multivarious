@@ -9,9 +9,9 @@ apply_rotation(x, rotation_matrix, ...)
 \arguments{
 \item{x}{A model object, possibly created using the \code{pca()} function.}
 
-\item{ncomp}{The number of components to rotate.}
+\item{rotation_matrix}{\code{matrix} reprsenting the rotation.}
 
-\item{type}{The type of rotation to apply.}
+\item{...}{extra args}
 }
 \value{
 A modified object with updated components and scores after applying the specified rotation.

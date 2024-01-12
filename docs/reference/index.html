@@ -135,6 +135,11 @@
         <dd>New sample projection</dd>
       </dl><dl><dt>
           
+          <code><a href="residualize.html">residualize()</a></code> 
+        </dt>
+        <dd>Compute a regression model for each column in a matrix and return residual matrix</dd>
+      </dl><dl><dt>
+          
           <code><a href="partial_project.html">partial_project()</a></code> 
         </dt>
         <dd>Partially project a new sample onto subspace</dd>
@@ -193,11 +198,37 @@
           <code><a href="nystrom_embedding.html">nystrom_embedding()</a></code> 
         </dt>
         <dd>Nystrom method for out-of-sample embedding</dd>
+      </dl></div><div class="section level2">
+      <h2 id="cross-projection">Cross Projection<a class="anchor" aria-label="anchor" href="#cross-projection"></a></h2>
+      
+      <p class="section-desc"></p><p>Functions for creating and working with cross_projectors for two-way projection between two sets of variables or features.</p>
+
+      
+    </div><div id="" class="section level2">
+      
+      
+      
+
+      <dl><dt>
+          
+          <code><a href="project.cross_projector.html">project(<i>&lt;cross_projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>project a cross_projector instance</dd>
       </dl><dl><dt>
           
-          <code><a href="predict.classifier.html">predict(<i>&lt;classifier&gt;</i>)</a></code> 
+          <code><a href="coef.cross_projector.html">coef(<i>&lt;cross_projector&gt;</i>)</a></code> 
         </dt>
-        <dd>predict with a classifier object</dd>
+        <dd>Extract coefficients from a cross_projector object</dd>
+      </dl><dl><dt>
+          
+          <code><a href="reprocess.cross_projector.html">reprocess(<i>&lt;cross_projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>reprocess a cross_projector instance</dd>
+      </dl><dl><dt>
+          
+          <code><a href="shape.cross_projector.html">shape(<i>&lt;cross_projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>shape</dd>
       </dl></div><div class="section level2">
       <h2 id="model-components-and-properties">Model Components and Properties<a class="anchor" aria-label="anchor" href="#model-components-and-properties"></a></h2>
       
@@ -269,11 +300,6 @@
           <code><a href="prinang.html">prinang()</a></code> 
         </dt>
         <dd>Compute principal angles for a set of subspaces</dd>
-      </dl><dl><dt>
-          
-          <code><a href="coef.cross_projector.html">coef(<i>&lt;cross_projector&gt;</i>)</a></code> 
-        </dt>
-        <dd>Project new data using a cross_projector object</dd>
       </dl></div><div class="section level2">
       <h2 id="rotation-and-transformation">Rotation and Transformation<a class="anchor" aria-label="anchor" href="#rotation-and-transformation"></a></h2>
       
@@ -318,6 +344,11 @@
         <dd>Bootstrap Resampling for Multivariate Models</dd>
       </dl><dl><dt>
           
+          <code><a href="bootstrap.pca.html">bootstrap(<i>&lt;pca&gt;</i>)</a></code> 
+        </dt>
+        <dd>PCA Bootstrap Resampling</dd>
+      </dl><dl><dt>
+          
           <code><a href="perm_ci.html">perm_ci()</a></code> 
         </dt>
         <dd>Permutation Confidence Intervals</dd>
@@ -339,19 +370,34 @@
         <dd>Construct a Classifier</dd>
       </dl><dl><dt>
           
-          <code><a href="rf_classifier.html">rf_classifier()</a></code> 
-        </dt>
-        <dd>construct a random forest wrapper classifier</dd>
-      </dl><dl><dt>
-          
           <code><a href="classifier.discriminant_projector.html">classifier(<i>&lt;discriminant_projector&gt;</i>)</a></code> 
         </dt>
         <dd>Create a k-NN classifier for a discriminant projector</dd>
       </dl><dl><dt>
           
+          <code><a href="classifier.multiblock_biprojector.html">classifier(<i>&lt;multiblock_biprojector&gt;</i>)</a></code> 
+        </dt>
+        <dd>Multiblock Bi-Projector Classifier</dd>
+      </dl><dl><dt>
+          
+          <code><a href="classifier.projector.html">classifier(<i>&lt;projector&gt;</i>)</a></code> 
+        </dt>
+        <dd>create <code>classifier</code> from a <code>projector</code></dd>
+      </dl><dl><dt>
+          
+          <code><a href="rf_classifier.html">rf_classifier()</a></code> 
+        </dt>
+        <dd>construct a random forest wrapper classifier</dd>
+      </dl><dl><dt>
+          
           <code><a href="rf_classifier.projector.html">rf_classifier(<i>&lt;projector&gt;</i>)</a></code> 
         </dt>
         <dd>create a random forest classifier</dd>
+      </dl><dl><dt>
+          
+          <code><a href="predict.classifier.html">predict(<i>&lt;classifier&gt;</i>)</a></code> 
+        </dt>
+        <dd>predict with a classifier object</dd>
       </dl></div><div class="section level2">
       <h2 id="model-diagnostics-and-residuals">Model Diagnostics and Residuals<a class="anchor" aria-label="anchor" href="#model-diagnostics-and-residuals"></a></h2>
       
@@ -401,11 +447,6 @@
         <dd>scale a data matrix</dd>
       </dl><dl><dt>
           
-          <code><a href="add_node.html">add_node()</a></code> 
-        </dt>
-        <dd>add a pre-processing stage</dd>
-      </dl><dl><dt>
-          
           <code><a href="prep.html">prep()</a></code> 
         </dt>
         <dd>prepare a dataset by applying a pre-processing pipeline</dd>
@@ -439,6 +480,11 @@
           <code><a href="concat_pre_processors.html">concat_pre_processors()</a></code> 
         </dt>
         <dd>bind together blockwise pre-processors</dd>
+      </dl><dl><dt>
+          
+          <code><a href="add_node.html">add_node()</a></code> 
+        </dt>
+        <dd>add a pre-processing stage</dd>
       </dl></div><div class="section level2">
       <h2 id="other">Other<a class="anchor" aria-label="anchor" href="#other"></a></h2>
       

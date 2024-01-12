@@ -5,7 +5,8 @@
 #'
 #' @param ... The sequence of `projector` objects to be composed.
 #'
-#' @return A `composed_projector` object that extends the `function` class, allowing the composed projectors to be applied to input data.
+#' @return A `composed_projector` object that extends the `function` class, allowing the composed projectors to be 
+#' applied to input data.
 #' @export
 #' @seealso \code{\link{projector}}, \code{\link{project}}
 #'
@@ -47,6 +48,8 @@ compose_projectors <- function(...) {
   out <- structure(f,
     class=c("composed_projector", "function")
   )
+  attr(out, "length") <- length(args)
+  out
 }
 
 # compose_partial_projector <- function(...) {
@@ -99,16 +102,15 @@ project.composed_projector <- function(x, new_data,...) {
 #' X2 <- scores(pca1)
 #' pca2 <- pca(X2, ncomp=4)
 #' cproj <- compose_projectors(pca1, pca2)
-#' print(cproj)
 #' @export
 print.composed_projector <- function(x, ...) {
-  n_proj <- length(unclass(x))
+  n_proj <- attr(x, "length")
   cat("Composed projector object:\n")
   cat("  Number of projectors: ", n_proj, "\n")
-  cat("  Projector order:\n")
-  for (i in seq_len(n_proj)) {
-    cat("    ", i, ": ", class(unclass(x)[[i]]$projector)[1], "\n")
-  }
+  #cat("  Projector order:\n")
+  #for (i in seq_len(n_proj)) {
+  #  cat("    ", i, ": ", class(unclass(x)[[i]]$projector)[1], "\n")
+  #}
   invisible(x)
 }
 

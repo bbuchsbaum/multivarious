@@ -4,6 +4,7 @@
 #' construct a new pre-processing pipeline
 #' 
 #' @keywords internal
+#' @noRd
 prepper <- function() {
   steps <- list()
   ret <- list(steps=steps)
@@ -105,6 +106,7 @@ fresh.pre_processor <- function(x, preproc=prepper(),...) {
 #' @param create the creation function
 #' 
 #' @keywords internal
+#' @noRd
 prep_node <- function(pipeline, name, create,  ...) {
   node <- create()
   ret <- list(name=name,

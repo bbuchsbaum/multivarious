@@ -17,10 +17,10 @@
 #' labels <- factor(rep(1:2, each = 50))
 #'
 #' # Perform LDA and create a discriminant projector
-#' library(MASS)
-#' lda_fit <- lda(X, labels)
+#' lda_fit <- MASS::lda(X, labels)
 #'
-#' dp <- discriminant_projector(lda_fit$scaling, s = lda_fit$scores, sdev = lda_fit$svd, labels = labels)
+#' dp <- discriminant_projector(lda_fit$scaling, X %*% lda_fit$scaling, sdev = lda_fit$svd, 
+#' labels = labels)
 #' @export
 discriminant_projector <- function(v, s, sdev, preproc=prep(pass()), labels, classes=NULL, ...) {
   

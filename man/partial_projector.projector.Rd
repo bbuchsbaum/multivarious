@@ -6,6 +6,13 @@
 \usage{
 \method{partial_projector}{projector}(x, colind, ...)
 }
+\arguments{
+\item{x}{The original \code{projector} instance, typically an object of class \code{bi_projector} or any other class that implements a \code{partial_projector} method}
+
+\item{colind}{A numeric vector of column indices to select in the projection matrix. These indices correspond to the variables used for the partial projector}
+
+\item{...}{Additional arguments passed to the underlying \code{partial_projector} method}
+}
 \description{
 construct a partial_projector from a \code{projector} instance
 }

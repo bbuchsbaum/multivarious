@@ -22,3 +22,4 @@ reduction methods.
 \seealso{
 \code{\link{bi_projector}} for an example of a two-way mapping model that can be transposed
 }
+\concept{transpose}

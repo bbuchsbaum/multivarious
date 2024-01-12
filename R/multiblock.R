@@ -107,7 +107,8 @@ coef.multiblock_projector <- function(object, block,...) {
 #' # Compute PCA on the combined data
 #' pc <- pca(X, ncomp = 8)
 #' # Create a multiblock bi-projector using PCA components and block indices
-#' mb_biproj <- multiblock_biprojector(pc$v, s = pc$u %*% diag(pc$d), sdev = pc$d, block_indices = list(1:5, 6:10))
+#' mb_biproj <- multiblock_biprojector(pc$v, s = pc$u %*% diag(sdev(pc)), sdev = sdev(pc), 
+#' block_indices = list(1:5, 6:10))
 #' # Pretty print the multiblock bi-projector object
 #' print(mb_biproj)
 #' @export
