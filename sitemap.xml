@@ -46,6 +46,9 @@
     <loc>https://bbuchsbaum.github.io/multivarious/reference/bootstrap.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/bootstrap.pca.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/center.html</loc>
   </url>
   <url>
@@ -53,6 +56,12 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.multiblock_biprojector.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.projector.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/coef.cross_projector.html</loc>
@@ -112,9 +121,6 @@
     <loc>https://bbuchsbaum.github.io/multivarious/reference/ncomp.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/new_classifier.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/nystrom_embedding.html</loc>
   </url>
   <url>
@@ -145,12 +151,6 @@
     <loc>https://bbuchsbaum.github.io/multivarious/reference/prep.html</loc>
   </url>
   <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/prep_node.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/prepper.html</loc>
-  </url>
-  <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/prinang.html</loc>
   </url>
   <url>
@@ -170,6 +170,9 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/print.projector.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/project.cross_projector.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/project.html</loc>
@@ -193,7 +196,13 @@
     <loc>https://bbuchsbaum.github.io/multivarious/reference/regress.html</loc>
   </url>
   <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/reprocess.cross_projector.html</loc>
+  </url>
+  <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/reprocess.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/residualize.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/residuals.html</loc>
@@ -215,6 +224,9 @@
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/sdev.html</loc>
+  </url>
+  <url>
+    <loc>https://bbuchsbaum.github.io/multivarious/reference/shape.cross_projector.html</loc>
   </url>
   <url>
     <loc>https://bbuchsbaum.github.io/multivarious/reference/shape.html</loc>

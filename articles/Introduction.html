@@ -8,8 +8,8 @@
 <meta name="description" content="multivarious">
 <title>Introduction to the multivarious Package • multivarious</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Introduction to the multivarious Package">
 <meta property="og:description" content="multivarious">
@@ -82,9 +82,9 @@ projecting new data onto a lower-dimensional subspace.</p>
 <div class="section level2">
 <h2 id="projector-and-bi-projector-classes">Projector and Bi-projector Classes<a class="anchor" aria-label="anchor" href="#projector-and-bi-projector-classes"></a>
 </h2>
-<p>projector and bi_projector are two core classes in the multivarious
-package. They represent linear transformations from a high-dimensional
-space to a lower-dimensional space.</p>
+<p>projector and bi_projector are two core classes in the
+<code>multivarious</code> package. They represent linear transformations
+from a high-dimensional space to a lower-dimensional space.</p>
 </div>
 <div class="section level2">
 <h2 id="projector">Projector<a class="anchor" aria-label="anchor" href="#projector"></a>
@@ -141,9 +141,7 @@ subspace as the original data.</p>
 <span></span>
 <span><span class="co"># Create a synthetic dataset</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1020</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in matrix(rnorm(1020), 10, 20): data length differs from size of</span></span>
-<span><span class="co">#&gt; matrix: [1020 != 10 x 20]</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Perform SVD on the dataset</span></span>
 <span><span class="va">svdfit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
@@ -156,25 +154,26 @@ subspace as the original data.</p>
 <span></span>
 <span><span class="va">projected_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">new_data</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">projected_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;             [,1]       [,2]       [,3]       [,4]       [,5]       [,6]</span></span>
-<span><span class="co">#&gt; [1,] -0.58913714  0.6865705  0.4102210  0.6438856  0.1402522 -0.6761381</span></span>
-<span><span class="co">#&gt; [2,] -0.26952900 -0.3642198 -0.7173707  0.2154867  0.6124832 -1.0128207</span></span>
-<span><span class="co">#&gt; [3,] -0.05130657  0.6229558 -1.1896199 -0.9898505 -1.2961081 -2.8089945</span></span>
-<span><span class="co">#&gt; [4,]  2.09310369  2.3419124 -1.1773441  0.3953684  0.2574287 -1.4958182</span></span>
-<span><span class="co">#&gt; [5,]  0.65287270 -1.4746880 -1.4929464  0.2257442 -0.1187262  1.0901138</span></span>
-<span><span class="co">#&gt;             [,7]         [,8]       [,9]      [,10]</span></span>
-<span><span class="co">#&gt; [1,]  0.68371650  0.258370781 -1.3508220 -1.4870010</span></span>
-<span><span class="co">#&gt; [2,] -0.94059882  0.241747174 -0.9027479  0.7274886</span></span>
-<span><span class="co">#&gt; [3,]  0.93458865 -0.563849694 -0.7676557  0.0302713</span></span>
-<span><span class="co">#&gt; [4,] -0.04816029 -0.004896937 -1.4666963 -0.4516368</span></span>
-<span><span class="co">#&gt; [5,]  0.56153130 -0.160593061 -1.1317360 -0.5067634</span></span></code></pre></div>
-<p>In the multivarious package, the bi_projector class allows you to
-project new variables into the subspace defined by the model. The
-project_vars function is a generic function that operates on an object
-of a class implementing the project_vars method, such as a bi_projector
-object. This function projects one or more variables onto a subspace,
-which can be computed for a biorthogonal decomposition like Singular
-Value Decomposition (SVD).</p>
+<span><span class="co">#&gt;            [,1]       [,2]       [,3]       [,4]         [,5]       [,6]</span></span>
+<span><span class="co">#&gt; [1,] -0.7864046 -0.4800612 -0.8865129 -0.2262336  0.678323845  2.3448302</span></span>
+<span><span class="co">#&gt; [2,] -0.1325076  1.3903017 -1.5064698  1.2550899  0.673332975  0.5718498</span></span>
+<span><span class="co">#&gt; [3,]  0.2864814 -0.2701905 -0.8181929 -0.8490030  0.006430116 -1.2933359</span></span>
+<span><span class="co">#&gt; [4,]  1.1311516  0.2891873 -1.0273319 -1.7338016  2.030170740 -2.8299146</span></span>
+<span><span class="co">#&gt; [5,] -0.8503584  0.1281519 -0.3367642  1.1956792 -0.315282938  1.2275375</span></span>
+<span><span class="co">#&gt;              [,7]       [,8]       [,9]      [,10]</span></span>
+<span><span class="co">#&gt; [1,] -0.985947936 -0.3905921 -0.8155574  1.2573170</span></span>
+<span><span class="co">#&gt; [2,] -0.006895692  1.5533483 -0.9853844  0.1021079</span></span>
+<span><span class="co">#&gt; [3,] -1.018713344 -0.8993998  1.1744588  1.1175886</span></span>
+<span><span class="co">#&gt; [4,] -0.520309205  0.8700092  0.5702875  0.1959549</span></span>
+<span><span class="co">#&gt; [5,]  1.078096512  0.1897177 -0.9757569 -1.1833003</span></span></code></pre></div>
+<p>In the <code>multivarious</code> package, the
+<code>bi_projector</code> class allows you to project new variables into
+the subspace defined by the model. The <code>project_vars</code>
+function is a generic function that operates on an object of a class
+implementing the <code>project_vars</code> method, such as a
+<code>bi_projector</code> object. This function projects one or more
+variables onto a subspace, which can be computed for a biorthogonal
+decomposition like Singular Value Decomposition (SVD).</p>
 <p>Remember, given an original data matrix <span class="math inline">\(X\)</span>, the SVD of <span class="math inline">\(X\)</span> can be written as:</p>
 <p><span class="math display">\[
 X \approx USV^T
@@ -184,22 +183,23 @@ singular vectors (scores), <span class="math inline">\(S\)</span> is a
 diagonal matrix containing the singular values, and <span class="math inline">\(V^T\)</span> contains the right singular vectors
 (components). When we have new variables (columns) that we want to
 project into the same subspace as the original data, we can use the
-project_vars function.</p>
+<code>project_vars</code> function.</p>
 </div>
 <div class="section level2">
 <h2 id="projecting-new-variables-onto-the-subspace">Projecting New Variables onto the Subspace<a class="anchor" aria-label="anchor" href="#projecting-new-variables-onto-the-subspace"></a>
 </h2>
-<p>Let’s say we have a new data matrix new_data with the same number of
-rows as the original data. To project these new variables into the
-subspace, we can compute:</p>
+<p>Let’s say we have a new data matrix <code>new_data</code> with the
+same number of rows as the original data. To project these new variables
+into the subspace, we can compute:</p>
 <p> = U^T </p>
 <p>The result is a matrix or vector of the projected variables in the
 subspace.</p>
 <p>Here’s an example of how you can use the <code>svd_wrapper</code>
-function in the multivarious package with the Iris dataset to compute
-the SVD and project new variables into the subspace.</p>
-<p>First, let’s load the Iris dataset and compute the SVD using the
-svd_wrapper function:</p>
+function in the <code>multivarious</code> package with the
+<code>iris</code> dataset to compute the SVD and project new variables
+into the subspace.</p>
+<p>First, let’s load the <code>iris</code> dataset and compute the SVD
+using the <code>svd_wrapper</code> function:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Load iris dataset and select the first four columns</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
@@ -207,9 +207,10 @@ svd_wrapper function:</p>
 <span></span>
 <span><span class="co"># Compute SVD using the base method and 3 components</span></span>
 <span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/svd_wrapper.html">svd_wrapper</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">3</span>, preproc <span class="op">=</span> <span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"base"</span><span class="op">)</span></span></code></pre></div>
-<p>Now, let’s assume we have a new data matrix new_data with the same
-number of rows as the original data. To project these new variables into
-the subspace, we can use the project_vars function:</p>
+<p>Now, let’s assume we have a new data matrix <code>new_data</code>
+with the same number of rows as the original data. To project these new
+variables into the subspace, we can use the <code>project_vars</code>
+function:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Define new_data</span></span>
 <span><span class="va">new_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span>
@@ -217,8 +218,9 @@ the subspace, we can use the project_vars function:</p>
 <span><span class="co"># Project the new variables into the subspace</span></span>
 <span><span class="va">projected_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_vars.html">project_vars</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">new_data</span><span class="op">)</span></span></code></pre></div>
 <p>This example demonstrates how to compute the SVD using the
-svd_wrapper function and project new variables into the subspace defined
-by the SVD using the <code>project_vars</code> function.</p>
+<code>svd_wrapper</code> function and project new variables into the
+subspace defined by the SVD using the <code>project_vars</code>
+function.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
