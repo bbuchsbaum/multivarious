@@ -125,6 +125,8 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 #' 
 #' @inheritParams rf_classifier
 #' @inheritParams classifier.multiblock_biprojector
+#' 
+#' @param scores a matrix of references scores used for classification
 #'
 #' @examples
 #' data(iris)

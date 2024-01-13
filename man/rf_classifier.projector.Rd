@@ -13,6 +13,8 @@
 
 \item{labels}{A factor or vector of class labels for the training data.}
 
+\item{scores}{a matrix of references scores used for classification}
+
 \item{...}{extra arguments to \code{randomForest} function}
 }
 \description{
