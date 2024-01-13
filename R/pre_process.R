@@ -139,6 +139,7 @@ new_pre_processor <- function(x) {
 #' `pass` simply passes its data through the chain
 #' 
 #' @param preproc the pre-processing pipeline
+#' @return a `prepper` list 
 #' @export
 pass <- function(preproc=prepper()) {
   
@@ -176,7 +177,7 @@ pass <- function(preproc=prepper()) {
 #' @inheritParams pass
 #' @export
 #' @importFrom Matrix colMeans
-#' 
+#' @return a `prepper` list 
 center <- function(preproc = prepper(), cmeans=NULL) {
   create <- function() {
     #env = new.env()
@@ -234,7 +235,7 @@ center <- function(preproc = prepper(), cmeans=NULL) {
 #' 
 #' @param type the kind of scaling, `unit` norm, `z`-scoring, or precomputed `weights`
 #' @param weights optional precomputed weights
-#' 
+#' @return a `prepper` list 
 #' @export
 colscale <- function(preproc = prepper(),
                      type = c("unit", "z", "weights"),
@@ -299,6 +300,7 @@ colscale <- function(preproc = prepper(),
 #' @param cmeans an optional vector of column means
 #' @param sds an optional vector of sds
 #' @inheritParams pass
+#' @return a `prepper` list 
 #' @export
 standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
   create <- function() {
@@ -362,7 +364,7 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
 #' @param preprocs a list of initialized `pre-processor` objects
 #' @param block_indices a list of block indices where each vector in the list 
 #' contains the global indices of the variables.
-#' 
+#' @return a new `prepper` object
 #' @examples 
 #' 
 #' p1 <- center() |> prep()

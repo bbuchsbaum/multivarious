@@ -86,22 +86,13 @@ column indices are associated with a given block.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
-    <div class="dont-index"><p><code><a href="project.html">project</a></code> for the generic projection function</p></div>
+    <div class="dont-index"><p><code><a href="project.html">project</a></code> for the generic projection function</p>
+<p>Other project: 
+<code><a href="project.cross_projector.html">project.cross_projector</a>()</code>,
+<code><a href="project_vars.html">project_vars</a>()</code>,
+<code><a href="project.html">project</a>()</code></p></div>
     </div>
 
-    <div class="section level2">
-    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Example with a custom class that implements a project_block method</span></span></span>
-<span class="r-in"><span><span class="co"># Assume that MyModel is a class that implements a project_block method</span></span></span>
-<span class="r-in"><span><span class="co"># Fit the model and project the data for the first block</span></span></span>
-<span class="r-in"><span><span class="va">mymodel_fit</span> <span class="op">&lt;-</span> <span class="fu">MyModel</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in MyModel(...):</span> could not find function "MyModel"</span>
-<span class="r-in"><span><span class="va">new_data</span> <span class="op">&lt;-</span> <span class="va">...</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in eval(expr, envir, enclos):</span> '...' used in an incorrect context</span>
-<span class="r-in"><span><span class="va">projected_data</span> <span class="op">&lt;-</span> <span class="fu">project_block</span><span class="op">(</span><span class="va">mymodel_fit</span>, <span class="va">new_data</span>, block <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in project_block(mymodel_fit, new_data, block = 1):</span> object 'mymodel_fit' not found</span>
-</code></pre></div>
-    </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 

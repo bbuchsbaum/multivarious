@@ -9,6 +9,9 @@ pass(preproc = prepper())
 \arguments{
 \item{preproc}{the pre-processing pipeline}
 }
+\value{
+a \code{prepper} list
+}
 \description{
 \code{pass} simply passes its data through the chain
 }

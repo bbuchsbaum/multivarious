@@ -61,7 +61,7 @@ onto a lower-dimensional space using only a subset of the variables, as specifie
 
 
 <dt>new_data</dt>
-<dd><p>A matrix or vector of new observations with the same number of columns as the original data. Rows represent observations and columns represent variables</p></dd>
+<dd><p>A matrix or vector of new observations with a subset of columns equal to length of <code>colind</code>. Rows represent observations and columns represent variables</p></dd>
 
 
 <dt>colind</dt>
@@ -86,12 +86,11 @@ onto a lower-dimensional space using only a subset of the variables, as specifie
 <span class="r-in"><span><span class="va">svdfit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="bi_projector.html">bi_projector</a></span><span class="op">(</span><span class="va">svdfit</span><span class="op">$</span><span class="va">v</span>, s <span class="op">=</span> <span class="va">svdfit</span><span class="op">$</span><span class="va">u</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">svdfit</span><span class="op">$</span><span class="va">d</span><span class="op">)</span>, sdev<span class="op">=</span><span class="va">svdfit</span><span class="op">$</span><span class="va">d</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Partially project new_data onto the same subspace as the original data using only the first 10 variables</span></span></span>
+<span class="r-in"><span><span class="co"># Partially project new_data onto the same subspace as the original data </span></span></span>
+<span class="r-in"><span><span class="co"># using only the first 10 variables</span></span></span>
 <span class="r-in"><span><span class="va">new_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span><span class="op">*</span><span class="fl">20</span><span class="op">)</span>, <span class="fl">5</span>, <span class="fl">20</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">colind</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span></span></span>
-<span class="r-in"><span><span class="va">partially_projected_data</span> <span class="op">&lt;-</span> <span class="fu">partial_project</span><span class="op">(</span><span class="va">p</span>, <span class="va">new_data</span>, <span class="va">colind</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in chk::check_dim(new_data, ncol, length(colind)):</span> `ncol(new_data)` must be equal to 10L.</span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> Use `rlang::last_error()$y` to show the object compared to.</span>
+<span class="r-in"><span><span class="va">partially_projected_data</span> <span class="op">&lt;-</span> <span class="fu">partial_project</span><span class="op">(</span><span class="va">p</span>, <span class="va">new_data</span><span class="op">[</span>,<span class="va">colind</span><span class="op">]</span>, <span class="va">colind</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -83,6 +83,8 @@ prinang <- function(fits) {
 #' @param X the response matrix
 #' @param design the \code{data.frame} containing the design variables specified in \code{form} argument.
 #' @param intercept add an intercept term (default is FALSE)
+#' 
+#' @return a \code{matrix} of residuals
 #' @examples 
 #' 
 #' X <- matrix(rnorm(20*10), 20, 10)

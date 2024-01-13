@@ -11,6 +11,9 @@ center(preproc = prepper(), cmeans = NULL)
 
 \item{cmeans}{optional vector of precomputed column means}
 }
+\value{
+a \code{prepper} list
+}
 \description{
 remove mean of all columns in matrix
 }

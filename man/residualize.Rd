@@ -15,6 +15,9 @@ residualize(form, X, design, intercept = FALSE)
 
 \item{intercept}{add an intercept term (default is FALSE)}
 }
+\value{
+a \code{matrix} of residuals
+}
 \description{
 Compute a regression model for each column in a matrix and return residual matrix
 }

@@ -13,6 +13,9 @@ standardize(preproc = prepper(), cmeans = NULL, sds = NULL)
 
 \item{sds}{an optional vector of sds}
 }
+\value{
+a \code{prepper} list
+}
 \description{
 center and scale each vector of a matrix
 }

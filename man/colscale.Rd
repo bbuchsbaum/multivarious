@@ -13,6 +13,9 @@ colscale(preproc = prepper(), type = c("unit", "z", "weights"), weights = NULL)
 
 \item{weights}{optional precomputed weights}
 }
+\value{
+a \code{prepper} list
+}
 \description{
 normalize each column by a scale factor.
 }

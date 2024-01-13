@@ -12,6 +12,9 @@ concat_pre_processors(preprocs, block_indices)
 \item{block_indices}{a list of block indices where each vector in the list
 contains the global indices of the variables.}
 }
+\value{
+a new \code{prepper} object
+}
 \description{
 concatenate a sequence of pre-processors, each previously applied to a block of data.
 }
