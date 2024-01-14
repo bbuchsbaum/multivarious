@@ -10,3 +10,4 @@
 ^\.github$
 Generics.yml
 experimental
+^cran-comments\.md$

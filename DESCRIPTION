@@ -6,8 +6,8 @@ Authors@R:
            family = "Buchsbaum",
            role = c("aut", "cre"),
            email = "brad.buchsbaum@gmail.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: The 'multivarious' package provides a set of basic and extensible data structures and functions for multivariate analysis, including dimensionality reduction techniques, projection methods, and preprocessing functions. The aim of this package is to offer a flexible and user-friendly framework for multivariate analysis that can be easily extended for custom requirements and specific data analysis tasks.
+           comment = c(ORCID = "0000-0002-1108-4866"))
+Description: Provides a set of basic and extensible data structures and functions for multivariate analysis, including dimensionality reduction techniques, projection methods, and preprocessing functions. The aim of this package is to offer a flexible and user-friendly framework for multivariate analysis that can be easily extended for custom requirements and specific data analysis tasks.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -37,5 +37,4 @@ Suggests:
     rmarkdown,
     MASS
 URL: https://bbuchsbaum.github.io/multivarious/
-Remotes: https://github.com/bbuchsbaum/deflist
 VignetteBuilder: knitr
