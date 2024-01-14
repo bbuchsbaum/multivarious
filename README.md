@@ -9,8 +9,6 @@
 coverage](https://codecov.io/gh/bbuchsbaum/multivarious/branch/master/graph/badge.svg)](https://app.codecov.io/gh/bbuchsbaum/multivarious?branch=master)
 <!-- badges: end -->
 
-This is all very preliminary …
-
 This package is intended to provide some basic abstractions and default
 implementations of basic computational infrastructure for multivariate
 component-based modeling such as principal components analysis.
@@ -22,15 +20,15 @@ space. This idea is encapsulated by the `projector` class and the
 column projection) is provided by the derived class `bi-projector`.
 Generic functions for common operations are included:
 
--   `project` for mapping from input space into (usually)
-    reduced-dimensional output space
--   `partial_project` for mapping a subset of input space into output
-    space
--   `project_vars` for mapping new variables (“supplementary variables”)
-    to output space
--   `reconstruct` for reconstructing input data from its low-dimensional
-    representation
--   `residuals` for extracting residuals of a fit with `n` components.
+- `project` for mapping from input space into (usually)
+  reduced-dimensional output space
+- `partial_project` for mapping a subset of input space into output
+  space
+- `project_vars` for mapping new variables (“supplementary variables”)
+  to output space
+- `reconstruct` for reconstructing input data from its low-dimensional
+  representation
+- `residuals` for extracting residuals of a fit with `n` components.
 
 ## Installation
 

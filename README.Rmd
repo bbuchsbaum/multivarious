@@ -19,7 +19,6 @@ knitr::opts_chunk$set(
 [![Codecov test coverage](https://codecov.io/gh/bbuchsbaum/multivarious/branch/master/graph/badge.svg)](https://app.codecov.io/gh/bbuchsbaum/multivarious?branch=master)
 <!-- badges: end -->
 
-This is all very preliminary ... 
 
 This package is intended to provide some basic abstractions and default implementations of basic computational infrastructure for multivariate component-based modeling such as principal components analysis.
 
