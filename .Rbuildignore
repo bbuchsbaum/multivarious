@@ -11,3 +11,4 @@
 Generics.yml
 experimental
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
