@@ -37,4 +37,5 @@ Suggests:
     rmarkdown,
     MASS
 URL: https://bbuchsbaum.github.io/multivarious/
+BugReports: https://github.com/bbuchsbaum/multivarious/issues
 VignetteBuilder: knitr
