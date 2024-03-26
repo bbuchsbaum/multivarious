@@ -5,11 +5,16 @@
 \title{Pretty Print Method for \code{projector} Objects}
 \usage{
 \method{print}{projector}(x, ...)
+
+\method{print}{projector}(x, ...)
 }
 \arguments{
 \item{x}{A \code{projector} object.}
 
 \item{...}{Additional arguments passed to \code{print()}.}
+}
+\value{
+the \code{projector} object
 }
 \description{
 Display a human-readable summary of a \code{projector} object, including information about the dimensions of the projection matrix and the pre-processing pipeline.

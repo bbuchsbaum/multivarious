@@ -13,6 +13,9 @@
 
 \item{...}{extra args}
 }
+\value{
+the coefficients
+}
 \description{
 Extract coefficients from a cross_projector object
 }

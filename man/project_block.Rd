@@ -28,8 +28,8 @@ column indices are associated with a given block.
 \code{\link{project}} for the generic projection function
 
 Other project: 
+\code{\link{project}()},
 \code{\link{project.cross_projector}()},
-\code{\link{project_vars}()},
-\code{\link{project}()}
+\code{\link{project_vars}()}
 }
 \concept{project}

@@ -127,7 +127,7 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 #' @inheritParams classifier.multiblock_biprojector
 #' 
 #' @param scores a matrix of references scores used for classification
-#'
+#' @return a `rf_classifier` object
 #' @examples
 #' data(iris)
 #' X <- iris[,1:4]
@@ -173,6 +173,8 @@ rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
 #' @export
 #' 
 #' @family classifier
+#' 
+#' @return a `classifier` object
 #' 
 #' @examples
 #' data(iris)
@@ -308,6 +310,7 @@ prepare_predict <- function(object, colind, ncomp, new_data,...) {
 #' @param ... additional arguments to projection function
 #' 
 #' @importFrom stats predict
+#' @return a list with the predicted class and probabilities
 #' @export
 predict.classifier <- function(object, new_data, ncomp=NULL,
                                colind=NULL, metric=c("cosine", "euclidean"), ...) {
@@ -362,7 +365,7 @@ predict.rf_classifier <- function(object, new_data, ncomp=NULL,
 #'
 #' @param x A `classifier` object.
 #' @param ... Additional arguments passed to `print()`.
-#'
+#' @return `classifier` object.
 #' @export
 print.classifier <- function(x, ...) {
   cat("classifier object:\n")

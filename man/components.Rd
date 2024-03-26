@@ -11,6 +11,9 @@ components(x, ...)
 
 \item{...}{extra args}
 }
+\value{
+the component matrix
+}
 \description{
 Extract the component matrix of a fit.
 }

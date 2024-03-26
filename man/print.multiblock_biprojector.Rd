@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments passed to \code{print()}.}
 }
+\value{
+Invisible \code{multiblock_biprojector} object.
+}
 \description{
 Display a human-readable summary of a \code{multiblock_biprojector} object, including information about the dimensions of the projection matrix, the pre-processing pipeline, and block indices.
 }

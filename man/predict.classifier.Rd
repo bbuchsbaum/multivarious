@@ -26,6 +26,9 @@
 
 \item{...}{additional arguments to projection function}
 }
+\value{
+a list with the predicted class and probabilities
+}
 \description{
 predict with a classifier object
 }

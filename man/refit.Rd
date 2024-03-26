@@ -13,6 +13,9 @@ refit(x, new_data, ...)
 
 \item{...}{extra args}
 }
+\value{
+a refit model object
+}
 \description{
 refit a model given new data or new parameter(s)
 }

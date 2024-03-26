@@ -94,7 +94,7 @@ project.composed_projector <- function(x, new_data,...) {
 #'
 #' @param x A `composed_projector` object.
 #' @param ... Additional arguments passed to `print()`.
-#'
+#' @return The `composed_projector` object.
 #' @examples
 #' # Create two PCA projectors and compose them
 #' X <- matrix(rnorm(20*20), 20, 20)

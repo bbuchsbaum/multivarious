@@ -17,6 +17,9 @@
 
 \item{...}{extra arguments to \code{randomForest} function}
 }
+\value{
+a \code{rf_classifier} object
+}
 \description{
 create a random forest classifier
 }

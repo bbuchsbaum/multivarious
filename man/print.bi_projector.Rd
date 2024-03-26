@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments passed to the print function}
 }
+\value{
+Invisible \code{bi_projector} object
+}
 \description{
 Pretty Print S3 Method for bi_projector Class
 }

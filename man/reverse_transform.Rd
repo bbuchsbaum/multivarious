@@ -15,6 +15,9 @@ reverse_transform(x, X, colind, ...)
 
 \item{...}{extra args}
 }
+\value{
+the reverse-transformed data
+}
 \description{
 reverse a pre-processing transform
 }

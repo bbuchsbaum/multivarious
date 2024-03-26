@@ -11,6 +11,9 @@ truncate(x, ncomp)
 
 \item{ncomp}{number of components to retain}
 }
+\value{
+a truncated object (e.g. PCA with 'ncomp' components)
+}
 \description{
 take the first n components of a decomposition
 }

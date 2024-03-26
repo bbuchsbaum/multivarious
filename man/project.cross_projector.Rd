@@ -15,13 +15,16 @@
 
 \item{...}{Extra arguments to be passed to the specific project method for the object's class}
 }
+\value{
+the projected data
+}
 \description{
 project a cross_projector instance
 }
 \seealso{
 Other project: 
+\code{\link{project}()},
 \code{\link{project_block}()},
-\code{\link{project_vars}()},
-\code{\link{project}()}
+\code{\link{project_vars}()}
 }
 \concept{project}

@@ -53,8 +53,10 @@ cross_projector <- function(vx, vy, preproc_x=prep(pass()), preproc_y=prep(pass(
 }
 
 #' project a cross_projector instance
+#' 
 #' @inheritParams project
 #' @param source the source of the data (X or Y block)
+#' @return the projected data
 #' @export
 #' @family project
 project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
@@ -76,6 +78,7 @@ project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
 #' @param object the model fit
 #' @param source the source of the data (X or Y block), either "X" or "Y"
 #' @param ... extra args
+#' @return the coefficients
 #' @export
 coef.cross_projector <- function(object, source=c("X", "Y"),...) {
   source <- match.arg(source)
@@ -90,6 +93,7 @@ coef.cross_projector <- function(object, source=c("X", "Y"),...) {
 #' 
 #' @inheritParams reprocess
 #' @param source the source of the data (X or Y block)
+#' @return the re(pre-)processed data
 #' @export
 #' @family reprocess
 reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y"), ...) {
@@ -109,9 +113,10 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
   
 }
 
-#' shape
+#' shape of a cross_projector instance
 #' 
 #' @param source the source of the data (X or Y block)
+#' @return the shape of the data
 #' @export
 #' @family shape
 #' @inheritParams shape

@@ -11,6 +11,9 @@ prep(x, ...)
 
 \item{...}{extra args}
 }
+\value{
+the pre-processed data
+}
 \description{
 prepare a dataset by applying a pre-processing pipeline
 }

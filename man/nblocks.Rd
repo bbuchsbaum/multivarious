@@ -9,6 +9,9 @@ nblocks(x)
 \arguments{
 \item{x}{the object}
 }
+\value{
+the number of blocks
+}
 \description{
 The number of data blocks in a multiblock element
 }

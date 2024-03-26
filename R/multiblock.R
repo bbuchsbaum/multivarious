@@ -98,7 +98,7 @@ coef.multiblock_projector <- function(object, block,...) {
 #'
 #' @param x A `multiblock_biprojector` object.
 #' @param ... Additional arguments passed to `print()`.
-#'
+#' @return Invisible `multiblock_biprojector` object.
 #' @examples
 #' # Generate some example data
 #' X1 <- matrix(rnorm(10 * 5), 10, 5)

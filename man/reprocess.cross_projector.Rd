@@ -17,6 +17,9 @@
 
 \item{...}{extra args}
 }
+\value{
+the re(pre-)processed data
+}
 \description{
 reprocess a cross_projector instance
 }
