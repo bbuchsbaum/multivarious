@@ -97,7 +97,7 @@ prinang <- function(fits) {
 #' @export
 #' @importFrom stats model.matrix lsfit resid
 residualize <- function(form, X, design, intercept=FALSE) {
-  options(contrasts = c("contr.sum", "contr.poly"))
+  #options(contrasts = c("contr.sum", "contr.poly"))
   modmat <- model.matrix(form, data=design)
   stats::resid(lsfit(modmat, X, intercept=intercept))
 }
