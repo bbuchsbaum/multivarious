@@ -8,4 +8,4 @@
 
 * There are no references that generically relate to this package.
 
-* an "options" call setting within "residualize" was removed to comply with CRAN guidance.
+* an "options" call within "residualize" was removed to comply with CRAN guidance.
