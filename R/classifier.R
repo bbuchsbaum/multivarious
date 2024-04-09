@@ -306,14 +306,14 @@ prepare_predict <- function(object, colind, ncomp, new_data,...) {
 #' @param new_data new data to predict on
 #' @param ncomp the number of components to use
 #' @param colind the column indices to select in the projection matrix
-#' @param metric the similarity metric ("euclidean" or "cosine")
+#' @param metric the similarity metric ("euclidean", "cosine", "ejaccard")
 #' @param ... additional arguments to projection function
 #' 
 #' @importFrom stats predict
 #' @return a list with the predicted class and probabilities
 #' @export
 predict.classifier <- function(object, new_data, ncomp=NULL,
-                               colind=NULL, metric=c("cosine", "euclidean"), ...) {
+                               colind=NULL, metric=c("cosine", "euclidean", "ejaccard"), normalize_probs=TRUE, ...) {
   
   metric <- match.arg(metric)
 
@@ -322,9 +322,12 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   ncomp <- prep$ncomp
   
   doit <- function(p) {
-    prob <- normalize_probs(p)
-    pmeans <- avg_probs(prob, object$labels)
-    cls <- nearest_class(prob, object$labels, object$knn)
+    #prob <- normalize_probs(p)
+    if (normalize_probs) {
+      p <- t(apply(p, 1, function(v) scale(v)))
+    }
+    pmeans <- avg_probs(p, object$labels)
+    cls <- nearest_class(p, object$labels, object$knn)
     list(class=cls, prob=pmeans)
   }
   
@@ -338,6 +341,9 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     D <- D/max(D)
     doit(exp(-D))
     #-D
+  } else if (metric == "ejaccard") {
+    p <- proxy::simil(sc[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="ejaccard")
+    doit(p)
   }
   
 }

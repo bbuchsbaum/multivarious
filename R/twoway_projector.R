@@ -103,8 +103,7 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
     colind <- 1:ncol(new_data)
   } else {
     chk::chk_equal(length(colind), ncol(new_data)) 
-  }
-  
+    
   if (source == "X") {
     apply_transform(x$preproc_x, new_data, colind)
   } else {
