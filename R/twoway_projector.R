@@ -70,8 +70,7 @@ project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
   
   chk::check_dim(new_data, ncol, values=nrow(coefficients(x, source=source)))
   reprocess(x, new_data, source=source) %*% coefficients(x, source=source)
-
-}  
+}
 
 #' Extract coefficients from a cross_projector object
 #'
@@ -103,6 +102,7 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
     colind <- 1:ncol(new_data)
   } else {
     chk::chk_equal(length(colind), ncol(new_data)) 
+  }
     
   if (source == "X") {
     apply_transform(x$preproc_x, new_data, colind)
@@ -135,10 +135,5 @@ print.cross_projector <- function(x,...) {
   cat("output dim (X): ", shape(x, source="X")[2], "\n")
   cat("input dim (Y): ", shape(x, source="Y")[1], "\n")
   cat("output dim (Y): ", shape(x, source="Y")[2], "\n")
+  Invisible(x)
 }
-
-
-  
-  
-  
-  
