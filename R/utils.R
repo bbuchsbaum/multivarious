@@ -33,8 +33,7 @@ group_means <- function (Y, X) {
   else {
     if (any(is.na(X))) {
       xspl <- split_matrix(X, Y)
-      ret <- do.call(rbind, lapply(xspl, function(x) matrixStats::colMeans2(x, 
-                                                                            na.rm = TRUE)))
+      ret <- do.call(rbind, lapply(xspl, function(x) matrixStats::colMeans2(x, na.rm = TRUE)))
       row.names(ret) <- names(xspl)
       ret
     }
