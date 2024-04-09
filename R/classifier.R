@@ -307,13 +307,14 @@ prepare_predict <- function(object, colind, ncomp, new_data,...) {
 #' @param ncomp the number of components to use
 #' @param colind the column indices to select in the projection matrix
 #' @param metric the similarity metric ("euclidean", "cosine", "ejaccard")
+#' @param normalized_probs whether to normalize the similaritiesf each row of the scores X new_data similarity matrix.
 #' @param ... additional arguments to projection function
 #' 
 #' @importFrom stats predict
 #' @return a list with the predicted class and probabilities
 #' @export
 predict.classifier <- function(object, new_data, ncomp=NULL,
-                               colind=NULL, metric=c("cosine", "euclidean", "ejaccard"), normalize_probs=TRUE, ...) {
+                               colind=NULL, metric=c("cosine", "euclidean", "ejaccard"), normalize_probs=FALSE, ...) {
   
   metric <- match.arg(metric)
 
@@ -324,7 +325,7 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   doit <- function(p) {
     #prob <- normalize_probs(p)
     if (normalize_probs) {
-      p <- t(apply(p, 1, function(v) scale(v)))
+      p <- t(apply(p, 1, function(v) v/sd(v)))
     }
     pmeans <- avg_probs(p, object$labels)
     cls <- nearest_class(p, object$labels, object$knn)
