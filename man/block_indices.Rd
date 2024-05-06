@@ -11,6 +11,9 @@ block_indices(x, ...)
 
 \item{...}{extra args}
 }
+\value{
+a list of block indices
+}
 \description{
 extract the list of indices associated with each block in a \code{multiblock} object
 }

@@ -4,4 +4,8 @@
 
 * This is a new release.
 
-* version number is now "serious".
+* @return tags are now added for all functions referenced in previous CRAN review.
+
+* There are no references that generically relate to this package.
+
+* an "options" call within "residualize" was removed to comply with CRAN guidance.

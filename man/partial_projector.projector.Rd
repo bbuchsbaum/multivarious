@@ -13,6 +13,9 @@
 
 \item{...}{Additional arguments passed to the underlying \code{partial_projector} method}
 }
+\value{
+A \code{partial_projector} instance
+}
 \description{
 construct a partial_projector from a \code{projector} instance
 }

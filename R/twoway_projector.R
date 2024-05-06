@@ -53,8 +53,10 @@ cross_projector <- function(vx, vy, preproc_x=prep(pass()), preproc_y=prep(pass(
 }
 
 #' project a cross_projector instance
+#' 
 #' @inheritParams project
 #' @param source the source of the data (X or Y block)
+#' @return the projected data
 #' @export
 #' @family project
 project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
@@ -68,14 +70,14 @@ project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
   
   chk::check_dim(new_data, ncol, values=nrow(coefficients(x, source=source)))
   reprocess(x, new_data, source=source) %*% coefficients(x, source=source)
-
-}  
+}
 
 #' Extract coefficients from a cross_projector object
 #'
 #' @param object the model fit
 #' @param source the source of the data (X or Y block), either "X" or "Y"
 #' @param ... extra args
+#' @return the coefficients
 #' @export
 coef.cross_projector <- function(object, source=c("X", "Y"),...) {
   source <- match.arg(source)
@@ -90,6 +92,7 @@ coef.cross_projector <- function(object, source=c("X", "Y"),...) {
 #' 
 #' @inheritParams reprocess
 #' @param source the source of the data (X or Y block)
+#' @return the re(pre-)processed data
 #' @export
 #' @family reprocess
 reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y"), ...) {
@@ -100,7 +103,7 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
   } else {
     chk::chk_equal(length(colind), ncol(new_data)) 
   }
-  
+    
   if (source == "X") {
     apply_transform(x$preproc_x, new_data, colind)
   } else {
@@ -109,9 +112,10 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
   
 }
 
-#' shape
+#' shape of a cross_projector instance
 #' 
 #' @param source the source of the data (X or Y block)
+#' @return the shape of the data
 #' @export
 #' @family shape
 #' @inheritParams shape
@@ -131,10 +135,5 @@ print.cross_projector <- function(x,...) {
   cat("output dim (X): ", shape(x, source="X")[2], "\n")
   cat("input dim (Y): ", shape(x, source="Y")[1], "\n")
   cat("output dim (Y): ", shape(x, source="Y")[2], "\n")
+  Invisible(x)
 }
-
-
-  
-  
-  
-  

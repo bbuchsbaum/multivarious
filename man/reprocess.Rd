@@ -15,6 +15,9 @@ reprocess(x, new_data, colind, ...)
 
 \item{...}{extra args}
 }
+\value{
+the reprocessed data
+}
 \description{
 Given a new dataset, process it in the same way the original data was processed (e.g. centering, scaling, etc.)
 }

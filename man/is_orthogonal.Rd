@@ -9,6 +9,9 @@ is_orthogonal(x)
 \arguments{
 \item{x}{the object}
 }
+\value{
+a logical value indicating whether the transformation is orthogonal
+}
 \description{
 test whether components are orthogonal
 }

@@ -15,6 +15,9 @@ apply_transform(x, X, colind, ...)
 
 \item{...}{extra args}
 }
+\value{
+the transformed data
+}
 \description{
 apply a pre-processing transform
 }

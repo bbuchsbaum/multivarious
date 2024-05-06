@@ -9,6 +9,9 @@ sdev(x)
 \arguments{
 \item{x}{the model fit}
 }
+\value{
+the standard deviations
+}
 \description{
 The standard deviations of the projected data matrix
 }

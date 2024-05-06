@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments passed to \code{print()}.}
 }
+\value{
+The \code{composed_projector} object.
+}
 \description{
 Display a human-readable summary of a \code{composed_projector} object, including information about the number and order of projectors.
 }

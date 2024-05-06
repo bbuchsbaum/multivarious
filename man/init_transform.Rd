@@ -11,6 +11,9 @@ init_transform(x, X, ...)
 
 \item{X}{the data matrix}
 }
+\value{
+an initialized pre-processor
+}
 \description{
 initialize a transform
 }

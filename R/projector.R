@@ -141,10 +141,12 @@ shape.projector <- function(x,...) {
 
 
 #' @export
+#' @return the `projector` object
 print.projector <- function(x,...) {
   cat("projector: ", paste0(class(x)), "\n")
   cat("input dim: ", shape(x)[1], "\n")
   cat("output dim: ", shape(x)[2], "\n")
+  Invisible(x)
 }
 
 
@@ -152,6 +154,7 @@ print.projector <- function(x,...) {
 #' 
 #' @export
 #' @inheritParams partial_projector
+#' @return A `partial_projector` instance
 #' @examples 
 #' 
 #' X <- matrix(rnorm(10*10), 10, 10)

@@ -11,6 +11,9 @@ fresh(x, ...)
 
 \item{...}{extra args}
 }
+\value{
+a fresh pre-processing pipeline
+}
 \description{
 Get a fresh pre-processing node cleared of any cached data
 }

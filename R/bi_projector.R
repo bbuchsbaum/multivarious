@@ -84,7 +84,7 @@ residuals.bi_projector <- function(x, ncomp=ncomp(x), xorig,...) {
 #'
 #' @param x A `bi_projector` object
 #' @param ... Additional arguments passed to the print function
-#'
+#' @return Invisible `bi_projector` object
 #' @export
 print.bi_projector <- function(x, ...) {
   cat("A bi_projector object with the following properties:\n\n")

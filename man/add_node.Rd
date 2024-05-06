@@ -13,6 +13,9 @@ add_node(x, step, ...)
 
 \item{...}{extra args}
 }
+\value{
+a new pre-processing pipeline with the added step
+}
 \description{
 add a pre-processing stage
 }

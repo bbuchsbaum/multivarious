@@ -24,8 +24,8 @@ projection and can be computed for a biorthogonal decomposition, such as Singula
 \code{\link{project}} for the generic projection function for samples
 
 Other project: 
+\code{\link{project}()},
 \code{\link{project.cross_projector}()},
-\code{\link{project_block}()},
-\code{\link{project}()}
+\code{\link{project_block}()}
 }
 \concept{project}

@@ -9,6 +9,9 @@ block_lengths(x)
 \arguments{
 \item{x}{the object}
 }
+\value{
+the block lengths
+}
 \description{
 extract the lengths of each block in a multiblock object
 }

@@ -13,6 +13,9 @@ rf_classifier(x, colind, ...)
 
 \item{...}{extra arguments to \code{randomForest} function}
 }
+\value{
+a random forest classifier
+}
 \description{
 Given a model object (e.g. \code{projector} construct a random forest classifier that can generate predictions for new data points.
 }

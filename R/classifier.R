@@ -127,7 +127,7 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 #' @inheritParams classifier.multiblock_biprojector
 #' 
 #' @param scores a matrix of references scores used for classification
-#'
+#' @return a `rf_classifier` object
 #' @examples
 #' data(iris)
 #' X <- iris[,1:4]
@@ -173,6 +173,8 @@ rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
 #' @export
 #' 
 #' @family classifier
+#' 
+#' @return a `classifier` object
 #' 
 #' @examples
 #' data(iris)
@@ -304,13 +306,15 @@ prepare_predict <- function(object, colind, ncomp, new_data,...) {
 #' @param new_data new data to predict on
 #' @param ncomp the number of components to use
 #' @param colind the column indices to select in the projection matrix
-#' @param metric the similarity metric ("euclidean" or "cosine")
+#' @param metric the similarity metric ("euclidean", "cosine", "ejaccard")
+#' @param normalized_probs whether to normalize the similaritiesf each row of the scores X new_data similarity matrix.
 #' @param ... additional arguments to projection function
 #' 
 #' @importFrom stats predict
+#' @return a list with the predicted class and probabilities
 #' @export
 predict.classifier <- function(object, new_data, ncomp=NULL,
-                               colind=NULL, metric=c("cosine", "euclidean"), ...) {
+                               colind=NULL, metric=c("cosine", "euclidean", "ejaccard"), normalize_probs=FALSE, ...) {
   
   metric <- match.arg(metric)
 
@@ -319,9 +323,12 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   ncomp <- prep$ncomp
   
   doit <- function(p) {
-    prob <- normalize_probs(p)
-    pmeans <- avg_probs(prob, object$labels)
-    cls <- nearest_class(prob, object$labels, object$knn)
+    #prob <- normalize_probs(p)
+    if (normalize_probs) {
+      p <- t(apply(p, 1, function(v) v/sd(v)))
+    }
+    pmeans <- avg_probs(p, object$labels)
+    cls <- nearest_class(p, object$labels, object$knn)
     list(class=cls, prob=pmeans)
   }
   
@@ -335,6 +342,9 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
     D <- D/max(D)
     doit(exp(-D))
     #-D
+  } else if (metric == "ejaccard") {
+    p <- proxy::simil(sc[,1:ncomp,drop=FALSE], as.matrix(proj)[,1:ncomp,drop=FALSE], method="ejaccard")
+    doit(p)
   }
   
 }
@@ -362,7 +372,7 @@ predict.rf_classifier <- function(object, new_data, ncomp=NULL,
 #'
 #' @param x A `classifier` object.
 #' @param ... Additional arguments passed to `print()`.
-#'
+#' @return `classifier` object.
 #' @export
 print.classifier <- function(x, ...) {
   cat("classifier object:\n")

@@ -220,6 +220,7 @@ std_scores <- function(x, ...) UseMethod("std_scores")
 #' 
 #' @param x the model fit
 #' @param ... extra args
+#' @return the component matrix
 #' @export
 components <- function(x,...) UseMethod("components")
 
@@ -281,7 +282,7 @@ compose_projector <- function(x,y,...) UseMethod("compose_projector")
 #' 
 #' @param x the processing pipeline
 #' @param ... extra args
-#' 
+#' @return a fresh pre-processing pipeline
 #' @export
 fresh <- function(x,...) UseMethod("fresh")
 
@@ -293,6 +294,7 @@ fresh <- function(x,...) UseMethod("fresh")
 #' @param step the pre-processing step to add
 #' @param ... extra args
 #' @export
+#' @return a new pre-processing pipeline with the added step
 add_node <- function(x, step, ...) UseMethod("add_node")
 
 
@@ -300,6 +302,7 @@ add_node <- function(x, step, ...) UseMethod("add_node")
 #' 
 #' @param x the pipeline
 #' @param ... extra args
+#' @return the pre-processed data
 #' @export
 prep <- function(x, ...) UseMethod("prep")
 
@@ -312,6 +315,7 @@ prep <- function(x, ...) UseMethod("prep")
 #' @param new_data the new data to process
 #' @param colind the column indices of the new data
 #' @param ... extra args
+#' @return the reprocessed data
 #' @export
 reprocess <- function(x, new_data, colind, ...) UseMethod("reprocess")
 
@@ -324,6 +328,7 @@ reprocess <- function(x, new_data, colind, ...) UseMethod("reprocess")
 #' @param x the original model fit object
 #' @param new_data the new data to process
 #' @param ... extra args
+#' @return a refit model object
 #' @export
 refit <- function(x, new_data, ...) UseMethod("refit")
 
@@ -349,6 +354,7 @@ ncomp <- function(x) UseMethod("ncomp")
 #' The standard deviations of the projected data matrix
 #' 
 #' @param x the model fit
+#' @return the standard deviations
 #' @export
 sdev <- function(x) UseMethod("sdev")
 
@@ -357,6 +363,7 @@ sdev <- function(x) UseMethod("sdev")
 #' test whether components are orthogonal
 #' 
 #' @param x the object
+#' @return a logical value indicating whether the transformation is orthogonal
 is_orthogonal <- function(x) UseMethod("is_orthogonal")
 
 
@@ -366,6 +373,7 @@ is_orthogonal <- function(x) UseMethod("is_orthogonal")
 #' 
 #' @param x the object to truncate
 #' @param ncomp number of components to retain
+#' @return a truncated object (e.g. PCA with 'ncomp' components)
 #' @export
 truncate <- function(x, ncomp) UseMethod("truncate")
 
@@ -376,6 +384,7 @@ truncate <- function(x, ncomp) UseMethod("truncate")
 #' 
 #' @param x the object
 #' @export
+#' @return the block lengths
 block_lengths <- function(x) UseMethod("block_lengths")
 
 
@@ -386,6 +395,7 @@ block_lengths <- function(x) UseMethod("block_lengths")
 #' @param x the object
 #' @param ... extra args
 #' @export
+#' @return a list of block indices
 block_indices <- function(x, ...) UseMethod("block_indices")
 
 
@@ -394,6 +404,7 @@ block_indices <- function(x, ...) UseMethod("block_indices")
 #' The number of data blocks in a multiblock element
 #' 
 #' @param x the object
+#' @return the number of blocks
 #' @export
 nblocks <- function(x) UseMethod("nblocks")
 
@@ -403,6 +414,7 @@ nblocks <- function(x) UseMethod("nblocks")
 #' @param x the pre_processor
 #' @param X the data matrix
 #' @keywords internal
+#' @return an initialized pre-processor
 #' @export
 init_transform <- function(x, X, ...) UseMethod("init_transform")
 
@@ -414,6 +426,7 @@ init_transform <- function(x, X, ...) UseMethod("init_transform")
 #' @param colind column indices
 #' @param ... extra args
 #' @export
+#' @return the transformed data
 apply_transform <- function(x, X, colind, ...) UseMethod("apply_transform")
 
 
@@ -422,6 +435,7 @@ apply_transform <- function(x, X, colind, ...) UseMethod("apply_transform")
 #' @inheritParams init_transform
 #' @param colind column indices
 #' @param ... extra args
+#' @return the reverse-transformed data
 #' @export
 reverse_transform <- function(x, X, colind, ...) UseMethod("reverse_transform")
 
@@ -458,6 +472,7 @@ classifier <- function(x, colind, ...) UseMethod("classifier")
 #' @param x the model object
 #' @param colind the (optional) column indices used for prediction
 #' @param ... extra arguments to `randomForest` function
+#' @return a random forest classifier
 #' @export
 rf_classifier <- function(x, colind, ...) UseMethod("rf_classifier")
 

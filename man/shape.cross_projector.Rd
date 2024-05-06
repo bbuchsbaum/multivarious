@@ -2,7 +2,7 @@
 % Please edit documentation in R/twoway_projector.R
 \name{shape.cross_projector}
 \alias{shape.cross_projector}
-\title{shape}
+\title{shape of a cross_projector instance}
 \usage{
 \method{shape}{cross_projector}(x, source = c("X", "Y"), ...)
 }
@@ -13,7 +13,10 @@
 
 \item{...}{Extra arguments.}
 }
+\value{
+the shape of the data
+}
 \description{
-shape
+shape of a cross_projector instance
 }
 \concept{shape}

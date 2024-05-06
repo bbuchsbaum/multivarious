@@ -19,6 +19,9 @@
 
 \item{...}{Additional arguments to be passed to the specific model implementation of \code{classifier}.}
 }
+\value{
+a \code{classifier} object
+}
 \description{
 create \code{classifier} from a \code{projector}
 }
