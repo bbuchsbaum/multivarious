@@ -8,12 +8,13 @@
 #' @param new_data An optional data matrix for which to generate predictions (default: NULL).
 #' @param block An optional block index for prediction (default: NULL).
 #' @param knn The number of nearest neighbors to consider in the classifier (default: 1).
+#' @param global_scores Whether to use the global scores or the partial scores for reference space (default: TRUE).
 #' @param ... Additional arguments to be passed to the specific model implementation of `classifier`.
 #' @return A multiblock classifier object.
 #' @export
 #' @family classifier
 classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=NULL, 
-                                              block=NULL, knn=1,...) {
+                                              block=NULL, global_scores=TRUE, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
     chk::chk_true(all(colind>0))
@@ -22,10 +23,10 @@ classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=N
     }
   }
   
-  scores <- if (!is.null(colind)) {
+  scores <- if (!is.null(colind) && !global_scores) {
     chk::chk_not_null(new_data)
     scores <- partial_project(x, new_data, colind=colind)
-  } else if (!is.null(block)) {
+  } else if (!is.null(block) & !global_scores) {
     chk::chk_whole_number(block)
     project_block(x, new_data, block)
   } else {
@@ -36,7 +37,8 @@ classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=N
     }
   }
   
-  new_classifier(x,labels=labels,scores=scores, colind=colind, block=block, knn=knn, classes="multiblock_classifier")
+  new_classifier(x,labels=labels,scores=scores, colind=colind, block=block, knn=knn, global_scores=global_scores,
+                 classes="multiblock_classifier")
 }
 
 
@@ -118,7 +120,7 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
 
 }
 
-#' create a random forest classifier
+#' Create a random forest classifier
 #' 
 #' 
 #' @export
@@ -170,6 +172,7 @@ rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
 #' @param labels the labels associated with the rows of the projected data (see `new_data`)
 #' @param new_data reference data associated with `labels` and to be projected into subspace (required).
 #' @param knn the number of nearest neighbors to use when classifying a new point. 
+#' @param global_scores whether to use the global scores or the partial scores for reference space
 #' @export
 #' 
 #' @family classifier
@@ -182,7 +185,7 @@ rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
 #' pcres <- pca(as.matrix(X),2)
 #' cfier <- classifier(pcres, labels=iris[,5], new_data=as.matrix(iris[,1:4]))
 #' p <- predict(cfier, as.matrix(iris[,1:4]))
-classifier.projector <- function(x, colind=NULL, labels, new_data, knn=1,...) {
+classifier.projector <- function(x, colind=NULL, labels, new_data, knn=1, global_scores=TRUE, ...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
     chk::chk_true(all(colind>0))
@@ -190,7 +193,7 @@ classifier.projector <- function(x, colind=NULL, labels, new_data, knn=1,...) {
   
   chk::chk_equal(length(labels), nrow(new_data))
   
-  scores <- if (!is.null(colind)) {
+  scores <- if (!is.null(colind) && !global_scores) {
     partial_project(x, new_data, colind=colind)
   } else {
     project(x, new_data)
@@ -208,7 +211,7 @@ rank_score <- function(prob, observed) {
   chk::chk_true(all(observed %in% pnames))
   prank <- apply(prob, 1, function(p) {
     rp <- rank(p, ties.method="random")
-    rp/length(rp)
+    rp/(length(rp)+1)
   })
   
   mids <- match(observed, pnames)
@@ -260,7 +263,7 @@ project.classifier <- function(x, new_data, ...) {
 }
 
 #' @noRd
-prepare_predict <- function(object, colind, ncomp, new_data,...) {
+prepare_predict <- function(object, colind=NULL, ncomp=NULL, new_data,...) {
   if (is.null(colind)) {
     colind <- object$colind
   } else {
@@ -307,14 +310,16 @@ prepare_predict <- function(object, colind, ncomp, new_data,...) {
 #' @param ncomp the number of components to use
 #' @param colind the column indices to select in the projection matrix
 #' @param metric the similarity metric ("euclidean", "cosine", "ejaccard")
-#' @param normalized_probs whether to normalize the similaritiesf each row of the scores X new_data similarity matrix.
+#' @param normalize_probs whether to normalize the similarities of each row of the scores X new_data similarity matrix.
 #' @param ... additional arguments to projection function
 #' 
 #' @importFrom stats predict
 #' @return a list with the predicted class and probabilities
 #' @export
 predict.classifier <- function(object, new_data, ncomp=NULL,
-                               colind=NULL, metric=c("cosine", "euclidean", "ejaccard"), normalize_probs=FALSE, ...) {
+                               colind=NULL, 
+                               metric=c("cosine", "euclidean", "ejaccard"), 
+                               normalize_probs=FALSE, ...) {
   
   metric <- match.arg(metric)
 
@@ -325,8 +330,10 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
   doit <- function(p) {
     #prob <- normalize_probs(p)
     if (normalize_probs) {
-      p <- t(apply(p, 1, function(v) v/sd(v)))
+      v <- v - min(v)
+      p <- t(apply(p, 1, function(v) v/sum(v)))
     }
+    
     pmeans <- avg_probs(p, object$labels)
     cls <- nearest_class(p, object$labels, object$knn)
     list(class=cls, prob=pmeans)
@@ -357,6 +364,8 @@ predict.rf_classifier <- function(object, new_data, ncomp=NULL,
   
   prep <- prepare_predict(object, colind, ncomp, new_data,...) 
   proj <- prep$proj
+  proj <- as.data.frame(proj)
+  names(proj) <- names(obj$scores)
   ncomp <- prep$ncomp
   
   cls <- predict(object$rfres, proj)
@@ -376,7 +385,6 @@ predict.rf_classifier <- function(object, new_data, ncomp=NULL,
 #' @export
 print.classifier <- function(x, ...) {
   cat("classifier object:\n")
-  cat("  k-NN classifier with k =", x$knn, "\n")
   cat("  Model fit: \n")
   print(x$projector)
   cat("  Scores matrix dimensions: ", nrow(x$scores), "x", ncol(x$scores), "\n")
