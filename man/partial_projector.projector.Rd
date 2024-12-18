@@ -21,9 +21,6 @@ construct a partial_projector from a \code{projector} instance
 }
 \examples{
 
-X <- matrix(rnorm(10*10), 10, 10)
-pfit <- pca(X, ncomp=9)
-proj <- project(pfit, X)
-
-pp <- partial_projector(pfit, 1:5)
+# Assuming pfit is a projector with many components:
+# pp <- partial_projector(pfit, 1:5)
 }

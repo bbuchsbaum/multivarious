@@ -517,4 +517,15 @@ rotate <- function(x, ncomp, type) UseMethod("rotate")
 apply_rotation <- function(x, rotation_matrix, ...) { UseMethod("apply_rotation") }
 
 
+#' Evaluate feature importance
+#' 
+#' Calculate the importance of features in a model
+#' 
+#' @param x the model fit
+#' @param ... extra args
+#' @return the feature importance scores
+#' @export
+feature_importance <- function(x, ...) UseMethod("feature_importance")
+
+
 

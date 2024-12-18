@@ -9,9 +9,9 @@
 \arguments{
 \item{x}{the discriminant projector object}
 
-\item{colind}{an optional vector specifying the column indices of the components to use for prediction (NULL by default)}
+\item{colind}{an optional vector specifying the column indices of the components}
 
-\item{knn}{the number of nearest neighbors to consider in the k-NN classifier (default is 1)}
+\item{knn}{the number of nearest neighbors (default=1)}
 
 \item{...}{extra arguments}
 }
@@ -19,5 +19,5 @@
 a classifier object
 }
 \description{
-Constructs a k-NN classifier for a discriminant projector, with an option to use a subset of the components.
+Create a k-NN classifier for a discriminant projector
 }

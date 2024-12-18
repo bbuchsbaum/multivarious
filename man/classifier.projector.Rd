@@ -2,38 +2,33 @@
 % Please edit documentation in R/classifier.R
 \name{classifier.projector}
 \alias{classifier.projector}
-\title{create \code{classifier} from a \code{projector}}
+\title{create classifier from a projector}
 \usage{
-\method{classifier}{projector}(x, colind = NULL, labels, new_data, knn = 1, ...)
+\method{classifier}{projector}(
+  x,
+  colind = NULL,
+  labels,
+  new_data,
+  knn = 1,
+  global_scores = TRUE,
+  ...
+)
 }
 \arguments{
-\item{x}{A model object, such as a \code{projector}, that has been fit to a training dataset.}
+\item{x}{projector}
 
-\item{colind}{Optional vector of column indices used for prediction. If not provided, all columns will be used.}
+\item{colind}{...}
 
-\item{labels}{the labels associated with the rows of the projected data (see \code{new_data})}
+\item{labels}{...}
 
-\item{new_data}{reference data associated with \code{labels} and to be projected into subspace (required).}
+\item{new_data}{...}
 
-\item{knn}{the number of nearest neighbors to use when classifying a new point.}
+\item{knn}{...}
 
-\item{...}{Additional arguments to be passed to the specific model implementation of \code{classifier}.}
-}
-\value{
-a \code{classifier} object
+\item{global_scores}{...}
+
+\item{...}{extra args}
 }
 \description{
-create \code{classifier} from a \code{projector}
+create classifier from a projector
 }
-\examples{
-data(iris)
-X <- iris[,1:4]
-pcres <- pca(as.matrix(X),2)
-cfier <- classifier(pcres, labels=iris[,5], new_data=as.matrix(iris[,1:4]))
-p <- predict(cfier, as.matrix(iris[,1:4]))
-}
-\seealso{
-Other classifier: 
-\code{\link{classifier.multiblock_biprojector}()}
-}
-\concept{classifier}

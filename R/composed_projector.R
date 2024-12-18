@@ -1,33 +1,20 @@
-#' Projector Composition
+#' Compose Multiple Partial Projectors
 #'
-#' Compose a sequence of `projector` objects in forward order.
-#' This function allows the composition of multiple projectors, applying them sequentially to the input data.
+#' Creates a `composed_partial_projector` object that applies partial projections sequentially.
+#' If multiple projectors are composed, the column indices (colind) used at each stage must be considered.
 #'
-#' @param ... The sequence of `projector` objects to be composed.
-#'
-#' @return A `composed_projector` object that extends the `function` class, allowing the composed projectors to be 
-#' applied to input data.
+#' @param ... A sequence of projectors that implement `partial_project()`.
+#' @return A `composed_partial_projector` object.
 #' @export
-#' @seealso \code{\link{projector}}, \code{\link{project}}
 #'
 #' @examples
-#' # Create two PCA projectors and compose them
-#' X <- matrix(rnorm(20*20), 20, 20)
-#' pca1 <- pca(X, ncomp=10)
-#' X2 <- scores(pca1)
-#' pca2 <- pca(X2, ncomp=4)
-#'
-#' # Compose the PCA projectors
-#' cproj <- compose_projectors(pca1, pca2)
-#'
-#' # Ensure the output of the composed projectors has the expected dimensions
-#' stopifnot(ncol(cproj(X)) == 4)
-#' # Check that the composed projectors work as expected
-#' all.equal(project(cproj, X), cproj(X))
-#' @export
-compose_projectors <- function(...) {
+#' # Suppose pca1 and pca2 support partial_project().
+#' # cpartial <- compose_partial_projector(pca1, pca2)
+#' # partial_project(cpartial, new_data, colind=1:5)
+compose_partial_projector <- function(...) {
   args <- list(...)
-  sapply(args, function(p) chk::chk_s3_class(p, "projector"))
+  lapply(args, function(p) chk::chk_s3_class(p, "projector"))
+  
   if (length(args) == 1) {
     return(args[[1]])
   }
@@ -37,82 +24,105 @@ compose_projectors <- function(...) {
     chk::chk_equal(shapelist[[i-1]][2], shapelist[[i]][1])
   }
   
-  out <- lapply(args, function(arg) {
-    f <- function(new_data) {
-      project(arg, new_data)
-    }
-  })
-
-  f <- do.call(purrr::compose, c(out,.dir="forward"))
-  
-  out <- structure(f,
-    class=c("composed_projector", "function")
+  out <- structure(
+    list(projectors = args),
+    class = c("composed_partial_projector", "composed_projector", "projector")
   )
-  attr(out, "length") <- length(args)
   out
 }
 
-# compose_partial_projector <- function(...) {
-#   args <- list(...)
-#   out <- lapply(1:length(args), function(i) {
-#     arg <- args[[i]]
-#     chk::chk_s3_class(arg, "projector")
-#     f <- function(new_data, colind) {
-#       partial_project(arg, new_data, colind=1:nrow(coefficients(x)))
-#     }
-#   })
-#   
-#   f <- do.call(purrr::compose, c(out,.dir="forward"))
-#   
-#   out <- structure(f,
-#                    class=c("composed_partial_projector", "composed_projector", "function")
-#   )
-# }
 
+#' Partial Project Through a Composed Partial Projector
+#'
+#' Applies `partial_project()` through each projector in the composition.
+#' If `colind` is a single vector, it applies to the first projector only. Subsequent projectors apply full columns.
+#' If `colind` is a list, each element specifies the `colind` for the corresponding projector in the chain.
+#'
+#' @param x A `composed_partial_projector` object.
+#' @param new_data The input data matrix or vector.
+#' @param colind A numeric vector or a list of numeric vectors. If a single vector, applies to the first projector. 
+#'   If a list, its length must match the number of projectors in `x`.
+#' @param ... Additional arguments passed to `partial_project()` methods.
+#'
+#' @return The partially projected data after all projectors are applied.
 #' @export
-project.composed_projector <- function(x, new_data,...) {
-  if (is.vector(new_data)) {
-    new_data <- matrix(new_data, byrow=TRUE)
+partial_project.composed_partial_projector <- function(x, new_data, colind, ...) {
+  if (is.vector(new_data) && length(colind) > 1) {
+    new_data <- matrix(new_data, nrow=1)
+  } else if (is.vector(new_data) && length(colind) == 1) {
+    new_data <- matrix(new_data, ncol=1)
   }
+  
   chk::vld_matrix(new_data)
   
-  x(new_data)
+  projs <- x$projectors
+  n_proj <- length(projs)
+  
+  # Determine how to handle colind:
+  # If colind is a single vector, only apply it to the first projector.
+  # If colind is a list, each element corresponds to a projector.
+  
+  if (is.list(colind)) {
+    # Ensure length matches number of projectors
+    if (length(colind) != n_proj) {
+      stop("If colind is a list, its length must match the number of projectors.")
+    }
+    colinds <- colind
+  } else {
+    # Single vector: first projector uses colind, subsequent projectors use all columns
+    colinds <- vector("list", n_proj)
+    colinds[[1]] <- colind
+    # For subsequent projectors, colinds will be set to NULL indicating "use all columns"
+    for (i in 2:n_proj) {
+      colinds[[i]] <- NULL
+    }
+  }
+  
+  current_data <- new_data
+  
+  for (i in seq_len(n_proj)) {
+    proj <- projs[[i]]
+    current_colind <- colinds[[i]]
+    
+    if (is.null(current_colind)) {
+      # Use all columns for this step
+      current_colind <- seq_len(ncol(current_data))
+    } else {
+      # Validate colind
+      chk::chk_range(max(current_colind), c(1, ncol(current_data)))
+      chk::chk_range(min(current_colind), c(1, ncol(current_data)))
+    }
+    
+    current_data <- partial_project(proj, current_data, current_colind, ...)
+    # After this step, current_data changes dimensions.
+    # Next step colind interpretation will be handled similarly.
+  }
+  
+  current_data
 }
 
-# partial_project.composed_partial_projector <- function(x, new_data, colind) {
-#   if (is.vector(new_data) && length(colind) > 1) {
-#     new_data <- matrix(new_data, byrow=TRUE)
-#   } 
-#   chk::vld_matrix(new_data)
-#   chk::check_dim(new_data, ncol, length(colind))
-#   x(new_data, colind)
-# }
 
-#' Pretty Print Method for `composed_projector` Objects
-#'
-#' Display a human-readable summary of a `composed_projector` object, including information about the number and order of projectors.
-#'
-#' @param x A `composed_projector` object.
-#' @param ... Additional arguments passed to `print()`.
-#' @return The `composed_projector` object.
-#' @examples
-#' # Create two PCA projectors and compose them
-#' X <- matrix(rnorm(20*20), 20, 20)
-#' pca1 <- pca(X, ncomp=10)
-#' X2 <- scores(pca1)
-#' pca2 <- pca(X2, ncomp=4)
-#' cproj <- compose_projectors(pca1, pca2)
+#' @export
+project.composed_projector <- function(x, new_data, ...) {
+  if (is.vector(new_data)) {
+    new_data <- matrix(new_data, nrow=1)
+  }
+  
+  chk::vld_matrix(new_data)
+  
+  # Apply each projector in sequence
+  for (proj in x$projectors) {
+    new_data <- project(proj, new_data, ...)
+  }
+  
+  new_data
+}
+
 #' @export
 print.composed_projector <- function(x, ...) {
-  n_proj <- attr(x, "length")
+  n_proj <- length(x$projectors)
   cat("Composed projector object:\n")
   cat("  Number of projectors: ", n_proj, "\n")
-  #cat("  Projector order:\n")
-  #for (i in seq_len(n_proj)) {
-  #  cat("    ", i, ": ", class(unclass(x)[[i]]$projector)[1], "\n")
-  #}
   invisible(x)
 }
-
-
 

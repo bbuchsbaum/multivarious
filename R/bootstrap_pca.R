@@ -44,76 +44,79 @@ bootstrap.pca <- function(x, nboot=100, k=ncomp(x),...) {
 }
 
 
-#' @keywords internal
-#' @noRd
-svd_dutp <- function(DUtP,k) {
-  n<-dim(DUtP)[2]
+svd_dutp <- function(DUtP, k) {
+  n <- dim(DUtP)[2]
   svdDUtP <- svd(DUtP)
   sb <- svdDUtP$d
   
   sign_flip <- sign(diag(svdDUtP$u))
+  sign_flip[sign_flip == 0] <- 1
+  sign_flip <- sign_flip[1:k]
   
-  sign_flip[sign_flip==0]<-1 
-  sign_flip <- sign_flip[1:k] 
+  # Add drop=FALSE to ensure these are matrices even if k=1
+  Ab <- svdDUtP$u[1:min(dim(DUtP)), 1:k, drop=FALSE]
+  Ub <- svdDUtP$v[1:n, 1:k, drop=FALSE]
   
-  
-  Ab <- svdDUtP$u[1:min(dim(DUtP)), 1:k]
-  Ub <- svdDUtP$v[1:n, 1:k] 
-  
-  Ab <- sweep(Ab,2,sign_flip, "*")
-  Ub <- sweep(Ub,2,sign_flip, "*")
+  Ab <- sweep(Ab, 2, sign_flip, "*")
+  Ub <- sweep(Ub, 2, sign_flip, "*")
   
   list(d=sb, Ab=Ab, Ub=Ub)
 }
 
 #' @keywords internal
 #' @noRd
-boot_sum <- function(res,k, v) {
+#' @keywords internal
+#' @noRd
+boot_sum <- function(res, k, v, epsilon = 1e-15) {
   
-  ## each of k elements has nboot rows and n columns
   AsByK <- lapply(1:k, function(ki) {
     do.call(rbind, lapply(res, function(a) {
-      a$svdfit$Ab[,ki]
+      a$svdfit$Ab[, ki, drop=TRUE]
     }))
   })
   
   ScoresByK <- lapply(1:k, function(ki) {
     do.call(rbind, lapply(res, function(a) {
-      u <- a$svdfit$Ub[,ki] * a$svdfit$d[ki]
+      u <- a$svdfit$Ub[, ki] * a$svdfit$d[ki]
       u2 <- rep(NA, length(u))
+      # Restore original sample positions
       u2[a$idx] <- u
       u2
     }))
   })
   
-  ## mean scores
-  EScores <- lapply(ScoresByK, function(s) {
-    apply(s, 2, mean, na.rm=TRUE)
+  # Mean and SD of scores
+  EScores <- lapply(ScoresByK, function(s) apply(s, 2, mean, na.rm=TRUE))
+  sdScores <- lapply(ScoresByK, function(s) apply(s, 2, sd, na.rm=TRUE))
+  
+  # Replace zeros or near-zeros in sdScores
+  sdScores <- lapply(sdScores, function(sd_vec) {
+    sd_vec[sd_vec < epsilon] <- epsilon
+    sd_vec
   })
   
-  ## sd of scores
-  sdScores <- lapply(ScoresByK, function(s) {
-    apply(s, 2, stats::sd, na.rm=TRUE)
+  # Mean of A (EAs)
+  EAs <- lapply(AsByK, colMeans)
+  
+  # EVs = loadings * EAs
+  EVs <- lapply(EAs, function(EA) v %*% matrix(EA, ncol=1))
+  
+  varAs <- lapply(AsByK, var)
+  
+  varVs <- lapply(seq_along(AsByK), function(i) {
+    # rowSums((v %*% varAs[[i]]) * v)
+    tmp <- (v %*% varAs[[i]]) * v
+    rowSums(tmp)
   })
   
-  
-  ## produces 5 mean vectors, 1 per component
-  EAs <- lapply(AsByK, colMeans) 
-  
-  ## 5 loadings components
-  EVs <- lapply(EAs, function(EA) v %*% matrix(EA,ncol=1))
-  
-  
-  ## k nXn covariance matrices
-  varAs <- lapply(AsByK,stats::var) #indexed by k
-  
-  varVs <- lapply(1:length(AsByK), function(ki) {
-    rowSums((v %*% varAs[[ki]]) * v)
+  sdVs <- lapply(varVs, sqrt)
+  # Replace zero or near-zero in sdVs
+  sdVs <- lapply(sdVs, function(sd_vec) {
+    sd_vec[sd_vec < epsilon] <- epsilon
+    sd_vec
   })
   
-  sdVs <- lapply(varVs,sqrt)
   list(res=res, EAs=EAs, EVs=EVs, varAs=varAs, sdVs=sdVs, EScores=EScores, sdScores=sdScores)
-  
 }
 
 #' @keywords internal

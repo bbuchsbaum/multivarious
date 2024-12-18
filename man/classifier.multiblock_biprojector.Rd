@@ -10,6 +10,7 @@
   labels,
   new_data = NULL,
   block = NULL,
+  global_scores = TRUE,
   knn = 1,
   ...
 )
@@ -25,18 +26,18 @@
 
 \item{block}{An optional block index for prediction (default: NULL).}
 
+\item{global_scores}{Whether to use the global scores or the partial scores for reference space (default: TRUE).}
+
 \item{knn}{The number of nearest neighbors to consider in the classifier (default: 1).}
 
-\item{...}{Additional arguments to be passed to the specific model implementation of \code{classifier}.}
+\item{...}{Additional arguments.}
 }
 \value{
 A multiblock classifier object.
 }
 \description{
-Constructs a classifier for a multiblock bi-projector model that can generate predictions for new data points.
-}
-\seealso{
-Other classifier: 
-\code{\link{classifier.projector}()}
+Constructs a classifier for a multiblock bi-projector model object.
+Either global or partial scores can be used. If \code{colind} or \code{block} are provided
+and \code{global_scores=FALSE}, partial projection is performed. Otherwise, global projection is used.
 }
 \concept{classifier}

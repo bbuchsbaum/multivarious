@@ -7,16 +7,15 @@
 concat_pre_processors(preprocs, block_indices)
 }
 \arguments{
-\item{preprocs}{a list of initialized \code{pre-processor} objects}
+\item{preprocs}{a list of initialized \code{pre_processor} objects}
 
-\item{block_indices}{a list of block indices where each vector in the list
-contains the global indices of the variables.}
+\item{block_indices}{a list of integer vectors specifying the global column indices for each block}
 }
 \value{
-a new \code{prepper} object
+a new \code{pre_processor} object that applies the correct transformations blockwise
 }
 \description{
-concatenate a sequence of pre-processors, each previously applied to a block of data.
+concatenate a sequence of pre-processors, each applied to a block of data.
 }
 \examples{
 

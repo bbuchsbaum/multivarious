@@ -1,82 +1,134 @@
-
-#' #' generalized eigenvalue decomposition
-#' #' 
-#' #' compute generalized eigenvalues and eigenvectors using one of two methods
-#' #' 
-#' #' @param A the left hand side matrix
-#' #' @param B the right hand side matrix
-#' #' @param ncomp number of components to return
-#' #' @param method robust or lapack (using `geigen` package)
-#' #' @param ... extra args sent to underlying engine
-#' #' 
-#' #' @return `geneig` instance which is a subclass of `projector` with added slot for eigenvalues called `values`
-#' #' @export
-#' #' @examples 
-#' #' 
-#' #' A <- matrix(c(14, 10, 12,
-#' #'               10, 12, 13,
-#' #'               12, 13, 14), nrow=3, byrow=TRUE)
-#' 
-#' #' B <- matrix(c(48, 17, 26,
-#' #'               17, 33, 32,
-#' #'               26, 32, 34), nrow=3, byrow=TRUE)
-#' #'               
-#' #' @importFrom Matrix isDiagonal   
-#' #' @import Matrix         
-#' geneig <- function(A, B, ncomp, method=c("robust", "sdiag", "geigen", "primme"), ...) {
-#'   method <- match.arg(method)
-#'   
-#'   chk::chk_equal(nrow(A), ncol(A))
-#'   chk::chk_equal(nrow(B), ncol(B))
-#'   chk::chk_equal(nrow(A), nrow(B))
-#'  
-#'   if (missing(ncomp)) {
-#'     ncomp <- nrow(A)
-#'   }
-#'   #which <- match.arg(ordering)
-#'   
-#'   ret <- if (method == "robust") {
-#'     if (isDiagonal(B)) {
-#'       Sinv <- Matrix::Diagonal(x=1/sqrt(diag(B)))
-#'       W <- Matrix::Diagonal(x=Sinv) %*% A  %*% Matrix::Diagonal(x=Sinv)
-#'     } else {
-#'       decomp <- eigen(B)
-#'       S <- decomp$values
-#'       U <- decomp$vectors
-#'       S[S < 1e-8] = Inf
-#'       Sinv = 1 /sqrt(S)
-#'       W = Matrix::Diagonal(x=Sinv) %*% crossprod(U, (A %*% U)) %*% Matrix::Diagonal(x=Sinv)
-#'     }
-#'     
-#'     decomp2 = eigen(W)
-#'     
-#'     vecs <- if (!isDiagonal(B)) {
-#'       U %*% Matrix::Diagonal(x=Sinv) %*% Re(decomp2$vectors)
-#'     } else {
-#'       decomp2$vectors
-#'     }
-#'     list(vectors = vecs, values=decomp2$values)
-#'   } else if (method == "sdiag") {
-#'     B_decomp <- eigen(B)
-#'     keep <- Re(B_decomp$values) > 1e-8
-#'     Bp <- B_decomp$vectors[,keep,drop=FALSE] %*% diag(1/sqrt(B_decomp$values[keep]))
-#'     Ap <- t(Bp) %*% A %*% Bp
-#'     A_decomp <- eigen(Ap)
-#'     keep <- Re(A_decomp$values) > 1e-8
-#'     vecs <- Bp %*% A_decomp$vectors[,keep,drop=FALSE]
-#'     list(vectors=vecs, values=A_decomp$values)
-#'   } else if (method == "geigen") {
-#'     res <- geigen(as.matrix(A),as.matrix(B))
-#'     vec <- res$vectors[, nrow(res$vectors):(nrow(res$vectors)-(ncomp-1))]
-#'     list(vectors=vec, values=rev(res$values)[1:ncomp])
-#'   } else if (method == "primme") {
-#'     res <- PRIMME::eigs_sym(A=A, B=B, NEig=ncomp,...)
-#'     list(vectors=res$vectors, values=res$values)
-#'   }
-#'   
-#'   projector(v=ret$vectors, classes="geneig",values=ret$values)
-#'   
+#' Generalized Eigenvalue Decomposition
+#'
+#' Computes the generalized eigenvalues and eigenvectors for the problem: A x = λ B x.
+#' Various methods are available and differ in their assumptions about A and B.
+#'
+#' @param A The left-hand side square matrix.
+#' @param B The right-hand side square matrix, same dimension as A.
+#' @param ncomp Number of eigenpairs to return.
+#' @param method Method to compute the eigenvalues and eigenvectors:
+#'   - "robust": Uses a stable decomposition via a whitening transform (requires B to be symmetric positive-definite).
+#'   - "sdiag": Uses a spectral decomposition of B and transforms the problem, works when B is symmetric positive-definite.
+#'   - "geigen": Uses the `geigen` package for a general solution.
+#'   - "primme": Uses the `PRIMME` package for large sparse matrices.
+#' @param ... Additional arguments passed to the underlying methods.
+#' @return An object of class `projector` with eigenvalues stored in `values` and standard deviations in `sdev = sqrt(values)`.
+#' @importFrom Matrix isSymmetric
+#' @importFrom chk chk_equal
+#' @export
+#'
+#' @examples
+#' if (requireNamespace("geigen", quietly = TRUE)) {
+#'   A <- matrix(c(14, 10, 12, 10, 12, 13, 12, 13, 14), nrow=3, byrow=TRUE)
+#'   B <- matrix(c(48, 17, 26, 17, 33, 32, 26, 32, 34), nrow=3, byrow=TRUE)
+#'   res <- geneig(A, B, ncomp=3, method="geigen")
+#'   # res$values and coefficients(res)
 #' }
-
-
+geneig <- function(A, B, ncomp, method = c("robust", "sdiag", "geigen", "primme"), ...) {
+  method <- match.arg(method)
+  
+  # Validate inputs
+  chk::chk_equal(nrow(A), ncol(A))
+  chk::chk_equal(nrow(B), ncol(B))
+  chk::chk_equal(nrow(A), nrow(B))
+  
+  if (!is.numeric(ncomp) || ncomp <= 0) {
+    stop("ncomp must be a positive integer.")
+  }
+  
+  # Perform generalized eigen decomposition
+  ret <- switch(method,
+                robust = {
+                  # Robust method: assumes B is symmetric positive definite
+                  # Approach:
+                  #   1. Compute B^{1/2} and its inverse: B = Q Λ Q^T, B^{1/2} = Q Λ^{1/2} Q^T
+                  #   2. Define W = B^{-1/2} A B^{-1/2}. Then solve eigen(W).
+                  #   3. Eigenvectors in original space: V = B^{-1/2} eigenvectors(W)
+                  if (!isSymmetric(B)) {
+                    stop("For the robust method, B must be symmetric positive definite.")
+                  }
+                  B_chol <- chol(B)
+                  B_sqrt_inv <- solve(B_chol)
+                  
+                  W <- B_sqrt_inv %*% A %*% B_sqrt_inv
+                  decomp <- eigen(W)
+                  
+                  # Extract ncomp
+                  vectors <- B_sqrt_inv %*% decomp$vectors[, 1:ncomp, drop=FALSE]
+                  values <- decomp$values[1:ncomp]
+                  list(vectors = vectors, values = values)
+                },
+                sdiag = {
+                  # sdiag method:
+                  #   1. B must be symmetric. Eigen-decompose B.
+                  #   2. Adjust small/negative eigenvalues if necessary.
+                  #   3. Define B^{-1/2} using these eigenvectors and eigenvalues.
+                  #   4. Transform A: A' = B^{-1/2} A B^{-1/2}.
+                  #   5. Solve eigen(A'), then map back eigenvectors = B^{-1/2} V
+                  if (!isSymmetric(B)) {
+                    stop("Matrix B must be symmetric for the sdiag method.")
+                  }
+                  min_eigenvalue <- 1e-6
+                  B_eig <- eigen(B)
+                  valsB <- B_eig$values
+                  # Ensure no too-small or negative eigenvalues
+                  valsB[valsB < abs(min_eigenvalue)] <- min_eigenvalue
+                  
+                  B_sqrt_inv <- B_eig$vectors %*% diag(1 / sqrt(valsB)) %*% t(B_eig$vectors)
+                  
+                  A_transformed <- t(B_sqrt_inv) %*% A %*% B_sqrt_inv
+                  A_eig <- eigen(A_transformed)
+                  
+                  vectors <- B_sqrt_inv %*% A_eig$vectors[, 1:ncomp, drop=FALSE]
+                  values <- A_eig$values[1:ncomp]
+                  list(vectors = vectors, values = values)
+                },
+                geigen = {
+                  if (!requireNamespace("geigen", quietly = TRUE)) {
+                    stop("The 'geigen' package is required for method='geigen'. Please install it.")
+                  }
+                  res <- geigen::geigen(A, B)
+                  # Extract ncomp
+                  vectors <- res$vectors[, 1:ncomp, drop = FALSE]
+                  values <- res$values[1:ncomp]
+                  list(vectors = vectors, values = values)
+                },
+                primme = {
+                  if (!requireNamespace("PRIMME", quietly = TRUE)) {
+                    stop("The 'PRIMME' package is required for method='primme'. Please install it.")
+                  }
+                  # PRIMME::eigs_sym can handle generalized eigen problems if specified
+                  # But PRIMME typically handles symmetric problems, ensure A,B are suitable
+                  # For a general problem, you may need a different call or ensure A,B are symmetric.
+                  # Check PRIMME docs for generalized eigenproblems.
+                  res <- PRIMME::eigs_sym(A = A, B = B, NEig = ncomp, ...)
+                  vectors <- res$vectors
+                  values <- res$values
+                  list(vectors = vectors, values = values)
+                }
+  )
+  
+  # sdev is often sqrt of eigenvalues (especially if they represent variances)
+  # However, generalized eigenvalues can be negative or complex. Here we assume they are real and non-negative.
+  # If negative/complex eigenvalues appear, handle accordingly.
+  # For now, let's assume they are real and non-negative:
+  ev <- ret$values
+  if (any(ev < 0)) {
+    warning("Some eigenvalues are negative. 'sdev' may not be meaningful.")
+  }
+  
+  sdev <- sqrt(pmax(ev, 0)) # Prevent sqrt of negative
+  
+  # Construct the projector object.
+  # The projector class doesn't have a `values` parameter by default, but we can pass them in `...`:
+  out <- projector(
+    v = ret$vectors,
+    preproc = prep(pass()),
+    classes = "geneig",
+    values = ev,
+    sdev = sdev
+  )
+  
+  out
+}
 

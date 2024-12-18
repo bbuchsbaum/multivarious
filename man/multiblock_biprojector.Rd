@@ -15,27 +15,26 @@ multiblock_biprojector(
 )
 }
 \arguments{
-\item{v}{A matrix of components with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components).}
+\item{v}{A matrix of components (nrow = number of variables, ncol = number of components).}
 
-\item{s}{A matrix of scores.}
+\item{s}{A matrix of scores (nrow = samples, ncol = components).}
 
-\item{sdev}{A numeric vector of singular values.}
+\item{sdev}{A numeric vector of singular values or standard deviations.}
 
-\item{preproc}{A pre-processing function for the data (default is a pass-through with \code{prep(pass())}).}
+\item{preproc}{A pre-processing object (default: \code{prep(pass())}).}
 
 \item{...}{Extra arguments.}
 
-\item{block_indices}{A list of numeric vectors specifying the indices of each data block.}
+\item{block_indices}{A list of numeric vectors specifying data block variable indices.}
 
-\item{classes}{(optional) A character vector specifying the class attributes of the object, default is NULL.}
+\item{classes}{Additional class attributes (default NULL).}
 }
 \value{
 A \code{multiblock_biprojector} object.
 }
 \description{
 Constructs a multiblock bi-projector using the given component matrix (\code{v}), score matrix (\code{s}), singular values (\code{sdev}),
-a preprocessing function, and a list of block indices. This allows for the projection of multiblock data, where each block
-represents a different set of variables or features, with two-way mapping from samples to scores and from variables to components.
+a preprocessing function, and a list of block indices. This allows for two-way mapping with multiblock data.
 }
 \seealso{
 bi_projector, multiblock_projector

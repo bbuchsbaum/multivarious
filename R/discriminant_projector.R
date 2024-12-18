@@ -40,4 +40,10 @@ print.discriminant_projector <- function(x,...) {
   print.projector(x)
   cat("label counts: ", x$counts)
 }
-  
+
+# @export
+# predict.discriminant_projector <- function(object, new_data, ...) {
+#   chk::vld_matrix(new_data)
+#   #chk::check_dim(new_data, ncol, values=nrow(coefficients(object)))
+# }
+#   

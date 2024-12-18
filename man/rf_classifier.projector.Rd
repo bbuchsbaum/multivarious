@@ -2,31 +2,24 @@
 % Please edit documentation in R/classifier.R
 \name{rf_classifier.projector}
 \alias{rf_classifier.projector}
-\title{create a random forest classifier}
+\title{Create a random forest classifier}
 \usage{
 \method{rf_classifier}{projector}(x, colind = NULL, labels, scores, ...)
 }
 \arguments{
-\item{x}{the model object}
+\item{x}{a projector object}
 
-\item{colind}{the (optional) column indices used for prediction}
+\item{colind}{optional col indices}
 
-\item{labels}{A factor or vector of class labels for the training data.}
+\item{labels}{class labels}
 
-\item{scores}{a matrix of references scores used for classification}
+\item{scores}{reference scores}
 
-\item{...}{extra arguments to \code{randomForest} function}
+\item{...}{passed to \code{randomForest}}
 }
 \value{
-a \code{rf_classifier} object
+a \code{rf_classifier} object with rfres (rf model), labels, scores
 }
 \description{
-create a random forest classifier
-}
-\examples{
-data(iris)
-X <- iris[,1:4]
-pcres <- pca(as.matrix(X),2)
-cfier <- rf_classifier(pcres, labels=iris[,5], scores=scores(pcres))
-p <- predict(cfier, new_data=as.matrix(iris[,1:4]))
+Uses \code{randomForest} to train a random forest on the provided scores and labels.
 }

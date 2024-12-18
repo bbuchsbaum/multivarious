@@ -15,18 +15,5 @@
 Invisible \code{multiblock_biprojector} object.
 }
 \description{
-Display a human-readable summary of a \code{multiblock_biprojector} object, including information about the dimensions of the projection matrix, the pre-processing pipeline, and block indices.
-}
-\examples{
-# Generate some example data
-X1 <- matrix(rnorm(10 * 5), 10, 5)
-X2 <- matrix(rnorm(10 * 5), 10, 5)
-X <- cbind(X1, X2)
-# Compute PCA on the combined data
-pc <- pca(X, ncomp = 8)
-# Create a multiblock bi-projector using PCA components and block indices
-mb_biproj <- multiblock_biprojector(pc$v, s = pc$u \%*\% diag(sdev(pc)), sdev = sdev(pc), 
-block_indices = list(1:5, 6:10))
-# Pretty print the multiblock bi-projector object
-print(mb_biproj)
+Display a summary of a \code{multiblock_biprojector} object.
 }

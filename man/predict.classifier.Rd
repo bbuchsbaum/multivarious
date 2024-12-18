@@ -9,25 +9,28 @@
   new_data,
   ncomp = NULL,
   colind = NULL,
-  metric = c("cosine", "euclidean"),
+  metric = c("euclidean", "cosine", "ejaccard"),
+  normalize_probs = FALSE,
   ...
 )
 }
 \arguments{
-\item{object}{the model fit}
+\item{object}{classifier}
 
-\item{new_data}{new data to predict on}
+\item{new_data}{new data}
 
-\item{ncomp}{the number of components to use}
+\item{ncomp}{number of components}
 
-\item{colind}{the column indices to select in the projection matrix}
+\item{colind}{column indices}
 
-\item{metric}{the similarity metric ("euclidean" or "cosine")}
+\item{metric}{similarity metric}
 
-\item{...}{additional arguments to projection function}
+\item{normalize_probs}{logical}
+
+\item{...}{extra args}
 }
 \value{
-a list with the predicted class and probabilities
+list with class and prob
 }
 \description{
 predict with a classifier object

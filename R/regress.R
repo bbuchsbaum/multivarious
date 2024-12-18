@@ -1,4 +1,3 @@
-
 #' Multi-output linear regression
 #'
 #' Fit a multivariate regression model for a matrix of basis functions, `X`, and a response matrix `Y`.
@@ -36,77 +35,119 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"),
                     intercept=FALSE, lambda=.001, alpha=0, ncomp=ceiling(ncol(X)/2), ...) {
   method <- match.arg(method)
   
-  #procres <- prep(preproc, X)
-  #Xp <- procres$init(X)
-  ## we have a basis set, X and data Y
-  
-  # Y ~ basis*betas
-  # Y * b_inv = basis
-  
-  ## basis * betas
-  ## scores(x)[rowind,comp] %*% t(components(x)[,comp,drop=FALSE])[,colind]
-  
-  
+  # If intercept=TRUE, prepend a column of ones
   if (intercept) {
     scores <- cbind(rep(1, nrow(X)), X)
   } else {
     scores <- X
   }
   
+  # Compute betas depending on the method
   betas <- if (method == "lm") {
-    lfit = stats::lsfit(X, Y, intercept=intercept)
+    # Ordinary least squares
+    lfit <- stats::lsfit(X, Y, intercept=intercept)
     as.matrix(t(coef(lfit)))
     
   } else if (method == "mridge") {
+    # Multivariate ridge regression via glmnet with alpha=0
     gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept, ...)
-  
+    # coef(gfit) returns a list of coefficients (one per response)
+    # do.call(cbind, ...) combines them into a matrix
+    # If no intercept, drop intercept column
     if (!intercept) {
       as.matrix(Matrix::t(do.call(cbind, stats::coef(gfit))))[,-1,drop=FALSE]
     } else {
       as.matrix(Matrix::t(do.call(cbind, stats::coef(gfit))))
     }
+    
   } else if (method == "enet") {
+    # Elastic net for each response column separately
     out <- do.call(rbind, lapply(1:ncol(Y), function(i) {
       gfit <- glmnet(X, Y[,i], alpha=alpha, family="gaussian", lambda=lambda, intercept=intercept, ...)
-      #gfit <- glmnet(X, Y[,i], alpha=alpha, family="gaussian", lambda=lambda, intercept=intercept)
-      if (!intercept) coef(gfit)[-1,1] else stats::coef(gfit)[,1]
+      # Extract coefficients for this response
+      if (!intercept) {
+        coef(gfit)[-1,1]
+      } else {
+        stats::coef(gfit)[,1]
+      }
     }))
-  
+    out
     
   } else {
-    
+    # PLS regression
     dfl <- list(x=scores, y=Y)
-    fit <- plsr(y ~ x, data=dfl, ncomp=ncomp,...)
+    # plsr expects a formula: y ~ x
+    fit <- plsr(y ~ x, data=dfl, ncomp=ncomp, ...)
     as.matrix(t(stats::coef(fit)[,,1]))
   }
   
-  #print(dim(betas))
+  # Remove references to X and Y (not strictly necessary, but original code does it)
   rm(X)
   rm(Y)
   
-  p <- bi_projector(v=t(corpcor::pseudoinverse(betas)), 
-                    s=scores,
-                    sdev=apply(scores,2,stats::sd),
-                    coefficients=betas,
-                    method=method,
-                    classes="regress")
-  
+  # Create a bi_projector
+  # v = t(pseudoinverse(betas))
+  # s = scores
+  # sdev = standard deviations of scores columns
+  # store coefficients=betas and method
+  p <- bi_projector(v = t(corpcor::pseudoinverse(betas)), 
+                    s = scores,
+                    sdev = apply(scores,2,stats::sd),
+                    coefficients = betas,
+                    method = method,
+                    classes = "regress")
+  p
 }
+
 
 #' @export
 inverse_projection.regress <- function(x,...) {
+  # inverse projection = t(coefficients)
   t(x$coefficients)
 }
-
 
 #' @export
 project_vars.regress <- function(x, new_data,...) {
   if (is.vector(new_data)) {
     new_data <- matrix(new_data)
   }
+  # Check dimension: new_data rows = nrow(scores(x))
   chk::chk_equal(nrow(new_data), nrow(scores(x)))
+  
+  # project_vars for regress: t(new_data) %*% scores(x)
+  # If new_data is NxM and scores is NxC, result is MxC
   t(new_data) %*% (scores(x))
 }
 
 
+#' Pretty Print Method for `regress` Objects
+#'
+#' Display a human-readable summary of a `regress` object using crayon formatting, 
+#' including information about the method and dimensions.
+#'
+#' @param x A `regress` object (a bi_projector with regression info).
+#' @param ... Additional arguments passed to `print()`.
+#' @export
+print.regress <- function(x, ...) {
+  cat(crayon::bold(crayon::green("Regression bi_projector object:\n")))
+  
+  # Display method
+  if (!is.null(x$method)) {
+    cat(crayon::yellow("  Method: "), crayon::cyan(x$method), "\n", sep="")
+  } else {
+    cat(crayon::yellow("  Method: "), crayon::cyan("unknown"), "\n", sep="")
+  }
+  
+  # Input/Output dims from v
+  cat(crayon::yellow("  Input dimension: "), nrow(x$v), "\n", sep="")
+  cat(crayon::yellow("  Output dimension: "), ncol(x$v), "\n", sep="")
+  
+  # Check if intercept was used: If intercept present, betas includes an extra row
+  # but we have no direct flag. The code doesn't store intercept explicitly,
+  # so we won't guess. Let's just print coefficients dim:
+  cat(crayon::yellow("  Coefficients dimension: "),
+      paste(dim(x$coefficients), collapse=" x "), "\n")
+  
+  invisible(x)
+}
 

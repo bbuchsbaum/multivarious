@@ -9,11 +9,11 @@
 \arguments{
 \item{x}{A \code{classifier} object.}
 
-\item{...}{Additional arguments passed to \code{print()}.}
+\item{...}{Additional arguments.}
 }
 \value{
 \code{classifier} object.
 }
 \description{
-Display a human-readable summary of a \code{classifier} object, including information about the k-NN classifier, the model fit, and the dimensions of the scores matrix.
+Display a human-readable summary of a \code{classifier} object.
 }

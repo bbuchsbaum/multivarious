@@ -13,15 +13,15 @@ multiblock_projector(
 )
 }
 \arguments{
-\item{v}{A matrix of components with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components).}
+\item{v}{A matrix of components with dimensions \code{nrow(v)} by \code{ncol(v)} (columns = number of components).}
 
-\item{preproc}{A pre-processing function for the data (default is a pass-through with \code{prep(pass())}).}
+\item{preproc}{A pre-processing function for the data (default: \code{prep(pass())}).}
 
 \item{...}{Extra arguments.}
 
 \item{block_indices}{A list of numeric vectors specifying the indices of each data block.}
 
-\item{classes}{(optional) A character vector specifying the class attributes of the object, default is NULL.}
+\item{classes}{(optional) A character vector specifying additional class attributes of the object, default is NULL.}
 }
 \value{
 A \code{multiblock_projector} object.
@@ -42,7 +42,7 @@ pc <- pca(X, ncomp = 8)
 # Create a multiblock projector using PCA components and block indices
 mb_proj <- multiblock_projector(pc$v, block_indices = list(1:5, 6:10))
 
-# Project the multiblock data using the multiblock projector
+# Project multiblock data using the multiblock projector
 mb_scores <- project(mb_proj, X)
 }
 \seealso{
