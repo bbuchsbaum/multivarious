@@ -31,7 +31,7 @@ perm_test(x, ...)
 
 \item{stepwise}{(Used by \code{pca}) Logical indicating if sequential testing (P3 projection) should be performed. Default \code{TRUE}. (The multiblock methods also perform sequential testing based on \code{alpha} and \code{comps}, but this argument is ignored). Ignored by other methods.}
 
-\item{parallel}{(Used by all methods) Logical; if \code{TRUE}, attempt parallel execution via \code{future.apply::future_lapply}.}
+\item{parallel}{(Used by all methods) Logical; if \code{TRUE}, attempt parallel execution via \code{future.apply::future_lapply}. Requires the \code{future.apply} package.}
 
 \item{alternative}{(Used by all methods) Character string for the alternative hypothesis: "greater" (default), "less", or "two.sided".}
 
