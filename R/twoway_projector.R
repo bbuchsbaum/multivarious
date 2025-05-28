@@ -504,8 +504,10 @@ perm_test.cross_projector <- function(x,
   }
   
   # ---------- Run Permutations (Serial or Parallel) ----------
-  message(sprintf("Running %d permutations for cross projector (%s)...", 
+  message(sprintf("Running %d permutations for cross projector (%s)...",
                   nperm, if(parallel) "parallel" else "serial"))
+  if (parallel && !requireNamespace("future.apply", quietly = TRUE))
+    stop("Package 'future.apply' required for parallel execution.", call.=FALSE)
   apply_fun <- if (parallel) future.apply::future_lapply else lapply
   perm_args <- list(X = seq_len(nperm), FUN = one_perm)
   # Pass ... down to one_perm via the lapply function's ...
