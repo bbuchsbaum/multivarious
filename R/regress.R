@@ -5,7 +5,7 @@
 #'
 #' @param X the set of independent (basis) variables
 #' @param Y the response matrix
-#' @param preproc the pre-processor (currently unused)
+#' @param preproc A preprocessing pipeline applied to \code{X} before fitting the model
 #' @param method the regression method: `lm`, `enet`, `mridge`, or `pls`
 #' @param intercept whether to include an intercept term
 #' @param lambda ridge shrinkage parameter (for methods `mridge` and `enet`)
