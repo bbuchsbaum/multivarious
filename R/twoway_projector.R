@@ -7,8 +7,8 @@
 #' and `coef` work, but by default, it is assumed that the `X` block is primary. To access `Y` block operations, an
 #' additional argument `source` must be supplied to the relevant functions, e.g., `coef(fit, source = "Y")`
 #'
-#' @param vx the X coefficients
-#' @param vy the Y coefficients
+#' @param vx the X coefficients. Must have the same number of columns as `vy`.
+#' @param vy the Y coefficients. Must have the same number of columns as `vx`.
 #' @param preproc_x the X pre-processor
 #' @param preproc_y the Y pre-processor
 #' @param ... extra parameters or results to store
@@ -33,6 +33,7 @@ cross_projector <- function(vx, vy, preproc_x=prep(pass()), preproc_y=prep(pass(
   
   chk::chkor_vld(chk::vld_matrix(vx), chk::vld_s4_class(vx, "Matrix"))
   chk::chkor_vld(chk::vld_matrix(vy), chk::vld_s4_class(vy, "Matrix"))
+  chk::chk_equal(ncol(vx), ncol(vy))
   chk::chk_s3_class(preproc_x, "pre_processor")
   chk::chk_s3_class(preproc_y, "pre_processor")
   
