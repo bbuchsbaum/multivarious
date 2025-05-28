@@ -170,10 +170,12 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
   U_svd <- x$u[, 1:k, drop = FALSE]    # Left singular vectors (n x k) - directly available
 
   # --- Sanity check: Scores_UD should approximate U_svd %*% diag(d) ---
-  # reconstruct_scores <- U_svd %*% diag(d, nrow=k, ncol=k)
-  # if (max(abs(Scores_UD - reconstruct_scores)) > sqrt(.Machine$double.eps)) {
-  #    warning("Internal consistency check failed: x$s does not seem to be x$u %*% diag(x$sdev). Ensure 'pca' object structure is correct.")
-  # }
+  reconstruct_scores <- U_svd %*% diag(d, nrow = k, ncol = k)
+  if (max(abs(Scores_UD - reconstruct_scores)) > sqrt(.Machine$double.eps)) {
+      warning(
+        "Internal consistency check failed: x$s does not seem to be x$u %*% diag(x$sdev). Ensure 'pca' object structure is correct."
+      )
+  }
   # --- End Sanity Check ---
 
   # Calculate the matrix D U' needed for resampling (k x n)
