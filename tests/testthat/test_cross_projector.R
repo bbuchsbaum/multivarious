@@ -25,6 +25,24 @@ make_blocks <- function(n  = 40L,
   )
 }
 
+# Non-orthonormal variant for ridge tests
+make_blocks_nonortho <- function(n = 40L,
+                                 pX = 6L,
+                                 pY = 5L,
+                                 d  = 3L) {
+  Vx <- matrix(rnorm(pX * d), pX, d)         # not orthonormal
+  Vy <- matrix(rnorm(pY * d), pY, d)
+  F  <- matrix(rnorm(n * d), n, d)
+
+  list(
+    X  = F %*% t(Vx),
+    Y  = F %*% t(Vy),
+    Vx = Vx,
+    Vy = Vy,
+    F  = F
+  )
+}
+
 
 # =========================================================================
 # 1. ‑‑ Constructor + accessor sanity -------------------------------------
@@ -105,4 +123,24 @@ test_that("transfer converts X‑>Y (and Y‑>X) with low reconstruction error",
 
   mse_yx <- mean((X_hat - dims$X)^2)
   expect_lt(mse_yx, 1e-4)
+})
+
+# -------------------------------------------------------------------------
+# 4. -- transfer with ridge uses lambda argument --------------------------
+# -------------------------------------------------------------------------
+test_that("transfer uses ridge regularized projection when opts$ls_rr", {
+  dims <- make_blocks_nonortho()
+  preproc <- prep(pass())
+  cp   <- cross_projector(dims$Vx, dims$Vy, preproc_x = preproc, preproc_y = preproc)
+  lambda <- 0.5
+
+  manual_scores <- dims$X %*% dims$Vx %*%
+    multivarious:::robust_inv_vTv(dims$Vx, lambda = lambda)
+  inv_y <- MASS::ginv(dims$Vy)
+  manual <- manual_scores %*% inv_y
+
+  Y_hat <- transfer(cp, dims$X, from = "X", to = "Y",
+                    opts = list(ls_rr = TRUE, lambda = lambda))
+
+  expect_equal(Y_hat, manual, tolerance = 1e-6)
 })

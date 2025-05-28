@@ -175,6 +175,11 @@ partial_project.cross_projector <- function(x, new_data, colind,
 #' @param opts A list of options (see `transfer` generic).
 #' @param ... Ignored.
 #' @return Transferred data matrix.
+#' @details
+#' When `opts$ls_rr` is `TRUE`, the forward projection from the `from`
+#' domain is computed using a ridge-regularized least squares approach.
+#' The penalty parameter is taken from `opts$lambda`. Component subsetting
+#' via `opts$comps` is applied after computing these ridge-based scores.
 #' @importFrom utils modifyList
 #' @importFrom cli cli_abort
 #' @export
@@ -216,9 +221,14 @@ transfer.cross_projector <- function(x, new_data,
 
   # ---------- 2. forward projection ----------------------
   # Project the preprocessed data into the latent space
-  # For cross_projector, project doesn't take least_squares/lambda directly
-  # Use standard projection
-  scores <- project(x, nd_proc, source = from)
+  # Optionally use ridge-regularized LS if opts$ls_rr is TRUE
+  v_from <- coef.cross_projector(x, source = from)
+  if (isTRUE(opts$ls_rr)) {
+      inv_vtv <- robust_inv_vTv(v_from, lambda = opts$lambda)
+      scores  <- nd_proc %*% v_from %*% inv_vtv
+  } else {
+      scores <- nd_proc %*% v_from
+  }
                     
   # Subset components if requested
   if (!is.null(opts$comps)) {
