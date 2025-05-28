@@ -14,7 +14,7 @@
 #' X <- matrix(rnorm(200), 10, 20)
 #' svdfit <- svd(X)
 #'
-#' p <- bi_projector(svdfit$v, s = svdfit$u %% diag(svdfit$d), sdev=svdfit$d)
+#' p <- bi_projector(svdfit$v, s = svdfit$u %*% diag(svdfit$d), sdev=svdfit$d)
 #' @export
 bi_projector <- function(v, s, sdev, preproc=prep(pass()), classes=NULL, ...) {
   chk::vld_matrix(v)
