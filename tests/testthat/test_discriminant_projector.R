@@ -121,3 +121,4 @@ test_that("perm_test.discriminant_projector yields small p for signal and large 
   pt_noise <- perm_test(dp_noise, X_noise, nperm = 150)
   expect_true(pt_noise$p.value > 0.10)           # no real separation
 })
+
