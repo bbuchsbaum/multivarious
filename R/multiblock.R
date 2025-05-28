@@ -145,6 +145,28 @@ print.multiblock_biprojector <- function(x, ...) {
   invisible(x)
 }
 
+# -------------------------------------------------------------
+# Default multiblock shuffle helper
+# -------------------------------------------------------------
+#' Shuffle rows of a matrix or list of matrices
+#'
+#' Helper used internally by permutation tests to randomize the
+#' observation order of either a single matrix or each matrix in a
+#' list.  Each block (or the single matrix) has its rows permuted
+#' independently.
+#' @param data A matrix or list of matrices with the same number of rows.
+#' @keywords internal
+#' @noRd
+.default_multiblock_shuffle <- function(data) {
+  if (is.list(data)) {
+    lapply(data, function(M) M[sample(nrow(M)), , drop = FALSE])
+  } else if (is.matrix(data)) {
+    data[sample(nrow(data)), , drop = FALSE]
+  } else {
+    stop("Unsupported data type for multiblock shuffling")
+  }
+}
+
 
 
 
@@ -219,37 +241,21 @@ perm_test.multiblock_biprojector <- function(
   obs_vec <- unlist(T_list_obs)
 
   ## ------------------------------------------------------------------
-  ## 4.  default shuffle – independently permute rows of each block
+  ## 4.  decide what data to shuffle and set default shuffle
   ## ------------------------------------------------------------------
-  if (is.null(shuffle_fun)){
-      shuffle_fun <- function(blks){           # blks is a list
-         lapply(blks, function(mat) mat[sample(nrow(mat)), , drop = FALSE])
-      }
-  }
-
-  ## pre‑extract data blocks (scores or original) -----------------------
-  if (is.null(Xlist)){
-      # We will shuffle the full original score matrix once per permutation
-      S_orig <- scores(x) # n x Kmax
-      # Ensure default shuffle works on this matrix N x Kmax
-      if (is.null(shuffle_fun)) {
-        shuffle_fun <- function(S, ...) S[sample(nrow(S)), , drop = FALSE]
-      }
-      data_to_shuffle <- S_orig 
-      use_shuffled_scores_matrix = TRUE
+  if (is.null(Xlist)) {
+      # Shuffle the scores matrix once per permutation
+      data_to_shuffle            <- scores(x)
+      use_shuffled_scores_matrix <- TRUE
   } else {
-      # user gave full data; keep as list
       if (length(Xlist) != B)
          stop("Length of Xlist must equal number of blocks in the model.")
-      # Default shuffle works on list of matrices
-      if (is.null(shuffle_fun)){
-           shuffle_fun <- function(blks, ...) {           # blks is a list
-              lapply(blks, function(mat) mat[sample(nrow(mat)), , drop = FALSE])
-           }
-      }
-      data_to_shuffle <- Xlist 
-      use_shuffled_scores_matrix = FALSE
+      data_to_shuffle            <- Xlist
+      use_shuffled_scores_matrix <- FALSE
   }
+
+  if (is.null(shuffle_fun))
+      shuffle_fun <- .default_multiblock_shuffle
 
   ## ------------------------------------------------------------------
   ## 5.  permutation loop (sequential stopping like PCA)
@@ -490,6 +496,8 @@ perm_test.multiblock_projector <- function(x,
     }
     if (pvals[k] > alpha) { stopat <- k; break }
   }
+
+  keep <- seq_len(stopat)
 
   ci <- t(apply(perm_mat[, keep, drop = FALSE], 2,
                 stats::quantile, probs = c(.025, .975)))
