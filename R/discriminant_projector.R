@@ -78,9 +78,10 @@ discriminant_projector <- function(v, s, sdev, preproc=prep(pass()), labels, cla
 #'
 #' This produces class predictions or posterior-like scores for new data, based on:
 #' \itemize{
-#'   \item \strong{LDA approach} (\code{method="lda"}), which uses a linear discriminant 
-#'         formula with a pooled covariance matrix if \code{x\$Sigma} is given, or 
-#'         the identity matrix if \code{Sigma=NULL}.
+#'   \item \strong{LDA approach} (\code{method="lda"}), which uses a linear discriminant
+#'         formula with a pooled covariance matrix if \code{x\$Sigma} is given, or
+#'         the identity matrix if \code{Sigma=NULL}. If that covariance matrix is
+#'         not invertible, a pseudo-inverse is used and a warning is emitted.
 #'   \item \strong{Euclid approach} (\code{method="euclid"}), which uses plain
 #'         Euclidean distance to each class mean in the subspace.
 #' }
@@ -160,7 +161,13 @@ predict.discriminant_projector <- function(object,
       # fallback to identity
       sigma_pooled <- diag(ncol(object$s))
     }
-    inv_sigma <- solve(sigma_pooled)
+    inv_sigma <- tryCatch(
+      solve(sigma_pooled),
+      error = function(e) {
+        warning("Covariance matrix not invertible; using pseudo-inverse via MASS::ginv")
+        MASS::ginv(sigma_pooled)
+      }
+    )
     
     # Precompute (for linear discriminants):
     means_inv  <- class_means %*% inv_sigma

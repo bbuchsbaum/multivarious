@@ -140,3 +140,36 @@ test_that("perm_test.discriminant_projector yields small p for signal and large 
   expect_true(pt_noise$p.value > 0.10)           # no real separation
 })
 
+
+# -------------------------------------------------------------------------
+# 4. Rank deficient covariance is handled via pseudo-inverse ---------------
+# -------------------------------------------------------------------------
+test_that("predict works when covariance is rank deficient", {
+
+  set.seed(123)
+  # create perfectly collinear feature to ensure singular covariance
+  X_rd <- matrix(rnorm(50 * 2), 50, 2)
+  X_rd <- cbind(X_rd, X_rd[,1])
+  Y_rd <- factor(rep(c("A", "B"), each = 25))
+
+  lda_fit <- lda(X_rd, grouping = Y_rd)
+
+  # manually supply rank deficient Sigma
+  Sigma_rd <- cov(X_rd)
+
+  preproc <- prep(pass())
+  init_transform(preproc, X_rd)
+
+  dp <- discriminant_projector(v      = lda_fit$scaling,
+                               s      = X_rd %*% lda_fit$scaling,
+                               sdev   = lda_fit$svd,
+                               preproc = preproc,
+                               labels = Y_rd,
+                               Sigma  = Sigma_rd)
+
+  preds <- predict(dp, X_rd, method = "lda", type = "class")
+  expect_length(preds, length(Y_rd))
+  expect_true(all(levels(preds) == levels(Y_rd)))
+})
+=======
+
