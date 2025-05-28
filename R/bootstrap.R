@@ -241,9 +241,10 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
     if (is.null(future::plan("list")[[1]]$workers)) { # Check if a plan with workers is set
         num_cores <- if (!is.null(cores)) cores else future::availableCores()
         message("Setting future plan to multisession with ", num_cores, " workers.")
+        # Save current plan before changing it so we can restore on exit
+        existing_plan <- future::plan()
         future::plan(future::multisession, workers = num_cores)
         # Ensure plan is reset on exit if we set it here
-        existing_plan <- future::plan("list")
         on.exit(future::plan(existing_plan), add = TRUE)
     }
     # Use future_lapply - seed needs to be handled via future.seed argument
