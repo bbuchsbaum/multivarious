@@ -229,7 +229,6 @@ perm_test.discriminant_projector <- function(
     fit_fun = NULL,
     shuffle_fun = NULL,
     predict_method = c("lda", "euclid"), # Added explicit argument
-    stepwise = FALSE, # Ignored
     parallel = FALSE,
     alternative = c("greater", "less", "two.sided"),
     ...) {
@@ -237,6 +236,7 @@ perm_test.discriminant_projector <- function(
   # Match arguments
   alternative <- match.arg(alternative)
   predict_method <- match.arg(predict_method)
+
   
   # Ensure labels are factor and dimensions match
   y <- factor(x$labels)
