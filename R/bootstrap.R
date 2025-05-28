@@ -9,7 +9,8 @@
 #' @param x An object of class 'pca' as returned by the provided `pca` function.
 #'   It's expected to contain loadings (`v`), scores (`s`), singular values (`sdev`),
 #'   left singular vectors (`u`), and pre-processing info (`preproc`).
-#' @param nboot The number of bootstrap resamples to perform (default: 100).
+#' @param nboot The number of bootstrap resamples to perform. Must be a positive
+#'   integer (default: 100).
 #' @param k The number of principal components to bootstrap (default: all
 #'   components available in the fitted PCA model `x`). Must be less than or
 #'   equal to the number of components in `x`.
@@ -159,6 +160,8 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
       warning("Requested k (", k, ") exceeds the number of observations (", n, "). Results might be unstable.")
   }
   if (k <= 0 || !is.numeric(k) || k != round(k)) stop("k must be a positive integer.")
+  if (!is.numeric(nboot) || length(nboot) != 1 || nboot <= 0 || nboot != round(nboot))
+    stop("nboot must be a positive integer.")
 
   # Seed handling with future_lapply requires specific argument
   # if (!is.null(seed)) withr::local_seed(seed) # Apply seed locally before loop if not parallel

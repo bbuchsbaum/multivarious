@@ -20,7 +20,7 @@ bootstrap_pca(
 It's expected to contain loadings (\code{v}), scores (\code{s}), singular values (\code{sdev}),
 left singular vectors (\code{u}), and pre-processing info (\code{preproc}).}
 
-\item{nboot}{The number of bootstrap resamples to perform (default: 100).}
+\item{nboot}{The number of bootstrap resamples to perform. Must be a positive integer (default: 100).}
 
 \item{k}{The number of principal components to bootstrap (default: all
 components available in the fitted PCA model \code{x}). Must be less than or
