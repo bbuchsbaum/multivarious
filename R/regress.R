@@ -79,6 +79,9 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
   # Compute betas depending on the method
   betas <- {
     # Compute betas depending on the method (using X_fit)
+    y_single <- is.vector(Y) || (is.matrix(Y) && ncol(Y) == 1)
+    glmnet_family <- if (y_single) "gaussian" else "mgaussian"
+    Y_glmnet <- if (y_single) as.vector(Y) else Y
     b <- if (method == "lm") {
       # Use lm.fit for potentially better performance/stability than lsfit
       lfit <- stats::lm.fit(X_fit, Y)
@@ -89,10 +92,14 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
       if (!requireNamespace("glmnet", quietly = TRUE)) {
           stop("Package 'glmnet' needed for method='mridge'. Please install it.", call. = FALSE)
       }
-      gfit <- glmnet::glmnet(X_fit, Y, alpha = 0, family = "mgaussian", 
-                             lambda = lambda, intercept = intercept_flag, ...) 
+      gfit <- glmnet::glmnet(X_fit, Y_glmnet, alpha = 0, family = glmnet_family,
+                             lambda = lambda, intercept = intercept_flag, ...)
       cf <- stats::coef(gfit, s = lambda)
-      bmat <- do.call(cbind, lapply(cf, as.matrix))
+      if (y_single) {
+        bmat <- as.matrix(cf)
+      } else {
+        bmat <- do.call(cbind, lapply(cf, as.matrix))
+      }
       # Transpose to get p_out x (p_in+1 if intercept fitted by glmnet)
       t(bmat)
 
@@ -100,10 +107,14 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
       if (!requireNamespace("glmnet", quietly = TRUE)) {
           stop("Package 'glmnet' needed for method='enet'. Please install it.", call. = FALSE)
       }
-      gfit <- glmnet::glmnet(X_fit, Y, alpha = alpha, family = "mgaussian", 
+      gfit <- glmnet::glmnet(X_fit, Y_glmnet, alpha = alpha, family = glmnet_family,
                              lambda = lambda, intercept = intercept_flag, ...)
       cf <- stats::coef(gfit, s = lambda)
-      bmat <- do.call(cbind, lapply(cf, as.matrix))
+      if (y_single) {
+        bmat <- as.matrix(cf)
+      } else {
+        bmat <- do.call(cbind, lapply(cf, as.matrix))
+      }
       # Transpose to get p_out x (p_in+1 if intercept fitted by glmnet)
       t(bmat)
       
