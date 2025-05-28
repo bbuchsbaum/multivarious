@@ -23,4 +23,8 @@ the re(pre-)processed data
 \description{
 reprocess a cross_projector instance
 }
+\details{
+When \code{colind} is supplied, each index is validated to lie within the
+available coefficient rows using \code{chk::chk_subset}.
+}
 \concept{reprocess}
