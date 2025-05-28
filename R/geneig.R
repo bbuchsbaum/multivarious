@@ -6,7 +6,6 @@
 #' @param A The left-hand side square matrix.
 #' @param B The right-hand side square matrix, same dimension as A.
 #' @param ncomp Number of eigenpairs to return.
-#' @param preproc A preprocessing function to apply to the matrices before solving the generalized eigenvalue problem.
 #' @param method One of:
 #'   - "robust": Uses a stable decomposition via a whitening transform (B must be symmetric PD).
 #'   - "sdiag":  Uses a spectral decomposition of B (must be symmetric PD). Requires A to be symmetric for meaningful results.
@@ -49,7 +48,6 @@
 geneig <- function(A = NULL,
                    B = NULL,
                    ncomp = 2,
-                   preproc = prep(pass()),
                    method = c("robust", "sdiag", "geigen", "primme"),
                    which = "LR", ...) {
   method <- match.arg(method)
@@ -198,16 +196,17 @@ geneig <- function(A = NULL,
   
   sdev <- sqrt(abs(ev)) # Use abs(Re(ev))
   
-  # Return a simple list with a class attribute
-  out <- list(
-    values  = ev,
-    vectors = vec,
-    sdev    = sdev,
-    ncomp   = ncomp,
-    method  = method
+  # Wrap results in a `projector` object
+  out <- projector(
+    v = vec,
+    preproc = prep(pass()),
+    values = ev,
+    sdev = sdev,
+    ncomp = ncomp,
+    method = method,
+    classes = "geneig"
   )
-  
-  class(out) <- c("geneig", "list")
+
   out
 }
 
