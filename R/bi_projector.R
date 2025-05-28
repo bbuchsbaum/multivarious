@@ -164,12 +164,10 @@ reconstruct_new.bi_projector <- function(x,
   chk::chk_equal(ncol(new_data), length(colind))
   
   # Use standard project method for consistency
-  # First, apply preprocessing only to the specified columns
-  full_data <- matrix(0, nrow = nrow(new_data), ncol = nrow(coef.projector(x)))
-  full_data[, colind] <- new_data
-  
-  # Apply preprocessing to full data
-  full_data_proc <- apply_transform(x$preproc, full_data)
+  # Apply preprocessing only to the provided columns
+  full_data_proc <- matrix(0, nrow = nrow(new_data),
+                           ncol = nrow(coef.projector(x)))
+  full_data_proc[, colind] <- apply_transform(x$preproc, new_data, colind)
   
   # Project to get scores for all components
   scores_new_full <- project(x, full_data_proc)
@@ -184,7 +182,8 @@ reconstruct_new.bi_projector <- function(x,
   
   # Reconstruct
   rec_data_sub <- scores_new %*% ip_sub
-  
+
   # Reverse transform for the selected columns
+  rec_data_sub <- reverse_transform(x$preproc, rec_data_sub, colind)
   rec_data_sub
 }
