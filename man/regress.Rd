@@ -21,7 +21,7 @@ regress(
 
 \item{Y}{the response matrix}
 
-\item{preproc}{the pre-processor (currently unused)}
+\item{preproc}{A preprocessing pipeline applied to \code{X} before fitting the model}
 
 \item{method}{the regression method: \code{lm}, \code{enet}, \code{mridge}, or \code{pls}}
 
