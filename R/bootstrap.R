@@ -9,7 +9,8 @@
 #' @param x An object of class 'pca' as returned by the provided `pca` function.
 #'   It's expected to contain loadings (`v`), scores (`s`), singular values (`sdev`),
 #'   left singular vectors (`u`), and pre-processing info (`preproc`).
-#' @param nboot The number of bootstrap resamples to perform (default: 100).
+#' @param nboot The number of bootstrap resamples to perform. Must be a positive
+#'   integer (default: 100).
 #' @param k The number of principal components to bootstrap (default: all
 #'   components available in the fitted PCA model `x`). Must be less than or
 #'   equal to the number of components in `x`.
@@ -159,6 +160,8 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
       warning("Requested k (", k, ") exceeds the number of observations (", n, "). Results might be unstable.")
   }
   if (k <= 0 || !is.numeric(k) || k != round(k)) stop("k must be a positive integer.")
+  if (!is.numeric(nboot) || length(nboot) != 1 || nboot <= 0 || nboot != round(nboot))
+    stop("nboot must be a positive integer.")
 
   # Seed handling with future_lapply requires specific argument
   # if (!is.null(seed)) withr::local_seed(seed) # Apply seed locally before loop if not parallel
@@ -170,10 +173,12 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
   U_svd <- x$u[, 1:k, drop = FALSE]    # Left singular vectors (n x k) - directly available
 
   # --- Sanity check: Scores_UD should approximate U_svd %*% diag(d) ---
-  # reconstruct_scores <- U_svd %*% diag(d, nrow=k, ncol=k)
-  # if (max(abs(Scores_UD - reconstruct_scores)) > sqrt(.Machine$double.eps)) {
-  #    warning("Internal consistency check failed: x$s does not seem to be x$u %*% diag(x$sdev). Ensure 'pca' object structure is correct.")
-  # }
+  reconstruct_scores <- U_svd %*% diag(d, nrow = k, ncol = k)
+  if (max(abs(Scores_UD - reconstruct_scores)) > sqrt(.Machine$double.eps)) {
+      warning(
+        "Internal consistency check failed: x$s does not seem to be x$u %*% diag(x$sdev). Ensure 'pca' object structure is correct."
+      )
+  }
   # --- End Sanity Check ---
 
   # Calculate the matrix D U' needed for resampling (k x n)
@@ -241,9 +246,10 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
     if (is.null(future::plan("list")[[1]]$workers)) { # Check if a plan with workers is set
         num_cores <- if (!is.null(cores)) cores else future::availableCores()
         message("Setting future plan to multisession with ", num_cores, " workers.")
+        # Save current plan before changing it so we can restore on exit
+        existing_plan <- future::plan()
         future::plan(future::multisession, workers = num_cores)
         # Ensure plan is reset on exit if we set it here
-        existing_plan <- future::plan("list")
         on.exit(future::plan(existing_plan), add = TRUE)
     }
     # Use future_lapply - seed needs to be handled via future.seed argument
@@ -267,8 +273,8 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
 
 
   # --- Aggregate Results ---
-  Ab_array <- simplify2array(lapply(res_list, `[[`, "Ab"))       # k x k x nboot_actual
-  Scores_array <- simplify2array(lapply(res_list, `[[`, "Scores")) # n x k x nboot_actual
+  Ab_array <- simplify2array(lapply(res_list, `[[`, "Ab"), higher = TRUE)       # k x k x nboot_actual
+  Scores_array <- simplify2array(lapply(res_list, `[[`, "Scores"), higher = TRUE) # n x k x nboot_actual
 
   # --- Calculate Bootstrap Moments and Z-scores ---
 

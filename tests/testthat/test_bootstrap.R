@@ -68,3 +68,11 @@ test_that("bootstrap means track dominant component and SD hierarchy is sensible
   # dominant component should be estimated more precisely
   expect_true(median(boot_res$sd_Vb[, 1]) < median(boot_res$sd_Vb[, 2]))
 })
+
+# -------------  4. input validation -----------------------------------------
+test_that("nboot must be a positive integer", {
+  expect_error(bootstrap_pca(toy_pca, nboot = 0, k = k),
+               "nboot must be a positive integer")
+  expect_error(bootstrap_pca(toy_pca, nboot = 2.5, k = k),
+               "nboot must be a positive integer")
+})

@@ -36,9 +36,10 @@ discriminant_projector <- function(v, s, sdev, preproc=prep(pass()), labels, cla
   chk::chk_equal(ncol(v), length(sdev))
   chk::chk_equal(length(labels), nrow(s))
   
-  # Ensure labels are factor and get named counts
-  labels <- factor(labels)
-  counts <- table(labels, dnn = NULL) 
+  # Ensure labels are factor; preserve level order if already factor
+  labels <- if (is.factor(labels)) factor(labels, levels = levels(labels))
+            else factor(labels)
+  counts <- table(labels, dnn = NULL)
   
   out <- bi_projector(v, s=s, sdev=sdev, preproc=preproc, labels=labels, 
                       counts=counts, classes=c(classes, "discriminant_projector"), ...)
@@ -236,7 +237,6 @@ perm_test.discriminant_projector <- function(
     fit_fun = NULL,
     shuffle_fun = NULL,
     predict_method = c("lda", "euclid"), # Added explicit argument
-    stepwise = FALSE, # Ignored
     parallel = FALSE,
     alternative = c("greater", "less", "two.sided"),
     ...) {
@@ -244,6 +244,7 @@ perm_test.discriminant_projector <- function(
   # Match arguments
   alternative <- match.arg(alternative)
   predict_method <- match.arg(predict_method)
+
   
   # Ensure labels are factor and dimensions match
   y <- factor(x$labels)

@@ -51,6 +51,24 @@ test_that("discriminant_projector constructor stores consistent state", {
   expect_equal(dim(dp$s), c(length(Y_signal), dim(dp$v)[2]))
 })
 
+test_that("discriminant_projector preserves factor level order", {
+
+  labs_custom <- factor(Y_signal, levels = c("B", "A"))
+  lda_fit  <- lda(X_signal, grouping = labs_custom)
+  preproc <- prep(pass())
+  Xp <- init_transform(preproc, X_signal)
+
+  dp <- discriminant_projector(
+          v      = lda_fit$scaling,
+          s      = X_signal %*% lda_fit$scaling,
+          sdev   = lda_fit$svd,
+          preproc = preproc,
+          labels = labs_custom,
+          Sigma  = lda_fit$covariance)
+
+  expect_equal(levels(dp$labels), levels(labs_custom))
+})
+
 # -------------------------------------------------------------------------
 # 2. Prediction engine (LDA & Euclidean) -----------------------------------
 # -------------------------------------------------------------------------
@@ -122,6 +140,7 @@ test_that("perm_test.discriminant_projector yields small p for signal and large 
   expect_true(pt_noise$p.value > 0.10)           # no real separation
 })
 
+
 # -------------------------------------------------------------------------
 # 4. Rank deficient covariance is handled via pseudo-inverse ---------------
 # -------------------------------------------------------------------------
@@ -152,3 +171,5 @@ test_that("predict works when covariance is rank deficient", {
   expect_length(preds, length(Y_rd))
   expect_true(all(levels(preds) == levels(Y_rd)))
 })
+=======
+
