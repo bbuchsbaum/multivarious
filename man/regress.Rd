@@ -7,7 +7,7 @@
 regress(
   X,
   Y,
-  preproc = NULL,
+  preproc = pass(),
   method = c("lm", "enet", "mridge", "pls"),
   intercept = FALSE,
   lambda = 0.001,
@@ -36,7 +36,10 @@ regress(
 \item{...}{extra arguments sent to the underlying fitting function}
 }
 \value{
-a bi-projector of type \code{regress}
+a bi-projector of type \code{regress}. The \code{sdev} component of this object
+stores the standard deviations of the columns of the design matrix (\code{X} potentially
+including an intercept) used in the fit, not the standard deviations of latent
+components as might be typical in other \code{bi_projector} contexts (e.g., SVD).
 }
 \description{
 Fit a multivariate regression model for a matrix of basis functions, \code{X}, and a response matrix \code{Y}.
@@ -44,15 +47,20 @@ The goal is to find a projection matrix that can be used for mapping and reconst
 }
 \examples{
 # Generate synthetic data
-Y <- matrix(rnorm(100 * 10), 10, 100)
+set.seed(123) # for reproducibility
+Y <- matrix(rnorm(10 * 100), 10, 100)
 X <- matrix(rnorm(10 * 9), 10, 9)
-# Fit regression models and reconstruct the response matrix
+
+# Fit regression models and reconstruct the fitted response matrix
 r_lm <- regress(X, Y, intercept = FALSE, method = "lm")
-recon_lm <- reconstruct(r_lm)
+recon_lm <- reconstruct(r_lm) # Reconstructs fitted Y
+
 r_mridge <- regress(X, Y, intercept = TRUE, method = "mridge", lambda = 0.001)
 recon_mridge <- reconstruct(r_mridge)
+
 r_enet <- regress(X, Y, intercept = TRUE, method = "enet", lambda = 0.001, alpha = 0.5)
 recon_enet <- reconstruct(r_enet)
+
 r_pls <- regress(X, Y, intercept = TRUE, method = "pls", ncomp = 5)
 recon_pls <- reconstruct(r_pls)
 }

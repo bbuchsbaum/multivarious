@@ -7,7 +7,7 @@
 bi_projector(v, s, sdev, preproc = prep(pass()), classes = NULL, ...)
 }
 \arguments{
-\item{v}{A matrix of coefficients with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
+\item{v}{A matrix of coefficients with dimensions \code{nrow(v)} by \code{ncol(v)} (columns = components)}
 
 \item{s}{The score matrix}
 
@@ -31,5 +31,5 @@ variable space to the d-dimensional component space. The singular value decompos
 X <- matrix(rnorm(200), 10, 20)
 svdfit <- svd(X)
 
-p <- bi_projector(svdfit$v, s = svdfit$u \%\% diag(svdfit$d), sdev=svdfit$d)
+p <- bi_projector(svdfit$v, s = svdfit$u \%*\% diag(svdfit$d), sdev=svdfit$d)
 }

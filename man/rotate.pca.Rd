@@ -19,28 +19,55 @@
 \item{ncomp}{The number of components to rotate. Must be <= ncomp(x).}
 
 \item{type}{The type of rotation to apply. Supported rotation types:
+
 \describe{
 \item{"varimax"}{Orthogonal Varimax rotation}
 \item{"quartimax"}{Orthogonal Quartimax rotation}
 \item{"promax"}{Oblique Promax rotation}
 }}
 
+\item{loadings_type}{For oblique rotations, which loadings to use:
+
+\describe{
+\item{"pattern"}{Use pattern loadings as \code{v}}
+\item{"structure"}{Use structure loadings (\code{pattern_loadings \%*\% Phi}) as \code{v}}
+}
+
+Ignored for orthogonal rotations.}
+
+\item{score_method}{How to recompute scores after rotation:
+
+\describe{
+\item{"auto"}{For orthogonal rotations, use
+\code{scores_new = scores_original \%*\% t(R)}}
+For oblique rotations, recompute from the pseudoinverse.
+
+\item{"recompute"}{Always recompute scores from \code{X_proc} and
+the pseudoinverse of rotated loadings.}
+
+\item{"original"}{For orth rotations, same as \code{auto},
+but may not work for oblique rotations.}
+}}
+
 \item{...}{Additional arguments passed to GPArotation functions.}
 }
 \value{
 A modified PCA object with class \code{rotated_pca} and additional fields:
+\describe{
 \item{v}{Rotated loadings}
 \item{s}{Rotated scores}
 \item{sdev}{Updated standard deviations of rotated components}
 \item{explained_variance}{Proportion of explained variance for each rotated component}
-\item{rotation}{A list with rotation details: type, R (orth) or Phi (oblique), and loadings_type}
+\item{rotation}{A list with rotation details: \code{type}, \code{R} (orth) or \code{Phi} (oblique), and \code{loadings_type}}
+}
 }
 \description{
-Apply a specified rotation to the component loadings of a PCA model. This function leverages
-the GPArotation package to apply orthogonal or oblique rotations.
+Apply a specified rotation to the component loadings of a PCA model.
+This function leverages the GPArotation package to apply orthogonal
+or oblique rotations.
 }
 \examples{
-# Perform PCA on iris dataset
+# Perform PCA on the iris dataset
 data(iris)
 X <- as.matrix(iris[,1:4])
 res <- pca(X, ncomp=4)

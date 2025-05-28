@@ -1,0 +1,232 @@
+---
+title:  "Partial projection: working with incomplete feature sets"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Partial projection: working with incomplete feature sets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment  = "#>",
+  fig.width = 7,
+  fig.height = 4
+)
+library(dplyr)
+library(ggplot2)
+# Assuming necessary multiblock functions are loaded
+```
+
+# 1. Why partial projection?
+
+Assume you trained a dimensionality-reduction model (PCA, PLS ...)
+on p variables but, at prediction time,
+
+*   one sensor is broken,
+*   a block of variables is too expensive to measure,
+*   you need a quick first pass while the "heavy" data arrive later.
+
+You still want the latent scores in the same component space,
+so downstream models, dashboards, alarms, ... keep running.
+
+That's exactly what
+
+```
+partial_project(model, new_data_subset, colind = which.columns)
+```
+
+does:
+
+`new_data_subset` (n × q)  ─►  project into latent space (n × k)
+
+with q ≤ p.
+If the loading vectors are orthonormal this is a simple dot product;
+otherwise a ridge-regularised least-squares solve is used.
+
+---
+
+# 2. Walk-through with a toy PCA
+
+```{r data_partial_proj}
+set.seed(1)
+n  <- 100
+p  <- 8
+X  <- matrix(rnorm(n * p), n, p)
+
+# Fit a centred 3-component PCA (via SVD)
+# Assuming bi_projector, prep, center are available
+Xc      <- scale(X, center = TRUE, scale = FALSE)
+svd_res <- svd(Xc, nu = 0, nv = 3)
+pca     <- bi_projector(              #  <- multiblock helper
+  v     = svd_res$v,
+  s     = Xc %*% svd_res$v,
+  sdev  = svd_res$d[1:3] / sqrt(n-1), # Correct scaling for sdev
+  preproc = prep(center())
+)
+```
+
+## 2.1 Normal projection (all variables)
+
+```{r project_full}
+scores_full <- project(pca, X)        # n × 3
+head(round(scores_full, 2))
+```
+
+## 2.2 Missing two variables ➜ partial projection
+
+Suppose columns 7 and 8 are unavailable for a new batch.
+
+```{r project_partial}
+X_miss      <- X[, 1:6]               # keep only first 6 columns
+col_subset  <- 1:6                    # their positions in the **original** X
+
+scores_part <- partial_project(pca, X_miss, colind = col_subset)
+
+# How close are the results?
+plot_df <- tibble(
+  full = scores_full[,1],
+  part = scores_part[,1]
+)
+
+ggplot(plot_df, aes(full, part)) +
+  geom_point() +
+  geom_abline(col = "red") +
+  coord_equal() +
+  labs(title = "Component 1: full vs. partial projection") +
+  theme_minimal()
+```
+
+Even with two variables missing, the
+ridge LS step recovers latent scores that lie almost on the 1:1 line.
+
+---
+
+# 3. Caching the operation with a partial projector
+
+If you expect many rows with the same subset of features, create a
+specialised projector once and reuse it:
+
+```{r partial_projector_cache}
+# Assuming partial_projector is available
+pca_1to6 <- partial_projector(pca, 1:6)   # keeps a reference + cache
+
+# project 1000 new observations that only have the first 6 vars
+new_batch <- matrix(rnorm(1000 * 6), 1000, 6)
+scores_fast <- project(pca_1to6, new_batch)
+dim(scores_fast)   # 1000 × 3
+```
+
+Internally, `partial_projector()` stores the mapping
+`v[1:6, ]` and a pre-computed inverse, so calls to `project()` are
+as cheap as a matrix multiplication.
+
+---
+
+# 4. Block-wise convenience
+
+For multiblock fits (created with `multiblock_projector()`), 
+you can instead write
+
+```r
+# Assuming mb is a multiblock_projector and data_blockB is the data for block B
+# project_block(mb, data_blockB, block = "B") # Or block = 2
+```
+
+which is just a wrapper around `partial_project()` using the block's
+column indices.
+
+---
+
+# 5. Not only "missing data": regions-of-interest & nested designs
+
+Partial projection is handy even when all measurements exist:
+
+1.  **Region of interest (ROI).**
+    In neuro-imaging you might have 50,000 voxels but care only about the
+    motor cortex. Projecting just those columns shows how a
+    participant scores within that anatomical region without
+    refitting the whole PCA/PLS.
+2.  **Nested / multi-subject studies.**
+    For multi-block PCA (e.g. "participant × sensor"), you can ask
+    "where would subject i lie if I looked at block B only?"
+    Simply supply that block to `project_block()`.
+3.  **Feature probes or "what-if" analysis.**
+    Engineers often ask "What is the latent position if I vary only
+    temperature and hold everything else blank?" Pass a matrix that
+    contains the chosen variables and zeros elsewhere.
+
+## 5.1 Mini-demo: projecting an ROI
+
+Assume columns 1–5 (instead of 50 for brevity) of `X` form our ROI.
+
+```{r roi_project}
+roi_cols   <- 1:5                 # pretend these are the ROI voxels
+X_roi      <- X[, roi_cols]       # same matrix from Section 2
+
+roi_scores <- partial_project(pca, X_roi, colind = roi_cols)
+
+# Compare component 1 from full vs ROI
+df_roi <- tibble(
+  full = scores_full[,1],
+  roi  = roi_scores[,1]
+)
+
+ggplot(df_roi, aes(full, roi)) +
+  geom_point(alpha = .6) +
+  geom_abline(col = "red") +
+  coord_equal() +
+  labs(title = "Component 1 scores: full data vs ROI") +
+  theme_minimal()
+
+```
+
+**Interpretation:**
+If the two sets of scores align tightly, the ROI variables are
+driving this component. A strong deviation would reveal that other
+variables dominate the global pattern.
+
+## 5.2 Single-subject positioning in a multiblock design (Conceptual)
+
+```{r block_conceptual, eval=FALSE}
+# imagine `mb_pca` is a multiblock_biprojector with 2 blocks:
+#   Block 1 = questionnaire (Q1–Q30)
+#   Block 2 = reaction-time curves (RT1–RT120)
+
+# Assume data_subject7_block2 contains only the reaction time data for subject 7
+# subject_7_scores <- project_block(mb_pca,
+#                                   new_data   = data_subject7_block2,
+#                                   block      = 2)   # only RT variables
+
+# cat("Subject 7, component scores derived *solely* from reaction times:\n")
+# print(round(subject_7_scores, 2))
+```
+
+You can now overlay these scores on a map built from all subjects'
+global scores to see whether subject 7's behavioural profile is
+consistent with their psychometrics, or an outlier when viewed from this
+angle alone.
+
+---
+
+# 6. Cheat-sheet: why you might call `partial_project()`
+
+| Scenario                            | What you pass                     | Typical call                                |
+|-------------------------------------|-----------------------------------|---------------------------------------------|
+| Sensor outage / missing features    | matrix with observed cols only    | `partial_project(mod, X_obs, colind = idx)` |
+| Region of interest (ROI)            | ROI columns of the data           | `partial_project(mod, X[, ROI], ROI)`       |
+| Block-specific latent scores        | full block matrix                 | `project_block(mb, blkData, block = b)`     |
+| "What-if": vary a single variable set | varied cols + zeros elsewhere     | `partial_project()` with matching `colind`    |
+
+The component space stays identical throughout, so downstream
+analytics, classifiers, or control charts continue to work with no
+re-training.
+
+---
+
+# Session info
+
+```{r session-info-extra}
+sessionInfo()
+``` 

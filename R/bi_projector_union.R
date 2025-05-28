@@ -54,11 +54,7 @@ bi_projector_union <- function(fits, outer_block_indices=NULL) {
     
 }
 
-#' Pretty Print S3 Method for bi_projector_union Class
-#'
-#' @param x A `bi_projector_union` object
-#' @param ... Additional arguments passed to the print function
-#' @return Invisible `bi_projector_union` object
+
 #' @export
 print.bi_projector_union <- function(x, ...) {
   cat("A bi_projector_union object with the following properties:\n\n")

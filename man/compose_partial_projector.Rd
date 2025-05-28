@@ -2,22 +2,29 @@
 % Please edit documentation in R/composed_projector.R
 \name{compose_partial_projector}
 \alias{compose_partial_projector}
+\alias{\%>>\%}
 \title{Compose Multiple Partial Projectors}
 \usage{
 compose_partial_projector(...)
+
+lhs \%>>\% rhs
 }
 \arguments{
-\item{...}{A sequence of projectors that implement \code{partial_project()}.}
+\item{...}{A sequence of projectors that implement \code{partial_project()}, optionally named.}
+
+\item{lhs}{The left-hand side projector (or a composed projector).}
+
+\item{rhs}{The right-hand side projector to add to the sequence.}
 }
 \value{
 A \code{composed_partial_projector} object.
+
+A \code{composed_partial_projector} object representing the combined sequence.
 }
 \description{
 Creates a \code{composed_partial_projector} object that applies partial projections sequentially.
 If multiple projectors are composed, the column indices (colind) used at each stage must be considered.
-}
-\examples{
-# Suppose pca1 and pca2 support partial_project().
-# cpartial <- compose_partial_projector(pca1, pca2)
-# partial_project(cpartial, new_data, colind=1:5)
+
+This infix operator provides syntactic sugar for composing projectors sequentially.
+It is an alias for \code{\link{compose_partial_projector}}.
 }

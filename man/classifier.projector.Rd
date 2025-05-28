@@ -8,7 +8,7 @@
   x,
   colind = NULL,
   labels,
-  new_data,
+  new_data = NULL,
   knn = 1,
   global_scores = TRUE,
   ...
@@ -32,3 +32,14 @@
 \description{
 create classifier from a projector
 }
+\examples{
+# Assume proj is a fitted projector object
+# Assume lbls are labels and dat is new data
+# classifier(proj, labels = lbls, new_data = dat, knn = 3)
+}
+\seealso{
+Other classifier: 
+\code{\link{classifier.multiblock_biprojector}()},
+\code{\link{rf_classifier.projector}()}
+}
+\concept{classifier}

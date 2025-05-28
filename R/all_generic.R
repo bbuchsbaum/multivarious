@@ -25,28 +25,28 @@ project <- function(x, new_data, ...) UseMethod("project")
 
 #' Partially project a new sample onto subspace
 #'
-#' Project a selected subset of column indices onto the subspace. This function allows for the projection of new data
-#' onto a lower-dimensional space using only a subset of the variables, as specified by the column indices.
+#' Project a selected subset of column indices (`colind`) of `new_data` onto
+#' the subspace defined by the model \code{x}. Optionally do a
+#' ridge-regularized least-squares solve if columns are non-orthonormal.
 #'
-#' @param x The model fit, typically an object of class `bi_projector` or any other class that implements a `partial_project` method
-#' @param new_data A matrix or vector of new observations with a subset of columns equal to length of `colind`. Rows represent observations and columns represent variables
-#' @param colind A numeric vector of column indices to select in the projection matrix. These indices correspond to the variables used for the partial projection
-#' @return A matrix or vector of the partially projected observations, where rows represent observations and columns represent the lower-dimensional space
+#' @param x The fitted model, e.g. `bi_projector`, that has a partial_project method.
+#' @param new_data A numeric matrix (n x length(colind)) or vector, representing
+#'   the observations to be projected.
+#' @param colind A numeric vector of column indices in the original data space
+#'   that correspond to \code{new_data}'s columns.
+#' @param least_squares Logical; if TRUE (default), do a ridge-regularized solve.
+#' @param lambda Numeric; ridge penalty (default 1e-6). Ignored if `least_squares=FALSE`.
+#' @param ... Additional arguments passed to class-specific partial_project methods.
+#'
+#' @return A numeric matrix (n x d) of factor scores in the model's subspace, for
+#'   those columns only.
 #' @export
-#' @family partial_project
-#' @seealso \code{\link{bi_projector}} for an example of a class that implements a `partial_project` method
-#' @examples
-#' # Example with the bi_projector class
-#' X <- matrix(rnorm(10*20), 10, 20)
-#' svdfit <- svd(X)
-#' p <- bi_projector(svdfit$v, s = svdfit$u %*% diag(svdfit$d), sdev=svdfit$d)
-#'
-#' # Partially project new_data onto the same subspace as the original data 
-#' # using only the first 10 variables
-#' new_data <- matrix(rnorm(5*20), 5, 20)
-#' colind <- 1:10
-#' partially_projected_data <- partial_project(p, new_data[,colind], colind)
-partial_project <- function(x, new_data, colind) UseMethod("partial_project")
+partial_project <- function(x, new_data, colind,
+                            least_squares = TRUE,
+                            lambda = 1e-6,
+                            ...) {
+  UseMethod("partial_project")
+}
 
 
 
@@ -86,12 +86,13 @@ partial_projector <- function(x, colind, ...) UseMethod("partial_projector")
 #' @param x The model fit, typically an object of a class that implements a `project_block` method
 #' @param new_data A matrix or vector of new observation(s) with the same number of columns as the original data
 #' @param block An integer representing the block ID to select in the block projection matrix. This ID corresponds to the specific block of data to be projected
+#' @param least_squares Logical. If `TRUE` use least squares projection.
 #' @param ... Additional arguments passed to the underlying `project_block` method
 #' @return A matrix or vector of the projected data for the specified block
 #' @export
 #' @family project
 #' @seealso \code{\link{project}} for the generic projection function
-project_block <- function(x, new_data, block,...) UseMethod("project_block")
+project_block <- function(x, new_data, block, least_squares, ...) UseMethod("project_block")
 
 
 
@@ -145,24 +146,82 @@ reconstruct <- function(x, comp, rowind, colind, ...) UseMethod("reconstruct")
 
 
 
-##' Transfer data from one input domain to another via common latent space
+#' Reconstruct new data in a model's subspace
 #'
-#' Convert between data representations in a multiblock decomposition/alignment by projecting
-#' the input data onto a common latent space and then reconstructing it in the target domain.
+#' This function takes a model (e.g., `projector` or `bi_projector`) and a new dataset,
+#' and computes the rank-d approximation of the new data in the same subspace that
+#' was defined by the model. In other words, we \strong{project} the new data into
+#' the fitted subspace and then \strong{map it back} to the original dimensionality.
 #'
-#' @param x The model fit, typically an object of a class that implements a `transfer` method
-#' @param new_data The data to transfer, with the same number of rows as the source data block
-#' @param i The index of the source data block
-#' @param j The index of the destination data block
-#' @param comp A vector of component indices to use in the reconstruction
-#' @param rowind Optional set of row indices to transfer (default: all rows)
-#' @param colind Optional set of column indices to transfer (default: all columns)
-#' @param ... Additional arguments passed to the underlying `convert_domain` method
-#' @return A matrix or data frame representing the transferred data in the target domain
+#' Similar to \code{\link{reconstruct}} but operates on an external \code{new_data}
+#' rather than the original fitted data. Often used to see how well the model's
+#' subspace explains unseen data.
+#'
+#' @param x The fitted model object (e.g., \code{bi_projector}) that defines
+#'   a subspace or factorization.
+#' @param new_data A numeric matrix (or data frame) of shape
+#'   \code{(n x p_full)} or possibly fewer columns if you allow partial reconstruction.
+#' @param ... Additional arguments passed to the specific \code{reconstruct_new} method
+#'   for the class of \code{x}.
+#'
+#' @return A numeric matrix (same number of rows as \code{new_data}, and typically
+#'   the same number of columns if you're reconstructing fully) representing the
+#'   rank-d approximation in the model's subspace.
+#'
 #' @export
-#' @seealso \code{\link{project_block}} for projecting a single block of data onto the subspace
-convert_domain <- function(x, new_data, i, j, comp, rowind, colind, ...) UseMethod("transfer")
+#' @family reconstruct
+#' @seealso \code{\link{reconstruct}} for reconstructing the original data in the model.
+reconstruct_new <- function(x, new_data, ...) {
+  UseMethod("reconstruct_new")
+}
 
+
+
+#' Transfer data from one domain/block to another via a latent space
+#'
+#' Convert between data representations in a multiblock or cross-decomposition
+#' model by projecting the input `new_data` from the `from` domain/block
+#' onto a latent space and then reconstructing it in the `to` domain/block.
+#'
+#' @param x The model fit, typically an object that implements a `transfer` method
+#'   and ideally a `block_names` method.
+#' @param new_data The data to transfer, typically matching the dimension of the `from` domain.
+#' @param from Character string or index identifying the source domain/block.
+#'   Must be present in `block_names(x)` if that method exists.
+#' @param to Character string or index identifying the target domain/block.
+#'   Must be present in `block_names(x)` if that method exists.
+#' @param opts A list of optional arguments controlling the transfer process:
+#'   \describe{
+#'     \item{`cols`}{Optional numeric vector specifying column indices of the *target* 
+#'       domain to reconstruct. If NULL (default), reconstructs all columns.}
+#'     \item{`comps`}{Optional numeric vector specifying which latent components to use 
+#'       for the projection/reconstruction. If NULL (default), uses all components.}
+#'     \item{`ls_rr`}{Logical; if TRUE, use a ridge-regularized LS approach for the 
+#'       initial projection from the `from` domain. Default FALSE.}
+#'     \item{`lambda`}{Numeric ridge penalty (if `ls_rr=TRUE`). Default 1e-6.}
+#'   }
+#' @param ... Additional arguments passed to specific methods (discouraged, prefer `opts`).
+#'
+#' @return A matrix or data frame representing the transferred data in the `to` domain/block 
+#'   (or a subset of columns/components if specified in `opts`).
+#' @export
+transfer <- function(x, new_data, from, to, opts = list(), ...) {
+  UseMethod("transfer")
+}
+
+#' Default method for transfer
+#' @param x Object
+#' @param ... Ignored
+#' @importFrom cli cli_abort
+#' @export
+#' @noRd
+transfer.default <- function(x, ...) {
+    cli::cli_abort(c(
+      "!" = "{.fn transfer} is not implemented for {.cls {class(x)[1]}}.",
+      "i" = "Provide a method or ensure the object inherits from a supported class."
+      # Consider adding: "i" = "Supported classes include: cross_projector, ..."
+    ))
+}
 
 
 ## TODO 
@@ -363,8 +422,9 @@ sdev <- function(x) UseMethod("sdev")
 #' test whether components are orthogonal
 #' 
 #' @param x the object
+#' @param tol tolerance for checking orthogonality
 #' @return a logical value indicating whether the transformation is orthogonal
-is_orthogonal <- function(x) UseMethod("is_orthogonal")
+is_orthogonal <- function(x, tol=1e-6) UseMethod("is_orthogonal")
 
 
 #' truncate a component fit
@@ -498,10 +558,10 @@ perm_ci <- function(x, X, nperm, ...) UseMethod("perm_ci")
 #' @param x The model fit, typically a result from a dimensionality reduction method like PCA.
 #' @param ncomp The number of components to rotate.
 #' @param type The type of rotation to apply (e.g., "varimax", "quartimax", "promax").
+#' @param ... extra args
 #' @return A modified model fit with the rotated components.
 #' @export
-rotate <- function(x, ncomp, type) UseMethod("rotate")
-
+rotate <- function(x, ncomp, type, ...) UseMethod("rotate")
 
 
 
@@ -527,5 +587,245 @@ apply_rotation <- function(x, rotation_matrix, ...) { UseMethod("apply_rotation"
 #' @export
 feature_importance <- function(x, ...) UseMethod("feature_importance")
 
+
+
+#' Generic Permutation-Based Test
+#'
+#' This generic function implements a permutation-based test to assess the significance
+#' of components or statistics in a fitted model. The actual procedure depends on
+#' the method defined for the specific model class. Typical usage:
+#'
+#' \enumerate{
+#'   \item Shuffle or permute the data in a way that breaks the structure of interest
+#'         (e.g., shuffle labels for supervised methods, shuffle columns/rows for unsupervised).
+#'   \item Re-fit or re-project the model on the permuted data. Depending on the class,
+#'         this can be done via a \code{fit_fun} or a class-specific approach.
+#'   \item Measure the statistic of interest (e.g., variance explained, classification accuracy, canonical correlation).
+#'   \item Compare the distribution of permuted statistics to the observed statistic to compute an empirical p-value.
+#' }
+#'
+#' S3 methods define the specific defaults and required signatures for the functions
+#' involved in shuffling, fitting, and measuring.
+#'
+#' @name perm_test
+#' @aliases perm_test perm_test.pca perm_test.cross_projector perm_test.discriminant_projector perm_test.multiblock_biprojector
+#'
+#' @usage perm_test(x, ...)
+#'
+#' @param x A fitted model object (e.g. \code{pca}, \code{cross_projector}, \code{discriminant_projector}, \code{multiblock_biprojector}).
+#' @param X (Used by \code{pca}, \code{cross_projector}, \code{discriminant_projector}) The original primary data matrix used to fit \code{x}. Ignored by the \code{multiblock_biprojector} method.
+#' @param Y (Used by \code{cross_projector}) The secondary data block (n x pY). Ignored by other methods.
+#' @param Xlist (Used by \code{multiblock_biprojector} \[optional, default \code{NULL}\] and \code{multiblock_projector} \[required\]) List of data blocks.
+#' @param nperm Integer number of permutations (Default: 1000 for PCA, 500 for multiblock methods, 100 otherwise).
+#' @param measure_fun (Optional; Used by \code{pca}, \code{cross_projector}, \code{discriminant_projector}, \code{multiblock_projector}) A function for computing the statistic(s) of interest. Ignored by \code{multiblock_biprojector}. Signature/default varies by method (see Details).
+#' @param shuffle_fun (Optional; Used by all methods) A function for permuting the data appropriately. Signature/default varies by method (see Details).
+#' @param fit_fun (Optional; Used by \code{cross_projector}, \code{discriminant_projector}) A function for re-fitting a new model. Ignored by PCA and multiblock methods. Signature/default varies by method (see Details).
+#' @param stepwise (Used by \code{pca}) Logical indicating if sequential testing (P3 projection) should be performed. Default \code{TRUE}. (The multiblock methods also perform sequential testing based on \code{alpha} and \code{comps}, but this argument is ignored). Ignored by other methods.
+#' @param parallel (Used by all methods) Logical; if `TRUE`, attempt parallel execution via `future.apply::future_lapply`.
+#' @param alternative (Used by all methods) Character string for the alternative hypothesis: "greater" (default), "less", or "two.sided".
+#' @param alpha (Used by \code{pca}, \code{multiblock_biprojector}, \code{multiblock_projector}) Significance level for sequential stopping rule (default 0.05). Passed directly as a named argument to these methods.
+#' @param comps (Used by \code{pca}, \code{multiblock_biprojector}, \code{multiblock_projector}) Maximum number of components to test sequentially (default 4). Passed directly as a named argument to these methods.
+#' @param use_svd_solver (Used by \code{pca}) Optional string specifying the SVD solver (default "fast").
+#' @param use_rspectra (Used by \code{multiblock_biprojector}) Logical indicating whether to use RSpectra for eigenvalue calculation (default \code{TRUE}). Passed directly as a named argument.
+#' @param predict_method (Used by \code{discriminant_projector}) Prediction method (`"lda"` or `"euclid"`) used by the default measure function (default "lda").
+#' @param ... Additional arguments passed down to `shuffle_fun` or `measure_fun` (if applicable).\n#'   Note: For \code{multiblock} methods, \code{Xlist}, \code{comps}, \code{alpha}, and \code{use_rspectra} (for biprojector) are handled as direct named arguments, not via \code{...}.
+#'
+#' @details
+#' This function provides a framework for permutation testing in various multivariate models.
+#' The specific implementation details, default functions, and relevant arguments vary by method.
+#'
+#' \strong{PCA Method (`perm_test.pca`):} 
+#' Relevant arguments: \code{X}, \code{nperm}, \code{measure_fun}, \code{shuffle_fun}, \code{stepwise}, \code{parallel}, \code{alternative}, \code{alpha}, \code{comps}, \code{use_svd_solver}, \code{...}. Assesses significance of variance explained by each PC (Vitale et al., 2017). Default statistic: F_a. Default shuffle: column-wise. Default uses P3 projection and sequential stopping with \code{alpha}.
+#'
+#' \strong{Cross Projector Method (`perm_test.cross_projector`):} 
+#' Relevant arguments: \code{X}, \code{Y}, \code{nperm}, \code{measure_fun}, \code{shuffle_fun}, \code{fit_fun}, \code{parallel}, \code{alternative}, \code{...}. Tests the X-Y relationship. Default statistic: `x2y.mse`. Default shuffle: rows of Y. Default fit: `stats::cancor`.
+#'
+#' \strong{Discriminant Projector Method (`perm_test.discriminant_projector`):} 
+#' Relevant arguments: \code{X}, \code{nperm}, \code{measure_fun}, \code{shuffle_fun}, \code{fit_fun}, \code{predict_method}, \code{parallel}, \code{alternative}, \code{...}. Tests class separation. Default statistic: prediction accuracy. Default shuffle: labels. Default fit: `MASS::lda`.
+#'
+#' \strong{Multiblock Bi-Projector Method (`perm_test.multiblock_biprojector`):} 
+#' Relevant arguments: \code{Xlist} (optional), \code{nperm}, \code{shuffle_fun}, \code{parallel}, \code{alternative}, \code{alpha}, \code{comps}, \code{use_rspectra}, \code{...}. Tests consensus using fixed internal statistic (eigenvalue) on scores for each component. The statistic is the leading eigenvalue of the covariance matrix of block scores for a given component (T^T, where T columns are scores of block \emph{b} on component \emph{k}). By default, it shuffles rows within each block independently (either from \code{Xlist} if provided via \code{...}, or using the internally stored scores). It performs sequential testing for components specified by \code{comps} using the stopping rule defined by \code{alpha} (both passed via \code{...}).
+#'
+#' \strong{Multiblock Projector Method (`perm_test.multiblock_projector`):} 
+#' Relevant arguments: \code{Xlist} (required), \code{nperm}, \code{measure_fun}, \code{shuffle_fun}, \code{parallel}, \code{alternative}, \code{alpha}, \code{comps}, \code{...}. Tests consensus using \code{measure_fun} (default: mean abs corr) on scores projected from \code{Xlist} using the original model \code{x}. Does not refit.
+#'
+#' @return
+#' The structure of the return value depends on the method:
+#' \describe{
+#'   \item{\strong{`cross_projector`} and \strong{`discriminant_projector`}:}{
+#'     Returns an object of class \code{perm_test}, a list containing: \code{statistic}, \code{perm_values}, \code{p.value}, \code{alternative}, \code{method}, \code{nperm}, \code{call}.}
+#'   \item{\strong{`pca`}, \strong{`multiblock_biprojector`}, and \strong{`multiblock_projector`}:}{
+#'     Returns an object inheriting from \code{perm_test} (classes \code{perm_test_pca}, \code{perm_test_multiblock}, or \code{perm_test} respectively for multiblock_projector), \n
+#'     a list containing: \code{component_results} (data frame with observed stat, pval, CIs per component), \code{perm_values} (matrix of permuted stats), \code{alpha} (if applicable), \code{alternative}, \code{method}, \code{nperm} (vector of successful permutations per component), \code{call}.}
+#' }
+#'
+#' @references
+#' Buja, A., & Eyuboglu, N. (1992). Remarks on parallel analysis. *Multivariate Behavioral Research*, 27(4), 509-540. (Relevant for PCA permutation concepts)
+#'
+#' Vitale, R., Westerhuis, J. A., Næs, T., Smilde, A. K., de Noord, O. E., & Ferrer, A. (2017).
+#' Selecting the number of factors in principal component analysis by permutation testing—
+#' Numerical and practical aspects. *Journal of Chemometrics*, 31(10), e2937.
+#' \doi{10.1002/cem.2937} (Specific to `perm_test.pca`)
+#'
+#' @seealso \code{\link{pca}}, \code{\link{cross_projector}}, \code{\link{discriminant_projector}},
+#'   \code{\link{multiblock_biprojector}},
+#'   \code{\link{measure_interblock_transfer_error}}
+#' @family perm_test
+#'
+#' @examples
+#' # PCA Example
+#' data(iris)
+#' X_iris <- as.matrix(iris[,1:4])
+#' mod_pca <- pca(X_iris, ncomp=4, preproc=center()) # Ensure centering
+#'
+#' # Test first 3 components sequentially (faster with more nperm)
+#' # Ensure a future plan is set for parallel=TRUE, e.g., future::plan("multisession")
+#' res_pca <- perm_test(mod_pca, X_iris, nperm=50, comps=3, parallel=FALSE)
+#' print(res_pca)
+#'
+#' # PCA Example with row shuffling (tests different null hypothesis)
+#' row_shuffle <- function(dat, ...) dat[sample(nrow(dat)), ]
+#' res_pca_row <- perm_test(mod_pca, X_iris, nperm=50, comps=3,
+#'                          shuffle_fun=row_shuffle, parallel=FALSE)
+#' print(res_pca_row)
+#'
+#' \dontrun{
+#' # Cross Projector Example (using cancor)
+#' X <- as.matrix(iris[,1:2])
+#' Y <- as.matrix(iris[,3:4])
+#' ccr <- cancor(X, Y)
+#' mod_cp <- cross_projector(ccr$xcoef, ccr$ycoef)
+#'
+#' # Perm test (is x2y.mse lower than chance?)
+#' res_cp <- perm_test(mod_cp, X, Y=Y, nperm=50, alternative="less")
+#' print(res_cp)
+#'
+#' # Discriminant Projector Example (using LDA)
+#' library(MASS)
+#' lda_fit <- lda(X_iris, grouping=iris$Species)
+#' mod_dp <- discriminant_projector(
+#'   v = lda_fit$scaling,
+#'   s = X_iris %*% lda_fit$scaling,
+#'   sdev = lda_fit$svd,
+#'   labels = iris$Species,
+#'   preproc = prep(center()), # Assuming center() was intended for LDA
+#'   Sigma = lda_fit$covariance # Needed for LDA prediction method
+#' )
+#'
+#' # Perm test (is accuracy higher than chance?)
+#' res_dp <- perm_test(mod_dp, X_iris, nperm=50, alternative="greater")
+#' print(res_dp)
+#'
+#' # Multiblock Bi-Projector Example
+#' # (Requires a multiblock model 'mod_mb' from e.g. MFA or ComDim)
+#' # Assuming 'mod_mb' exists and has 2 blocks:
+#' # res_mb <- perm_test(mod_mb, nperm=50, comps=3) 
+#' # print(res_mb)
+#' # Example using provided Xlist (list of matrices X1, X2):
+#' # X1 <- matrix(rnorm(50*10), 50, 10)
+#' # X2 <- matrix(rnorm(50*15), 50, 15)
+#' # Assume mod_mb was fit on cbind(X1, X2) with block_indices=list(1:10, 11:25)
+#' # res_mb_xlist <- perm_test(mod_mb, Xlist=list(X1, X2), nperm=50, comps=3)
+#' # print(res_mb_xlist)
+#' }
+#' @export
+perm_test <- function(x, ...) {
+  UseMethod("perm_test")
+}
+
+
+
+#' Screeplot for PCA
+#'
+#' Displays the variance explained by each principal component as a bar or line plot.
+#' 
+#' @param x A \code{pca} object.
+#' @param ... extra args
+#' @export
+screeplot <- function(x, ...) UseMethod("screeplot")
+
+
+#' Cross-validation Framework
+#'
+#' Generic function for performing cross-validation on various objects or data.
+#' Specific methods should be implemented for different data types or model types.
+#'
+#' @param x The object to perform cross-validation on (e.g., data matrix, formula, model object).
+#' @param folds A list defining the cross-validation folds, typically containing `train` and `test` indices for each fold.
+#' @param ... Additional arguments passed to specific methods.
+#'
+#' @return The structure of the return value depends on the specific S3 method.
+#'   Typically, it will be an object containing the results of the cross-validation,
+#'   such as performance metrics per fold or aggregated metrics.
+#'
+#' @details
+#' The specific implementation details, default functions, and relevant arguments vary by method.
+#'
+#' \strong{Bi-Projector Method (`cv.bi_projector`):}
+#' Relevant arguments: \code{x}, \code{folds}, \code{max_comp}, \code{fit_fun},
+#'   \code{measure}, \code{measure_fun}, \code{return_models}, \code{...}.
+#'
+#' This method performs cross-validation specifically for \code{bi_projector} models
+#' (or models intended to be used like them, typically from unsupervised methods
+#' like PCA or SVD). For each fold, it fits a single model using the training data
+#' with the maximum number of components specified (\code{max_comp}). It then iterates
+#' from 1 to \code{max_comp} components:
+#' \enumerate{
+#'   \item It truncates the full model to \code{k} components using \code{truncate()}. 
+#'        (Requires a \code{truncate} method for the fitted model class).
+#'   \item It reconstructs the held-out test data using the k-component truncated model
+#'        via \code{reconstruct_new()}.
+#'   \item It calculates reconstruction performance metrics (e.g., MSE, R2) by comparing
+#'        the original test data to the reconstruction using the \code{measure} argument
+#'        or a custom \code{measure_fun}.
+#' }
+#' The \code{fit_fun} must accept an argument \code{ncomp}. Additional arguments in \code{...}
+#' are passed to \code{fit_fun} and \code{measure_fun}.
+#'
+#' The return value is a \code{cv_fit} object (a list with class `cv_fit`), where the
+#' \code{$results} element is a tibble. Each row corresponds to a fold, containing
+#' the fold index (\code{fold}) and a nested tibble (\code{component_metrics}).
+#' The \code{component_metrics} tibble has rows for each component evaluated (1 to
+#' \code{max_comp}) and columns for the component index (\code{comp}) plus all
+#' calculated metrics (e.g., \code{mse}, \code{r2}, \code{mae}) or error messages
+#' (\code{comp_error}). If \code{return_models=TRUE}, the full model fitted on the training
+#' data for each fold is included in a list column \code{model_full}.
+#'
+#' @export
+#' @family cv
+#' @seealso \code{\link{cv_generic}}, \code{\link{summary.cv_fit}}, \code{\link{plot.cv_fit}}
+cv <- function(x, folds, ...) {
+  UseMethod("cv")
+}
+
+
+#' Identify Original Variables Used by a Projector
+#' 
+#' Determines which columns from the *original* input space contribute 
+#' (have non-zero influence) to *any* of the output components of the projector.
+#' 
+#' @param x A projector object (e.g., `projector`, `composed_projector`).
+#' @param ... Additional arguments passed to specific methods.
+#' 
+#' @return A sorted numeric vector of unique indices corresponding to the original input variables.
+#' @export
+variables_used <- function(x, ...) {
+    UseMethod("variables_used")
+}
+
+#' Identify Original Variables for a Specific Component
+#' 
+#' Determines which columns from the *original* input space contribute 
+#' (have non-zero influence) to a *specific* output component of the projector.
+#' 
+#' @param x A projector object (e.g., `projector`, `composed_projector`).
+#' @param k The index of the output component to query.
+#' @param ... Additional arguments passed to specific methods.
+#' 
+#' @return A sorted numeric vector of unique indices corresponding to the original input variables.
+#' @export
+vars_for_component <- function(x, k, ...) {
+    UseMethod("vars_for_component")
+}
 
 

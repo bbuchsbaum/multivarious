@@ -7,11 +7,12 @@
 nystrom_approx(
   X,
   kernel_func = NULL,
-  ncomp = min(dim(X)),
+  ncomp = NULL,
   landmarks = NULL,
   nlandmarks = 10,
   preproc = pass(),
   method = c("standard", "double"),
+  center = FALSE,
   l = NULL,
   use_RSpectra = TRUE,
   ...
@@ -21,18 +22,26 @@ nystrom_approx(
 \item{X}{A numeric matrix or data frame of size (N x D), where N is number of samples.}
 
 \item{kernel_func}{A kernel function with signature \code{kernel_func(X, Y, ...)}.
-If NULL, defaults to a linear kernel: X \%*\% t(Y).}
+If NULL, defaults to a linear kernel: \code{X \%*\% t(Y)}.}
 
-\item{ncomp}{Number of components (eigenvectors/eigenvalues) to return.}
+\item{ncomp}{Number of components (eigenvectors/eigenvalues) to return.
+Cannot exceed the number of landmarks. Default capped at \code{length(landmarks)}.}
 
-\item{landmarks}{A vector of row indices (of X) specifying the landmark points.
+\item{landmarks}{A vector of row indices (1-based, from X) specifying the landmark points.
 If NULL, \code{nlandmarks} points are sampled uniformly at random.}
 
 \item{nlandmarks}{The number of landmark points to sample if \code{landmarks} is NULL. Default is 10.}
 
-\item{preproc}{A pre-processing pipeline (default \code{prep(pass())}) to apply before computing the kernel.}
+\item{preproc}{A pre-processing pipeline object (e.g., from \code{prep()}) or a pre-processing function
+(default \code{pass()}) to apply before computing the kernel.}
 
 \item{method}{Either "standard" (the classic single-stage Nyström) or "double" (the two-stage Double Nyström method).}
+
+\item{center}{Logical. If TRUE, attempts kernel centering. Default FALSE.
+\strong{Note:} True kernel centering (required for equivalence to Kernel PCA) is
+computationally expensive and \strong{not fully implemented}. Setting \code{center=TRUE} currently only
+issues a warning. For results equivalent to standard PCA, use a linear kernel
+and center the input data \code{X} (e.g., via \code{preproc}). See Details.}
 
 \item{l}{Intermediate rank for the double Nyström method. Ignored if \code{method="standard"}.
 Typically, \code{l < length(landmarks)} to reduce complexity.}
@@ -42,27 +51,61 @@ Typically, \code{l < length(landmarks)} to reduce complexity.}
 \item{...}{Additional arguments passed to \code{kernel_func}.}
 }
 \value{
-A \code{bi_projector} object with fields:
+A \code{bi_projector} object with class "nystrom_approx" and additional fields:
 \describe{
 \item{\code{v}}{The eigenvectors (N x ncomp) approximating the kernel eigenbasis.}
 \item{\code{s}}{The scores (N x ncomp) = v * diag(sdev), analogous to principal component scores.}
 \item{\code{sdev}}{The square roots of the eigenvalues.}
 \item{\code{preproc}}{The pre-processing pipeline used.}
+\item{\code{meta}}{A list containing parameters and intermediate results used (method, landmarks, kernel_func, etc.).}
 }
 }
 \description{
-Approximate the eigen-decomposition of a large kernel matrix using either
-the standard Nyström method or the Double Nyström method.
+Approximate the eigen-decomposition of a large kernel matrix K using either
+the standard Nyström method (Williams & Seeger, 2001) or the Double Nyström method
+(Lim et al., 2015, Algorithm 3).
 }
 \details{
 The Double Nyström method introduces an intermediate step that reduces the
 size of the decomposition problem, potentially improving efficiency and scalability.
+
+\strong{Kernel Centering:} Standard Kernel PCA requires the kernel matrix K to be centered
+in the feature space (Schölkopf et al., 1998). This implementation currently
+\strong{does not perform kernel centering} by default (\code{center=FALSE}) due to computational complexity.
+Consequently, with non-linear kernels, the results approximate the eigen-decomposition
+of the \emph{uncentered} kernel matrix, and are not strictly equivalent to Kernel PCA.
+If using a linear kernel, centering the input data \code{X} (e.g., using \code{preproc=prep(center())})
+yields results equivalent to standard PCA, which is often sufficient.
+
+\strong{Standard Nyström:} Uses the method from Williams & Seeger (2001), including the
+\code{sqrt(m/N)} scaling for eigenvectors and \code{N/m} for eigenvalues (\code{m} landmarks, \code{N} samples).
+
+\strong{Double Nyström:} Implements Algorithm 3 from Lim et al. (2015).
 }
 \examples{
 set.seed(123)
-X <- matrix(rnorm(1000*1000), 1000, 1000)
+# Smaller example matrix
+X <- matrix(rnorm(1000*300), 1000, 300)
+
 # Standard Nyström
-res_std <- nystrom_approx(X, ncomp=5, nlandmarks=20, method="standard")
+res_std <- nystrom_approx(X, ncomp=5, nlandmarks=50, method="standard")
+print(res_std)
+
 # Double Nyström
-res_db <- nystrom_approx(X, ncomp=5, nlandmarks=20, method="double", l=10)
+res_db <- nystrom_approx(X, ncomp=5, nlandmarks=50, method="double", l=20)
+print(res_db)
+
+# Projection (using standard result as example)
+scores_new <- project(res_std, X[1:10,])
+head(scores_new)
+}
+\references{
+Schölkopf, B., Smola, A., & Müller, K. R. (1998). Nonlinear component analysis as a kernel eigenvalue problem.
+\emph{Neural computation}, 10(5), 1299-1319.
+
+Williams, C. K. I., & Seeger, M. (2001). Using the Nyström Method to Speed Up Kernel Machines.
+In \emph{Advances in Neural Information Processing Systems 13} (pp. 682-688).
+
+Lim, D., Jin, R., & Zhang, L. (2015). An Efficient and Accurate Nystrom Scheme for Large-Scale Data Sets.
+\emph{Proceedings of the Twenty-Ninth AAAI Conference on Artificial Intelligence} (pp. 2765-2771).
 }

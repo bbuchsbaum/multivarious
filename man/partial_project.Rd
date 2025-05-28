@@ -4,35 +4,29 @@
 \alias{partial_project}
 \title{Partially project a new sample onto subspace}
 \usage{
-partial_project(x, new_data, colind)
+partial_project(x, new_data, colind, least_squares = TRUE, lambda = 1e-06, ...)
 }
 \arguments{
-\item{x}{The model fit, typically an object of class \code{bi_projector} or any other class that implements a \code{partial_project} method}
+\item{x}{The fitted model, e.g. \code{bi_projector}, that has a partial_project method.}
 
-\item{new_data}{A matrix or vector of new observations with a subset of columns equal to length of \code{colind}. Rows represent observations and columns represent variables}
+\item{new_data}{A numeric matrix (n x length(colind)) or vector, representing
+the observations to be projected.}
 
-\item{colind}{A numeric vector of column indices to select in the projection matrix. These indices correspond to the variables used for the partial projection}
+\item{colind}{A numeric vector of column indices in the original data space
+that correspond to \code{new_data}'s columns.}
+
+\item{least_squares}{Logical; if TRUE (default), do a ridge-regularized solve.}
+
+\item{lambda}{Numeric; ridge penalty (default 1e-6). Ignored if \code{least_squares=FALSE}.}
+
+\item{...}{Additional arguments passed to class-specific partial_project methods.}
 }
 \value{
-A matrix or vector of the partially projected observations, where rows represent observations and columns represent the lower-dimensional space
+A numeric matrix (n x d) of factor scores in the model's subspace, for
+those columns only.
 }
 \description{
-Project a selected subset of column indices onto the subspace. This function allows for the projection of new data
-onto a lower-dimensional space using only a subset of the variables, as specified by the column indices.
+Project a selected subset of column indices (\code{colind}) of \code{new_data} onto
+the subspace defined by the model \code{x}. Optionally do a
+ridge-regularized least-squares solve if columns are non-orthonormal.
 }
-\examples{
-# Example with the bi_projector class
-X <- matrix(rnorm(10*20), 10, 20)
-svdfit <- svd(X)
-p <- bi_projector(svdfit$v, s = svdfit$u \%*\% diag(svdfit$d), sdev=svdfit$d)
-
-# Partially project new_data onto the same subspace as the original data 
-# using only the first 10 variables
-new_data <- matrix(rnorm(5*20), 5, 20)
-colind <- 1:10
-partially_projected_data <- partial_project(p, new_data[,colind], colind)
-}
-\seealso{
-\code{\link{bi_projector}} for an example of a class that implements a \code{partial_project} method
-}
-\concept{partial_project}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/classifier.R
 \name{predict.classifier}
 \alias{predict.classifier}
-\title{predict with a classifier object}
+\title{Predict Class Labels using a Classifier Object}
 \usage{
 \method{predict}{classifier}(
   object,
@@ -11,27 +11,66 @@
   colind = NULL,
   metric = c("euclidean", "cosine", "ejaccard"),
   normalize_probs = FALSE,
+  prob_type = c("knn_proportion", "avg_similarity"),
   ...
 )
 }
 \arguments{
-\item{object}{classifier}
+\item{object}{A fitted object of class \code{classifier}.}
 
-\item{new_data}{new data}
+\item{new_data}{A numeric matrix or vector of new observations to classify. Rows are observations,
+columns are variables matching the original data space used by the projector OR matching \code{colind} if provided.}
 
-\item{ncomp}{number of components}
+\item{ncomp}{Optional integer; the number of components to use from the projector for classification (default: all components used during classifier creation).}
 
-\item{colind}{column indices}
+\item{colind}{Optional numeric vector specifying column indices from the original data space.
+If provided, \code{new_data} is projected using only these features (\code{partial_project}). This overrides any
+\code{colind} stored default in the \code{object}. The resulting projection is compared against the
+reference scores (\code{object$scores}) stored in the classifier.}
 
-\item{metric}{similarity metric}
+\item{metric}{Character string specifying the similarity or distance metric for k-NN.
+Choices: "euclidean", "cosine", "ejaccard".}
 
-\item{normalize_probs}{logical}
+\item{normalize_probs}{Logical; \strong{DEPRECATED} Normalization behavior is now implicit in \code{prob_type="avg_similarity"}.}
 
-\item{...}{extra args}
+\item{prob_type}{Character string; method for calculating probabilities:
+\itemize{
+\item "knn_proportion" (default): Calculates the proportion of each class among the \code{k} nearest neighbors.
+\item "avg_similarity": Calculates average similarity to all training points per class (uses \code{avg_probs} helper).
+}}
+
+\item{...}{Extra arguments passed down to projection methods (\code{project}, \code{partial_project})
+or potentially to distance/similarity calculations (e.g., for \code{proxy::simil} if used with \code{ejaccard}).}
 }
 \value{
-list with class and prob
+A list containing:
+\item{class}{A factor vector of predicted class labels for \code{new_data}.}
+\item{prob}{A numeric matrix (rows corresponding to \code{new_data}, columns to classes) of estimated class probabilities.}
 }
 \description{
-predict with a classifier object
+Predicts class labels and probabilities for new data using a fitted \code{classifier} object.
+It performs k-Nearest Neighbors (k-NN) classification in the projected component space.
 }
+\details{
+The function first projects the \code{new_data} into the component space defined by the
+classifier's internal projector. If \code{colind} is specified, a partial projection using
+only those features is performed. This projection is then compared to the reference scores
+stored within the \code{classifier} object (\code{object$scores}) using the specified \code{metric}.
+The k-NN algorithm identifies the \code{k} nearest reference samples (based on similarity or distance)
+and predicts the class via majority vote. Probabilities are estimated based on the average
+similarity/distance to each class among the neighbors or all reference points.
+}
+\examples{
+# Assume clf is a fitted classifier object (e.g., from classifier.projector)
+# Assume new_dat is a matrix of new observations
+# preds <- predict(clf, new_data = new_dat, metric = "cosine")
+# print(preds$class)
+# print(preds$prob)
+}
+\seealso{
+\code{\link{classifier.projector}}, \code{\link{classifier.multiblock_biprojector}}, \code{\link{partial_project}}
+
+Other classifier predict: 
+\code{\link{predict.rf_classifier}()}
+}
+\concept{classifier predict}

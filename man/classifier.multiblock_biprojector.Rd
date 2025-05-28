@@ -16,28 +16,54 @@
 )
 }
 \arguments{
-\item{x}{A fitted multiblock bi-projector model object.}
+\item{x}{A fitted \code{multiblock_biprojector} object.}
 
-\item{colind}{An optional vector of column indices used for prediction (default: NULL).}
+\item{colind}{An optional numeric vector specifying column indices from the original data space.
+If provided when \code{global_scores=FALSE}, these indices are used to perform a partial projection for the reference scores.
+If provided when \code{global_scores=TRUE}, this value is stored but does not affect the
+reference scores (which remain global); however, it may influence the default projection
+behavior during prediction unless overridden there. See \code{predict.classifier}.}
 
 \item{labels}{A factor or vector of class labels for the training data.}
 
-\item{new_data}{An optional data matrix for which to generate predictions (default: NULL).}
+\item{new_data}{An optional data matrix used to generate reference scores when \code{global_scores=FALSE},
+or when \code{global_scores=TRUE} but \code{colind} or \code{block} is also provided (overriding \code{global_scores}).
+Must be provided if \code{global_scores=FALSE}.}
 
-\item{block}{An optional block index for prediction (default: NULL).}
+\item{block}{An optional integer specifying a predefined block index.
+Used for partial projection if \code{global_scores=FALSE} or if \code{new_data} is also provided.
+Cannot be used simultaneously with \code{colind}.}
 
-\item{global_scores}{Whether to use the global scores or the partial scores for reference space (default: TRUE).}
+\item{global_scores}{Logical. \strong{DEPRECATED} This argument is deprecated and its behavior has changed.
+Reference scores are now determined automatically:
+\itemize{
+\item If \code{new_data} is NULL: Uses the globally projected scores stored in \code{x} (\code{scores(x)}).
+\item If \code{new_data} is provided: Always projects \code{new_data} to generate reference scores
+(using \code{partial_project}/\code{project_block} if \code{colind}/\code{block} are given, \code{project} otherwise).
+}}
 
-\item{knn}{The number of nearest neighbors to consider in the classifier (default: 1).}
+\item{knn}{The integer number of nearest neighbors (k) for the k-NN algorithm (default: 1).}
 
-\item{...}{Additional arguments.}
+\item{...}{Additional arguments (currently ignored).}
 }
 \value{
-A multiblock classifier object.
+An object of class \code{multiblock_classifier}, which also inherits from \code{classifier}.
 }
 \description{
-Constructs a classifier for a multiblock bi-projector model object.
-Either global or partial scores can be used. If \code{colind} or \code{block} are provided
-and \code{global_scores=FALSE}, partial projection is performed. Otherwise, global projection is used.
+Constructs a k-Nearest Neighbors (k-NN) classifier based on a fitted
+\code{multiblock_biprojector} model object. The classifier uses the projected scores
+as the feature space for k-NN.
+}
+\details{
+Users can specify whether to use the globally projected scores stored within the model
+(\code{global_scores = TRUE}) or to generate reference scores by projecting provided \code{new_data}
+(\code{global_scores = FALSE}). Partial projections based on \code{colind} or \code{block} can be used
+when \code{global_scores = FALSE} or when \code{new_data} is provided alongside \code{colind}/\code{block}.
+Prediction behavior is further controlled by arguments passed to \code{predict.classifier}.
+}
+\seealso{
+Other classifier: 
+\code{\link{classifier.projector}()},
+\code{\link{rf_classifier.projector}()}
 }
 \concept{classifier}

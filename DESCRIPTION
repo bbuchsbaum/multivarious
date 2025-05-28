@@ -19,7 +19,6 @@ Imports:
     glmnet,
     corpcor,
     Matrix,
-    purrr,
     rsvd,
     svd,
     pls,
@@ -27,14 +26,28 @@ Imports:
     RSpectra,
     proxy,
     matrixStats,
-    fitdistrplus
+    ggplot2,
+    ggrepel,
+    future.apply,
+    tibble,
+    tidyr,
+    dplyr,
+    crayon,
+    MASS,
+    methods,
+    cli,
+    withr,
+    assertthat,
+    future,
+    geigen,
+    PRIMME,
+    GPArotation
 Suggests: 
     covr,
     randomForest,
     testthat,
     magrittr,
     knitr,
-    rmarkdown,
-    MASS
+    rmarkdown
 URL: https://bbuchsbaum.github.io/multivarious/
 VignetteBuilder: knitr

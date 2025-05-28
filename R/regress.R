@@ -12,88 +12,139 @@
 #' @param alpha the elastic net mixing parameter if method is `enet`
 #' @param ncomp number of PLS components if method is `pls`
 #' @param ... extra arguments sent to the underlying fitting function
-#' @return a bi-projector of type `regress`
+#' @return a bi-projector of type `regress`. The `sdev` component of this object
+#'   stores the standard deviations of the columns of the design matrix (`X` potentially
+#'   including an intercept) used in the fit, not the standard deviations of latent
+#'   components as might be typical in other `bi_projector` contexts (e.g., SVD).
 #' @export
 #' @importFrom glmnet glmnet
 #' @importFrom Matrix t
 #' @importFrom pls plsr
-#' @importFrom stats coef
+#' @importFrom stats coef lm.fit sd
 #' @examples
 #' # Generate synthetic data
-#' Y <- matrix(rnorm(100 * 10), 10, 100)
+#' set.seed(123) # for reproducibility
+#' Y <- matrix(rnorm(10 * 100), 10, 100)
 #' X <- matrix(rnorm(10 * 9), 10, 9)
-#' # Fit regression models and reconstruct the response matrix
+#' 
+#' # Fit regression models and reconstruct the fitted response matrix
 #' r_lm <- regress(X, Y, intercept = FALSE, method = "lm")
-#' recon_lm <- reconstruct(r_lm)
+#' recon_lm <- reconstruct(r_lm) # Reconstructs fitted Y
+#' 
 #' r_mridge <- regress(X, Y, intercept = TRUE, method = "mridge", lambda = 0.001)
 #' recon_mridge <- reconstruct(r_mridge)
+#' 
 #' r_enet <- regress(X, Y, intercept = TRUE, method = "enet", lambda = 0.001, alpha = 0.5)
 #' recon_enet <- reconstruct(r_enet)
+#' 
 #' r_pls <- regress(X, Y, intercept = TRUE, method = "pls", ncomp = 5)
 #' recon_pls <- reconstruct(r_pls)
-regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"), 
-                    intercept=FALSE, lambda=.001, alpha=0, ncomp=ceiling(ncol(X)/2), ...) {
+regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"), 
+                    intercept=FALSE, lambda=.001, alpha=0, 
+                    # Default ncomp for PLS: arbitrary, consider tuning
+                    ncomp=ceiling(ncol(X)/2), ...) {
   method <- match.arg(method)
   
-  # If intercept=TRUE, prepend a column of ones
-  if (intercept) {
-    scores <- cbind(rep(1, nrow(X)), X)
+  # --- Preprocessing Handling ---
+  # Ensure preproc is initialized and apply it to X
+  if (!inherits(preproc, "pre_processor")) {
+    # If it's a prepper object or similar, finalize it
+    proc <- prep(preproc)
   } else {
-    scores <- X
+    # Already a finalized pre_processor
+    proc <- preproc
   }
+  
+  # Initialize and apply the transform to X
+  # Note: We process X *before* adding the intercept column
+  X_processed <- init_transform(proc, X)
+  
+  # --- Intercept Handling ---
+  # Manually add intercept column to the *processed* X if requested,
+  # and tell underlying fitters NOT to add one.
+  if (intercept) {
+    X_fit <- cbind(Intercept = 1, X_processed)  
+    intercept_flag <- FALSE            
+  } else {
+    X_fit <- X_processed
+    intercept_flag <- FALSE # Fitters should not add intercept if not in X_fit
+  }
+  
+  # Store the processed design matrix (including intercept if added)
+  # that coefficients will correspond to
+  # TODO: [INEFF] Storing the full design matrix can be memory intensive.
+  #       Consider alternatives if X_fit is very large.
+  scores <- X_fit 
   
   # Compute betas depending on the method
-  betas <- if (method == "lm") {
-    # Ordinary least squares
-    lfit <- stats::lsfit(X, Y, intercept=intercept)
-    as.matrix(t(coef(lfit)))
-    
-  } else if (method == "mridge") {
-    # Multivariate ridge regression via glmnet with alpha=0
-    gfit <- glmnet(X, Y, alpha=0, family="mgaussian", lambda=lambda, intercept=intercept, ...)
-    # coef(gfit) returns a list of coefficients (one per response)
-    # do.call(cbind, ...) combines them into a matrix
-    # If no intercept, drop intercept column
-    if (!intercept) {
-      as.matrix(Matrix::t(do.call(cbind, stats::coef(gfit))))[,-1,drop=FALSE]
-    } else {
-      as.matrix(Matrix::t(do.call(cbind, stats::coef(gfit))))
+  betas <- {
+    # Compute betas depending on the method (using X_fit)
+    b <- if (method == "lm") {
+      # Use lm.fit for potentially better performance/stability than lsfit
+      lfit <- stats::lm.fit(X_fit, Y)
+      # Coefficients: rows are predictors (matching X_fit cols), cols are responses
+      t(stats::coef(lfit)) # Transpose to get shape (p_out x p_in)
+      
+    } else if (method == "mridge") {
+      if (!requireNamespace("glmnet", quietly = TRUE)) {
+          stop("Package 'glmnet' needed for method='mridge'. Please install it.", call. = FALSE)
+      }
+      gfit <- glmnet::glmnet(X_fit, Y, alpha = 0, family = "mgaussian", 
+                             lambda = lambda, intercept = intercept_flag, ...) 
+      cf <- stats::coef(gfit, s = lambda)
+      bmat <- do.call(cbind, lapply(cf, as.matrix))
+      # Transpose to get p_out x (p_in+1 if intercept fitted by glmnet)
+      t(bmat)
+
+    } else if (method == "enet") {
+      if (!requireNamespace("glmnet", quietly = TRUE)) {
+          stop("Package 'glmnet' needed for method='enet'. Please install it.", call. = FALSE)
+      }
+      gfit <- glmnet::glmnet(X_fit, Y, alpha = alpha, family = "mgaussian", 
+                             lambda = lambda, intercept = intercept_flag, ...)
+      cf <- stats::coef(gfit, s = lambda)
+      bmat <- do.call(cbind, lapply(cf, as.matrix))
+      # Transpose to get p_out x (p_in+1 if intercept fitted by glmnet)
+      t(bmat)
+      
+    } else { # method == "pls"
+      if (!requireNamespace("pls", quietly = TRUE)) {
+          stop("Package 'pls' needed for method='pls'. Please install it.", call. = FALSE)
+      }
+      fit <- pls::plsr(Y ~ scores, ncomp = ncomp, data = data.frame(Y=Y, scores=scores), ...) # Need data frame for formula
+      cf <- stats::coef(fit, ncomp = ncomp, intercept = FALSE) # Intercept already in 'scores'
+      # Result is typically p_in x p_out, need p_out x p_in
+      t(cf)
     }
     
-  } else if (method == "enet") {
-    # Elastic net for each response column separately
-    out <- do.call(rbind, lapply(1:ncol(Y), function(i) {
-      gfit <- glmnet(X, Y[,i], alpha=alpha, family="gaussian", lambda=lambda, intercept=intercept, ...)
-      # Extract coefficients for this response
-      if (!intercept) {
-        coef(gfit)[-1,1]
-      } else {
-        stats::coef(gfit)[,1]
-      }
-    }))
-    out
-    
-  } else {
-    # PLS regression
-    dfl <- list(x=scores, y=Y)
-    # plsr expects a formula: y ~ x
-    fit <- plsr(y ~ x, data=dfl, ncomp=ncomp, ...)
-    as.matrix(t(stats::coef(fit)[,,1]))
+    # FIX: Remove intercept column from glmnet betas if intercept was FALSE for regress() input
+    if (method %in% c("mridge", "enet") && !intercept) {
+      b[, -1, drop=FALSE] # Remove the first column (intercept)
+    } else {
+      b
+    }
   }
   
-  # Remove references to X and Y (not strictly necessary, but original code does it)
-  rm(X)
-  rm(Y)
-  
   # Create a bi_projector
-  # v = t(pseudoinverse(betas))
-  # s = scores
-  # sdev = standard deviations of scores columns
-  # store coefficients=betas and method
-  p <- bi_projector(v = t(corpcor::pseudoinverse(betas)), 
+  # v = betas (coefficients, p_out x p_in)
+  # s = scores (design matrix X_fit, N x p_in)
+  # Y_approx = s %*% t(v)
+  
+  # Calculate sdev for the scores matrix (X_fit)
+  sds <- matrixStats::colSds(as.matrix(scores))
+  # Handle columns with zero standard deviation (like intercept)
+  zero_sd_idx <- sds < .Machine$double.eps
+  if (any(zero_sd_idx)) {
+      # Optional: Warn the user
+      # warning("Columns ", paste(which(zero_sd_idx), collapse=", "), " in the design matrix have zero standard deviation. Setting sdev to 1.")
+      sds[zero_sd_idx] <- 1
+  }
+  
+  p <- bi_projector(v = betas, 
                     s = scores,
-                    sdev = apply(scores,2,stats::sd),
-                    coefficients = betas,
+                    sdev = sds, # Pass the calculated standard deviations
+                    preproc=proc, # Store the *initialized* preprocessor
+                    coefficients = betas, # Store betas explicitly
                     method = method,
                     classes = "regress")
   p
@@ -102,8 +153,10 @@ regress <- function(X, Y, preproc=NULL, method=c("lm", "enet", "mridge", "pls"),
 
 #' @export
 inverse_projection.regress <- function(x,...) {
-  # inverse projection = t(coefficients)
-  t(x$coefficients)
+  # inverse projection should map scores back to Y (or approx Y)
+  # Y_approx = scores %*% t(betas)
+  # If v = betas, then inverse_projection = t(v) = t(betas)
+  t(x$coefficients) # This matches if v = betas
 }
 
 #' @export
@@ -115,10 +168,50 @@ project_vars.regress <- function(x, new_data,...) {
   chk::chk_equal(nrow(new_data), nrow(scores(x)))
   
   # project_vars for regress: t(new_data) %*% scores(x)
+  # Projects new variables onto the original predictor space.
   # If new_data is NxM and scores is NxC, result is MxC
   t(new_data) %*% (scores(x))
 }
 
+#' Partial Inverse Projection for a `regress` Object
+#'
+#' This function computes a sub-block inversion of the regression coefficients,
+#' allowing you to focus on only certain columns (e.g. partial factors).
+#' If your coefficient matrix is not orthonormal or is not square, we use a
+#' pseudoinverse approach (via `corpcor::pseudoinverse`) to find a minimal-norm
+#' solution. 
+#'
+#' @param x A `regress` object (created by \code{\link{regress}}).
+#' @param colind A numeric vector specifying which columns of the \emph{factor space}
+#'        (i.e., the second dimension of \code{x$coefficients}) you want to invert.
+#'        Typically these refer to a subset of canonical / PCA / PLS components.
+#' @param ... Further arguments passed to or used by methods (not used here).
+#'
+#' @return A matrix of shape \code{(length(colind) x nrow(x$coefficients))}. When
+#'         multiplied by partial factor scores \code{(n x length(colind))}, it yields
+#'         an \code{(n x nrow(x$coefficients))} reconstruction in the original domain.
+#'
+#' @export
+partial_inverse_projection.regress <- function(x, colind, ...) {
+  # We assume x$coefficients is shape (p_out x p_in),
+  # where p_out is # of outputs, and p_in is # of (X dimension).
+  # For partial factors, we interpret 'colind' as columns
+  # in that factor dimension. So we subset horizontally.
+  
+  # Subset columns of x$coefficients
+  # e.g., if x$coefficients is (p_out x d_total),
+  # then betas_sub is (p_out x length(colind)).
+  betas_sub <- x$coefficients[, colind, drop=FALSE]
+  
+  # Inverse it (in a minimal-norm sense) with corpcor::pseudoinverse
+  # This yields (length(colind) x p_out).
+  if (!requireNamespace("corpcor", quietly = TRUE)) {
+    stop("Package 'corpcor' must be installed for partial_inverse_projection in `regress`.")
+  }
+  inv_mat_sub <- corpcor::pseudoinverse(betas_sub)
+  
+  inv_mat_sub
+}
 
 #' Pretty Print Method for `regress` Objects
 #'

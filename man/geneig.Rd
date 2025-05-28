@@ -4,7 +4,15 @@
 \alias{geneig}
 \title{Generalized Eigenvalue Decomposition}
 \usage{
-geneig(A, B, ncomp, method = c("robust", "sdiag", "geigen", "primme"), ...)
+geneig(
+  A = NULL,
+  B = NULL,
+  ncomp = 2,
+  preproc = prep(pass()),
+  method = c("robust", "sdiag", "geigen", "primme"),
+  which = "LR",
+  ...
+)
 }
 \arguments{
 \item{A}{The left-hand side square matrix.}
@@ -13,28 +21,54 @@ geneig(A, B, ncomp, method = c("robust", "sdiag", "geigen", "primme"), ...)
 
 \item{ncomp}{Number of eigenpairs to return.}
 
-\item{method}{Method to compute the eigenvalues and eigenvectors:
+\item{preproc}{A preprocessing function to apply to the matrices before solving the generalized eigenvalue problem.}
+
+\item{method}{One of:
 \itemize{
-\item "robust": Uses a stable decomposition via a whitening transform (requires B to be symmetric positive-definite).
-\item "sdiag": Uses a spectral decomposition of B and transforms the problem, works when B is symmetric positive-definite.
-\item "geigen": Uses the \code{geigen} package for a general solution.
-\item "primme": Uses the \code{PRIMME} package for large sparse matrices.
+\item "robust": Uses a stable decomposition via a whitening transform (B must be symmetric PD).
+\item "sdiag":  Uses a spectral decomposition of B (must be symmetric PD). Requires A to be symmetric for meaningful results.
+\item "geigen": Uses the \pkg{geigen} package for a general solution (A and B can be non-symmetric).
+\item "primme": Uses the \pkg{PRIMME} package for large/sparse symmetric problems (A and B must be symmetric).
 }}
 
-\item{...}{Additional arguments passed to the underlying methods.}
+\item{which}{Only used for \code{method = "primme"}. Specifies which eigenvalues to compute ("LM", "SM", "LA", "SA", etc.). Default is "LM" (Largest Magnitude). See \code{\link[PRIMME]{eigs_sym}}.}
+
+\item{...}{Additional arguments to pass to the underlying solver.}
 }
 \value{
-An object of class \code{projector} with eigenvalues stored in \code{values} and standard deviations in \code{sdev = sqrt(values)}.
+A \code{projector} object with generalized eigenvectors and eigenvalues.
 }
 \description{
 Computes the generalized eigenvalues and eigenvectors for the problem: A x = λ B x.
-Various methods are available and differ in their assumptions about A and B.
+Various methods differ in assumptions about A and B.
 }
 \examples{
-if (requireNamespace("geigen", quietly = TRUE)) {
-  A <- matrix(c(14, 10, 12, 10, 12, 13, 12, 13, 14), nrow=3, byrow=TRUE)
-  B <- matrix(c(48, 17, 26, 17, 33, 32, 26, 32, 34), nrow=3, byrow=TRUE)
-  res <- geneig(A, B, ncomp=3, method="geigen")
-  # res$values and coefficients(res)
+# Simulate two matrices
+set.seed(123)
+A <- matrix(rnorm(50 * 50), 50, 50)
+B <- matrix(rnorm(50 * 50), 50, 50)
+A <- A \%*\% t(A) # Make A symmetric
+B <- B \%*\% t(B) + diag(50) * 0.1 # Make B symmetric positive definite
+
+# Solve generalized eigenvalue problem
+result <- geneig(A = A, B = B, ncomp = 3)
+
 }
+\seealso{
+\code{\link{projector}} for the base class structure.
+
+#' @references
+Golub, G. H. & Van Loan, C. F. (2013) \emph{Matrix Computations},
+4th ed., § 8.7 – textbook derivation for the "robust" (Cholesky)
+and "sdiag" (spectral) transforms.
+
+Moler, C. & Stewart, G. (1973) "An Algorithm for Generalized Matrix
+Eigenvalue Problems". \emph{SIAM J. Numer. Anal.}, 10 (2): 241‑256 –
+the QZ algorithm behind the \code{geigen} backend.
+
+Stathopoulos, A. & McCombs, J. R. (2010) "PRIMME: PReconditioned
+Iterative Multi‑Method Eigensolver". \emph{ACM TOMS} 37 (2): 21:1‑21:30 –
+the algorithmic core of the \code{primme} backend.
+
+See also the \pkg{geigen} (CRAN) and \pkg{PRIMME} documentation.
 }

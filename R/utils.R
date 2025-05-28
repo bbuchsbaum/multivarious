@@ -1,5 +1,3 @@
-
-
 #' @noRd
 split_matrix <- function(X, fac) {
   idx <- split(1:nrow(X), fac)
@@ -47,34 +45,71 @@ group_means <- function (Y, X) {
   }
 }
 
-#' Compute principal angles for a set of subspaces
-#'
-#' This function calculates the principal angles between subspaces derived from a list of bi_projector instances.
-#'
-#' @param fits a list of `bi_projector` instances
-#' @return a numeric vector of principal angles with length equal to the minimum dimension of input subspaces
-#' @export
-#' @examples
-#' 
-#' data(iris)
-#' X <- as.matrix(iris[, 1:4])
-#' res <- pca(X, ncomp = 4)
-#' fits_list <- list(res,res,res)
-#' principal_angles <- prinang(fits_list)
-prinang <- function(fits) {
-  chk::chk_all(fits, chk_fun = chk_s3_class, "bi_projector")
-  
-  mindim <- min(sapply(fits, function(x) shape(x)[2]))
-  sclist <- lapply(fits, function(x) {
-    sc <- scores(x)[,1:mindim,drop=FALSE]
-    apply(sc,2, function(z) z/sqrt(sum(z^2)))
-  })
-  
-  cmat <- do.call(cbind, sclist)
-  sres <- svd(cmat)
-  sqrt(sres$d)/length(fits)
+
+
+#' @noRd
+.avg_pair_princ_ang <- function(bases, ...) {
+  warning("Subspace similarity method 'avg_pair' is not implemented.")
+  return(NA_real_)
 }
 
+#' @noRd
+.grassmann_dispersion <- function(bases, ...) {
+  warning("Subspace similarity method 'grassmann' is not implemented.")
+  return(NA_real_)
+}
+
+#' @noRd
+.worst_case_angle <- function(bases, ...) {
+  warning("Subspace similarity method 'worst_case' is not implemented.")
+  return(NA_real_)
+}
+
+#' Compute subspace similarity
+#' 
+#' @param fits a list of bi_projector objects
+#' @param method the method to use for computing subspace similarity
+#' @param ... additional arguments to pass to the method
+#' @return a numeric value representing the subspace similarity
+#' @export
+subspace_similarity <- function(fits,
+                                method = c("avg_pair",     # mean of all pair–wise princ. angles
+                                           "grassmann",    # Grassmann‑mean dispersion
+                                           "worst_case"),  # max{ min angle of each pair }
+                                ...) {
+  method <- match.arg(method)
+  bases  <- lapply(fits, function(f) qr.Q(qr(scores(f))))   # orthonormalise
+
+  switch(method,
+    avg_pair   = .avg_pair_princ_ang(bases, ...),
+    grassmann  = .grassmann_dispersion(bases, ...),
+    worst_case = .worst_case_angle(bases, ...)
+  )
+}
+
+
+
+#' Principal angles (two sub‑spaces)
+#'
+#' @param fit1,fit2  bi_projector objects (or any object with $v loadings)
+#' @param k          number of dimensions to compare (default: min(ncomp))
+#' @return numeric vector of principal angles (radians, length = k)
+#' @export
+principal_angles <- function(fit1, fit2, k = NULL) {
+  stopifnot(inherits(fit1, "bi_projector"),
+            inherits(fit2, "bi_projector"))
+
+  V1 <- fit1$v
+  V2 <- fit2$v
+  k  <- if (is.null(k)) min(ncol(V1), ncol(V2)) else k
+  V1 <- qr.Q(qr(V1[, 1:k, drop = FALSE]))      # orthonormal bases
+  V2 <- qr.Q(qr(V2[, 1:k, drop = FALSE]))
+
+  s  <- svd(crossprod(V1, V2), nu = 0, nv = 0)$d  # singular values
+  s  <- pmin(pmax(s, -1), 1)                      # numerical safety
+
+  acos(s)                                         # angles in radians
+}
 
 #' Compute a regression model for each column in a matrix and return residual matrix
 #' 
@@ -99,5 +134,63 @@ residualize <- function(form, X, design, intercept=FALSE) {
   #options(contrasts = c("contr.sum", "contr.poly"))
   modmat <- model.matrix(form, data=design)
   stats::resid(lsfit(modmat, X, intercept=intercept))
+}
+
+#' Calculate Principal Angles Between Subspaces
+#'
+#' Computes the principal angles between two subspaces defined by the
+#' columns of two orthonormal matrices Q1 and Q2.
+#'
+#' @param Q1 An n x p matrix whose columns form an orthonormal basis for the first subspace.
+#' @param Q2 An n x q matrix whose columns form an orthonormal basis for the second subspace.
+#' @return A numeric vector containing the principal angles in radians, sorted in ascending order.
+#'         The number of angles is `min(p, q)`.
+#' @export
+#' @examples
+#' # Example: Angle between xy-plane and a plane rotated 45 degrees around x-axis
+#' Q1 <- cbind(c(1,0,0), c(0,1,0)) # xy-plane basis
+#' theta <- pi/4
+#' R <- matrix(c(1, 0, 0, 0, cos(theta), sin(theta), 0, -sin(theta), cos(theta)), 3, 3)
+#' Q2 <- R %*% Q1 # Rotated basis
+#' angles_rad <- prinang(Q1, Q2)
+#' angles_deg <- angles_rad * 180 / pi
+#' print(angles_deg) # Should be approximately 0 and 45 degrees
+#'
+#' # Example with PCA loadings (after ensuring orthonormality if needed)
+#' # Assuming pca1$v and pca2$v are loading matrices (variables x components)
+#' # Orthonormalize them first if they are not already (e.g., from standard SVD)
+#' # Q1 <- qr.Q(qr(pca1$v[, 1:3]))
+#' # Q2 <- qr.Q(qr(pca2$v[, 1:3]))
+#' # prinang(Q1, Q2)
+prinang <- function(Q1, Q2) {
+  # Basic dimension checks
+  if (nrow(Q1) != nrow(Q2)) {
+    stop("Q1 and Q2 must have the same number of rows.")
+  }
+  p <- ncol(Q1)
+  q <- ncol(Q2)
+  if (p == 0 || q == 0) {
+    warning("One or both matrices have zero columns. Returning empty vector.")
+    return(numeric(0))
+  }
+  
+  # Optional: Add checks for orthonormality (can be computationally expensive)
+  # tol <- 1e-8
+  # if (max(abs(crossprod(Q1) - diag(p))) > tol || max(abs(crossprod(Q2) - diag(q))) > tol) {
+  #   warning("Input matrices may not be orthonormal. Results might be inaccurate.")
+  # }
+  
+  # Compute the SVD of the cross-product
+  svd_res <- svd(crossprod(Q1, Q2))
+  
+  # Singular values are cosines of the principal angles
+  # Clamp values to [-1, 1] to avoid domain errors in acos due to potential numerical inaccuracies
+  cos_thetas <- pmax(-1, pmin(1, svd_res$d))
+  
+  # Angles are acos of singular values
+  angles <- acos(cos_thetas)
+  
+  # Return angles sorted in ascending order
+  sort(angles)
 }
 

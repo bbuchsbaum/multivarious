@@ -1,0 +1,208 @@
+---
+title: "Pre-processing pipelines in multiblock"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Pre-processing pipelines in multiblock}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width=6, fig.height=4)
+library(dplyr) # Needed for %>% and tibble manipulation
+library(tibble)
+library(ggplot2)
+# Assuming necessary multiblock functions are loaded
+```
+
+# 1. Why a pipeline at all?
+
+Most chemometrics / ML code mutates the data in place (e.g. `scale(X)`),
+which is convenient in a script but dangerous inside reusable functions:
+
+*   **Data-leak avoidance**: Fitted means/SDs live inside the pre-processor object, calculated only once (typically on training data).
+*   **Reversibility**: `reverse_transform()` gives you proper back-transforms (handy for reconstruction error or publication plots).
+*   **Composability**: You can pipe simple steps together (e.g., `center() %>% scale()`).
+*   **Partial input**: The same pipeline can process just the columns you pass (`apply_transform(..., colind = 1:3)`), perfect for region-of-interest or block workflows.
+
+The grammar is tiny:
+
+| Verb          | Role                           | Typical Call                       |
+|---------------|--------------------------------|------------------------------------|
+| `pass()`      | do nothing (placeholder)       | `prep(pass())`                     |
+| `center()`    | subtract column means          | `center() %>% prep()`            |
+| `standardize()` | centre and scale to unit SD    | `standardize()`                    |
+| `colscale()`  | user-supplied weights/scaling  | `colscale(type="z", ...)`          |
+| `...`         | (write your own)               | any function returning a node      |
+
+The `prep()` verb is the bridge between defining your preprocessing steps (the *recipe*) and actually applying them. You call `prep()` on your recipe, typically providing your training dataset. `prep()` calculates and stores the necessary parameters (e.g., column means, standard deviations) from this data, turning the recipe into a *fitted pre-processor* object.
+
+Once you have a prepped object (`pp` below), it exposes three key methods:
+
+| Method                | Role                                           | Typical Use Case |
+|-----------------------|------------------------------------------------|------------------|
+| `init_transform(pp, X)` | fits parameters *and* transforms `X`         | Training set     |
+| `apply_transform(pp, Xnew)`| applies stored parameters to new data       | Test/new data    |
+| `reverse_transform(pp, Y)` | back-transforms data using stored parameters | Interpreting results |
+
+
+# 2. The 60-second tour
+
+## 2.1 No-op and sanity check
+
+```{r setup_data_preproc}
+set.seed(0)
+X <- matrix(rnorm(10*4), 10, 4)
+
+pp_pass <- prep(pass())          # == do nothing
+Xp_pass <- init_transform(pp_pass, X) # fits nothing, just copies X
+all.equal(Xp_pass, X)            # TRUE
+```
+
+## 2.2 Centre → standardise
+
+```{r standardize_example}
+# Define the recipe and prep it (calculates means & SDs from X)
+pp_std <- standardize() %>% prep()
+# Apply to the data it was prepped on
+Xs     <- init_transform(pp_std, X)
+
+# Check results
+all(abs(colMeans(Xs)) < 1e-12)   # TRUE: data is centered
+round(apply(Xs, 2, sd), 6)       # ~1: data is scaled
+
+# Check back-transform
+all.equal(reverse_transform(pp_std, Xs), X) # TRUE
+```
+
+## 2.3 Partial input (region-of-interest)
+
+Imagine a sensor fails and you only observe columns 2 and 4:
+
+```{r partial_transform}
+X_cols24 <- X[, c(2,4), drop=FALSE] # Keep as matrix
+
+# Apply the *already prepped* standardizer using only columns 2 & 4
+Xs_cols24 <- apply_transform(pp_std, X_cols24, colind = c(2,4))
+
+# Compare original columns 2, 4 with their transformed versions
+head(cbind(X_cols24, Xs_cols24))
+
+# Back-transform works too
+X_rev_cols24 <- reverse_transform(pp_std, Xs_cols24, colind = c(2,4))
+all.equal(X_rev_cols24, X_cols24) # TRUE
+```
+
+# 3. Pipelines are just pipes
+
+Because each step is stateless before `prep()`, you can stack them:
+
+```{r pipe_example}
+# Define a pipeline: center, then scale using 'z' transformation (robust scale)
+# Assuming 'colscale' with type='z' exists and calculates MAD or similar
+# If not, replace with standardize() for illustration
+# pp_pipe <- center() %>% colscale(type = "z") %>% prep()
+pp_pipe <- standardize() %>% prep() # Using standardize for simplicity here
+
+# Prep and apply the pipeline
+Xp_pipe <- init_transform(pp_pipe, X)
+```
+
+## 3.1 Quick visual
+
+```{r plot_pipeline}
+# Compare first column before and after pipeline
+df_pipe <- tibble(raw = X[,1],   processed = Xp_pipe[,1])
+
+ggplot(df_pipe) +
+  geom_density(aes(raw), colour = "red", linewidth = 1) +
+  geom_density(aes(processed), colour = "blue", linewidth = 1) +
+  ggtitle("Column 1 Density: Before (red) and After (blue) Pipeline") +
+  theme_minimal()
+```
+
+# 4. Block-wise concatenation
+
+Large multiblock models often want different preprocessing per block.
+`concat_pre_processors()` glues several *already fitted* pipelines into one
+wide transformer that understands global column indices.
+
+```{r concat_example}
+# Two fake blocks with distinct scales
+X1 <- matrix(rnorm(10*5 , 10 , 5), 10, 5)   # block 1: high mean
+X2 <- matrix(rnorm(10*7 ,  2 , 7), 10, 7)   # block 2: low mean
+
+# Define and prep separate pipelines for each block
+p1 <- center()      %>% prep()
+p2 <- standardize() %>% prep()
+
+# Fit each pipeline to its corresponding data block
+X1p <- init_transform(p1, X1)
+X2p <- init_transform(p2, X2)
+
+# Concatenate the *prepped* pipelines
+block_indices_list = list(1:5, 6:12)
+pp_concat <- concat_pre_processors(
+  list(p1, p2),
+  block_indices = block_indices_list
+)
+
+# Apply the concatenated preprocessor to the combined data
+X_combined <- cbind(X1, X2)
+X_combined_p <- apply_transform(pp_concat, X_combined) # Use apply_transform
+
+# Check means (block 1 only centered, block 2 standardized)
+round(colMeans(X_combined_p), 2)
+
+# Need only block 1 processed later? Use colind with global indices
+X1_later_p <- apply_transform(pp_concat, X1, colind = block_indices_list[[1]])
+all.equal(X1_later_p, X1p) # TRUE
+
+# Need block 2 processed?
+X2_later_p <- apply_transform(pp_concat, X2, colind = block_indices_list[[2]])
+all.equal(X2_later_p, X2p) # TRUE
+```
+
+### Check reversibility of concatenated pipeline
+
+```{r concat_reversibility}
+back_combined <- reverse_transform(pp_concat, X_combined_p)
+
+# Compare first few rows/cols of original vs round-trip
+knitr::kable(
+  head(cbind(orig = X_combined[, 1:6], recon = back_combined[, 1:6]), 3),
+  digits = 2,
+  caption = "First 3 rows, columns 1-6: Original vs Reconstructed"
+)
+
+all.equal(X_combined, back_combined) # TRUE
+```
+
+# 5. Inside the weeds (for authors & power users)
+
+| Helper                    | Purpose                                                              |
+|---------------------------|----------------------------------------------------------------------|
+| `fresh(pp)`               | return the un-fitted recipe skeleton. **Crucial for tasks like cross-validation (CV)**, as it allows you to re-`prep()` the pipeline using *only* the current training fold's data, preventing data leakage from other folds or the test set. |
+| `concat_pre_processors()` | build one big transformer out of already-prepped pieces.               |
+| `pass()` vs `prep(pass())` | `pass()` is a recipe; `prep(pass())` is a fitted identity transformer. |
+| caching                   | Prepped objects store parameters (means, SDs) for fast re-application. |
+
+You rarely need to interact with these helpers directly; they exist so
+model-writers (e.g. new PCA flavours) can avoid boiler-plate.
+
+# 6. Key take-aways
+
+*   **Write once**: Define a `center %>% scale %>% ...` recipe and reuse it safely across CV folds.
+*   **No data leakage**: Parameters live inside the pre-processor object.
+*   **Composable & reversible**: Chain steps, pull them apart, back-transform whenever you need results in original units.
+*   **Block-aware**: The same mechanism powers multiblock PCA, CCA, ComDim…
+
+Happy projecting!
+
+---
+
+# Session info
+
+```{r session_info_preproc}
+sessionInfo()
+``` 

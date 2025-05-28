@@ -128,6 +128,72 @@ test_that("can concatenate two pre-processors", {
   
 })
 
+test_that("concat_pre_processors handles complex colind across different block types", {
+  set.seed(123) # for reproducibility
+  mat1 <- matrix(rnorm(10*5, mean=10), 10, 5)
+  mat2 <- matrix(rnorm(10*7, mean=20, sd=5), 10, 7)
+  mat3 <- matrix(rnorm(10*3, mean=0, sd=1), 10, 3)
+  
+  p1 <- center() %>% prep()       # Center only
+  p2 <- standardize() %>% prep()  # Center and scale
+  p3 <- pass() %>% prep()         # No-op
+  
+  # Initialize individual processors
+  m1_init <- init_transform(p1, mat1)
+  m2_init <- init_transform(p2, mat2)
+  m3_init <- init_transform(p3, mat3)
+  
+  proclist <- list(p1, p2, p3)
+  block_indices <- list(1:5, 6:12, 13:15)
+  
+  proc_concat <- concat_pre_processors(proclist, block_indices)
+  
+  # --- Test apply_transform --- 
+  # Select columns: 2nd and 4th from block 1, 2nd and 3rd from block 2, 2nd from block 3
+  colind_global <- c(2, 4, 7, 8, 14)
+  
+  # Create the input matrix corresponding to these global columns
+  test_mat_apply <- cbind(mat1[, c(2, 4)], mat2[, c(2, 3)], mat3[, 2, drop=FALSE])
+  
+  # Apply the concatenated transform
+  result_apply <- apply_transform(proc_concat, test_mat_apply, colind = colind_global)
+  
+  # Manually apply transforms to corresponding original blocks and columns
+  manual_res1 <- apply_transform(p1, mat1[, c(2, 4), drop = FALSE], colind = c(2, 4)) # Local indices: 2, 4
+  manual_res2 <- apply_transform(p2, mat2[, c(2, 3), drop = FALSE], colind = c(2, 3)) # Local indices: 2, 3
+  manual_res3 <- apply_transform(p3, mat3[, 2, drop = FALSE], colind = 2)        # Local index: 2
+  
+  # Combine manual results in the order defined by colind_global
+  expected_apply <- cbind(manual_res1[, 1, drop=FALSE],  # Corresponds to global col 2
+                        manual_res1[, 2, drop=FALSE],  # Corresponds to global col 4
+                        manual_res2[, 1, drop=FALSE],  # Corresponds to global col 7
+                        manual_res2[, 2, drop=FALSE],  # Corresponds to global col 8
+                        manual_res3[, 1, drop=FALSE]) # Corresponds to global col 14
+  
+  expect_equal(result_apply, expected_apply, tolerance = 1e-7)
+  
+  # --- Test reverse_transform --- 
+  # Input for reverse is the result from apply_transform
+  test_mat_reverse <- result_apply
+  
+  # Reverse using concatenated processor
+  result_reverse <- reverse_transform(proc_concat, test_mat_reverse, colind = colind_global)
+  
+  # Manually reverse transforms using the outputs from the manual forward transforms
+  manual_rev1 <- reverse_transform(p1, manual_res1, colind = c(2, 4))
+  manual_rev2 <- reverse_transform(p2, manual_res2, colind = c(2, 3))
+  manual_rev3 <- reverse_transform(p3, manual_res3, colind = 2)
+  
+  # Combine manual reverse results in the order defined by colind_global
+  expected_reverse <- cbind(manual_rev1[, 1, drop=FALSE], 
+                            manual_rev1[, 2, drop=FALSE], 
+                            manual_rev2[, 1, drop=FALSE], 
+                            manual_rev2[, 2, drop=FALSE], 
+                            manual_rev3[, 1, drop=FALSE])
+                            
+  # The result of reverse should match the original input subset 'test_mat_apply'
+  expect_equal(result_reverse, test_mat_apply, tolerance = 1e-7)
+})
 
 # 
 # test_that("can preprocess a block projector", {

@@ -1,0 +1,310 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+
+```markdown
+# 📚 Roxygen Style Guide for R Packages
+
+**TL;DR:** Document all exported functions. Every man page (`.Rd`) needs `@examples` (use `\donttest{}`, never `\dontrun{}`) and `@return`. Use `@rdname` to group S3 methods: document the generic fully if defined *in your package*; for external generics (like `print`), pick *one* method in your package to provide the full documentation block (`@title`, `@description`, `@param`, `@return`, `@examples`), linking back to the original generic (`\code{\link[pkg]{generic}}`), while other methods only need `@rdname` and `@export`. Use `@noRd` for internal code. Consider `#' @md` for improved comment readability.
+
+---
+
+This guide defines best practices for documenting an R package using `roxygen2`. Adhering to this guide ensures consistent, maintainable (DRY - Don't Repeat Yourself), and CRAN-compliant documentation, with a particular focus on **S3 generics and methods**.
+
+---
+
+## 🧭 Core Principles
+
+*   ✅ **Document All Exports:** Every exported function/object requires a documentation entry (`.Rd` file). Use `@export` judiciously.
+*   ✅ **Complete Man Pages:** Every generated manual page (`.Rd` file) *must* include `@examples` and `@return` (or its synonym `@value`, though `@return` is preferred).
+*   ✅ **DRY S3 Documentation:** Avoid redundant documentation across S3 methods for the *same* generic by using shared documentation blocks via `@rdname`.
+*   ✅ **Runnable Examples:** Provide meaningful `@examples`. Use `\donttest{}` for code that should run during checks but might be time-consuming or require specific conditions not always met on CRAN. **Never use `\dontrun{}`**, as it prevents examples from being checked at all.
+*   ✅ **Internal Code:** Use `@noRd` for internal helper functions or objects not intended for users, preventing their documentation from being generated or exported.
+
+---
+
+## ✨ Using Markdown (`@md`) for Readability
+
+While not strictly required, enabling Markdown support with `#' @md` at the beginning of a Roxygen block is **highly recommended** for improving the readability *of the documentation comments within your R source files*.
+
+*   **Why Use `@md`?**
+    *   **Cleaner Source Code:** Use familiar Markdown syntax (like `*italic*`, `**bold**`, ` ``code`` `) directly in comments instead of the more verbose Rd syntax (`\emph{italic}`, `\strong{bold}`, `\code{code}`).
+    *   **Simpler Lists:** Create bulleted or numbered lists using standard Markdown (`* item` or `1. item`), which is often easier to write and read than Rd list markup.
+    *   **Natural Formatting:** Makes the Roxygen comments look more like standard explanatory text.
+*   **When to Use `@md`?**
+    *   Use it consistently for most Roxygen blocks, especially those with descriptive text, lists, or inline code references.
+*   **How it Works:** `roxygen2` processes the Markdown syntax and correctly converts it into the required Rd format for the final documentation pages. The benefit is primarily for the developer reading the source code.
+
+```r
+#' Process Data Objects
+#'
+#' @md # Enable Markdown for this block
+#' @description
+#' S3 generic for processing various data structures.
+#'
+#' This function acts as a dispatcher. See methods like:
+#' * `process_data.ExampleClass1()`
+#' * `process_data.ExampleClass2()`
+#'
+#' Consult `vignette("package-vignette")` for more info.
+#'
+#' @param x An object representing data. The class determines the method.
+#' @param settings A `list` of configuration options.
+#' @param ... Additional arguments.
+#'
+#' @return A processed object, usually the *same class* as `x`.
+# ... rest of the function definition ...
+```
+
+---
+
+## 🔧 Documenting S3 Generics and Methods
+
+The key strategy for S3 methods is to **document the family once** using `@rdname`.
+
+### 1. Generics Defined *Within* Your Package
+
+When your package defines the S3 generic (e.g., a new function like `process_data`):
+
+*   **Document the Generic Fully:** The generic function's Roxygen block establishes the shared documentation.
+*   **Include Core Tags:** Provide `@title`, `@description`, `@param`, `@return`, and `@examples` here. These will apply to all methods unless overridden.
+*   **Use `@rdname`:** Assign a descriptive `@rdname` (e.g., `process_data-methods`) to group the generic and its methods.
+*   **Use `@family`:** Use `@family` tags to group related documentation pages for easier navigation (e.g., `@family Data Processing Functions`).
+
+```r
+#' Process Package-Specific Data Objects
+#'
+#' @md
+#' @description
+#' S3 generic for processing various data structures relevant to this package.
+#' Specific implementations handle different object classes appropriately.
+#' See the "Methods" section below for class-specific implementations defined in this package.
+#'
+#' @param x An object representing data handled by this package. The specific class determines which method is called.
+#' @param settings Configuration options for processing. Consult specific method documentation if settings vary by class.
+#' @param ... Additional arguments passed to specific methods.
+#'
+#' @return A processed object, typically of the same class as `x` or a related class defined in the package. The exact structure depends on the method.
+#'
+#' @examples
+#' # Example using a hypothetical ExampleClass1 object
+#' data1 <- structure(list(a = 1), class = "ExampleClass1")
+#' processed1 <- process_data(data1, settings = list(threshold = 0.5))
+#' print(processed1)
+#'
+#' # Example using a hypothetical ExampleClass2 object (assuming method exists)
+#' \donttest{
+#' data2 <- structure(list(b = 2), class = "ExampleClass2")
+#' processed2 <- process_data(data2, settings = list(normalize = TRUE))
+#' print(processed2)
+#' }
+#'
+#' @export
+#' @family Data Processing Functions
+#' @rdname process_data-methods
+process_data <- function(x, settings, ...) {
+  UseMethod("process_data")
+}
+```
+
+### 2. Methods for Generics Defined *Within* Your Package
+
+Methods for generics defined in your package simply refer back to the generic's documentation using the *same* `@rdname`.
+
+*   **Minimal Documentation:** Only include `@rdname` and `@export`.
+*   **No Redundant Tags:** Do *not* repeat `@title`, `@description`, `@param`, `@return`, or `@examples` unless the method's behavior *significantly deviates* (which is generally discouraged for consistency). If parameters have class-specific meanings not adequately covered by the generic docs, document them briefly using `@param` within the method's block. Add a `#' @section Methods:` block if needed to detail class-specific behaviors.
+
+```r
+#' @rdname process_data-methods
+#' @export
+process_data.ExampleClass1 <- function(x, settings, ...) {
+  # ExampleClass1-specific processing logic...
+  message("Processing ExampleClass1 object with threshold: ", settings$threshold)
+  x$processed <- TRUE
+  invisible(x)
+}
+
+#' @section Methods (by class):
+#' * `process_data(x = <ExampleClass2>, ...)`: Processes ExampleClass2 objects, potentially applying normalization based on `settings$normalize`.
+#' @rdname process_data-methods
+#' @export
+process_data.ExampleClass2 <- function(x, settings, ...) {
+  # ExampleClass2-specific processing logic...
+  message("Processing ExampleClass2 object with normalization: ", settings$normalize)
+  x$processed <- TRUE
+  x$normalized <- if (!is.null(settings$normalize)) settings$normalize else FALSE
+  invisible(x)
+}
+```
+
+### 3. Methods for Generics Defined *Externally* (e.g., `print`, `plot`, `summary`, `external_pkg::process`)
+
+This is a common scenario and requires careful handling for CRAN compliance and clarity.
+
+*   **CRAN Requirement:** CRAN requires *a* manual page (`.Rd` file) for your method family (e.g., all `print.*` methods *you define* for your package's classes). This single page must contain the essential documentation tags (`@title`, `@description`, `@param`, `@return`, `@examples`).
+*   **Designate a "Lead" Method:** Choose **one** method from the family you are defining (e.g., `print.ExampleClass1` or `external_pkg::process.MyClassA`) to carry the **full documentation block**. This block will define the shared `@rdname` and provide the necessary tags for the entire family *within your package*.
+    *   The documentation should focus on *how* the generic is applied to *your package's classes*.
+    *   Crucially, **link back** to the original generic's documentation using `\code{\link[<pkg>]{<generic>}}` (e.g., `\code{\link[base]{print}}`, `\code{\link[external_pkg]{process}}`) in the description so users can find the canonical definition.
+    *   Document the parameters *as defined by the generic signature* (e.g., `x`, `...` for `print`). Explain their general role in the context of your methods.
+    *   Provide `@examples` that showcase the generic being used with *multiple* classes defined in your package to demonstrate the S3 dispatch for your methods.
+*   **Other Methods in the Family:** All subsequent methods for the *same* external generic defined in your package (e.g., `print.ExampleClass2`, `external_pkg::process.MyClassB`, `external_pkg::process.MyClassC`) only need:
+    *   `@rdname <shared-rdname>` (e.g., `@rdname print-methods`, `@rdname process-methods`)
+    *   `@export`
+    *   (Optionally, but consistently) `@method <generic> <Class>` (e.g., `@method print ExampleClass2`, `@method process MyClassB`)
+*   **Minimal Redundancy:** This approach ensures CRAN compliance with a single, comprehensive `.Rd` page for your package's contributions to that generic, while keeping the documentation for individual methods minimal and DRY.
+
+```r
+# --- Example: Methods for external_pkg::process ---
+# Assume 'external_pkg' defines 'process(x, ...)'
+
+#' Process Objects using external_pkg::process
+#'
+#' @md
+#' @description
+#' Methods for the S3 generic `process` from the `external_pkg` package,
+#' specifically tailored for handling this package's `MyClassA`, `MyClassB`,
+#' and `MyClassC` objects.
+#'
+#' These methods apply the processing logic defined by
+#' `\code{\link[external_pkg]{process}}` to different data structures from this package.
+#' See the documentation of the original generic for general behavior and
+#' the "Methods" section below for any class-specific details implemented here.
+#'
+#' @param x An object of class `MyClassA`, `MyClassB`, or `MyClassC` defined in this package.
+#' @param ... Additional arguments passed down to `\code{\link[external_pkg]{process}}`
+#'   or specific methods. Check the generic's documentation and specific method
+#'   implementations if relevant.
+#'
+#' @return The processed object, typically inheriting from the input class or
+#'   as defined by `\code{\link[external_pkg]{process}}`.
+#'
+#' @examples
+#' # Assume external_pkg is loaded and process is available
+#' # library(external_pkg)
+#'
+#' obj_a <- structure(list(val = 1), class = "MyClassA")
+#' obj_b <- structure(list(id = "B1"), class = "MyClassB")
+#' obj_c <- structure(list(data = runif(3)), class = "MyClassC")
+#'
+#' # These calls dispatch to process.MyClassA, .MyClassB, .MyClassC (if defined)
+#' \donttest{
+#'   # processed_a <- external_pkg::process(obj_a)
+#'   # print(processed_a)
+#'   #
+#'   # processed_b <- external_pkg::process(obj_b, some_option = TRUE)
+#'   # print(processed_b)
+#'   #
+#'   # processed_c <- external_pkg::process(obj_c)
+#'   # print(processed_c)
+#' }
+#'
+#' @family External S3 Methods Support
+#' @family Data Processing Functions
+#' @rdname process-methods # Shared name for all process.* methods in this package
+#' @export
+#' @method process MyClassA
+process.MyClassA <- function(x, ...) {
+  # Implementation for MyClassA
+  # Minimal documentation here - relies on the shared block above.
+  cat("Processing MyClassA...\n")
+  # result <- external_pkg::process(x, ...) # Might call next method or do work
+  x$processed_A <- TRUE
+  invisible(x)
+}
+
+#' @section Methods (by class):
+#' * `process(x = <MyClassB>, ...)`: Handles `MyClassB`, potentially using `some_option`.
+#' @rdname process-methods
+#' @export
+#' @method process MyClassB
+process.MyClassB <- function(x, ...) {
+  # Implementation for MyClassB
+  cat("Processing MyClassB...\n")
+  args <- list(...)
+  if (!is.null(args$some_option) && args$some_option) {
+    cat("... with some_option=TRUE\n")
+  }
+  x$processed_B <- TRUE
+  invisible(x)
+}
+
+#' @rdname process-methods
+#' @export
+#' @method process MyClassC
+process.MyClassC <- function(x, ...) {
+  # Implementation for MyClassC
+  cat("Processing MyClassC...\n")
+  x$processed_C <- TRUE
+  invisible(x)
+}
+```
+
+*Note:* The `@method` tag (e.g., `@method process MyClassA`) is technically not required by `roxygen2` if the function name follows the `generic.Class` pattern, but it aids clarity and code navigation tools (like in RStudio). Use it consistently if you adopt it. It explicitly declares the generic and class this function is a method for.
+
+### 4. Methods with Additional Parameters (Beyond Generic)
+
+If a specific method (whether for an internal or external generic) requires parameters *not* present in the generic signature or needs to detail class-specific interpretation of a generic parameter:
+
+*   **Document New/Specific Parameters:** Add `@param` tags for the *new* or *class-specific* parameters within that method's Roxygen block.
+*   **Still Use `@rdname`:** Continue using the shared `@rdname` to link it to the family's main documentation page. Roxygen will merge these parameter descriptions into the final `.Rd` file.
+
+```r
+# Continuing the external_pkg::process example:
+# Suppose process.MyClassC needs a 'threshold' argument
+
+#' @rdname process-methods
+#' @param threshold Numeric. A specific threshold value used only when processing `MyClassC` objects. Default: 0.9.
+#' @export
+#' @method process MyClassC
+process.MyClassC <- function(x, ..., threshold = 0.9) {
+  # Implementation for MyClassC using threshold
+  cat("Processing MyClassC with threshold:", threshold, "...\n")
+  x$processed_C <- TRUE
+  x$threshold_used <- threshold
+  invisible(x)
+}
+
+# Note: The other methods (process.MyClassA, .MyClassB) DO NOT get this param.
+# The "lead" method's documentation (process.MyClassA in the example above)
+# does NOT mention 'threshold' in its @param list, as it's not part of the generic.
+# Roxygen adds the 'threshold' param description to the final 'process-methods.Rd' page.
+```
+
+---
+
+## 🧹 File Organization Strategy
+
+A structured layout improves maintainability:
+
+| File Path                           | Purpose                                                                              | Roxygen Tags Used                      |
+| :---------------------------------- | :----------------------------------------------------------------------------------- | :------------------------------------- |
+| `R/generics.R`                      | Define all S3 generics *owned by the package*. Include full docs & `@rdname`.       | `@export`, `@rdname`, `@family`, etc.  |
+| `R/methods-print.R`                 | Implementations for `print.*` methods. Designate **one** as "lead" with full docs.   | `@rdname print-methods`, `@export`     |
+| `R/methods-plot.R`                  | Implementations for `plot.*` methods. Designate **one** as "lead" with full docs.    | `@rdname plot-methods`, `@export`      |
+| `R/methods-summary.R`               | Implementations for `summary.*` methods. Designate **one** as "lead" with full docs. | `@rdname summary-methods`, `@export`   |
+| `R/methods-<your_generic_name>.R` | Implementations for `your_generic_name.*`. Generic defined in `generics.R`.          | `@rdname <your_generic_name>-methods`, `@export` |
+| `R/methods-external-<generic>.R`  | Implementations for `external_pkg::<generic>.*`. Designate **one** as "lead".      | `@rdname <generic>-methods`, `@export`   |
+| `R/utils-internal.R`                | Internal helper functions not exported.                                              | `@noRd`                                |
+| `R/zzz.R`                           | `.onLoad`, `.onAttach`, `.onUnload` hooks if needed.                                 | (Often none or `@noRd`)                |
+
+---
+
+## ✅ CRAN Compliance Checklist Summary
+
+| Requirement                          | How This Guide Helps Achieve It                                                                                                                                                                                                                                                     | Key Tags                                      |
+| :----------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------- |
+| Document all exported functions      | Every function with `@export` has a corresponding Roxygen block OR is linked via `@rdname` to a block that generates documentation. Internal functions use `@noRd`.                                                                                                                  | `@export`, `@rdname`, `@noRd`                   |
+| Provide `@examples`                  | Every generated `.Rd` page (one per `@rdname` group or per standalone exported function) includes runnable `@examples`. Use `\donttest{}` for conditional/long examples. Avoid `\dontrun{}`. For S3 methods, examples ideally show dispatch to multiple methods in the family.     | `@examples`, `\donttest{}`                     |
+| Provide `@return`/`@value`           | Every generated `.Rd` page includes a `@return` (preferred) or `@value` tag describing the output.                                                                                                                                                                                     | `@return`, `@value`                           |
+| Handle S3 Methods Correctly        | Use `@rdname` to group methods for the same generic (internal or external). For external generics, designate a "lead" method within your package to provide the full documentation block for the family defined in the package, linking back to the original generic's docs.         | `@rdname`, `@method` (optional), `\link[]{}` |
+| Avoid Undocumented Arguments       | Ensure all arguments in function signatures are documented with `@param`. For S3 methods using `@rdname`, arguments are primarily documented in the generic or "lead" method block. Add specific `@param` tags only for *new* arguments in a method.                                   | `@param`                                      |
+| Clear Description & Title            | Every generated `.Rd` page has a meaningful `@title` and `@description`.                                                                                                                                                                                                                | `@title`, `@description`                      |
+| Utilize Markdown (`@md`)             | **Recommended:** Use `#' @md` at the start of Roxygen blocks for easier formatting *within source comments* (lists, emphasis, code). Roxygen converts this to Rd.                                                                                                                       | `@md`                                         |
+| Organize Related Topics              | Use `@family` tags to create cross-links between related help pages.                                                                                                                                                                                                                   | `@family`                                     |
+
+---
+
+**To conclude:** Ensure CRAN compliance (`@export`, runnable `@examples`, `@return` on all man pages) and maintainable S3 documentation via `@rdname` consolidation, assigning one source (generic or lead method) per family for full details; use `@md` for cleaner source comments.
+```

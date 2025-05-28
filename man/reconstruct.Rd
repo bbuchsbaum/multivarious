@@ -26,5 +26,8 @@ the impact of dimensionality reduction or when visualizing approximations of the
 }
 \seealso{
 \code{\link{bi_projector}} for an example of a two-way mapping model that can be reconstructed
+
+Other reconstruct: 
+\code{\link{reconstruct_new}()}
 }
 \concept{reconstruct}

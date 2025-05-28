@@ -4,7 +4,7 @@
 \alias{rotate}
 \title{Rotate a Component Solution}
 \usage{
-rotate(x, ncomp, type)
+rotate(x, ncomp, type, ...)
 }
 \arguments{
 \item{x}{The model fit, typically a result from a dimensionality reduction method like PCA.}
@@ -12,6 +12,8 @@ rotate(x, ncomp, type)
 \item{ncomp}{The number of components to rotate.}
 
 \item{type}{The type of rotation to apply (e.g., "varimax", "quartimax", "promax").}
+
+\item{...}{extra args}
 }
 \value{
 A modified model fit with the rotated components.

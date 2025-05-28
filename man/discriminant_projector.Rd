@@ -15,19 +15,19 @@ discriminant_projector(
 )
 }
 \arguments{
-\item{v}{A matrix of coefficients with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
+\item{v}{The projection matrix (often \code{X \%*\% v}). Rows correspond to observations, columns to components.}
 
-\item{s}{The score matrix}
+\item{s}{The score matrix (often \code{X \%*\% v}). Rows correspond to observations, columns to components.}
 
-\item{sdev}{The standard deviations of the score matrix}
+\item{sdev}{The standard deviations associated with the scores or components (e.g., singular values from LDA).}
 
-\item{preproc}{(optional) A pre-processing pipeline, default is prep(pass())}
+\item{preproc}{A \code{prepper} or \code{pre_processor} object, or a pre-processing function (e.g., \code{center}, \code{pass}).}
 
-\item{labels}{A factor or character vector of class labels corresponding to the rows of the score matrix \code{s}.}
+\item{labels}{A factor or character vector of class labels corresponding to the rows of \code{X} (and \code{s}).}
 
-\item{classes}{(optional) A character vector specifying the class attributes of the object, default is NULL}
+\item{classes}{Additional S3 classes to prepend.}
 
-\item{...}{Extra arguments to be stored in the \code{projector} object.}
+\item{...}{Extra arguments passed to \code{bi_projector}.}
 }
 \value{
 A \code{discriminant_projector} object.

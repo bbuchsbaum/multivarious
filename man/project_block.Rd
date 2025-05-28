@@ -4,7 +4,7 @@
 \alias{project_block}
 \title{Project a single "block" of data onto the subspace}
 \usage{
-project_block(x, new_data, block, ...)
+project_block(x, new_data, block, least_squares, ...)
 }
 \arguments{
 \item{x}{The model fit, typically an object of a class that implements a \code{project_block} method}
@@ -12,6 +12,8 @@ project_block(x, new_data, block, ...)
 \item{new_data}{A matrix or vector of new observation(s) with the same number of columns as the original data}
 
 \item{block}{An integer representing the block ID to select in the block projection matrix. This ID corresponds to the specific block of data to be projected}
+
+\item{least_squares}{Logical. If \code{TRUE} use least squares projection.}
 
 \item{...}{Additional arguments passed to the underlying \code{project_block} method}
 }

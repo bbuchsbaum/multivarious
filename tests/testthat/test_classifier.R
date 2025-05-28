@@ -53,17 +53,7 @@ test_that("can compute group means of rows of matrix", {
   expect_equal(nrow(gm), length(Y))
 })
 
-test_that("can compute principle angles of a set of pca fits", {
-  
-  fits <- lapply(1:4, function(i) {
-    m <- matrix(rnorm(10*15), 10, 15)
-    pca(m, ncomp=10)
-  })
-  
-  pa <- prinang(fits)
-  expect_true(length(pa) == 10)
-  
-})
+
 
 
 test_that("feature_importance.classifier works with iris data and PCA", {
@@ -83,6 +73,7 @@ test_that("feature_importance.classifier works with iris data and PCA", {
   
   # Evaluate feature importance using the marginal approach
   importance_marginal <- feature_importance.classifier(classifier, new_data, ncomp = 2, 
+                                                       true_labels = labels,
                                                        metric = "euclidean", fun = rank_score, 
                                                        approach = "marginal")
   print(importance_marginal)
@@ -90,6 +81,7 @@ test_that("feature_importance.classifier works with iris data and PCA", {
   
   # Evaluate feature importance using the standalone approach
   importance_standalone <- feature_importance.classifier(classifier, new_data, ncomp = 2, 
+                                                         true_labels = labels,
                                                          metric = "euclidean", fun = rank_score, 
                                                          approach = "standalone")
   print(importance_standalone)

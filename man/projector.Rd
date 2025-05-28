@@ -7,9 +7,9 @@
 projector(v, preproc = prep(pass()), ..., classes = NULL)
 }
 \arguments{
-\item{v}{A matrix of coefficients with dimensions \code{nrow(v)} by \code{ncol(v)} (number of columns = number of components)}
+\item{v}{A matrix of coefficients with dimensions \code{nrow(v)} by \code{ncol(v)} (columns = components)}
 
-\item{preproc}{A prepped pre-processing object. Default is the no-processing \code{pass()} preprocessor.}
+\item{preproc}{A prepped pre-processing object (S3 class \code{pre_processor}). Default is the no-op \code{pass()} preprocessor.}
 
 \item{...}{Extra arguments to be stored in the \code{projector} object.}
 
@@ -22,11 +22,4 @@ An instance of type \code{projector}.
 A \code{projector} maps a matrix from an N-dimensional space to d-dimensional space, where \code{d} may be less than \code{N}.
 The projection matrix, \code{v}, is not necessarily orthogonal. This function constructs a \code{projector} instance which can be
 used for various dimensionality reduction techniques like PCA, LDA, etc.
-}
-\examples{
-X <- matrix(rnorm(10*10), 10, 10)
-svdfit <- svd(X)
-p <- projector(svdfit$v)
-proj <- project(p, X)
-
 }

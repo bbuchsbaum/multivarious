@@ -1,0 +1,247 @@
+---
+title: "Cross-validation for Dimensionality Reduction"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Cross-validation for Dimensionality Reduction}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width=6, fig.height=4)
+library(multivarious)
+library(ggplot2)
+```
+
+## Why Cross-validate Dimensionality Reduction?
+
+When using PCA or other dimensionality reduction methods, we often face questions like:
+- How many components should I keep?
+- How well does my model generalize to new data?
+- Which preprocessing strategy works best?
+
+Cross-validation provides principled answers by testing how well models trained on one subset of data perform on held-out data.
+
+## Quick Example: Finding the Right Number of Components
+
+Let's use the iris dataset to demonstrate:
+
+```{r basic_example}
+# Prepare data
+X <- as.matrix(scale(iris[, 1:4]))  # 150 samples × 4 features
+
+# Create 5-fold cross-validation splits
+K <- 5
+fold_ids <- sample(rep(1:K, length.out = nrow(X)))
+folds <- lapply(1:K, function(k) list(
+  train = which(fold_ids != k), 
+  test  = which(fold_ids == k)
+))
+
+# Run cross-validation for PCA
+cv_results <- cv.bi_projector(
+  X,
+  folds = folds,
+  max_comp = 4,           # Test 1-4 components
+  measure = c("rmse"),    # Root Mean Squared Error
+  return_models = FALSE   # Don't store models (saves memory)
+)
+
+# View results
+print(cv_results)
+
+# Get average performance across folds
+summary(cv_results)
+
+# Visualize results
+plot(cv_results, metric = "rmse") + 
+  labs(title = "Cross-validation: PCA Reconstruction Error",
+       x = "Number of Components", 
+       y = "RMSE")
+```
+
+The plot shows that 2 components capture most of the variance, with diminishing returns after that.
+
+## Understanding the Output
+
+The `cv.bi_projector()` function returns a `cv_fit` object containing:
+
+- **Fold-level results**: Each row represents one CV fold
+- **Performance metrics**: Stored in the `component_metrics` column
+- **Summary statistics**: Mean and standard error across folds
+
+```{r understanding_output}
+# Detailed look at one fold's results
+fold1_metrics <- cv_results$component_metrics[[1]]
+print(fold1_metrics)
+
+# Which number of components minimizes error?
+cv_summary <- summary(cv_results)
+best_ncomp <- cv_summary$comp[which.min(cv_summary$rmse)]
+print(paste("Optimal number of components:", best_ncomp))
+```
+
+## Custom Cross-validation Scenarios
+
+### Scenario 1: Comparing Preprocessing Strategies
+
+Use `cv_generic()` to compare different preprocessing pipelines:
+
+```{r preprocessing_comparison}
+# Define two preprocessing strategies
+prep1 <- prep(center())              # Center only
+prep2 <- prep(center(), scale())     # Center and scale
+
+# Fit function that applies preprocessing
+fit_with_prep <- function(train_data, ncomp, preproc) {
+  # Apply preprocessing to training data
+  train_processed <- init_transform(preproc, train_data)
+  # Fit PCA
+  pca_model <- pca(train_processed, ncomp = ncomp)
+  # Store preprocessor with model
+  pca_model$preproc <- preproc
+  pca_model
+}
+
+# Measure function that handles preprocessing
+measure_with_prep <- function(model, test_data) {
+  # Apply same preprocessing to test data
+  test_processed <- apply_transform(model$preproc, test_data)
+  # Project and reconstruct
+  scores <- project(model, test_processed)
+  recon_processed <- reconstruct(model, test_processed)
+  # Reverse preprocessing for fair comparison
+  recon_original <- reverse_transform(model$preproc, recon_processed)
+  
+  # Calculate metrics
+  measure_reconstruction_error(test_data, recon_original, 
+                               metrics = c("rmse", "r2"))
+}
+
+# Compare both strategies
+cv_prep1 <- cv_generic(
+  X, folds,
+  .fit_fun = fit_with_prep,
+  .measure_fun = measure_with_prep,
+  preproc = prep1,  # Pass as extra argument
+  max_comp = 3
+)
+
+cv_prep2 <- cv_generic(
+  X, folds,
+  .fit_fun = fit_with_prep,
+  .measure_fun = measure_with_prep,
+  preproc = prep2,
+  max_comp = 3
+)
+
+# Compare results
+cat("Center only - RMSE:", mean(summary(cv_prep1)$rmse), "\n")
+cat("Center + Scale - RMSE:", mean(summary(cv_prep2)$rmse), "\n")
+```
+
+### Scenario 2: Parallel Cross-validation
+
+For larger datasets, run folds in parallel:
+
+```{r parallel_cv, eval=FALSE}
+# Setup parallel backend
+library(future)
+plan(multisession, workers = 4)
+
+# Run CV in parallel
+cv_parallel <- cv.bi_projector(
+  X, 
+  folds = folds,
+  max_comp = 4,
+  backend = "future"  # Use parallel backend
+)
+
+# Don't forget to reset
+plan(sequential)
+```
+
+## Available Metrics
+
+The `measure_reconstruction_error()` function provides several metrics:
+
+| Metric | Description | Range |
+|--------|-------------|-------|
+| `mse` | Mean Squared Error | [0, ∞) |
+| `rmse` | Root Mean Squared Error | [0, ∞) |
+| `mae` | Mean Absolute Error | [0, ∞) |
+| `r2` | R-squared (coefficient of determination) | (-∞, 1] |
+
+```{r multiple_metrics}
+# Calculate multiple metrics at once
+cv_multi <- cv.bi_projector(
+  X, 
+  folds = folds,
+  max_comp = 4,
+  measure = c("rmse", "r2", "mae")
+)
+
+# View all metrics
+summary(cv_multi)
+```
+
+## Tips for Effective Cross-validation
+
+### 1. Preprocessing Inside the Loop
+Always fit preprocessing parameters inside the CV loop:
+
+```{r preprocessing_tip, eval=FALSE}
+# WRONG: Preprocessing outside CV
+X_scaled <- scale(X)  # Uses information from all samples!
+cv_wrong <- cv.bi_projector(X_scaled, folds, max_comp = 4)
+
+# RIGHT: Preprocessing inside CV
+# (See custom CV example above)
+```
+
+### 2. Choose Appropriate Fold Sizes
+- **Small datasets (< 100 samples)**: Use leave-one-out or 10-fold CV
+- **Medium datasets (100-1000)**: Use 5-10 fold CV
+- **Large datasets (> 1000)**: Use 3-5 fold CV or hold-out validation
+
+### 3. Consider Metric Choice
+- Use **RMSE** for general reconstruction quality
+- Use **R²** to understand proportion of variance explained
+- Use **MAE** when outliers are a concern
+
+## Advanced: Cross-validating Other Projectors
+
+The CV framework works with any bi_projector:
+
+```{r other_projectors, eval=FALSE}
+# Cross-validate kernel PCA
+cv_kernel <- cv.bi_projector(
+  X,
+  folds = folds,
+  max_comp = 10,
+  projector_fn = function(X, ncomp) {
+    nystrom_approx(X, kernel_func = rbf_kernel, 
+                   ncomp = ncomp, nlandmarks = 50)
+  }
+)
+
+# Cross-validate discriminant analysis
+cv_lda <- cv.bi_projector(
+  X,
+  folds = folds,
+  max_comp = 3,
+  projector_fn = function(X, ncomp) {
+    discriminant_projector(X, iris$Species, ncomp = ncomp)
+  }
+)
+```
+
+## Summary
+
+The `multivarious` CV framework provides:
+- Easy cross-validation for any dimensionality reduction method
+- Flexible metric calculation
+- Parallel execution support
+- Tidy output format for easy analysis
+
+Use it to make informed decisions about model complexity and ensure your dimensionality reduction generalizes well to new data.

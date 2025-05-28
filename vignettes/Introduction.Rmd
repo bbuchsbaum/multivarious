@@ -12,102 +12,120 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-```
-
-## Introduction
-
-The multivarious package provides generic functions and some basic implementations for dimensionality reduction of high-dimensional data. This vignette focuses on two main classes in the package, projector and bi_projector, and demonstrates how to use the project function for projecting new data onto a lower-dimensional subspace.
-
-## Projector and Bi-projector Classes
-projector and bi_projector are two core classes in the `multivarious` package. They represent linear transformations from a high-dimensional space to a lower-dimensional space.
-
-## Projector
-A projector instance maps a matrix from an $N$-dimensional space to a $d$-dimensional space, where $d$ may be less than $N$. The projection matrix, $V$, is not necessarily orthogonal. This class can be used for various dimensionality reduction techniques like PCA, LDA, etc.
-
-## Bi-projector
-A bi_projector instance offers a two-way mapping from samples (rows) to scores and from variables (columns) to components. This allows projecting from a $D$-dimensional input space to a $d$-dimensional subspace, and projecting from an $n$-dimensional variable space to the $d$-dimensional component space. The singular value decomposition (SVD) is a canonical example of such a two-way mapping.
-
-## The Project Function
-The project function is a generic function that takes a model fit (typically an object of class bi_projector or any other class that implements a project method) and new observations. It projects these observations onto the subspace defined by the model. This enables the transformation of new data into the same lower-dimensional space as the original data. Mathematically, projection consists of the following:
-
-$$
-X \approx USV^T
-$$
-
-$$
-\text{projected_data} = \text{new_data} \cdot V
-$$
-
-
-## Example
-In this example, we will demonstrate how to create a bi_projector object using the results of an SVD and project new data onto the same subspace as the original data.
-
-```{r}
-
-# Load the multivarious package
 library(multivarious)
-
-# Create a synthetic dataset
-set.seed(42)
-X <- matrix(rnorm(200), 10, 20)
-
-# Perform SVD on the dataset
-svdfit <- svd(X)
-
-# Create a bi_projector object
-p <- bi_projector(svdfit$v, s = svdfit$u %*% diag(svdfit$d), sdev = svdfit$d)
-
-# Generate new data to project onto the same subspace as the original data
-new_data <- matrix(rnorm(5 * 20), 5, 20)
-
-projected_data <- project(p, new_data)
-print(projected_data)
-
 ```
 
-In the `multivarious` package, the `bi_projector` class allows you to project new variables into the subspace defined by the model. The `project_vars` function is a generic function that operates on an object of a class implementing the `project_vars` method, such as a `bi_projector` object. This function projects one or more variables onto a subspace, which can be computed for a biorthogonal decomposition like Singular Value Decomposition (SVD).
+## The Goal: Unified Dimensionality Reduction
 
-Remember, given an original data matrix $X$, the SVD of $X$ can be written as:
+Multivariate data analysis often involves reducing dimensionality or transforming data using techniques like Principal Component Analysis (PCA), Partial Least Squares (PLS), Contrastive PCA (cPCA), Nyström approximation for Kernel PCA, or representing data in a specific basis (e.g., Fourier, splines). While each method has unique mathematical underpinnings, they share common operational needs:
 
-$$
-X \approx USV^T
-$$
+*   Fitting the model to training data.
+*   Extracting key components (scores, loadings/coefficients).
+*   Projecting *new* data points into the reduced/transformed space.
+*   Reconstructing approximations of the original data from the reduced space.
+*   Integrating these steps with pre-processing (like centering or scaling).
+*   Comparing or tuning models using cross-validation.
 
+Handling these tasks consistently across different algorithms can lead to repetitive code and complex workflows. The **`multivarious` package aims to simplify this by providing a unified interface** centered around the concept of a **`bi_projector`**. 
 
-Where $U$ contains the left singular vectors (scores), $S$ is a diagonal matrix containing the singular values, and $V^T$ contains the right singular vectors (components). When we have new variables (columns) that we want to project into the same subspace as the original data, we can use the `project_vars` function.
+## The `bi_projector`: A Two-Way Map
 
-## Projecting New Variables onto the Subspace
+The `bi_projector` class is the cornerstone of `multivarious`. It represents a linear transformation (or an approximation thereof) that provides a **two-way mapping**:
 
-Let's say we have a new data matrix `new_data` with the same number of rows as the original data. To project these new variables into the subspace, we can compute:
+1.  **Samples (Rows) ↔ Scores:** Maps data points from the original high-dimensional space to a lower-dimensional latent space (scores), and potentially back.
+2.  **Variables (Columns) ↔ Components/Loadings:** Maps original variables to their representation in the latent space (loadings/components), and potentially back.
 
-\text{projected_vars} = U^T \cdot \text{new_data}
+Think of it as encapsulating the core results of a dimensionality reduction technique (like the U, S, V components of an SVD, or the scores and loadings of PCA/PLS) along with any necessary pre-processing information.
 
-The result is a matrix or vector of the projected variables in the subspace.
+Crucially, many functions within `multivarious` (e.g., `pca()`, `pls()`, `cPCAplus()`, `nystrom_approx()`, `regress()`) return objects that inherit from `bi_projector`.
 
-Here's an example of how you can use the `svd_wrapper` function in the `multivarious` package with the `iris` dataset to compute the SVD and project new variables into the subspace.
+## Key Actions with a `bi_projector`
 
-First, let's load the `iris` dataset and compute the SVD using the `svd_wrapper` function:
+Because different methods return a `bi_projector`, you can perform common tasks using a consistent set of verbs:
 
+*   `scores(model)`: Get the scores (latent space representation) of the *training* data.
+*   `coef(model)` or `loadings(model)`: Get the loadings or coefficients mapping variables to components.
+*   `project(model, newdata)`: Project *new* samples (rows of `newdata`) into the latent space defined by the `model`.
+*   `reconstruct(model, ...)`: Reconstruct an approximation of the original data from the latent space (either from training scores or provided new scores/coefficients).
+*   `truncate(model, ncomp)`: Reduce the number of components kept in the model.
+*   `summary(model)`: Get a concise summary of the model dimensions.
 
-```{r}
-# Load iris dataset and select the first four columns
+This consistent API simplifies writing generic analysis code and makes it easier to swap between different dimensionality reduction methods.
+
+## Example: PCA Workflow
+
+Let's demonstrate a typical workflow using PCA on the classic `iris` dataset.
+
+```{r pca_example}
+# Load iris dataset and select numeric columns
 data(iris)
-X <- iris[, 1:4]
+X <- as.matrix(iris[, 1:4])
 
-# Compute SVD using the base method and 3 components
-fit <- svd_wrapper(X, ncomp = 3, preproc = center(), method = "base")
+# 1. Define a pre-processor (center the data)
+preproc <- center()
+
+# 2. Fit PCA using svd_wrapper, keeping 3 components
+#    The pre-processor is applied internally.
+fit <- pca(X, ncomp = 3, preproc = preproc)
+
+# The result 'fit' is a bi_projector
+print(fit)
+
+# 3. Access results
+iris_scores <- scores(fit) # Scores of the centered training data (150 x 3)
+iris_loadings <- loadings(fit) # Loadings (4 x 3)
+cat("\nDimensions of Scores:", dim(iris_scores), "\n")
+cat("Dimensions of Loadings:", dim(iris_loadings), "\n")
+
+# 4. Project new data
+# Create some new iris-like samples (5 samples, 4 variables)
+set.seed(123)
+new_iris_data <- matrix(rnorm(5 * 4, mean = colMeans(X), sd = apply(X, 2, sd)), 
+                        nrow = 5, byrow = TRUE)
+
+# Project the new data into the PCA space defined by 'fit'
+# Pre-processing (centering using training data means) is applied automatically.
+projected_new_scores <- project(fit, new_iris_data)
+cat("\nDimensions of Projected New Data Scores:", dim(projected_new_scores), "\n")
+print(head(projected_new_scores))
+
+# 5. Reconstruct approximated original data from scores
+# Reconstruct the first few original samples
+reconstructed_X_approx <- reconstruct(fit, comp=1:3) # uses scores(fit) by default
+cat("\nReconstructed Approximation of Original Data (first 5 rows):\n")
+print(head(reconstructed_X_approx))
+
+print(head(X)) # Original data for comparison
 
 ```
 
-Now, let's assume we have a new data matrix `new_data` with the same number of rows as the original data. To project these new variables into the subspace, we can use the `project_vars` function:
+This example shows how fitting (`pca`), accessing results (`scores`, `loadings`), and applying the model to new data (`project`) follow a consistent pattern, regardless of whether the underlying method was PCA, PLS, or another technique returning a `bi_projector`.
 
-```{r}
-# Define new_data
-new_data <- rnorm(nrow(iris))
+## Beyond Basic Projection: The `multivarious` Ecosystem
 
-# Project the new variables into the subspace
-projected_vars <- project_vars(fit, new_data)
+The unified `bi_projector` interface enables several powerful features within the package:
 
+*   **Pre-processing Pipelines:** Define reusable pre-processing steps (see `vignette("PreProcessing")`).
+*   **Model Composition:** Chain multiple `bi_projector` steps together (e.g., pre-processing → PCA → rotation) into a single composite projector (see `vignette("Composing_Projectors")`).
+*   **Cross-Validation:** Easily perform cross-validation to select hyperparameters (like the number of components) using helpers that understand the `bi_projector` structure (see `vignette("CrossValidation")`).
+
+## Projecting Variables (`project_vars`)
+
+While `project()` operates on new samples (rows), the `bi_projector` also supports projecting new *variables* (columns) into the component space defined by the model's scores (U vectors in SVD terms). This is done using `project_vars()`.
+
+```{r project_vars_example}
+# Using the 'fit' object from the PCA example above
+
+# Create a new variable (column) with the same number of samples as original data
+set.seed(456)
+new_variable <- rnorm(nrow(X))
+
+# Project this new variable into the component space defined by the PCA scores (fit$s)
+# Result shows how the new variable relates to the principal components.
+projected_variable_loadings <- project_vars(fit, new_variable)
+cat("\nProjection of new variable onto components:", projected_variable_loadings, "\n")
 ```
 
-This example demonstrates how to compute the SVD using the `svd_wrapper` function and project new variables into the subspace defined by the SVD using the `project_vars` function.
+## Conclusion
+
+The `multivarious` package provides a consistent and extensible framework for common dimensionality reduction and related linear transformation tasks. By leveraging the `bi_projector` class, it offers a unified API for fitting models, projecting new data, reconstruction, and accessing key model components. This simplifies workflows, promotes code reuse, and facilitates integration with pre-processing, model composition, and cross-validation tools within the package ecosystem.

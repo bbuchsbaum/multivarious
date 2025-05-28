@@ -4,10 +4,12 @@
 \alias{is_orthogonal}
 \title{is it orthogonal}
 \usage{
-is_orthogonal(x)
+is_orthogonal(x, tol = 1e-06)
 }
 \arguments{
 \item{x}{the object}
+
+\item{tol}{tolerance for checking orthogonality}
 }
 \value{
 a logical value indicating whether the transformation is orthogonal

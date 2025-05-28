@@ -21,3 +21,7 @@ a classifier object
 \description{
 Create a k-NN classifier for a discriminant projector
 }
+\examples{
+# Assume dp is a fitted discriminant_projector object
+# classifier(dp, knn = 5) # Basic example
+}

@@ -1,0 +1,211 @@
+---
+title: "Contrastive PCA: Finding What's Different Between Groups"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Contrastive PCA: Finding What's Different Between Groups}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
+library(multivarious)
+library(ggplot2)
+```
+
+## What is Contrastive PCA?
+
+Imagine you're studying two groups: patients with a disease and healthy controls. Both groups show variation in their measurements, but you're specifically interested in what makes the patients *different*. Standard PCA would find the largest sources of variation across all samples, which might be dominated by age, sex, or other factors common to both groups. 
+
+**Contrastive PCA (cPCA++) finds patterns that are enriched in one group (foreground) compared to another (background).**
+
+## A Simple Example
+
+Let's start with a practical example to see why contrastive PCA is useful:
+
+```{r motivation_example}
+set.seed(123)
+n_samples <- 100
+n_features <- 50
+
+# Create background data (e.g., healthy controls)
+# Main variation is in features 1-10
+background <- matrix(rnorm(n_samples * n_features), n_samples, n_features)
+background[, 1:10] <- background[, 1:10] * 3  # Strong common variation
+
+# Create foreground data (e.g., patients)
+# Has the same common variation PLUS disease-specific signal in features 20-25
+foreground <- background[1:60, ]  # Start with same structure
+foreground[, 20:25] <- foreground[, 20:25] + matrix(rnorm(60 * 6, sd = 2), 60, 6)
+
+# Standard PCA on combined data
+all_data <- rbind(background, foreground)
+regular_pca <- pca(all_data, ncomp = 2)
+
+# Contrastive PCA
+cpca_result <- cPCAplus(foreground, background, ncomp = 2)
+
+# Compare what each method finds
+par(mfrow = c(1, 2))
+
+# Regular PCA loadings
+barplot(abs(regular_pca$v[1:30, 1]), main = "Standard PCA: PC1 Loadings",
+        names.arg = 1:30, las = 2, cex.names = 0.7)
+
+# Contrastive PCA loadings  
+barplot(abs(cpca_result$v[1:30, 1]), main = "Contrastive PCA: PC1 Loadings",
+        names.arg = 1:30, las = 2, cex.names = 0.7)
+```
+
+Notice how standard PCA focuses on features 1-10 (the common variation), while contrastive PCA correctly identifies features 20-25 (the group-specific signal).
+
+## Using cPCAplus()
+
+The `cPCAplus()` function makes contrastive PCA easy to use:
+
+```{r basic_usage}
+# Basic usage
+cpca_fit <- cPCAplus(
+  X_foreground = foreground,  # Your group of interest
+  X_background = background,   # Your reference group
+  ncomp = 5                   # Number of components to extract
+)
+
+# The result is a bi_projector object with familiar methods
+print(cpca_fit)
+
+# Project new data
+new_samples <- matrix(rnorm(10 * n_features), 10, n_features)
+new_scores <- project(cpca_fit, new_samples)
+
+# Reconstruct using top components
+reconstructed <- reconstruct(cpca_fit, comp = 1:2)
+```
+
+## Understanding the Output
+
+`cPCAplus()` returns a `bi_projector` object containing:
+
+- **`v`**: Loadings (feature weights) for each component
+- **`s`**: Scores (sample projections) for the foreground data
+- **`sdev`**: Standard deviations explaining the "contrastive variance"
+- **`values`**: The eigenvalue ratios (foreground variance / background variance)
+
+```{r understanding_output}
+# Which features contribute most to the first contrastive component?
+top_features <- order(abs(cpca_fit$v[, 1]), decreasing = TRUE)[1:10]
+print(paste("Top contributing features:", paste(top_features, collapse = ", ")))
+
+# How much more variable is each component in foreground vs background?
+print(paste("Variance ratios:", paste(round(cpca_fit$values[1:3], 2), collapse = ", ")))
+```
+
+## Common Applications
+
+### 1. Biomedical Studies
+```{r biomedical_example, eval=FALSE}
+# Identify disease-specific patterns
+tumor_cpca <- cPCAplus(
+  X_foreground = tumor_samples,
+  X_background = healthy_tissue,
+  ncomp = 10
+)
+```
+
+### 2. Technical Variation Removal
+```{r technical_example, eval=FALSE}
+# Use technical replicates as background to find biological signal
+bio_cpca <- cPCAplus(
+  X_foreground = biological_samples,
+  X_background = technical_replicates,
+  ncomp = 5
+)
+```
+
+### 3. Time-Based Contrasts
+```{r time_example, eval=FALSE}
+# Find patterns specific to treatment timepoint
+treatment_cpca <- cPCAplus(
+  X_foreground = after_treatment,
+  X_background = before_treatment,
+  ncomp = 5
+)
+```
+
+## Advanced Options
+
+### Handling High-Dimensional Data
+
+When you have more features than samples (p >> n), use the efficient sample-space strategy:
+
+```{r high_dim}
+# Create high-dimensional example
+n_f <- 50; n_b <- 80; p <- 1000
+X_background_hd <- matrix(rnorm(n_b * p), n_b, p)
+X_foreground_hd <- X_background_hd[1:n_f, ] + 
+                   matrix(c(rnorm(n_f * 20, sd = 2), rep(0, n_f * (p-20))), n_f, p)
+
+# Use sample-space strategy for efficiency
+cpca_hd <- cPCAplus(X_foreground_hd, X_background_hd, 
+                    ncomp = 5, strategy = "sample")
+```
+
+### Regularization for Unstable Background
+
+If your background covariance is nearly singular, add regularization:
+
+```{r regularization}
+# Small background sample size can lead to instability
+small_background <- matrix(rnorm(20 * 100), 20, 100)
+small_foreground <- matrix(rnorm(30 * 100), 30, 100)
+
+# Add regularization 
+cpca_regularized <- cPCAplus(
+  small_foreground, 
+  small_background,
+  ncomp = 5,
+  shrinkage = 0.1  # Shrink background covariance toward diagonal
+)
+```
+
+## When to Use Contrastive PCA
+
+✓ **Use contrastive PCA when:**
+- You have two groups and want to find patterns specific to one
+- Background variation obscures your signal of interest
+- You want to remove technical/batch effects captured by control samples
+
+✗ **Don't use contrastive PCA when:**
+- You only have one group (use standard PCA)
+- Groups differ mainly in mean levels (use t-tests or LDA)
+- The interesting variation is non-linear (consider kernel methods)
+
+## Technical Details
+
+<details>
+<summary>Click for mathematical details</summary>
+
+Contrastive PCA++ solves the generalized eigenvalue problem:
+
+$$\mathbf{R}_f \mathbf{v} = \lambda \mathbf{R}_b \mathbf{v}$$
+
+where:
+- $\mathbf{R}_f$ is the foreground covariance matrix
+- $\mathbf{R}_b$ is the background covariance matrix
+- $\lambda$ represents the variance ratio (foreground/background)
+- $\mathbf{v}$ are the contrastive directions
+
+This finds directions that maximize the ratio of foreground to background variance, effectively highlighting patterns enriched in the foreground group.
+
+The `geneig()` function provides the underlying solver with multiple algorithm options:
+- `"geigen"`: General purpose, handles non-symmetric matrices
+- `"robust"`: Fast for well-conditioned problems
+- `"primme"`: Efficient for very large sparse matrices
+
+</details>
+
+## See Also
+
+- `pca()` for standard principal component analysis
+- `discriminant_projector()` for supervised dimensionality reduction
+- `geneig()` for solving generalized eigenvalue problems directly

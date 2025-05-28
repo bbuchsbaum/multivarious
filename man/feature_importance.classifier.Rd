@@ -2,46 +2,68 @@
 % Please edit documentation in R/classifier.R
 \name{feature_importance.classifier}
 \alias{feature_importance.classifier}
-\title{Evaluate Feature Importance}
+\title{Evaluate Feature Importance for a Classifier}
 \usage{
 \method{feature_importance}{classifier}(
   x,
   new_data,
+  true_labels,
   ncomp = NULL,
   blocks = NULL,
   metric = c("cosine", "euclidean", "ejaccard"),
   fun = rank_score,
-  normalize_probs = FALSE,
+  fun_direction = c("lower_is_better", "higher_is_better"),
   approach = c("marginal", "standalone"),
   ...
 )
 }
 \arguments{
-\item{x}{classifier}
+\item{x}{A fitted \code{classifier} object.}
 
-\item{new_data}{new data}
+\item{new_data}{The data matrix used for evaluating importance (typically validation or test data).}
 
-\item{ncomp}{...}
+\item{true_labels}{The true class labels corresponding to the rows of \code{new_data}.}
 
-\item{blocks}{a list of feature indices}
+\item{ncomp}{Optional integer; the number of components to use from the projector for classification (default: all components used during classifier creation).}
 
-\item{metric}{...}
+\item{blocks}{A list where each element is a numeric vector of feature indices (columns in the original
+data space) defining a block. If \code{NULL}, each feature is treated as its own block.}
 
-\item{fun}{a function to compute accuracy (default rank_score)}
+\item{metric}{Character string specifying the similarity or distance metric for k-NN.
+Choices: "euclidean", "cosine", "ejaccard".}
 
-\item{normalize_probs}{logical}
+\item{fun}{A function to compute the performance metric (e.g., \code{rank_score}, \code{topk}, or a custom function).
+The function should take a probability matrix and observed labels and return a data frame
+where the first column is the metric value per observation.}
 
-\item{approach}{"marginal" or "standalone"}
+\item{fun_direction}{Character string, either "lower_is_better" or "higher_is_better", indicating
+whether lower or higher values of the metric calculated by \code{fun} signify better performance.
+This is used to interpret the importance score correctly.}
 
-\item{...}{args to projection}
+\item{approach}{Character string: "marginal" (calculates importance as change from baseline when block is removed)
+or "standalone" (calculates importance as performance using only the block).}
+
+\item{...}{Additional arguments passed to \code{predict.classifier} during internal predictions.}
 }
 \value{
-a data.frame with block and importance
+A \code{data.frame} with columns \code{block} (character representation of feature indices in the block)
+and \code{importance} (numeric importance score). Higher importance values generally indicate more influential blocks,
+considering \code{fun_direction}.
 }
 \description{
-Uses "marginal" or "standalone" approaches:
-\itemize{
-\item marginal: remove block and see change in accuracy
-\item standalone: use only that block and measure accuracy
+Estimates the importance of features or blocks of features for the classification performance
+using either a "marginal" (leave-one-block-out) or "standalone" (use-only-one-block) approach.
 }
+\details{
+Importance is measured by the change in a performance metric (\code{fun}) when features are
+removed (marginal) or used exclusively (standalone).
 }
+\examples{
+# Assume clf is a fitted classifier object, dat is new data, true_lbls are correct labels for dat
+# Assume blocks_list defines feature groups e.g., list(1:5, 6:10)
+# feature_importance(clf, new_data = dat, true_labels = true_lbls, blocks = blocks_list)
+}
+\seealso{
+\code{\link{rank_score}}, \code{\link{topk}}
+}
+\concept{feature_importance classifier}

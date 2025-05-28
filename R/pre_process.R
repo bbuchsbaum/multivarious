@@ -2,6 +2,11 @@
 #' 
 #' Creates a bare prepper object (a pipeline holder).
 #' 
+#' TODO: Consider using a single environment in the finalized pre_processor
+#'       to store all step parameters, instead of individual environments
+#'       per step, potentially improving serialization and GC performance
+#'       for very large pipelines.
+#' 
 #' @keywords internal
 #' @noRd
 prepper <- function() {
@@ -19,61 +24,63 @@ prepper <- function() {
 #' @export
 add_node.prepper <- function(x, step,...) {
   x$steps[[length(x$steps)+1]] <- step
-  x
+  invisible(x) # Return invisibly for better pipe behavior
 }
 
 
-#' finalize a prepper pipeline
-#' 
-#' Prepares a pre-processing pipeline for application by creating `init`, `transform`, and `reverse_transform` functions.
-#'
+
 #' @export
 prep.prepper <- function(x,...) {
-  steps <- x$steps
-  
-  # init transform: applies all forward steps
-  tinit <- function(X) {
-    xin <- X
-    for (st in steps) {
-      xin <- st$forward(xin)
+  # Use local to capture a stable copy of steps
+  local({
+    steps <- x$steps
+    orig_ncol <- NULL # Placeholder for original number of columns
+    
+    # init transform: applies all forward steps and learns parameters
+    tinit <- function(X) {
+      xin <- X
+      # Store original dimension when initializing
+      assign("orig_ncol", ncol(X), envir = parent.env(environment()))
+      for (st in steps) {
+        xin <- st$forward(xin)
+      }
+      xin
     }
-    xin
-  }
-  
-  # transform: apply steps in forward direction using partial 'colind'
-  tform <- function(X, colind=NULL) {
-    xin <- X
-    for (st in steps) {
-      xin <- st$apply(xin, colind)
+    
+    # transform: apply learned steps in forward direction using partial 'colind'
+    tform <- function(X, colind=NULL) {
+      xin <- X
+      for (st in steps) {
+        xin <- st$apply(xin, colind)
+      }
+      xin
     }
-    xin
-  }
-  
-  # reverse_transform: apply steps in reverse order
-  rtform <- function(X, colind=NULL) {
-    xin <- X
-    for (i in seq_along(steps)) {
-      st <- steps[[length(steps)-i+1]]
-      xin <- st$reverse(xin, colind)
+    
+    # reverse_transform: apply learned steps in reverse order
+    rtform <- function(X, colind=NULL) {
+      xin <- X
+      # Use rev() for clarity and robustness
+      for (st in rev(steps)) {
+        xin <- st$reverse(xin, colind)
+      }
+      xin
     }
-    xin
-  }
-  
-  ret <- list(
-    preproc=x,
-    init=tinit,
-    transform=tform,
-    reverse_transform=rtform
-  )
-  
-  class(ret) <- "pre_processor"
-  ret
+    
+    ret <- list(
+      preproc = x, # Store the original prepper structure if needed
+      init = tinit,
+      transform = tform,
+      reverse_transform = rtform,
+      # Store orig_ncol after init is called
+      get_orig_ncol = function() orig_ncol 
+    )
+    
+    class(ret) <- "pre_processor"
+    ret
+  })
 }
 
-#' Create a fresh pipeline from an existing prepper
-#'
-#' Recreates the pipeline structure without any learned parameters.
-#'
+
 #' @export
 fresh.prepper <- function(x,...) {
   p <- prepper()
@@ -87,26 +94,64 @@ fresh.prepper <- function(x,...) {
 #' @export
 init_transform.pre_processor <- function(x, X,...) {
   chk::chk_matrix(X)
-  x$init(X)
+  res <- x$init(X)
+  # After init, orig_ncol should be set, store it directly in the object? 
+  # Modifying the object after creation might be tricky with environments.
+  # For now, rely on the closure environment within prep.prepper and get_orig_ncol.
+  res
 }
 
 #' @export
 apply_transform.pre_processor <- function(x, X, colind=NULL,...) {
   chk::chk_matrix(X)
+  
+  # GENERAL CHECK: Ensure preprocessor is initialized before any application
+  # REMOVED: This check prevents using preprocessors with manually supplied parameters
+  # orig_ncol <- x$get_orig_ncol()
+  # if (is.null(orig_ncol)) {
+  #     stop("Preprocessor must be initialized with 'init_transform' before applying transformations.")
+  # }
+  
+  # COLIND SPECIFIC CHECKS: Only if colind is provided
   if (!is.null(colind)) {
-    chk::chk_range(max(colind), c(1,ncol(X)))
-    chk::chk_range(min(colind), c(1,ncol(X)))
+    # Check colind against original dimension (orig_ncol is known to be non-NULL here)
+    # Need to get orig_ncol without stopping if NULL
+    orig_ncol <- x$get_orig_ncol() # May be NULL, that's okay now
+    chk::chk_vector(colind)
+    if (!is.null(orig_ncol)) { # Only check subset if orig_ncol is known
+        chk::chk_subset(colind, 1:orig_ncol)
+    }
+    # Ensure the provided X matches the dimension implied by colind
+    chk::chk_equal(ncol(X), length(colind))
   }
+  
   x$transform(X, colind)
 }
 
 #' @export
 reverse_transform.pre_processor <- function(x, X, colind=NULL,...) {
   chk::chk_matrix(X)
+  
+  # GENERAL CHECK: Ensure preprocessor is initialized before any reversal
+  # REMOVED: This check prevents using preprocessors with manually supplied parameters
+  # orig_ncol <- x$get_orig_ncol()
+  # if (is.null(orig_ncol)) {
+  #     stop("Preprocessor must be initialized with 'init_transform' before reversing transformations.")
+  # }
+  
+  # COLIND SPECIFIC CHECKS: Only if colind is provided
   if (!is.null(colind)) {
-    chk::chk_range(max(colind), c(1,ncol(X)))
-    chk::chk_range(min(colind), c(1,ncol(X)))
+    # Check colind against original dimension (orig_ncol is known to be non-NULL here)
+    # Need to get orig_ncol without stopping if NULL
+    orig_ncol <- x$get_orig_ncol() # May be NULL, that's okay now
+    chk::chk_vector(colind)
+     if (!is.null(orig_ncol)) { # Only check subset if orig_ncol is known
+        chk::chk_subset(colind, 1:orig_ncol)
+    }
+    # Ensure the provided X matches the dimension implied by colind
+    chk::chk_equal(ncol(X), length(colind))
   }
+  
   x$reverse_transform(X, colind)
 }
 
@@ -210,6 +255,7 @@ center <- function(preproc = prepper(), cmeans=NULL) {
       
       apply = function(X, colind = NULL) {
         cm <- env$cmeans
+        chk::chk_not_null(cm, "Means not initialized. Run init_transform first or supply 'cmeans'.")
         if (is.null(colind)) {
           sweep(X, 2, cm, "-")
         } else {
@@ -221,7 +267,14 @@ center <- function(preproc = prepper(), cmeans=NULL) {
       reverse = function(X, colind = NULL) {
         chk::chk_not_null(env$cmeans)
         if (is.null(colind)) {
-          sweep(X, 2, env$cmeans, "+")
+          # Use only the means corresponding to the columns present in X
+          nc <- ncol(X)
+          if (nc > length(env$cmeans)) {
+             stop(sprintf("Internal error in center$reverse: ncol(X) [%d] > length(stored means) [%d]", 
+                           nc, length(env$cmeans)))
+          } 
+          means_to_use <- env$cmeans[1:nc]
+          sweep(X, 2, means_to_use, "+")
         } else {
           chk::chk_equal(ncol(X), length(colind))
           sweep(X, 2, env$cmeans[colind], "+")
@@ -258,48 +311,73 @@ colscale <- function(preproc = prepper(),
   
   create <- function() {
     env <- rlang::new_environment()
+    env$weights <- weights # Store precomputed weights if provided
+    
     list(
       forward = function(X) {
-        wts <- if (type == "weights") {
-          chk::chk_equal(length(weights), ncol(X))
-          weights
-        } else {
-          sds <- matrixStats::colSds(X)
-          if (all(sds == 0)) {
-            # If all zeros, set them to 1 to avoid division by zero
-            sds[] <- 1
+        if (is.null(env$weights)) { # Compute weights only if not precomputed
+          sds <- matrixStats::colSds(as.matrix(X)) # Ensure matrix for colSds
+          
+          # Handle zero standard deviations robustly
+          zero_sd <- sds < .Machine$double.eps
+          if (any(zero_sd)) {
+              warning(sprintf("Columns %s have zero standard deviation. Setting scale factor to 1.", 
+                              paste(which(zero_sd), collapse=", ")))
           }
+          sds[zero_sd] <- 1 # Set zero SDs to 1 to avoid Inf weights
+          
           if (type == "unit") {
-            # Unit norm: scale by sqrt(nrow(X)-1)
-            sds[sds == 0] <- mean(sds)
-            sds <- sds * sqrt(nrow(X) - 1)
-          } else {
-            # z-scaling sds already fine
-            sds[sds == 0] <- mean(sds)
+            # Unit norm scaling: weight is 1 / (sd * sqrt(N-1))
+            # Ensure N > 1 for sqrt
+            N <- nrow(X)
+            if (N <= 1) stop("Cannot compute unit norm scaling with N <= 1.")
+            scaling_factor <- sds * sqrt(N - 1)
+            # Check for zeros again after scaling (unlikely but possible)
+            scaling_factor[scaling_factor < .Machine$double.eps] <- 1
+            wts <- 1 / scaling_factor
+          } else { # type == "z"
+            # z-scaling weight is 1 / sd
+            wts <- 1 / sds
           }
-          1 / sds
+          env$weights <- wts
+        } else {
+            wts <- env$weights
+            chk::chk_equal(length(wts), ncol(X))
         }
-        env$weights <- wts
         sweep(X, 2, wts, "*")
       },
       
       apply = function(X, colind = NULL) {
+        chk::chk_not_null(env$weights, "Weights not initialized. Run init_transform first.")
         wts <- env$weights
         if (is.null(colind)) {
           sweep(X, 2, wts, "*")
         } else {
+          # Ensure X matches colind length, and colind is valid (checked by caller)
           chk::chk_equal(ncol(X), length(colind))
           sweep(X, 2, wts[colind], "*")
         }
       },
       
       reverse = function(X, colind = NULL) {
+        chk::chk_not_null(env$weights, "Weights not initialized. Run init_transform first.")
         wts <- env$weights
+        # Handle potential division by zero if weights were somehow zero
+        wts_safe <- wts
+        wts_safe[abs(wts) < .Machine$double.eps] <- 1 # Avoid division by zero
+        
         if (is.null(colind)) {
-          sweep(X, 2, wts, "/")
+          # Use only the weights corresponding to the columns present in X
+          nc <- ncol(X)
+           if (nc > length(wts_safe)) {
+             stop(sprintf("Internal error in colscale$reverse: ncol(X) [%d] > length(stored weights) [%d]", 
+                           nc, length(wts_safe)))
+           } 
+          weights_to_use <- wts_safe[1:nc]
+          sweep(X, 2, weights_to_use, "/")
         } else {
           chk::chk_equal(ncol(X), length(colind))
-          sweep(X, 2, wts[colind], "/")
+          sweep(X, 2, wts_safe[colind], "/")
         }
       }
     )
@@ -343,6 +421,9 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
         env$sds <- sds2
         env$cmeans <- cmeans2
         
+        # TODO: [INEFF] This uses two sweep() calls. For large matrices, 
+        #       consider combining into a single pass or using optimized 
+        #       functions if performance becomes critical.
         x1 <- sweep(X, 2, cmeans2, "-")
         sweep(x1, 2, sds2, "/")
       },
@@ -350,11 +431,15 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
       apply = function(X, colind = NULL) {
         sds2 <- env$sds
         cmeans2 <- env$cmeans
+        chk::chk_not_null(sds2, "SDs not initialized. Run init_transform first or supply 'sds'.")
+        chk::chk_not_null(cmeans2, "Means not initialized. Run init_transform first or supply 'cmeans'.")
         if (is.null(colind)) {
+          # TODO: [INEFF] See forward() - two sweep() calls.
           x1 <- sweep(X, 2, cmeans2, "-")
           sweep(x1, 2, sds2, "/")
         } else {
           chk::chk_equal(ncol(X), length(colind))
+          # TODO: [INEFF] See forward() - two sweep() calls.
           x1 <- sweep(X, 2, cmeans2[colind], "-")
           sweep(x1, 2, sds2[colind], "/")
         }
@@ -363,11 +448,25 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
       reverse = function(X, colind = NULL) {
         sds2 <- env$sds
         cmeans2 <- env$cmeans
+        chk::chk_not_null(sds2, "SDs not initialized.")
+        chk::chk_not_null(cmeans2, "Means not initialized.")
+        
         if (is.null(colind)) {
-          x0 <- sweep(X, 2, sds2, "*")
-          sweep(x0, 2, cmeans2, "+")
+          # Use only parameters corresponding to columns in X
+          nc <- ncol(X)
+          if (nc > length(sds2) || nc > length(cmeans2)) {
+               stop(sprintf("Internal error in standardize$reverse: ncol(X) [%d] inconsistent with stored params [%d, %d]", 
+                           nc, length(sds2), length(cmeans2)))
+          }
+          sds_to_use <- sds2[1:nc]
+          means_to_use <- cmeans2[1:nc]
+          
+          # TODO: [INEFF] Two sweep() calls.
+          x0 <- sweep(X, 2, sds_to_use, "*")
+          sweep(x0, 2, means_to_use, "+")
         } else {
           chk::chk_equal(ncol(X), length(colind))
+          # TODO: [INEFF] Two sweep() calls.
           x0 <- sweep(X, 2, sds2[colind], "*")
           sweep(x0, 2, cmeans2[colind], "+")
         }
@@ -405,54 +504,120 @@ concat_pre_processors <- function(preprocs, block_indices) {
   chk::chk_equal(length(preprocs), length(block_indices))
   
   unraveled_ids <- unlist(block_indices)
-  blk_ids <- rep(seq_along(block_indices), sapply(block_indices,length))
-  idmap <- data.frame(id_global=unraveled_ids, 
-                      id_block=unlist(lapply(block_indices, function(x) seq_along(x))),
-                      block=blk_ids)
+  # Check for overlaps and completeness more thoroughly?
+  if (any(duplicated(unraveled_ids))) stop("Duplicate indices found in block_indices.")
+  # Assuming indices cover a contiguous range for simplicity now, but could add checks.
+  max_idx <- max(unraveled_ids)
   
-  apply_fun <- function(f, X, colind) {
+  # Precompute mapping for efficiency and correct ordering
+  map_list <- lapply(seq_along(block_indices), function(i) {
+      list(orig_indices = block_indices[[i]], 
+           proc = preprocs[[i]])
+  })
+  names(map_list) <- as.character(seq_along(map_list))
+
+  # Internal helper for applying functions blockwise respecting colind order
+  # TODO: [INEFF] This helper recalculates mappings on each call.
+  #       If called repeatedly with the same colind structure (unlikely?),
+  #       pre-calculating and caching the exact mappings might be faster.
+  apply_blockwise <- function(func, X, colind) {
     chk::chk_matrix(X)
+    chk::chk_vector(colind)
+    # Remove unsupported named arguments x_arg, y_arg
     chk::chk_equal(ncol(X), length(colind))
-    keep <- idmap$id_global %in% colind
-    blks <- sort(unique(idmap$block[keep]))
     
-    idmap2 <- idmap[keep,]
-    do.call(cbind, lapply(blks, function(i) {
-      loc <- idmap2$id_block[idmap2$block == i]
-      offset <- which(idmap2$block == i)
-      f(preprocs[[i]], X[,offset,drop=FALSE], colind=loc)
-    }))
+    results_list <- vector("list", length(colind))
+    processed_cols <- logical(length(colind)) # Track which columns are processed
+    
+    # Find which original blocks are relevant for the given colind
+    for (block_num in seq_along(map_list)) {
+        block_info <- map_list[[block_num]]
+        # Find which of the requested `colind` fall into this block's original indices
+        matched_in_colind_idx <- which(colind %in% block_info$orig_indices)
+        
+        if (length(matched_in_colind_idx) > 0) {
+            # Get the subset of X corresponding to these columns
+            X_subset <- X[, matched_in_colind_idx, drop = FALSE]
+            # Get the original GLOBAL indices within this block that correspond to X_subset
+            orig_indices_in_block <- colind[matched_in_colind_idx]
+            
+            # Map global indices to the LOCAL indices expected by the block's preprocessor
+            local_indices_for_proc <- match(orig_indices_in_block, block_info$orig_indices)
+            if (any(is.na(local_indices_for_proc))) {
+                stop("Internal error: Mismatch between requested global indices and block's original indices.")
+            }
+            
+            # Apply the function using the LOCAL indices relative to the block
+            res_subset <- func(block_info$proc, X_subset, colind = local_indices_for_proc)
+            
+            # Place results back in the correct positions in the output list
+            results_list[matched_in_colind_idx] <- lapply(seq_len(ncol(res_subset)), function(k) res_subset[,k])
+            processed_cols[matched_in_colind_idx] <- TRUE
+        }
+    }
+    
+    if (!all(processed_cols)) {
+        stop("Some requested columns in 'colind' did not map to any provided block.")
+    }
+    
+    # Combine results respecting original colind order
+    do.call(cbind, results_list)
   }
   
   ret <- list(
+    # Note: init_transform is not defined for concat_pre_processor
+    # User should initialize individual preprocs before concatenating.
     transform = function(X, colind = NULL) {
       chk::chk_matrix(X)
       if (is.null(colind)) {
+        # Apply to full blocks in their natural order
         chk::chk_equal(ncol(X), length(unraveled_ids))
-        do.call(cbind, lapply(seq_along(block_indices), function(i) {
-          apply_transform(preprocs[[i]], X[,block_indices[[i]],drop=FALSE])
-        }))
+        res_list <- lapply(seq_along(map_list), function(i) {
+          block_info <- map_list[[i]]
+          apply_transform(block_info$proc, X[, block_info$orig_indices, drop = FALSE])
+        })
+        do.call(cbind, res_list)
       } else {
-        apply_fun(apply_transform, X, colind)
+        # Apply blockwise respecting colind order
+        apply_blockwise(apply_transform, X, colind)
       }
     },
     reverse_transform = function(X, colind = NULL) {
       chk::chk_matrix(X)
       if (is.null(colind)) {
+        # Reverse full blocks in their natural order
         chk::chk_equal(ncol(X), length(unraveled_ids))
-        do.call(cbind, lapply(seq_along(block_indices), function(i) {
-          reverse_transform(preprocs[[i]], X[,block_indices[[i]],drop=FALSE])
-        }))
+        res_list <- lapply(seq_along(map_list), function(i) {
+          block_info <- map_list[[i]]
+          reverse_transform(block_info$proc, X[, block_info$orig_indices, drop = FALSE])
+        })
+        do.call(cbind, res_list)
       } else {
-        apply_fun(reverse_transform, X, colind)
+        # Reverse blockwise respecting colind order
+        apply_blockwise(reverse_transform, X, colind)
       }
     }
+    # Store map_list? Might be useful for introspection.
+    # map_list = map_list 
   )
   
   class(ret) <- c("concat_pre_processor", "pre_processor")
   ret
 }
 
+
+
+#' @export
+apply_transform.concat_pre_processor <- function(x, X, colind=NULL,...) {
+  # Directly call the transform function stored within the concat object
+  x$transform(X, colind, ...)
+}
+
+#' @export
+reverse_transform.concat_pre_processor <- function(x, X, colind=NULL,...) {
+  # Directly call the reverse_transform function stored within the concat object
+  x$reverse_transform(X, colind, ...)
+}
 
 #' Print a prepper pipeline
 #' 

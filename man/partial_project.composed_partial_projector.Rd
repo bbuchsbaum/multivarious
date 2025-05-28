@@ -4,17 +4,23 @@
 \alias{partial_project.composed_partial_projector}
 \title{Partial Project Through a Composed Partial Projector}
 \usage{
-\method{partial_project}{composed_partial_projector}(x, new_data, colind, ...)
+\method{partial_project}{composed_partial_projector}(x, new_data, colind = NULL, ...)
 }
 \arguments{
 \item{x}{A \code{composed_partial_projector} object.}
 
 \item{new_data}{The input data matrix or vector.}
 
-\item{colind}{A numeric vector or a list of numeric vectors. If a single vector, applies to the first projector.
-If a list, its length must match the number of projectors in \code{x}.}
+\item{colind}{A numeric vector or a list of numeric vectors/NULLs.
+If a single vector, applies to the first projector only.
+If a list, its length should ideally match the number of projectors.
+\code{colind[[i]]} specifies the column indices (relative to the \emph{input} of stage \code{i})
+to use for the partial projection at stage \code{i}. A \code{NULL} entry means use full projection
+for that stage. If the list is shorter than the number of stages, \code{NULL} (full projection)
+is assumed for remaining stages. If a single numeric vector is provided, it is treated
+as \code{list(colind, NULL, NULL, ...)} for backward compatibility (partial only at first stage).}
 
-\item{...}{Additional arguments passed to \code{partial_project()} methods.}
+\item{...}{Additional arguments passed to \code{partial_project()} or \code{project()} methods.}
 }
 \value{
 The partially projected data after all projectors are applied.

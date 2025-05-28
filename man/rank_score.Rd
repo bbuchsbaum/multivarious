@@ -7,13 +7,26 @@
 rank_score(prob, observed)
 }
 \arguments{
-\item{prob}{matrix of predicted probabilities (observations x classes)}
+\item{prob}{Numeric matrix of predicted probabilities (observations x classes).
+Column names must correspond to class labels.}
 
-\item{observed}{vector of observed class labels}
+\item{observed}{Factor or vector of observed class labels. Must be present in \code{colnames(prob)}.}
 }
 \value{
-data.frame with prank and observed
+A \code{data.frame} with columns \code{prank} (the normalized rank score) and \code{observed} (the input labels).
 }
 \description{
-Calculate Rank Score for Predictions
+Computes the rank score (normalized rank of the true class probability) for each observation.
+Lower rank scores indicate better predictions (true class has higher probability).
 }
+\examples{
+probs <- matrix(c(0.1, 0.9, 0.8, 0.2), 2, 2, byrow=TRUE,
+               dimnames = list(NULL, c("A", "B")))
+obs <- factor(c("B", "A"))
+rank_score(probs, obs)
+}
+\seealso{
+Other classifier evaluation: 
+\code{\link{topk}()}
+}
+\concept{classifier evaluation}

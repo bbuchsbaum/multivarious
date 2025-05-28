@@ -23,3 +23,18 @@ a \code{rf_classifier} object with rfres (rf model), labels, scores
 \description{
 Uses \code{randomForest} to train a random forest on the provided scores and labels.
 }
+\examples{
+# Assume proj is a fitted projector object
+# Assume lbls are labels and sc are scores
+# if (requireNamespace("randomForest", quietly = TRUE)) {
+#   rf_classifier(proj, labels = lbls, scores = sc)
+# }
+}
+\seealso{
+\code{\link[randomForest]{randomForest}}
+
+Other classifier: 
+\code{\link{classifier.multiblock_biprojector}()},
+\code{\link{classifier.projector}()}
+}
+\concept{classifier}

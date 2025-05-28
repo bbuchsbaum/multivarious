@@ -17,3 +17,7 @@
 \description{
 Display a human-readable summary of a \code{classifier} object.
 }
+\examples{
+# Assume clf is a fitted classifier object
+# print(clf)
+}
