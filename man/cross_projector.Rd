@@ -14,9 +14,9 @@ cross_projector(
 )
 }
 \arguments{
-\item{vx}{the X coefficients}
+\item{vx}{the X coefficients. Must have the same number of columns as \code{vy}.}
 
-\item{vy}{the Y coefficients}
+\item{vy}{the Y coefficients. Must have the same number of columns as \code{vx}.}
 
 \item{preproc_x}{the X pre-processor}
 

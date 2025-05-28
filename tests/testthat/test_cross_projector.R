@@ -125,6 +125,7 @@ test_that("transfer converts X‑>Y (and Y‑>X) with low reconstruction error",
   expect_lt(mse_yx, 1e-4)
 })
 
+
 # -------------------------------------------------------------------------
 # 4. -- transfer with ridge uses lambda argument --------------------------
 # -------------------------------------------------------------------------
@@ -144,3 +145,21 @@ test_that("transfer uses ridge regularized projection when opts$ls_rr", {
 
   expect_equal(Y_hat, manual, tolerance = 1e-6)
 })
+
+# =========================================================================
+# 4. -- reprocess() validates column indices --------------------------------
+# =========================================================================
+test_that("reprocess.cross_projector validates column indices", {
+
+  dims <- make_blocks()
+  preproc <- prep(pass())
+  Xp <- init_transform(preproc, dims$X)
+  cp   <- cross_projector(dims$Vx, dims$Vy, preproc_x = preproc, preproc_y = preproc)
+
+  # Valid subset works
+  expect_silent(reprocess(cp, dims$X[, 1:2], colind = c(1, 2), source = "X"))
+
+  # Invalid index should error
+  expect_error(reprocess(cp, dims$X[, 1:2], colind = c(1, 10), source = "X"))
+})
+
