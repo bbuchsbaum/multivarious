@@ -98,6 +98,8 @@ coef.cross_projector <- function(object, source=c("X", "Y"),...) {
 #' @inheritParams reprocess
 #' @param source the source of the data (X or Y block)
 #' @return the re(pre-)processed data
+#' @details When `colind` is provided, each index is validated to be within the
+#'   available coefficient rows using `chk::chk_subset`.
 #' @export
 #' @family reprocess
 reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y"), ...) {
@@ -106,7 +108,8 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
     chk::chk_equal(ncol(new_data), nrow(coef.cross_projector(x, source=source)))
     colind <- 1:ncol(new_data)
   } else {
-    chk::chk_equal(length(colind), ncol(new_data)) 
+    chk::chk_equal(length(colind), ncol(new_data))
+    chk::chk_subset(colind, 1:nrow(coef.cross_projector(x, source=source)))
   }
     
   if (source == "X") {
