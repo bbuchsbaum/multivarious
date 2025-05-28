@@ -8,7 +8,6 @@ geneig(
   A = NULL,
   B = NULL,
   ncomp = 2,
-  preproc = prep(pass()),
   method = c("robust", "sdiag", "geigen", "primme"),
   which = "LR",
   ...
@@ -20,8 +19,6 @@ geneig(
 \item{B}{The right-hand side square matrix, same dimension as A.}
 
 \item{ncomp}{Number of eigenpairs to return.}
-
-\item{preproc}{A preprocessing function to apply to the matrices before solving the generalized eigenvalue problem.}
 
 \item{method}{One of:
 \itemize{
