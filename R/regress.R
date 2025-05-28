@@ -117,12 +117,14 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
       t(cf)
     }
     
-    # FIX: Remove intercept column from glmnet betas if intercept was FALSE for regress() input
-    if (method %in% c("mridge", "enet") && !intercept) {
-      b[, -1, drop=FALSE] # Remove the first column (intercept)
-    } else {
-      b
+    # FIX: Remove intercept column from glmnet betas to avoid dimension issues
+    # glmnet always includes an "(Intercept)" coefficient as the first column
+    # of the returned matrix, even when we supply our own intercept column.
+    # Drop that column unconditionally for the mridge and enet methods.
+    if (method %in% c("mridge", "enet")) {
+      b <- b[, -1, drop = FALSE]
     }
+    b
   }
   
   # Create a bi_projector
