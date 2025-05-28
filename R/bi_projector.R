@@ -62,7 +62,7 @@ project_vars.bi_projector <- function(x, new_data, ...) {
 genreconstruct <- function(x, comp, rowind, colind) {
   ip <- inverse_projection(x)
   out <- scores(x)[rowind,comp,drop=FALSE] %*% ip[comp,,drop=FALSE][,colind,drop=FALSE]
-  reverse_transform(x$preproc, out)
+  reverse_transform(x$preproc, out, colind)
 }
 
 #' @export
