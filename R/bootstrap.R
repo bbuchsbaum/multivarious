@@ -267,8 +267,8 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
 
 
   # --- Aggregate Results ---
-  Ab_array <- simplify2array(lapply(res_list, `[[`, "Ab"))       # k x k x nboot_actual
-  Scores_array <- simplify2array(lapply(res_list, `[[`, "Scores")) # n x k x nboot_actual
+  Ab_array <- simplify2array(lapply(res_list, `[[`, "Ab"), higher = TRUE)       # k x k x nboot_actual
+  Scores_array <- simplify2array(lapply(res_list, `[[`, "Scores"), higher = TRUE) # n x k x nboot_actual
 
   # --- Calculate Bootstrap Moments and Z-scores ---
 
