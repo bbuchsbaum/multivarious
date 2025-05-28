@@ -71,111 +71,45 @@ compose_partial_projector <- function(...) {
 partial_project.composed_partial_projector <- function(x, new_data, colind = NULL, ...) {
   projs <- x$projectors
   n_proj <- length(projs)
-  
-  if (n_proj == 0) return(new_data) # No projectors, return data as is
-  
-  # Standardize colind format to a list (user provides indices relative to ORIGINAL input)
-  if (!is.list(colind)) {
-    if (is.null(colind)) {
-      colind_list_orig <- rep(list(NULL), n_proj)
-    } else {
-      chk::chk_vector(colind)
-      chk::chk_numeric(colind)
-      colind_list_orig <- c(list(colind), rep(list(NULL), n_proj - 1))
+
+  if (n_proj == 0) return(new_data)
+
+  # normalise colind argument ------------------------------------------------
+  if (is.list(colind)) {
+    colind_list <- colind
+    if (length(colind_list) > 1 && any(vapply(colind_list[-1], Negate(is.null), logical(1)))) {
+      warning("Partial projection beyond the first stage is not supported; ignoring colind for later stages.")
     }
+    colind_first <- colind_list[[1]]
   } else {
-    if (length(colind) > n_proj) {
-      warning("Length of 'colind' list is greater than the number of stages. Extra elements ignored.")
-      colind_list_orig <- colind[1:n_proj]
-    } else if (length(colind) < n_proj) {
-      colind_list_orig <- c(colind, rep(list(NULL), n_proj - length(colind)))
-    } else {
-      colind_list_orig <- colind
-    }
-    lapply(colind_list_orig, function(ci) {
-      if (!is.null(ci)) {
-        chk::chk_vector(ci)
-        chk::chk_numeric(ci)
-      }
-    })
+    colind_first <- colind
   }
-  
-  # Handle input data shape
+
+  if (!is.null(colind_first)) {
+    chk::chk_vector(colind_first)
+    chk::chk_numeric(colind_first)
+  }
+
   if (is.vector(new_data)) {
     new_data <- matrix(new_data, nrow = 1)
   }
   chk::vld_matrix(new_data)
-  
-  # Initialize mapping: Input columns for stage 1 are original columns 1:p
-  # This assumes the user provides data corresponding ONLY to the original cols 
-  # specified in colind_list_orig[[1]] if it's not NULL.
-  p_initial <- shape(projs[[1]])[1]
-  current_input_to_orig_map <- 1:p_initial
 
-  # Apply projectors sequentially
-  current_data <- new_data
-  for (i in 1:n_proj) {
-    proj <- projs[[i]]
-    stage_colind_orig <- colind_list_orig[[i]] # User-specified ORIGINAL indices
-    
-    if (is.null(stage_colind_orig)) {
-      # Full projection for this stage
-      # Input data (`current_data`) columns correspond to `current_input_to_orig_map`
-      current_data <- project(proj, current_data, ...)
-      # Output map retains all output dimensions, but lineage isn't tracked here yet
-      # For now, assume the output columns map 1:k relative to the output
-      # A full lineage map would be needed to track origin precisely.
-      # Placeholder: The new map just indicates the dimension
-      current_input_to_orig_map <- 1:shape(proj)[2] 
-    } else {
-      # Partial projection for this stage
-      
-      # 1. Find which columns of `current_data` correspond to `stage_colind_orig`
-      #    We need the positions (local indices) within `current_data` that match 
-      #    the original indices provided by the user.
-      local_indices_to_use <- which(current_input_to_orig_map %in% stage_colind_orig)
-      
-      if (length(local_indices_to_use) == 0) {
-           stop("Stage ", i, ": None of the requested original column indices (", 
-                paste(stage_colind_orig, collapse=","), ") were found in the input data to this stage (",
-                "which corresponds to original indices: ", paste(current_input_to_orig_map, collapse=","),").")
-      }
-      
-      # 2. Check if the provided `current_data` actually contains these columns
-      #    The user must provide input `new_data` that aligns with the first non-NULL colind.
-      #    For subsequent stages, `current_data` *is* the input.
-      #    The number of columns in the input data for this stage MUST match the number 
-      #    of *available* input columns passed from the previous stage.
-      #    The `partial_project` call below needs data ONLY for the `local_indices_to_use`.
-      if (i == 1) {
-          # First stage: ncol(new_data) must match length(stage_colind_orig)
-           chk::chk_equal(ncol(current_data), length(stage_colind_orig))
-           data_for_partial_proj <- current_data # User supplied correctly subsetted data
-           # The local indices *for the projector* are simply 1:length(stage_colind_orig)
-           # because the data is already subsetted. But the projector's `partial_project`
-           # needs the indices relative to *its* full input space (original indices).
-           # --> This implies partial_project methods need to accept indices relative to original.
-           # Let's assume partial_project(proj, data_subset, colind_orig) works.
-           # We pass the subsetted data and the ORIGINAL indices it corresponds to.
-           current_data <- partial_project(proj, data_for_partial_proj, stage_colind_orig, ...)
+  # first stage --------------------------------------------------------------
+  if (!is.null(colind_first)) {
+    chk::chk_equal(ncol(new_data), length(colind_first))
+  } else {
+    chk::chk_equal(ncol(new_data), shape(projs[[1]])[1])
+  }
+  current_data <- partial_project(projs[[1]], new_data, colind_first, ...)
 
-      } else {
-          # Subsequent stages: Select the necessary columns from the output of the previous stage
-          data_for_partial_proj <- current_data[, local_indices_to_use, drop = FALSE]
-          # The `partial_project` method needs indices relative to *its* full input dimension.
-          # The full input dimension corresponds to the output of the previous stage.
-          # The `local_indices_to_use` are exactly those indices.
-          current_data <- partial_project(proj, data_for_partial_proj, local_indices_to_use, ...)
-      }
-      
-      # 3. Update the map for the next stage's input
-      # The output columns map 1:k relative to the output.
-      # Lineage isn't fully tracked without a proper index_map structure.
-      # Placeholder: The new map just indicates the dimension
-      current_input_to_orig_map <- 1:shape(proj)[2]
+  # remaining stages ---------------------------------------------------------
+  if (n_proj > 1) {
+    for (i in 2:n_proj) {
+      current_data <- project(projs[[i]], current_data, ...)
     }
   }
-  
+
   current_data
 }
 
@@ -294,43 +228,40 @@ coef.composed_projector <- function(object, ...) {
 #' @export
 #' @rdname compose_partial_projector
 `%>>%` <- function(lhs, rhs) {
-   # Check if lhs is already a composed projector
-   # Ensure rhs is a list containing the single projector
-   if (!is.list(rhs) || length(rhs) != 1 || !inherits(rhs[[1]], "projector")) {
-       # If rhs is a projector, wrap it in a list for consistent handling
-       if (inherits(rhs, "projector")) {
-           rhs_list <- list(rhs)
-           names(rhs_list) <- paste0("stage_", length(list(...)) + 1) # Needs context or better default naming
-           # Better: Use a placeholder name if none provided in original call context
-           rhs_list <- list(stage_new = rhs) 
-           # Need to check if name 'stage_new' collides! This logic needs care.
-       } else {
-           stop("`rhs` must be a projector object.")
-       }
-   } else {
-       # Assume rhs was provided like list(new_stage_name = projector_obj)
-       rhs_list <- rhs
-   }
-   
-   lhs_projs <- if (inherits(lhs, "composed_projector")) lhs$projectors else list(lhs)
-   lhs_names <- if (inherits(lhs, "composed_projector")) attr(lhs, "stage_names") else "stage_1"
-   
-   rhs_projs <- rhs_list
-   rhs_names <- names(rhs_list)
-   if (is.null(rhs_names) || rhs_names == "") rhs_names <- paste0("stage_", length(lhs_projs) + 1)
-   
-   # Combine projectors and check for name collisions
-   all_projs <- c(lhs_projs, rhs_projs)
-   all_names <- c(lhs_names, rhs_names)
-   
-   # Ensure unique names - simple appending suffix for now
-   if (anyDuplicated(all_names)) {
-       warning("Duplicate stage names detected during composition with `%>>%`. Appending suffixes.")
-       all_names <- make.unique(all_names, sep = ".")
-   }
-   
-   # Use do.call with named list
-   do.call(compose_partial_projector, setNames(all_projs, all_names))
+  # left-hand side -----------------------------------------------------------
+  if (inherits(lhs, "composed_projector")) {
+    lhs_projs  <- lhs$projectors
+    lhs_names  <- attr(lhs, "stage_names", exact = TRUE)
+  } else {
+    chk::chk_s3_class(lhs, "projector")
+    lhs_projs  <- list(lhs)
+    lhs_names  <- "stage_1"
+  }
+
+  # right-hand side ----------------------------------------------------------
+  if (is.list(rhs) && length(rhs) == 1 && inherits(rhs[[1]], "projector")) {
+    rhs_projs  <- rhs
+    rhs_names  <- names(rhs)
+    if (is.null(rhs_names) || rhs_names == "") {
+      rhs_names <- paste0("stage_", length(lhs_projs) + 1)
+    }
+  } else if (inherits(rhs, "projector")) {
+    rhs_projs  <- list(rhs)
+    rhs_names  <- paste0("stage_", length(lhs_projs) + 1)
+  } else {
+    stop("`rhs` must be a projector or a single-element named list containing one.")
+  }
+
+  # combine -----------------------------------------------------------------
+  all_projs <- c(lhs_projs, rhs_projs)
+  all_names <- c(lhs_names, rhs_names)
+
+  if (anyDuplicated(all_names)) {
+    warning("Duplicate stage names detected during composition with `%>>%`. Making names unique.")
+    all_names <- make.unique(all_names, sep = ".")
+  }
+
+  do.call(compose_partial_projector, setNames(all_projs, all_names))
 }
 
 #' @export
@@ -491,8 +422,9 @@ reconstruct.composed_projector <- function(x, scores, comp = NULL, rowind = NULL
   # Subset initial scores based on requested components and rows
   # Note: 'comp' refers to components in the *final* space
   current_recon <- scores[rowind, comp, drop = FALSE]
-  
-  # --- Iterative Reconstruction --- 
+  comp_indices <- comp
+
+  # --- Iterative Reconstruction ---
   # Iterate backwards from the last stage to the first
   for (i in n_proj:1) {
       proj_i <- projs[[i]]
@@ -514,8 +446,7 @@ reconstruct.composed_projector <- function(x, scores, comp = NULL, rowind = NULL
                ": Input components (", num_comps_in_current,
                ") exceed available rows in inverse projection (", nrow(inv_proj_i), ")")
       }
-      # Select rows of V_i+ corresponding to the components in current_recon
-      inv_proj_i_sub <- inv_proj_i[1:num_comps_in_current, , drop = FALSE]
+      inv_proj_i_sub <- inv_proj_i[comp_indices, , drop = FALSE]
       # Apply the linear inverse projection
       current_recon <- current_recon %*% inv_proj_i_sub
       
@@ -526,8 +457,11 @@ reconstruct.composed_projector <- function(x, scores, comp = NULL, rowind = NULL
           # Pass the result of the inverse projection to reverse_transform
           current_recon <- reverse_transform(preproc_i, current_recon)
       } # else: If no preprocessor, current_recon is already correct for this step
-      
+
       # ------------------------
+      if (i > 1) {
+          comp_indices <- 1:shape(projs[[i-1]])[2]
+      }
   }
   
   # --- Final Column Selection --- 
