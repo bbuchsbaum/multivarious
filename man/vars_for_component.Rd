@@ -15,6 +15,8 @@ vars_for_component(x, k, ...)
 \item{k}{The index of the output component to query.}
 
 \item{...}{Additional arguments passed to specific methods.}
+
+\item{tol}{Numeric tolerance for determining non-zero coefficients. Default is 1e-8 for some methods. Passed via \code{...}.}
 }
 \value{
 A sorted numeric vector of unique indices corresponding to the original input variables.

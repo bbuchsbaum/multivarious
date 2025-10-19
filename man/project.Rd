@@ -24,7 +24,7 @@ subspace defined by the model. This allows for the transformation of new data in
 # Example with the bi_projector class
 X <- matrix(rnorm(10*20), 10, 20)
 svdfit <- svd(X)
-p <- bi_projector(svdfit$v, s = svdfit$u \%\% diag(svdfit$d), sdev=svdfit$d)
+p <- bi_projector(svdfit$v, s = svdfit$u \%*\% diag(svdfit$d), sdev=svdfit$d)
 
 # Project new_data onto the same subspace as the original data
 new_data <- matrix(rnorm(5*20), 5, 20)

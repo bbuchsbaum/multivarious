@@ -184,7 +184,7 @@ ny_preprocessed <- nystrom_approx(
   kernel_func = rbf_kernel,
   ncomp = 2,
   nlandmarks = 50,
-  preproc = prep(center(), scale())  # Preprocessing pipeline
+  preproc = center() + colscale()  # Preprocessing pipeline using compose operator
 )
 ```
 

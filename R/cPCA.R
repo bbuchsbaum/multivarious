@@ -104,16 +104,19 @@
 #'
 #'   # Loadings (contrastive directions) (features x components)
 #'   print(head(res_cpca_plus$v))
+#' }
 #'
-#'   # Plot scores
-#'   plot(res_cpca_plus$s[, 1], res_cpca_plus$s[, 2],
+#' \dontrun{
+#' # Plot example (not run to avoid graphics device issues)
+#' if (requireNamespace("geigen", quietly = TRUE) && requireNamespace("corpcor", quietly = TRUE)) {
+#'   set.seed(123)
+#'   X_b <- matrix(rnorm(150 * 50), nrow=150, ncol=50)
+#'   X_f <- cbind(matrix(rnorm(100*5, sd=2), 100, 5), matrix(rnorm(100*45), 100, 45))
+#'   res <- cPCAplus(X_f, X_b, ncomp = 5, method = "geigen")
+#'   plot(res$s[, 1], res$s[, 2],
 #'        xlab = "Contrastive Component 1", ylab = "Contrastive Component 2",
-#'        main = "cPCA++ Scores (geigen method)")
-#'
-#'   # Example with corpcor method
-#'   res_cpca_corp <- cPCAplus(X_f, X_b, ncomp = 5, method = "corpcor")
-#'   print(head(res_cpca_corp$s)) # Scores in whitened space
-#'   print(head(res_cpca_corp$v)) # Loadings in whitened space
+#'        main = "cPCA++ Scores")
+#' }
 #' }
 #'
 #' @importFrom stats prcomp

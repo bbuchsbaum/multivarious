@@ -134,15 +134,18 @@ transpose <- function(x,...) UseMethod("transpose")
 #' the impact of dimensionality reduction or when visualizing approximations of the original data.
 #'
 #' @param x The model fit, typically an object of a class that implements a `reconstruct` method
-#' @param comp A vector of component indices to use in the reconstruction
-#' @param rowind The row indices to reconstruct (optional). If not provided, all rows are used.
-#' @param colind The column indices to reconstruct (optional). If not provided, all columns are used.
-#' @param ... Additional arguments passed to the underlying `reconstruct` method
+#' @param ... Additional arguments passed to specific methods. Common parameters include:
+#'   \describe{
+#'     \item{`comp`}{A vector of component indices to use in the reconstruction}
+#'     \item{`rowind`}{The row indices to reconstruct (optional)}
+#'     \item{`colind`}{The column indices to reconstruct (optional)}
+#'     \item{`scores`}{(For `composed_projector` only) A numeric matrix of scores to reconstruct from}
+#'   }
 #' @return A reconstructed data set based on the selected components, rows, and columns
 #' @export
 #' @family reconstruct
 #' @seealso \code{\link{bi_projector}} for an example of a two-way mapping model that can be reconstructed
-reconstruct <- function(x, comp, rowind, colind, ...) UseMethod("reconstruct")
+reconstruct <- function(x, ...) UseMethod("reconstruct")
 
 
 
@@ -610,7 +613,7 @@ feature_importance <- function(x, ...) UseMethod("feature_importance")
 #' @name perm_test
 #' @aliases perm_test perm_test.pca perm_test.cross_projector perm_test.discriminant_projector perm_test.multiblock_biprojector
 #'
-#' @usage perm_test(x, ...)
+#' @usage NULL
 #'
 #' @param x A fitted model object (e.g. \code{pca}, \code{cross_projector}, \code{discriminant_projector}, \code{multiblock_biprojector}).
 #' @param X (Used by \code{pca}, \code{cross_projector}, \code{discriminant_projector}) The original primary data matrix used to fit \code{x}. Ignored by the \code{multiblock_biprojector} method.
@@ -628,7 +631,8 @@ feature_importance <- function(x, ...) UseMethod("feature_importance")
 #' @param use_svd_solver (Used by \code{pca}) Optional string specifying the SVD solver (default "fast").
 #' @param use_rspectra (Used by \code{multiblock_biprojector}) Logical indicating whether to use RSpectra for eigenvalue calculation (default \code{TRUE}). Passed directly as a named argument.
 #' @param predict_method (Used by \code{discriminant_projector}) Prediction method (`"lda"` or `"euclid"`) used by the default measure function (default "lda").
-#' @param ... Additional arguments passed down to `shuffle_fun` or `measure_fun` (if applicable).\n#'   Note: For \code{multiblock} methods, \code{Xlist}, \code{comps}, \code{alpha}, and \code{use_rspectra} (for biprojector) are handled as direct named arguments, not via \code{...}.
+#' @param ... Additional arguments passed down to `shuffle_fun` or `measure_fun` (if applicable).
+#'   Note: For \code{multiblock} methods, \code{Xlist}, \code{comps}, \code{alpha}, and \code{use_rspectra} (for biprojector) are handled as direct named arguments, not via \code{...}.
 #'
 #' @details
 #' This function provides a framework for permutation testing in various multivariate models.
@@ -655,7 +659,7 @@ feature_importance <- function(x, ...) UseMethod("feature_importance")
 #'   \item{\strong{`cross_projector`} and \strong{`discriminant_projector`}:}{
 #'     Returns an object of class \code{perm_test}, a list containing: \code{statistic}, \code{perm_values}, \code{p.value}, \code{alternative}, \code{method}, \code{nperm}, \code{call}.}
 #'   \item{\strong{`pca`}, \strong{`multiblock_biprojector`}, and \strong{`multiblock_projector`}:}{
-#'     Returns an object inheriting from \code{perm_test} (classes \code{perm_test_pca}, \code{perm_test_multiblock}, or \code{perm_test} respectively for multiblock_projector), \n
+#'     Returns an object inheriting from \code{perm_test} (classes \code{perm_test_pca}, \code{perm_test_multiblock}, or \code{perm_test} respectively for multiblock_projector), 
 #'     a list containing: \code{component_results} (data frame with observed stat, pval, CIs per component), \code{perm_values} (matrix of permuted stats), \code{alpha} (if applicable), \code{alternative}, \code{method}, \code{nperm} (vector of successful permutations per component), \code{call}.}
 #' }
 #'
@@ -793,20 +797,21 @@ screeplot <- function(x, ...) UseMethod("screeplot")
 #'
 #' @export
 #' @family cv
-#' @seealso \code{\link{cv_generic}}, \code{\link{summary.cv_fit}}, \code{\link{plot.cv_fit}}
+#' @seealso \code{\link{cv_generic}}
 cv <- function(x, folds, ...) {
   UseMethod("cv")
 }
 
 
 #' Identify Original Variables Used by a Projector
-#' 
-#' Determines which columns from the *original* input space contribute 
+#'
+#' Determines which columns from the *original* input space contribute
 #' (have non-zero influence) to *any* of the output components of the projector.
-#' 
+#'
 #' @param x A projector object (e.g., `projector`, `composed_projector`).
+#' @param tol Numeric tolerance for determining non-zero coefficients. Default is 1e-8 for some methods. Passed via `...`.
 #' @param ... Additional arguments passed to specific methods.
-#' 
+#'
 #' @return A sorted numeric vector of unique indices corresponding to the original input variables.
 #' @export
 variables_used <- function(x, ...) {
@@ -814,14 +819,15 @@ variables_used <- function(x, ...) {
 }
 
 #' Identify Original Variables for a Specific Component
-#' 
-#' Determines which columns from the *original* input space contribute 
+#'
+#' Determines which columns from the *original* input space contribute
 #' (have non-zero influence) to a *specific* output component of the projector.
-#' 
+#'
 #' @param x A projector object (e.g., `projector`, `composed_projector`).
 #' @param k The index of the output component to query.
+#' @param tol Numeric tolerance for determining non-zero coefficients. Default is 1e-8 for some methods. Passed via `...`.
 #' @param ... Additional arguments passed to specific methods.
-#' 
+#'
 #' @return A sorted numeric vector of unique indices corresponding to the original input variables.
 #' @export
 vars_for_component <- function(x, k, ...) {

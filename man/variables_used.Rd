@@ -13,6 +13,8 @@ variables_used(x, ...)
 \item{x}{A projector object (e.g., \code{projector}, \code{composed_projector}).}
 
 \item{...}{Additional arguments passed to specific methods.}
+
+\item{tol}{Numeric tolerance for determining non-zero coefficients. Default is 1e-8 for some methods. Passed via \code{...}.}
 }
 \value{
 A sorted numeric vector of unique indices corresponding to the original input variables.

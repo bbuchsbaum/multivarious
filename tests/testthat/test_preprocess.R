@@ -79,6 +79,107 @@ test_that("can compose two pre-processors", {
 
 })
 
+# =============================================================================
+# Tests for New Preprocessing API
+# =============================================================================
+
+test_that("new API: fit() and transform() work correctly", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  
+  # Test centering with new API
+  preproc <- center()
+  fitted_preproc <- fit(preproc, mat1)
+  
+  # Transform the same data
+  x_transformed <- multivarious::transform(fitted_preproc, mat1)
+  
+  # Inverse transform
+  x_reconstructed <- multivarious::inverse_transform(fitted_preproc, x_transformed)
+  
+  expect_equal(mat1, x_reconstructed)
+  
+  # Check that centering actually happened
+  expect_true(all(mat1 != x_transformed))
+  expect_true(max(abs(colMeans(x_transformed))) < 1e-14)
+})
+
+test_that("new API: fit_transform() works correctly", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  
+  result <- fit_transform(center(), mat1)
+  fitted_preproc <- result$preproc
+  x_transformed <- result$transformed
+  
+  # Should be equivalent to separate fit() and transform()
+  preproc <- center()
+  fitted_preproc2 <- fit(preproc, mat1)
+  x_transformed2 <- multivarious::transform(fitted_preproc2, mat1)
+  
+  expect_equal(x_transformed, x_transformed2)
+})
+
+test_that("new API: preprocess() helper works correctly", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  
+  result <- preprocess(standardize(), mat1)
+  fitted_preproc <- result$preproc
+  x_transformed <- result$transformed
+  
+  # Verify standardization worked
+  expect_true(max(abs(colMeans(x_transformed))) < 1e-14)
+  expect_true(max(abs(apply(x_transformed, 2, sd) - 1)) < 1e-14)
+  
+  # Verify reconstruction
+  x_reconstructed <- multivarious::inverse_transform(fitted_preproc, x_transformed)
+  expect_equal(mat1, x_reconstructed)
+})
+
+test_that("new API: error handling for unfitted preprocessor", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  
+  # For prepper objects, they don't have methods for the new API
+  unfitted_preproc <- center()
+  
+  expect_error(
+    multivarious::inverse_transform(unfitted_preproc, mat1),
+    "no applicable method"
+  )
+  
+  # Create a pre_processor but don't initialize it properly
+  # This simulates an unfitted preprocessor from the new API
+  proc <- prep(center())
+  attr(proc, "fitted") <- FALSE
+  
+  expect_error(
+    multivarious::transform(proc, mat1),
+    "Pre-processor not fitted"
+  )
+  
+  expect_error(
+    multivarious::inverse_transform(proc, mat1), 
+    "Pre-processor not fitted"
+  )
+})
+
+test_that("new API: works with different preprocessing types", {
+  mat1 <- matrix(rnorm(10*15), 10, 15)
+  
+  # Test pass() preprocessor
+  result1 <- preprocess(pass(), mat1)
+  expect_equal(mat1, result1$transformed)
+  
+  # Test colscale with z-scoring
+  result2 <- preprocess(colscale(type="z"), mat1)
+  x_scaled <- result2$transformed
+  expect_true(max(abs(apply(x_scaled, 2, sd) - 1)) < 1e-14)
+  
+  # Test chain: center then scale
+  result3 <- preprocess(center() %>% colscale(type="z"), mat1)
+  x_std <- result3$transformed
+  expect_true(max(abs(colMeans(x_std))) < 1e-14)
+  expect_true(max(abs(apply(x_std, 2, sd) - 1)) < 1e-14)
+})
+
 
 
 test_that("can preprocess a matrix with a colind", {

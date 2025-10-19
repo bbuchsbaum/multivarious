@@ -47,14 +47,24 @@ project_vars.bi_projector <- function(x, new_data, ...) {
   
   sc <- scores(x)
   chk::chk_equal(nrow(new_data), nrow(sc))
-  
+
+  # Transform data using the same preprocessor that produced the scores
+  data_proc <- apply_transform(x$preproc, new_data)
+
   variance <- sdev(x)^2
-  # Check for zero or near-zero variance  
   if (any(abs(variance) < 1e-12)) {
     warning("Some variance values are near zero; results may be unstable.")
   }
-  
-  t(new_data) %*% sc %*% diag(1/variance, nrow=length(variance), ncol=length(variance))
+
+  res <- t(data_proc) %*% sc %*%
+    diag(1 / variance, nrow = length(variance), ncol = length(variance))
+
+  n_samples <- nrow(data_proc)
+  if (n_samples > 1) {
+    res <- res / (n_samples - 1)
+  }
+
+  res
 }
 
 #' @keywords internal

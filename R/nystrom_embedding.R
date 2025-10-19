@@ -81,9 +81,9 @@
 #' # Projection (using standard result as example)
 #' scores_new <- project(res_std, X[1:10,])
 #' head(scores_new)
-nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL, 
-                           landmarks=NULL, nlandmarks=10, preproc=pass(), 
-                           method=c("standard","double"), 
+nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
+                           landmarks=NULL, nlandmarks=10, preproc=pass(),
+                           method=c("standard","double"),
                            center=FALSE, # Added center argument
                            l=NULL, use_RSpectra=TRUE, ...) {
   
@@ -128,46 +128,38 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
     kernel_func <- function(X, Y, ...) X %*% t(Y)
   }
   
-  # Handle preproc argument (accept function or prep object)
-  if (!inherits(preproc, "pre_processor")) {
-      if (is.function(preproc)) {
-          proc <- prep(preproc)
-      } else {
-          stop("'preproc' must be a 'prep' object or a pre-processing function.")
-      }
-  } else {
-      proc <- preproc
-  }
-  
   # Placeholder check for centering - not implemented yet
   if (center) {
       warning("Kernel centering (center=TRUE) is requested but not yet implemented. Proceeding with uncentered kernel.")
       # Future: implement kernel centering logic here or within kernel calls
   }
-  
-  X_preprocessed <- init_transform(proc, X)
-  
+
+  # Store original input dimension before preprocessing
+  original_ncol <- ncol(X)
+
+  # Fit and transform preprocessing pipeline
+  result <- fit_transform(preproc, X)
+  proc <- result$preproc  # Fitted preprocessor
+  X_preprocessed <- result$transformed
+
   # Determine sets
   non_landmarks <- setdiff(seq_len(N), landmarks)
-  
-  X_l <- X_preprocessed[landmarks, , drop=FALSE]         
+
+  X_l <- X_preprocessed[landmarks, , drop=FALSE]
   X_nl <- if (length(non_landmarks) > 0) X_preprocessed[non_landmarks, , drop=FALSE] else matrix(0, 0, ncol(X_preprocessed))
-  
+
   # Compute kernel submatrices
   K_mm <- kernel_func(X_l, X_l, ...)
   K_nm <- if (length(non_landmarks) > 0) kernel_func(X_nl, X_l, ...) else matrix(0, 0, m)
-  
-  # Function for partial SVD or full eigen if needed, with re-orthogonalization for eigen
+
+  # Function for partial SVD or full eigen if needed
   low_rank_decomp <- function(M, k) {
     # Check if k exceeds dimensions or if RSpectra should not be used
     if (k >= nrow(M) || !use_RSpectra) {
       # full eigen decomposition
       eig <- eigen(M, symmetric=TRUE)
-      # Select top k and re-orthogonalize
-      vecs <- eig$vectors[, 1:k, drop=FALSE]
-      # Re-orthogonalize using QR
-      vecs_ortho <- qr.Q(qr(vecs))
-      return(list(d = eig$values[1:k], v = vecs_ortho))
+      # Eigenvectors from eigen() are already orthonormal, no need to re-orthogonalize
+      return(list(d = eig$values[1:k], v = eig$vectors[, 1:k, drop=FALSE]))
     } else {
       # partial SVD using RSpectra
       sv <- tryCatch(RSpectra::svds(M, k=k, nu=0, nv=k), # only need V
@@ -175,13 +167,12 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
                          warning(sprintf("RSpectra::svds failed: %s. Falling back to eigen().", e$message))
                          NULL
                      })
-      
+
       if (is.null(sv)) {
          # Fallback to eigen if svds fails
          eig <- eigen(M, symmetric=TRUE)
-         vecs <- eig$vectors[, 1:k, drop=FALSE]
-         vecs_ortho <- qr.Q(qr(vecs))
-         return(list(d = eig$values[1:k], v = vecs_ortho))
+         # Eigenvectors from eigen() are already orthonormal
+         return(list(d = eig$values[1:k], v = eig$vectors[, 1:k, drop=FALSE]))
       } else {
           # svds returns U,D,V with M = U D V^T
           # For symmetric M, eigenvectors are V (or U)
@@ -192,12 +183,14 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
       }
     }
   }
-  
-  meta_info <- list(method = method, 
-                    landmarks = landmarks, 
-                    kernel_func = kernel_func, 
-                    ncomp = ncomp, 
+
+  meta_info <- list(method = method,
+                    landmarks = landmarks,
+                    kernel_func = kernel_func,
+                    ncomp = ncomp,
                     center = center,
+                    X_landmarks = X_l,  # Store landmark data for projection
+                    original_ncol = original_ncol,  # Store original input dimension
                     extra_args = list(...)) # Store extra args passed to kernel
   
   if (method == "standard") {
@@ -371,7 +364,7 @@ project.nystrom_approx <- function(x, new_data, ...) {
   
   # Use the *projector* object for reprocess to get consistent preprocessing
   new_data_p <- reprocess(x, new_data)
-  K_new_landmark <- kernel_func(new_data_p, X_l, meta$extra_args)
+  K_new_landmark <- do.call(kernel_func, c(list(new_data_p, X_l), meta$extra_args))
   
   if (meta$method == "double") {
     # Double Nyström projection:
@@ -392,36 +385,71 @@ project.nystrom_approx <- function(x, new_data, ...) {
     
   } else { # method == "standard"
     # Standard Nyström projection:
-    # approx_scores(new) = K_new_landmark * U_mm * Lambda_mm^{-1/2} * diag(sdev_hat)
-    # where sdev_hat = sqrt( (N/m) * lambda_mm )
-    
+    # For training: U_full = sqrt(m/N) * [U_mm; K_nm * U_mm * inv(Lambda_mm)]
+    # Scores = U_full * diag(sdev)
+    # For test: U_test = sqrt(m/N) * K_test_landmark * U_mm * inv(Lambda_mm)
+    # Scores_test = U_test * diag(sdev)
+
     if (is.null(meta$U_mm) || is.null(meta$lambda_mm)) {
         stop("Standard Nystrom model object 'x' is missing necessary components for projection.")
     }
-    
+
     lambda_mm <- meta$lambda_mm
     U_mm <- meta$U_mm
     k_eff <- length(lambda_mm)
-    
-    # Ensure lambda_mm > 0 before sqrt
-    lambda_mm[lambda_mm <= 0] <- .Machine$double.eps # Replace non-positive with small value
-    
-    # Calculate the projection matrix: U_mm * Lambda_mm^{-1/2} * diag(sdev_hat)
-    # inv_sqrt_lambda_mm_mat <- diag(1 / sqrt(lambda_mm), nrow = k_eff, ncol = k_eff)
-    # proj_matrix <- U_mm %*% inv_sqrt_lambda_mm_mat %*% diag(x$sdev, nrow=k_eff, ncol=k_eff)
-    
-    # Simpler: Proj = U_mm * diag( 1/lambda_mm * sdev_hat ) = U_mm * diag( sqrt(N/m / lambda_mm) )
-    N <- nrow(x$v) # Get N from the stored eigenvectors dimension
+
+    # Ensure lambda_mm > 0 before inversion
+    lambda_mm[lambda_mm <= 0] <- .Machine$double.eps
+
+    # Get dimensions
+    N <- nrow(x$v) # Training sample size
     m <- length(meta$landmarks)
-    proj_vector <- sqrt((N/m) / lambda_mm) # Vector for diagonal matrix
-    
-    # Handle potential Inf/NaN if lambda_mm was zero
-    proj_vector[!is.finite(proj_vector)] <- 0 
-    
+
+    # Projection formula: K_new_landmark * U_mm * diag(sqrt(m/N) * sdev / lambda_mm)
+    # This matches the training formula for non-landmarks
+    scaling_factor <- sqrt(m / N)
+    proj_vector <- (scaling_factor * x$sdev) / lambda_mm
+
+    # Handle potential Inf/NaN
+    proj_vector[!is.finite(proj_vector)] <- 0
+
     proj_matrix <- U_mm %*% diag(proj_vector, nrow=k_eff, ncol=k_eff)
-    
+
     scores <- K_new_landmark %*% proj_matrix
   }
   
   scores
+}
+
+#' Reprocess data for Nyström approximation
+#'
+#' Apply preprocessing to new data for projection using a Nyström approximation.
+#' This method overrides the default `reprocess.projector` to handle the fact that
+#' Nyström components are in kernel space (not feature space).
+#'
+#' @param x A `nystrom_approx` object
+#' @param new_data A matrix with the same number of columns as the original training data
+#' @param colind Optional column indices (not typically used for Nyström)
+#' @param ... Additional arguments (ignored)
+#'
+#' @return Preprocessed data matrix
+#' @export
+reprocess.nystrom_approx <- function(x, new_data, colind = NULL, ...) {
+  # For Nyström, we need to check against the original input dimension,
+  # not the component dimension (which is N x ncomp in kernel space)
+  original_ncol <- x$meta$original_ncol
+
+  if (is.null(original_ncol)) {
+    stop("Cannot reprocess: original input dimension not found in model metadata. ",
+         "This may be an older nystrom_approx object that needs to be retrained.")
+  }
+
+  if (is.null(colind)) {
+    # Full dimension check
+    chk::chk_equal(ncol(new_data), original_ncol)
+    apply_transform(x$preproc, new_data)
+  } else {
+    chk::chk_equal(length(colind), ncol(new_data))
+    apply_transform(x$preproc, new_data, colind)
+  }
 }

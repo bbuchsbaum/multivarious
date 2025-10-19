@@ -33,11 +33,13 @@
 #' @return An object of class `multiblock_classifier`, which also inherits from `classifier`.
 #' @export 
 #' @family classifier
-classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=NULL, 
+classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=NULL,
                                               block=NULL, global_scores=TRUE, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
-    chk::chk_true(all(colind>0))
+    chk::chk_numeric(colind)
+    chk::chk_true(all(colind == as.integer(colind)))
+    chk::chk_true(all(colind > 0))
     if (!is.null(block)) {
       rlang::abort("can either supply `colind` or `block` but not both")
     }
@@ -99,7 +101,9 @@ classifier.multiblock_biprojector <- function(x, colind=NULL, labels, new_data=N
 classifier.discriminant_projector <- function(x, colind=NULL, knn=1,...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
-    chk::chk_true(all(colind>0))
+    chk::chk_numeric(colind)
+    chk::chk_true(all(colind == as.integer(colind)))
+    chk::chk_true(all(colind > 0))
   }
   if (!is.numeric(knn) || knn < 1 || knn != as.integer(knn)) {
     stop("knn must be a positive integer")
@@ -123,9 +127,11 @@ classifier.discriminant_projector <- function(x, colind=NULL, knn=1,...) {
 new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, ...) {
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
-    chk::chk_true(all(colind>0))
+    chk::chk_numeric(colind)
+    chk::chk_true(all(colind == as.integer(colind)))
+    chk::chk_true(all(colind > 0))
   }
-  
+
   if (!is.numeric(knn) || knn < 1 || knn != as.integer(knn)) {
     stop("knn must be a positive integer")
   }
@@ -138,17 +144,20 @@ new_classifier <- function(x, labels, scores, colind=NULL, knn=1, classes=NULL, 
   if (!is.factor(labels)) {
       labels <- factor(labels)
   }
-  
+
   chk::chk_equal(length(labels), nrow(scores))
-  
+
   structure(
-    list(
-      projector=x,
-      labels=labels,
-      scores=scores,
-      colind=colind,
-      knn=knn,
-      ...), # Store extra args passed to constructor
+    c(
+      list(...), # Put ... first to prevent overwriting named entries
+      list(
+        projector=x,
+        labels=labels,
+        scores=scores,
+        colind=colind,
+        knn=knn
+      )
+    ),
     class=c(classes, "classifier")
   )
 }
@@ -177,10 +186,12 @@ rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
   if (!requireNamespace("randomForest", quietly = TRUE)) {
     stop("Please install package 'randomForest' for 'rf_classifier'")
   }
-  
+
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
-    chk::chk_true(all(colind>0))
+    chk::chk_numeric(colind)
+    chk::chk_true(all(colind == as.integer(colind)))
+    chk::chk_true(all(colind > 0))
   }
   
   # C1: Coerce labels to factor (if not already factor)
@@ -212,6 +223,7 @@ rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
       rfres=rfres,
       labels=labels,
       scores=scores,
+      feat_names=colnames(scores_df), # Store sanitized feature names
       importance=imp,
       colind=colind
       # Do not pass ... here unless intended for storage
@@ -241,10 +253,12 @@ classifier.projector <- function(x, colind=NULL, labels, new_data=NULL, knn=1, g
   if (!missing(global_scores) && !is.null(global_scores)) {
      warning("'global_scores' argument is deprecated and ignored. Reference scores are now determined automatically based on whether 'new_data' is provided.")
   }
-  
+
   if (!is.null(colind)) {
     chk::chk_true(length(colind) <= shape(x)[1])
-    chk::chk_true(all(colind>0))
+    chk::chk_numeric(colind)
+    chk::chk_true(all(colind == as.integer(colind)))
+    chk::chk_true(all(colind > 0))
   }
   
   if (!is.numeric(knn) || knn < 1 || knn != as.integer(knn)) {
@@ -485,36 +499,61 @@ project.classifier <- function(x, new_data, ...) {
   if (!is.null(x$projector_args)) { # Assuming constructor stores relevant args
       proj_args <- utils::modifyList(x$projector_args, proj_args)
   }
-  
+
   # Use colind stored in classifier if not overridden in ...
   use_colind <- proj_args$colind
   if (is.null(use_colind)) {
       use_colind <- x$colind
   }
-  
+
+  # Remove colind and new_data from proj_args to prevent duplicate matching
+  proj_args$colind <- NULL
+  proj_args$new_data <- NULL
+
   # Project using appropriate method based on colind
   scores <- if (!is.null(use_colind)) {
     rlang::exec(partial_project, x$projector, new_data = new_data, colind = use_colind, !!!proj_args)
   } else {
     rlang::exec(project, x$projector, new_data = new_data, !!!proj_args)
   }
-  
+
   scores
 }
 
 #' @noRd
 prepare_predict <- function(object, colind=NULL, ncomp=NULL, new_data,...) {
-  # Determine the colind to use for projection
+  # Determine the colind or block to use for projection
   use_colind <- colind
-  if (is.null(use_colind)) {
+  use_block <- NULL
+
+  # Check for stored block (only for multiblock classifiers)
+  if (is.null(use_colind) && !is.null(object$block)) {
+    use_block <- object$block
+  }
+
+  # Default to stored colind if neither colind nor block provided
+  if (is.null(use_colind) && is.null(use_block)) {
     use_colind <- object$colind # Default to colind stored in classifier
   }
-  
+
+  # Ensure colind and block are mutually exclusive
+  if (!is.null(use_colind) && !is.null(use_block)) {
+    rlang::abort("Cannot use both `colind` and `block` simultaneously.")
+  }
+
   # C2 & C3: Robust handling of new_data dimensions and type
   expected_cols_original <- shape(object$projector)[1] # Expect cols matching original data space
   if (!is.null(use_colind)) {
       # If colind is used, new_data should have columns matching the length of colind
       expected_cols_subset <- length(use_colind)
+  } else if (!is.null(use_block)) {
+      # If block is used, need to determine expected columns from block
+      # This requires the projector to support block_indices
+      if (!is.null(object$projector$block_indices)) {
+        expected_cols_subset <- length(object$projector$block_indices[[use_block]])
+      } else {
+        expected_cols_subset <- expected_cols_original
+      }
   } else {
       expected_cols_subset <- expected_cols_original
   }
@@ -530,7 +569,7 @@ prepare_predict <- function(object, colind=NULL, ncomp=NULL, new_data,...) {
   } else {
       stop("'new_data' must be a numeric vector, matrix, or data frame.")
   }
-  
+
   # Determine number of components
   max_comps <- shape(object$projector)[2]
   if (is.null(ncomp)) {
@@ -539,16 +578,18 @@ prepare_predict <- function(object, colind=NULL, ncomp=NULL, new_data,...) {
     chk::chk_whole_number(ncomp)
     chk::chk_range(ncomp, c(1, max_comps))
   }
-  
+
   # Project the data
   proj <- if (!is.null(use_colind)) {
     partial_project(object$projector, new_data, colind = use_colind, ...) # Pass ...
+  } else if (!is.null(use_block)) {
+    project_block(object$projector, new_data, block = use_block, ...) # Pass ...
   } else {
     project(object$projector, new_data, ...) # Pass ...
   }
-  
+
   # Return list with projected data and determined parameters
-  list(proj=proj, new_data=new_data, colind=use_colind, ncomp=ncomp)
+  list(proj=proj, new_data=new_data, colind=use_colind, block=use_block, ncomp=ncomp)
 }
 
 
@@ -594,15 +635,20 @@ prepare_predict <- function(object, colind=NULL, ncomp=NULL, new_data,...) {
 #' # print(preds$class)
 #' # print(preds$prob)
 predict.classifier <- function(object, new_data, ncomp=NULL,
-                               colind=NULL, 
-                               metric=c("euclidean", "cosine", "ejaccard"), 
+                               colind=NULL,
+                               metric=c("euclidean", "cosine", "ejaccard"),
                                normalize_probs=FALSE, # Deprecated
-                               prob_type = c("knn_proportion", "avg_similarity"), 
+                               prob_type = c("knn_proportion", "avg_similarity"),
                                ...) {
-  
+
+  # Check proxy package availability early
+  if (!requireNamespace("proxy", quietly = TRUE)) {
+    stop("Package 'proxy' is required for predict.classifier. Please install it with: install.packages('proxy')")
+  }
+
   metric <- match.arg(metric)
   prob_type <- match.arg(prob_type)
-  
+
   # Deprecate normalize_probs
   if (!missing(normalize_probs) && normalize_probs) {
       warning("'normalize_probs' argument is deprecated and ignored. Normalization is implicit in prob_type='avg_similarity'.")
@@ -713,25 +759,25 @@ predict.classifier <- function(object, new_data, ncomp=NULL,
 predict.rf_classifier <- function(object, new_data, ncomp=NULL,
                                   colind=NULL, ...) {
   
-  prep <- prepare_predict(object, colind, ncomp, new_data,...) 
+  prep <- prepare_predict(object, colind, ncomp, new_data,...)
   proj <- prep$proj[, 1:prep$ncomp, drop=FALSE] # Ensure correct number of components
-  
-  # Ensure proj is a data frame with same colnames as used during training if possible
-  train_scores <- object$scores
-  if (!is.null(colnames(train_scores))) {
-    if (ncol(proj) == ncol(train_scores)) {
-      colnames(proj) <- colnames(train_scores)
-    } else if (ncol(proj) <= ncol(train_scores)) {
-        # Use first ncomp names if names exist and dimensions match subset
-         colnames(proj) <- colnames(train_scores)[1:ncol(proj)]
+
+  # Use sanitized feature names stored during training
+  if (!is.null(object$feat_names)) {
+    if (ncol(proj) == length(object$feat_names)) {
+      colnames(proj) <- object$feat_names
+    } else if (ncol(proj) <= length(object$feat_names)) {
+      # Use first ncomp sanitized names if dimensions match subset
+      colnames(proj) <- object$feat_names[1:ncol(proj)]
     } else {
-      warning("Projection has more components than original scores used for naming.")
+      warning("Projection has more components than original feat_names.")
       colnames(proj) <- paste0("Comp", 1:ncol(proj)) # Fallback naming
     }
   } else {
-       colnames(proj) <- paste0("Comp", 1:ncol(proj)) # Fallback naming if original scores lacked names
+    # Fallback if feat_names not available (shouldn't happen with new code)
+    colnames(proj) <- paste0("Comp", 1:ncol(proj))
   }
-  
+
   # Coerce proj to data.frame as expected by randomForest predict
   proj_df <- as.data.frame(proj)
   
@@ -923,23 +969,32 @@ feature_importance.classifier <- function(x, new_data,
 #' # Assume clf is a fitted classifier object
 #' # print(clf)
 print.classifier <- function(x, ...) {
+  # Helper function for optional coloring
+  maybe_cyan <- function(text) {
+    if (requireNamespace("crayon", quietly = TRUE)) {
+      crayon::cyan(text)
+    } else {
+      text
+    }
+  }
+
   cat("k-NN Classifier object:\n")
-  cat(crayon::cyan("  k-NN Neighbors (k):"), x$knn, "\n")
-  cat(crayon::cyan("  Number of Training Samples:"), nrow(x$scores), "\n")
-  cat(crayon::cyan("  Number of Classes:"), length(levels(x$labels)), "\n")
-  
+  cat(maybe_cyan("  k-NN Neighbors (k):"), x$knn, "\n")
+  cat(maybe_cyan("  Number of Training Samples:"), nrow(x$scores), "\n")
+  cat(maybe_cyan("  Number of Classes:"), length(levels(x$labels)), "\n")
+
   if (!is.null(x$colind)) {
-    cat(crayon::cyan("  Default Feature Subset (colind):"), paste(x$colind, collapse=", "), "\n")
+    cat(maybe_cyan("  Default Feature Subset (colind):"), paste(x$colind, collapse=", "), "\n")
   }
   if (inherits(x, "multiblock_classifier") && !is.null(x$block)){
-      cat(crayon::cyan("  Default Block Subset:"), x$block, "\n")
+      cat(maybe_cyan("  Default Block Subset:"), x$block, "\n")
   }
-  
-  cat(crayon::cyan("  Underlying Projector Details:"), "\n")
+
+  cat(maybe_cyan("  Underlying Projector Details:"), "\n")
   # Indent projector print output
   proj_output <- utils::capture.output(print(x$projector))
   cat(paste("    ", proj_output), sep = "\n")
-  
+
   invisible(x)
 }
 
@@ -956,23 +1011,32 @@ print.classifier <- function(x, ...) {
 #' # Assume rf_clf is a fitted rf_classifier object
 #' # print(rf_clf)
 print.rf_classifier <- function(x, ...) {
+  # Helper function for optional coloring
+  maybe_cyan <- function(text) {
+    if (requireNamespace("crayon", quietly = TRUE)) {
+      crayon::cyan(text)
+    } else {
+      text
+    }
+  }
+
   cat("Random Forest Classifier object:\n")
-  
+
   # Print details about the underlying projector
-  cat(crayon::cyan("  Underlying Projector Details:"), "\n")
+  cat(maybe_cyan("  Underlying Projector Details:"), "\n")
   proj_output <- utils::capture.output(print(x$projector))
   cat(paste("    ", proj_output), sep = "\n")
-  
+
   # Print details about the Random Forest model
-  cat(crayon::cyan("  Random Forest Model Details (from randomForest package):"), "\n")
+  cat(maybe_cyan("  Random Forest Model Details (from randomForest package):"), "\n")
   # Indent RF print output
   rf_output <- utils::capture.output(print(x$rfres, ...))
   cat(paste("    ", rf_output), sep = "\n")
-  
+
   if (!is.null(x$colind)) {
-    cat(crayon::cyan("  Default Feature Subset (colind) for Projection:"), paste(x$colind, collapse=", "), "\n")
+    cat(maybe_cyan("  Default Feature Subset (colind) for Projection:"), paste(x$colind, collapse=", "), "\n")
   }
-  
+
   invisible(x)
 }
 

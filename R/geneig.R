@@ -1,7 +1,44 @@
+
+# ---------- helpers: which parsing / selection / inversion ----------
+
+.normalize_which <- function(which) {
+  w <- toupper(which)
+  if (w %in% c("TOP", "LARGEST"))   w <- "LA"
+  if (w %in% c("BOTTOM", "SMALLEST")) w <- "SA"
+  valid <- c("LA", "SA", "LM", "SM")
+  if (!w %in% valid) {
+    stop(sprintf("Invalid 'which'='%s'. Allowed: %s", which, paste(valid, collapse = ", ")))
+  }
+  w
+}
+
+.invert_which_recip <- function(which_lambda) {
+  switch(which_lambda,
+    LA = "SA",
+    SA = "LA",
+    LM = "SM",
+    SM = "LM"
+  )
+}
+
+.select_eigs <- function(vals, vecs, which, ncomp) {
+  w <- .normalize_which(which)
+  ord <-
+    if (w %in% c("LA", "SA")) {
+      order(vals, decreasing = (w == "LA"))
+    } else {
+      order(abs(vals), decreasing = (w == "LM"))
+    }
+  keep <- ord[seq_len(min(ncomp, length(vals)))]
+  list(values = vals[keep], vectors = vecs[, keep, drop = FALSE])
+}
+
+# -------------------------------------------------------------------
+
 #' Generalized Eigenvalue Decomposition
 #'
 #' Computes the generalized eigenvalues and eigenvectors for the problem: A x = λ B x.
-#' Various methods differ in assumptions about A and B.
+#' Supports multiple dense and iterative solvers with a unified eigenpair selection interface.
 #'
 #' @param A The left-hand side square matrix.
 #' @param B The right-hand side square matrix, same dimension as A.
@@ -12,12 +49,18 @@
 #'   - "sdiag":  Uses a spectral decomposition of B (must be symmetric PD). Requires A to be symmetric for meaningful results.
 #'   - "geigen": Uses the \pkg{geigen} package for a general solution (A and B can be non-symmetric).
 #'   - "primme": Uses the \pkg{PRIMME} package for large/sparse symmetric problems (A and B must be symmetric).
-#' @param which Only used for `method = "primme"`. Specifies which eigenvalues to compute ("LM", "SM", "LA", "SA", etc.). Default is "LM" (Largest Magnitude). See \code{\link[PRIMME]{eigs_sym}}.
+#'   - "rspectra": Uses \pkg{RSpectra}; if B is SPD it calls \code{eigs_sym(A, B, ...)} directly, otherwise it applies a reciprocal transform to support all targets.
+#'   - "subspace": Block subspace iteration for symmetric pairs with SPD B (iterative, no external package required).
+#' @param which Which eigenpairs to return. One of
+#'   `"LA"` (largest algebraic), `"SA"` (smallest algebraic), `"LM"` (largest magnitude),
+#'   or `"SM"` (smallest magnitude). Aliases: `"top"`/`"largest"` → `"LA"`, `"bottom"`/`"smallest"` → `"SA"`.
+#'   Dense backends select eigenpairs post hoc; `"primme"` supports `"LA"`, `"SA"`, `"SM"` (not `"LM"`);
+#'   `"rspectra"` honors all four options. Default is `"LA"`.
 #' @param ... Additional arguments to pass to the underlying solver.
 #' @return A `projector` object with generalized eigenvectors and eigenvalues.
 #' @seealso \code{\link{projector}} for the base class structure.
-#' 
-#' #' @references
+#'
+#' @references
 #' Golub, G. H. & Van Loan, C. F. (2013) *Matrix Computations*,
 #'   4th ed., § 8.7 – textbook derivation for the "robust" (Cholesky)
 #'   and "sdiag" (spectral) transforms.
@@ -32,10 +75,12 @@
 #'
 #' See also the \pkg{geigen} (CRAN) and \pkg{PRIMME} documentation.
 #'
-#' @importFrom PRIMME eigs_sym
 #' @importFrom geigen geigen
+#' @importFrom RSpectra eigs
+#' @importFrom Matrix Cholesky solve forceSymmetric Diagonal t isSymmetric
 #' @export
 #' @examples
+#' \donttest{
 #' # Simulate two matrices
 #' set.seed(123)
 #' A <- matrix(rnorm(50 * 50), 50, 50)
@@ -45,173 +90,291 @@
 #'
 #' # Solve generalized eigenvalue problem
 #' result <- geneig(A = A, B = B, ncomp = 3)
+#' }
 #'
-geneig <- function(A = NULL,
-                   B = NULL,
-                   ncomp = 2,
-                   preproc = prep(pass()),
-                   method = c("robust", "sdiag", "geigen", "primme"),
-                   which = "LR", ...) {
-  method <- match.arg(method)
-  
-  # Validate inputs
-  # Restore original check
-  stopifnot(is.numeric(A), is.numeric(B)) 
-  chk::chk_equal(nrow(A), ncol(A))
-  chk::chk_equal(nrow(B), ncol(B))
-  chk::chk_equal(nrow(A), nrow(B))
-  
-  if (!is.numeric(ncomp) || ncomp <= 0 || !chk::vld_whole_number(ncomp)) {
-    stop("'ncomp' must be a positive integer.")
-  }
-  
-  # Truncate ncomp if it exceeds matrix dimensions
-  if (ncomp > nrow(A)) {
-    warning(sprintf("'ncomp' (%d) exceeds matrix dimensions (%d), truncating.", ncomp, nrow(A)))
-    ncomp <- nrow(A)
-  }
-  
-  # Dispatch to chosen method
-  res_raw <- switch(
-    method,
-    robust = {
-      if (!isSymmetric(B)) {
-        stop("For method='robust', B must be symmetric.")
+ geneig <- function(A = NULL,
+                    B = NULL,
+                    ncomp = 2,
+                    preproc = prep(pass()),
+                    method = c("robust", "sdiag", "geigen", "primme", "rspectra", "subspace"),
+                    which = "LA", ...) {
+   method <- match.arg(method)
+   which <- .normalize_which(which)
+
+   # Validate inputs
+   if (is.null(A) || is.null(B)) stop("A and B must be supplied.")
+   if (!is.matrix(A) && !inherits(A, "Matrix")) stop("A must be a matrix or a Matrix::Matrix.")
+   if (!is.matrix(B) && !inherits(B, "Matrix")) stop("B must be a matrix or a Matrix::Matrix.")
+   if (nrow(A) != ncol(A) || nrow(B) != ncol(B) || nrow(A) != nrow(B)) {
+     stop("A and B must be square and of the same dimension.")
+   }
+   if (!is.numeric(ncomp) || ncomp <= 0 || !chk::vld_whole_number(ncomp)) {
+     stop("'ncomp' must be a positive integer.")
+   }
+
+   # Truncate ncomp if it exceeds matrix dimensions
+   if (ncomp > nrow(A)) {
+     warning(sprintf("'ncomp' (%d) exceeds matrix dimensions (%d), truncating.", ncomp, nrow(A)))
+     ncomp <- nrow(A)
+   }
+
+   # Optional preprocessing hook if a function is provided
+   if (is.function(preproc)) {
+     outpb <- preproc(list(A = A, B = B))
+     if (!is.null(outpb$A)) A <- outpb$A
+     if (!is.null(outpb$B)) B <- outpb$B
+   }
+
+   if (method %in% c("rspectra", "primme") && ncomp >= nrow(A)) {
+     warning("Iterative backends require k < n; switching to a dense backend for full decomposition.")
+     method <- if ((inherits(B, "Matrix") && Matrix::isSymmetric(B)) || isSymmetric(B)) "robust" else "geigen"
+   }
+
+   sym_A <- if (inherits(A, "Matrix")) Matrix::isSymmetric(A) else isSymmetric(A)
+   sym_B <- if (inherits(B, "Matrix")) Matrix::isSymmetric(B) else isSymmetric(B)
+
+   res_raw <- switch(
+     method,
+     robust = {
+       if (!isTRUE(sym_B)) {
+         stop("For method='robust', B must be symmetric.")
+       }
+       B_chol_try <- try(chol(B), silent = TRUE)
+       if (inherits(B_chol_try, "try-error")) {
+         stop("For method='robust', B must be positive definite (Cholesky failed).")
+       }
+       B_chol <- B_chol_try
+
+       Rinverse <- backsolve(B_chol, diag(nrow(B)))
+       W <- forwardsolve(t(B_chol), A %*% Rinverse, upper.tri = FALSE)
+       W <- (W + t(W)) / 2
+
+       decomp <- eigen(W, symmetric = TRUE)
+       pick <- .select_eigs(decomp$values, decomp$vectors, which, ncomp)
+
+       vectors_raw <- Rinverse %*% pick$vectors
+       values <- pick$values
+
+       vectors <- b_orthonormalize(vectors_raw, B)
+       list(vectors = vectors, values = values)
+     },
+     sdiag = {
+       if (!isTRUE(sym_B)) {
+         stop("For method='sdiag', B must be symmetric.")
+       }
+       if (!isTRUE(sym_A)) {
+         warning("For method='sdiag', A is not symmetric. Results may be inaccurate or complex.")
+       }
+       min_eigenvalue <- sqrt(.Machine$double.eps)
+       B_eig <- eigen(B, symmetric = TRUE)
+       valsB <- B_eig$values
+       if (any(valsB < min_eigenvalue)) {
+         warning(sprintf("B has %d eigenvalues close to zero or negative (min eigenvalue=%.2e). Clamping for inversion.",
+                         sum(valsB < min_eigenvalue), min(valsB)))
+         valsB[valsB < min_eigenvalue] <- min_eigenvalue
+       }
+
+       B_sqrt_inv <- B_eig$vectors %*% diag(1 / sqrt(valsB), nrow = length(valsB), ncol = length(valsB)) %*% t(B_eig$vectors)
+       A_transformed <- B_sqrt_inv %*% A %*% B_sqrt_inv
+       A_transformed <- (A_transformed + t(A_transformed)) / 2
+       A_eig <- eigen(A_transformed, symmetric = TRUE)
+
+       pick <- .select_eigs(A_eig$values, A_eig$vectors, which, ncomp)
+       vectors_raw <- B_sqrt_inv %*% pick$vectors
+       values <- pick$values
+
+       vectors <- b_orthonormalize(vectors_raw, B)
+       list(vectors = vectors, values = values)
+     },
+     geigen = {
+       if (!requireNamespace("geigen", quietly = TRUE)) {
+         stop("Package 'geigen' not installed. Please install it for method='geigen'.")
+       }
+       geigen_symmetric <- isTRUE(sym_A) && isTRUE(sym_B)
+       if (geigen_symmetric) {
+         chol_try <- try(chol(B), silent = TRUE)
+         if (inherits(chol_try, "try-error")) {
+           geigen_symmetric <- FALSE
+         }
+       }
+       res <- geigen::geigen(A, B, symmetric = geigen_symmetric)
+       ord <-
+         if (which %in% c("LA", "SA")) {
+           order(Re(res$values), decreasing = (which == "LA"))
+         } else {
+           order(Mod(res$values), decreasing = (which == "LM"))
+         }
+       keep <- ord[seq_len(min(ncomp, length(ord)))]
+       values <- res$values[keep]
+       vectors <- res$vectors[, keep, drop = FALSE]
+       list(vectors = vectors, values = values)
+     },
+     primme = {
+       if (!requireNamespace("PRIMME", quietly = TRUE)) {
+         stop("Package 'PRIMME' not installed. Please install it for method='primme'.")
+       }
+       if (!isTRUE(sym_A) || !isTRUE(sym_B)) {
+         stop("For method='primme' using eigs_sym, both A and B must be symmetric.")
+       }
+       which_p <- switch(which,
+         LA = "LA",
+         SA = "SA",
+         SM = "SM",
+         LM = stop("PRIMME does not support which='LM' for generalized problems. Use 'LA', 'SA', or 'SM'.")
+       )
+       user_args <- list(...)
+       if (!is.null(user_args$.primme_method)) {
+         user_args$method <- user_args$.primme_method
+         user_args$.primme_method <- NULL
+       }
+       protected_args <- c("A", "B", "NEig", "which")
+       if (length(user_args)) {
+         drop_names <- intersect(names(user_args), protected_args)
+         if (length(drop_names)) {
+           warning(sprintf(
+             "Ignoring PRIMME arguments conflicting with geneig(): %s",
+             paste(drop_names, collapse = ", "
+           )))
+           user_args <- user_args[setdiff(names(user_args), protected_args)]
+         }
+       }
+       primme_defaults <- list(
+         method = "PRIMME_DEFAULT_MIN_TIME",
+         eps = 1e-6,
+         maxBlockSize = max(1L, min(4L, as.integer(ncomp)))
+       )
+       primme_args <- utils::modifyList(primme_defaults, user_args)
+       res <- do.call(
+         PRIMME::eigs_sym,
+         c(list(A = A, B = B, NEig = ncomp, which = which_p), primme_args)
+       )
+       list(vectors = res$vectors, values = res$values)
+     },
+     subspace = {
+       if (!isTRUE(sym_A) || !isTRUE(sym_B)) {
+         stop("For method='subspace', A and B must be symmetric.")
+       }
+       which_sub <- switch(which,
+         LA = "largest",
+         SA = "smallest",
+         stop("method='subspace' currently supports which='LA' or 'SA' only.")
+       )
+       dot_args <- list(...)
+       if (length(dot_args)) {
+         allowed <- c("max_iter", "tol", "V0", "reg_S", "reg_T", "seed")
+         named <- names(dot_args)
+         if (is.null(named) || any(named == "")) {
+           stop("All additional arguments for method='subspace' must be named.")
+         }
+         unknown <- setdiff(named, allowed)
+         if (length(unknown) > 0) {
+           warning(sprintf("Ignoring unsupported arguments for method='subspace': %s", paste(unknown, collapse = ", ")))
+         }
+         dot_args <- dot_args[named %in% allowed]
+       }
+       args <- c(list(S1 = A, S2 = B, q = ncomp, which = which_sub), dot_args)
+      res <- do.call(solve_gep_subspace, args)
+      if (!isTRUE(res$converged)) {
+        tol_val <- if (!is.null(args$tol)) args$tol else 1e-5
+        warning(sprintf(
+          "geneig(method='subspace'): iteration stopped after %d steps with residual %.2e (tol=%.1e).",
+          res$iterations, res$residual, tol_val
+        ))
       }
-      # Check for Positive Definiteness
-      B_chol_try <- try(chol(B), silent = TRUE)
-      if (inherits(B_chol_try, "try-error")) {
-        stop("For method='robust', B must be positive definite (Cholesky failed).")
-      }
-      B_chol <- B_chol_try 
-      
-      # B_sqrt_inv <- solve(B_chol) # Avoid forming full inverse if possible
-      # W <- t(B_sqrt_inv) %*% A %*% B_sqrt_inv # More stable calculation for W
-      # Use solve(chol(B), X) for B^{-1/2} X and solve(t(chol(B)), X) for B^{-T/2} X
-      tmp <- solve(B_chol, A) # tmp = R^-1 A where B=R^T R
-      W <- solve(t(B_chol), t(tmp)) # W = R^-T (R^-1 A)^T = R^-T A^T R^-1
-      # W should be symmetric if A is symmetric. Let's ensure it is treated as such.
-      W <- (W + t(W)) / 2
-      
-      decomp <- eigen(W, symmetric = TRUE) 
-      
-      # Back-transform eigenvectors: vectors = B^{-1/2} * eigenvecs(W)
-      # where B = R^T R, B^{-1/2} = solve(R)
-      vectors_raw <- solve(B_chol, decomp$vectors[, 1:ncomp, drop = FALSE])
-      values <- decomp$values[1:ncomp]
-      
-      # Explicitly B-orthonormalize
-      norm_factor <- sqrt(diag(t(vectors_raw) %*% B %*% vectors_raw))
-      # Avoid division by zero/NaN if norm_factor is very small
-      norm_factor[norm_factor < .Machine$double.eps] <- 1 
-      vectors <- sweep(vectors_raw, 2, norm_factor, "/")
-      
-      list(vectors = vectors, values = values)
+      list(vectors = res$vectors, values = res$values)
     },
-    sdiag = {
-      if (!isSymmetric(B)) {
-        stop("For method='sdiag', B must be symmetric.")
+     rspectra = {
+       if (!requireNamespace("RSpectra", quietly = TRUE)) {
+         stop("Package 'RSpectra' not installed. Please install it for method='rspectra'.")
+       }
+       if (!isTRUE(sym_A) || !isTRUE(sym_B)) {
+         stop("For method='rspectra', A and B must be symmetric.")
+       }
+       As <- Matrix::forceSymmetric(if (inherits(A, "Matrix")) A else Matrix::Matrix(A, sparse = FALSE))
+       Bs <- Matrix::forceSymmetric(if (inherits(B, "Matrix")) B else Matrix::Matrix(B, sparse = FALSE))
+       d <- nrow(As)
+
+      Bchol_try <- try(Matrix::Cholesky(Bs, LDL = FALSE, super = TRUE), silent = TRUE)
+      if (!inherits(Bchol_try, "try-error") && which %in% c("LA", "LM")) {
+        direct_try <- try(RSpectra::eigs_sym(A = As, B = Bs, k = ncomp, which = which, ...), silent = TRUE)
+        rs <- if (inherits(direct_try, "try-error")) {
+          A_rs <- if (inherits(As, "sparseMatrix")) {
+            methods::as(As, "dgCMatrix")
+          } else {
+            as.matrix(As)
+          }
+          B_rs <- if (inherits(Bs, "sparseMatrix")) {
+            methods::as(Bs, "dgCMatrix")
+          } else {
+            as.matrix(Bs)
+          }
+          RSpectra::eigs_sym(A = A_rs, B = B_rs, k = ncomp, which = which, ...)
+        } else {
+          direct_try
+        }
+        lam <- as.numeric(rs$values)
+        X <- b_orthonormalize(as.matrix(rs$vectors), Bs)
+        list(vectors = X, values = lam)
+      } else {
+        Afact <- factor_mat(As, reg = 1e-8, max_tries = 6)
+        ch <- Afact$ch
+
+        Top <- function(x, args) {
+          v <- Matrix::solve(ch, x, system = "L")
+          w <- Bs %*% v
+          y <- Matrix::solve(ch, w, system = "Lt")
+          as.numeric(y)
+        }
+
+        which_T <- .invert_which_recip(which)
+        rs <- RSpectra::eigs_sym(Top, k = ncomp, which = which_T, n = d, ...)
+        mu <- as.numeric(rs$values)
+        Y <- rs$vectors
+
+        tiny <- sqrt(.Machine$double.eps)
+        if (any(abs(mu) < tiny)) {
+          warning("Some μ ≈ 0 in the rspectra reciprocal fallback; corresponding λ may overflow. Consider method='primme' or 'geigen' with a shift.")
+        }
+
+        lam <- 1 / mu
+        Xraw <- Matrix::solve(ch, Y, system = "Lt")
+        X <- b_orthonormalize(as.matrix(Xraw), Bs)
+        list(vectors = X, values = lam)
       }
-      if (!isSymmetric(A)) {
-        warning("For method='sdiag', A is not symmetric. Results may be inaccurate or complex.")
-      }
-      # Check for Positive Definiteness needed for B_sqrt_inv
-      min_eigenvalue <- sqrt(.Machine$double.eps) # Use machine epsilon based threshold
-      B_eig <- eigen(B, symmetric = TRUE)
-      valsB <- B_eig$values
-      
-      if(any(valsB < min_eigenvalue)){
-        warning(sprintf("B has %d eigenvalues close to zero or negative (min eigenvalue=%.2e). Clamping for inversion.", 
-                        sum(valsB < min_eigenvalue), min(valsB)))
-        valsB[valsB < min_eigenvalue] <- min_eigenvalue
-      } 
-      
-      B_sqrt_inv_diag <- diag(1 / sqrt(valsB), nrow=length(valsB), ncol=length(valsB))
-      B_sqrt_inv <- B_eig$vectors %*% B_sqrt_inv_diag %*% t(B_eig$vectors)
-      
-      A_transformed <- B_sqrt_inv %*% A %*% B_sqrt_inv
-      # Ensure symmetry for eigen
-      A_transformed <- (A_transformed + t(A_transformed)) / 2
-      A_eig <- eigen(A_transformed, symmetric = TRUE)
-      
-      vectors_raw <- B_sqrt_inv %*% A_eig$vectors[, 1:ncomp, drop=FALSE]
-      values  <- A_eig$values[1:ncomp]
-      
-      # Explicitly B-orthonormalize
-      norm_factor <- sqrt(diag(t(vectors_raw) %*% B %*% vectors_raw))
-      norm_factor[norm_factor < .Machine$double.eps] <- 1 
-      vectors <- sweep(vectors_raw, 2, norm_factor, "/")
-      
-      list(vectors = vectors, values = values)
-    },
-    geigen = {
-      if (!requireNamespace("geigen", quietly = TRUE)) {
-        stop("Package 'geigen' not installed. Please install it for method='geigen'.")
-      }
-      res <- geigen::geigen(A, B, symmetric = FALSE) # Assume potentially non-symmetric
-      
-      # Sort by decreasing absolute value of eigenvalues
-      ord <- order(abs(res$values), decreasing = TRUE)
-      values_sorted  <- res$values[ord]
-      vectors_sorted <- res$vectors[, ord, drop=FALSE]
-      
-      vectors <- vectors_sorted[, 1:ncomp, drop=FALSE]
-      values  <- values_sorted[1:ncomp]
-      list(vectors = vectors, values = values)
-    },
-    primme = {
-      if (!requireNamespace("PRIMME", quietly = TRUE)) {
-        stop("Package 'PRIMME' not installed. Please install it for method='primme'.")
-      }
-      if (!isSymmetric(A) || !isSymmetric(B)) {
-        stop("For method='primme' using eigs_sym, both A and B must be symmetric.")
-      }
-      # Use the provided 'which' argument, pass others via ...
-      res <- PRIMME::eigs_sym(A = A, B = B, NEig = ncomp, which = which, ...)
-      vectors <- res$vectors
-      values  <- res$values
-      list(vectors = vectors, values = values)
-    }
-  )
-  
-  ev <- res_raw$values
-  vec <- res_raw$vectors
-  
-  # Check for complex eigenvalues and handle
-  if (is.complex(ev)) {
-    ev_im <- Im(ev)
-    if (any(abs(ev_im) > sqrt(.Machine$double.eps))) {
+     }
+   )
+
+   ev <- res_raw$values
+   vec <- res_raw$vectors
+
+   if (is.complex(ev)) {
+     if (any(abs(Im(ev)) > sqrt(.Machine$double.eps))) {
        warning("Complex eigenvalues found. Taking the real part.")
-    }
-    ev <- Re(ev)
-    # If eigenvalues were complex, eigenvectors might be too. Take real part.
-    if(is.complex(vec)){
-      warning("Complex eigenvectors found. Taking the real part.")
-      vec <- Re(vec)
-    }
-  }
+     }
+     ev <- Re(ev)
+     if (is.complex(vec)) {
+       warning("Complex eigenvectors found. Taking the real part.")
+       vec <- Re(vec)
+     }
+   }
 
-  # Check for negative eigenvalues (after taking real part)
-  if (any(ev < 0)) {
-    warning("Some real eigenvalues are negative. 'sdev' computed using absolute values.")
-  }
-  
-  sdev <- sqrt(abs(ev)) # Use abs(Re(ev))
-  
-  # Return a simple list with a class attribute
-  out <- list(
-    values  = ev,
-    vectors = vec,
-    sdev    = sdev,
-    ncomp   = ncomp,
-    method  = method
-  )
-  
-  class(out) <- c("geneig", "list")
-  out
-}
+   if (any(ev < 0)) {
+     warning("Some real eigenvalues are negative. 'sdev' computed using absolute values.")
+   }
 
+   sdev <- sqrt(abs(ev))
 
+   out <- list(
+     values  = ev,
+     vectors = vec,
+     sdev    = sdev,
+     ncomp   = ncomp,
+     method  = method
+   )
+
+   class(out) <- c("geneig", "list")
+   out
+ }
 
 #' Factor a matrix with regularization
 #'
@@ -225,39 +388,17 @@ geneig <- function(A = NULL,
 #' @importFrom Matrix Diagonal Cholesky
 #' @noRd
 factor_mat <- function(M, reg = 1e-3, max_tries = 5) {
-  d <- nrow(M)
-  M_reg <- M # Start with original M
-  current_reg <- 0 # Keep track of added regularization
-  
-  for (i in seq_len(max_tries + 1)) { # Try initial M first, then add reg
-    if (i > 1) { 
-      # Add regularization for attempts 2 onwards
-      if (i == 2) {
-        current_reg <- reg
-      } else {
-        current_reg <- current_reg * 10
-      }
-      # Add Diagonal efficiently
-      diag(M_reg) <- diag(M) + current_reg
-    } else {
-      # First attempt with M as is (or previous M_reg if loop continues)
-      M_reg <- M
-    }
-    
-    # Attempt Cholesky
-    ch <- try(Matrix::Cholesky(M_reg, LDL = FALSE, super = TRUE), silent = TRUE) # Use Matrix::Cholesky
-    
+  if (!inherits(M, "Matrix")) M <- Matrix::Matrix(M, sparse = FALSE)
+  M <- Matrix::forceSymmetric(M)
+  reg_now <- 0
+  for (i in 0:max_tries) {
+    reg_now <- if (i == 0) 0 else (reg * (10^(i - 1)))
+    ch <- try(Matrix::Cholesky(M, LDL = FALSE, super = TRUE, Imult = reg_now), silent = TRUE)
     if (!inherits(ch, "try-error")) {
-      # Return the successful factor and the *added* regularization amount
-      return(list(ch = ch, reg_added = if(i==1) 0 else current_reg)) 
-    }
-    
-    # If first attempt failed, prepare M_reg for the next iteration with base reg
-    if (i == 1) {
-       M_reg <- M # Ensure we add reg to original M next time
+      return(list(ch = ch, reg_added = reg_now))
     }
   }
-  stop(sprintf("Unable to factor matrix even after adding regularization up to %.2e.", current_reg))
+  stop(sprintf("Unable to factor matrix even after adding regularization up to %.2e.", reg_now))
 }
 
 #' Solve using a precomputed Cholesky factor
@@ -269,6 +410,30 @@ factor_mat <- function(M, reg = 1e-3, max_tries = 5) {
 #' @noRd
 solve_chol <- function(ch, RHS) {
   Matrix::solve(ch, RHS) # Use Matrix::solve method
+}
+
+#' B-orthonormalize a set of vectors
+#'
+#' @param X Matrix whose columns are candidate eigenvectors.
+#' @param B Inner-product matrix.
+#' @return Matrix with B-orthonormal columns.
+#' @keywords internal
+#' @noRd
+b_orthonormalize <- function(X, B) {
+  Bmat <- if (inherits(B, "Matrix")) B else Matrix::Matrix(B, sparse = FALSE)
+  Xmat <- if (inherits(X, "Matrix")) X else Matrix::Matrix(X, sparse = FALSE)
+  M <- Matrix::t(Xmat) %*% Bmat %*% Xmat
+  M <- (M + Matrix::t(M)) / 2
+  M_dense <- as.matrix(M)
+  R <- try(chol(M_dense), silent = TRUE)
+  if (!inherits(R, "try-error")) {
+    Xout <- Xmat %*% solve(R)
+  } else {
+    eig <- eigen(M_dense, symmetric = TRUE)
+    vals <- pmax(eig$values, .Machine$double.eps)
+    Xout <- Xmat %*% eig$vectors %*% diag(1 / sqrt(vals), nrow = length(vals))
+  }
+  as.matrix(Xout)
 }
 
 #' Orthonormalize columns via QR
@@ -310,14 +475,22 @@ orthonormalize <- function(X) {
 #' Subspace Iteration for Generalized Eigenproblem
 #'
 #' Iteratively solves S1 x = λ S2 x using a subspace approach.
-#' Assumes S1, S2 are symmetric. S2 (or S1 if which="smallest") must be PD.
+#' Assumes S1, S2 are symmetric. For `which = "largest"`, S2 must be SPD;
+#' for `which = "smallest"`, S1 must be SPD.
+#'
+#' The iteration always applies the operator B^{-1} C while keeping the
+#' subspace B-orthonormalized, where (C, B) equals (S1, S2) for `which = "largest"`
+#' and (S2, S1) for `which = "smallest"`. The reduced problem solves
+#' `T = V^T B V` (SPD) and `S = V^T C V`, with eigenvalues `μ` of
+#' `R^{-T} S R^{-1}` mapping directly to `λ` in the "largest" case and
+#' `λ = 1 / μ` in the "smallest" case.
 #'
 #' @param S1 A square symmetric matrix (e.g., n x n).
 #' @param S2 A square symmetric positive definite matrix of the same dimension.
 #' @param q Number of eigenpairs to approximate.
 #' @param which "largest" or "smallest" eigenvalues to seek.
 #' @param max_iter Maximum iteration count.
-#' @param tol Convergence tolerance on relative change in eigenvalues.
+#' @param tol Convergence tolerance on relative change in eigenvalues or residuals.
 #' @param V0 Optional initial guess matrix (n x q). If NULL, uses random.
 #' @param reg_S Regularization added to S1 or S2 during factorization attempts. Default 1e-6.
 #' @param reg_T Regularization for the small T matrix. Default 1e-9.
@@ -330,167 +503,241 @@ solve_gep_subspace <- function(S1, S2, q = 2,
                                which = c("largest", "smallest"),
                                max_iter = 100, tol = 1e-6,
                                V0 = NULL, reg_S = 1e-6, reg_T = 1e-9,
-                               seed = NULL) { 
-  
+                               seed = NULL) {
   which <- match.arg(which)
   d <- nrow(S1)
-  
-  # Factor either S2 or S1 once, depending on which eigenvalues we want
-  if (which == "largest") {
-    # Factor S2 => solve S2 V_hat = S1 V
-    s_fact <- factor_mat(S2, reg = reg_S)
-    ch <- s_fact$ch
-    
-    solve_step <- function(V) {
-      RHS <- S1 %*% V
-      solve_chol(ch, RHS)  # V_hat = S2^-1 (S1 V)
-    }
-  } else { # smallest
-    # Factor S1 => solve S1 V_hat = S2 V
-    s_fact <- factor_mat(S1, reg = reg_S)
-    ch <- s_fact$ch
-    
-    solve_step <- function(V) {
-      RHS <- S2 %*% V
-      solve_chol(ch, RHS)  # V_hat = S1^-1 (S2 V)
-    }
+
+  if (ncol(S1) != d || nrow(S2) != d || ncol(S2) != d) {
+    stop("S1 and S2 must be square and of the same dimension.")
   }
-  
-  # Initialize subspace V
+  if (q <= 0) stop("q must be positive.")
+
+  if (which == "largest") {
+    C <- S1
+    B <- S2
+  } else {
+    C <- S2
+    B <- S1
+  }
+
+  s_fact <- factor_mat(B, reg = reg_S)
+  ch <- s_fact$ch
+
+  solve_step <- function(V) {
+    RHS <- C %*% V
+    solve_chol(ch, RHS)
+  }
+
   if (is.null(V0)) {
-    if (!is.null(seed)) set.seed(seed) # Set seed only if provided
-    V <- matrix(rnorm(d * q), d, q)
+    if (!is.null(seed)) set.seed(seed)
+    V <- matrix(rnorm(d * q), nrow = d, ncol = q)
   } else {
     if (ncol(V0) != q || nrow(V0) != d) {
-       stop(sprintf("V0 dimensions (%d x %d) do not match expected (%d x %d).", 
-                 nrow(V0), ncol(V0), d, q))
+      stop(sprintf("V0 dimensions (%d x %d) do not match expected (%d x %d).",
+                   nrow(V0), ncol(V0), d, q))
     }
     V <- V0
   }
-  V <- orthonormalize(V)
-  # Handle case where initial V is rank deficient
-  if (ncol(V) < q) {
-      warning(sprintf("Initial subspace V has rank %d, less than requested q=%d. Proceeding with reduced rank.", ncol(V), q))
-      q <- ncol(V)
-      if (q == 0) stop("Initial subspace V has rank 0.")
+
+  symm <- function(M) (M + t(M)) / 2
+
+  residual_stats <- function(lambda_vec, V_mat) {
+    if (!length(lambda_vec)) {
+      return(list(max_resid = Inf))
+    }
+    diag_lambda <- Matrix::Diagonal(x = lambda_vec)
+    residual_mat <- S1 %*% V_mat - S2 %*% (V_mat %*% diag_lambda)
+    residual_dense <- as.matrix(residual_mat)
+    res_norm <- sqrt(colSums(residual_dense^2))
+    list(max_resid = max(res_norm / pmax(1, abs(lambda_vec))))
   }
-  
-  lambda_old <- rep(NA, q)
-  
+
+  rayleigh_ritz <- function(V_basis, C_mat, B_mat, which_mode, invert = FALSE) {
+    if (ncol(V_basis) == 0) {
+      stop("Rayleigh-Ritz requires a non-empty basis.")
+    }
+
+    T_mat <- symm(crossprod(V_basis, B_mat %*% V_basis))
+    S_mat <- symm(crossprod(V_basis, C_mat %*% V_basis))
+
+    T_dense <- as.matrix(T_mat)
+    R <- NULL
+    for (attempt in 0:3) {
+      bump <- reg_T * (10^attempt)
+      T_try <- T_dense
+      diag(T_try) <- diag(T_try) + bump
+      R_try <- try(chol(T_try), silent = TRUE)
+      if (!inherits(R_try, "try-error")) {
+        R <- R_try
+        break
+      }
+    }
+    if (is.null(R)) {
+      stop("Cholesky factorization of projected metric in Rayleigh-Ritz failed.")
+    }
+
+    S_small <- as.matrix(S_mat)
+    M <- backsolve(R, forwardsolve(t(R), S_small))
+    M <- symm(M)
+
+    ee <- eigen(M, symmetric = TRUE)
+    mu <- ee$values
+    W <- backsolve(R, ee$vectors)
+
+    if (invert) {
+      eps <- 1e-300
+      lambda <- 1 / pmax(abs(mu), eps) * sign(mu)
+      ord <- order(lambda, decreasing = FALSE)
+    } else {
+      lambda <- mu
+      ord <- if (which_mode == "largest") {
+        order(lambda, decreasing = TRUE)
+      } else {
+        order(lambda, decreasing = FALSE)
+      }
+    }
+    lambda <- lambda[ord]
+    W <- W[, ord, drop = FALSE]
+
+    V_new <- b_orthonormalize(V_basis %*% W, B_mat)
+    if (ncol(V_new) < length(lambda)) {
+      lambda <- lambda[seq_len(ncol(V_new))]
+    }
+
+    list(values = lambda, vectors = V_new)
+  }
+
+  V <- b_orthonormalize(V, B)
+  if (ncol(V) < q) {
+    warning(sprintf(
+      "Initial subspace V has rank %d, less than requested q=%d. Proceeding with reduced rank.",
+      ncol(V), q
+    ))
+    q <- ncol(V)
+    if (q == 0) stop("Initial subspace V has rank 0.")
+  }
+
+  lambda_prev <- NULL
+  lambda_curr <- NULL
+  rel_change <- Inf
+  max_resid <- Inf
+  converged <- FALSE
+
+  iter <- 0L
   for (iter in seq_len(max_iter)) {
-    # 1) Expand subspace: V_hat = Op(V) where Op = S2^-1 S1 or S1^-1 S2
     V_hat <- solve_step(V)
-    
-    # 2) Orthonormalize V_hat using QR decomposition
-    V_new <- orthonormalize(V_hat)
-    
-    # Check rank after orthonormalization
+    V_new <- b_orthonormalize(V_hat, B)
+
     q_new <- ncol(V_new)
     if (q_new < q) {
-        warning(sprintf("Subspace rank reduced to %d during iteration %d. Stopping early.", q_new, iter))
-        # Might need deflation or other strategy here, for now stop/return current
-        q <- q_new
-        if (q == 0) stop("Subspace iteration collapsed to rank 0.")
-        # Trim lambda_old if needed
-        lambda_old <- lambda_old[1:q]
-        V <- V_new[, 1:q, drop=FALSE] # Update V to the reduced rank version
-        break # Stop iteration as rank changed
-    }
-    
-    # 3) Form Rayleigh quotient matrices using V_new (the orthonormal basis)
-    # T_mat = V_new^T S2 V_new 
-    # S_mat = V_new^T S1 V_new
-    T_mat <- Matrix::t(V_new) %*% S2 %*% V_new
-    S_mat <- Matrix::t(V_new) %*% S1 %*% V_new
-    
-    # Ensure symmetry (numerical precision might cause slight asymmetry)
-    T_mat <- (T_mat + Matrix::t(T_mat)) / 2
-    S_mat <- (S_mat + Matrix::t(S_mat)) / 2
-    
-    # 4) Solve the small (q x q) generalized eigenproblem: S_mat w = lambda T_mat w
-    # Regularize T_mat before inversion if needed, although it should be PD if S2 is
-    T_mat_reg <- T_mat + Matrix::Diagonal(q, reg_T)
-    
-    eig_res <- tryCatch({
-        # Use base eigen for the small dense problem
-        # Solve S_mat w = lambda T_mat w <=> T_mat^-1 S_mat w = lambda w
-        # Ensure matrices are dense for base::eigen
-        eigen(solve(as.matrix(T_mat_reg), as.matrix(S_mat)), symmetric = TRUE)
-      },
-      error = function(e) {
-        warning(sprintf("Small eigenproblem failed at iter %d: %s. Trying geigen.", iter, e$message))
-        # Fallback to geigen for the small problem if solve/eigen fails
-        try(geigen::geigen(as.matrix(S_mat), as.matrix(T_mat_reg), symmetric=TRUE), silent=TRUE)
-      }
-    )
-    
-    if (inherits(eig_res, "try-error")) {
-        stop(sprintf("Unable to solve small (%d x %d) eigenproblem at iteration %d even with fallback.", q, q, iter))
-    }
-    
-    # Order eigenvalues (largest abs for convergence check stability, but use actual values)
-    ord <- order(abs(eig_res$values), decreasing = TRUE)
-    lambda <- eig_res$values[ord]
-    W <- eig_res$vectors[, ord, drop = FALSE]
-        
-    # Adjust target eigenvalues based on 'which' argument
-    if (which == "smallest") {
-        # If we factored S1 (Op = S1^-1 S2), then eigenvalues of Op are 1/lambda_orig
-        # We solved S_mat w = lambda_op T_mat w
-        # where lambda_op corresponds to eigenvalues of Op = S1^-1 S2
-        # We want eigenvalues of S1 x = lambda_orig S2 x
-        # Need to sort 1/lambda_op to find the largest, which correspond to smallest lambda_orig
-        ord_smallest_orig <- order(1/lambda, decreasing = TRUE) # Order by decreasing 1/lambda
-        lambda <- lambda[ord_smallest_orig] # Get the lambda_op corresponding to smallest lambda_orig
-        W <- W[, ord_smallest_orig, drop=FALSE]
-    } else {
-         # If we factored S2 (Op = S2^-1 S1), eigenvalues lambda_op are the ones we want (lambda_orig)
-         # We already sorted by magnitude, which is standard for 'largest'
-         ord_largest_orig <- order(lambda, decreasing = TRUE) # Order by value
-         lambda <- lambda[ord_largest_orig]
-         W <- W[, ord_largest_orig, drop=FALSE]
-    }
-    
-    # 5) Update V using the eigenvectors W of the small problem
-    # V_k+1 = V_new %*% W
-    V <- V_new %*% W 
-    # V should already be orthonormal if W is orthonormal and V_new is orthonormal
-    # Re-orthonormalize just in case of numerical drift?
-    V <- orthonormalize(V) 
-    q_check <- ncol(V)
-    if (q_check < q) {
-        warning(sprintf("Subspace rank reduced to %d after update at iteration %d. Stopping early.", q_check, iter))
-        q <- q_check
-        if (q == 0) stop("Subspace iteration collapsed to rank 0 after update.")
-        lambda_old <- lambda_old[1:q]
-        lambda <- lambda[1:q]
-        break
+      warning(sprintf("Subspace rank reduced to %d during iteration %d.", q_new, iter))
+      q <- q_new
+      if (q == 0) stop("Subspace iteration collapsed to rank 0.")
+      V_new <- V_new[, seq_len(q), drop = FALSE]
+      if (!is.null(lambda_prev)) lambda_prev <- lambda_prev[seq_len(q)]
+      if (!is.null(lambda_curr)) lambda_curr <- lambda_curr[seq_len(q)]
     }
 
-    # 6) Check convergence
-    if (iter > 1) { # Compare with previous iteration's eigenvalues
-      # Use lambda_old from the *previous* iteration (corresponding to the same subspace V)
-      valid_idx <- !is.na(lambda_old) & !is.na(lambda) & abs(lambda_old) > 1e-12
-      if (all(!valid_idx)) {
-         rel_change <- Inf # Cannot compare if no valid old values
-      } else {
-         rel_change <- max(abs(lambda[valid_idx] - lambda_old[valid_idx]) / pmax(abs(lambda_old[valid_idx]), 1e-12))
-      }
-      
-      if (rel_change < tol) {
-        # message(sprintf("Subspace iteration converged at iteration %d with rel_change=%.2e", iter, rel_change))
+    T_mat <- symm(crossprod(V_new, B %*% V_new))
+    S_mat <- symm(crossprod(V_new, C %*% V_new))
+
+    T_dense <- as.matrix(T_mat)
+    R <- NULL
+    for (attempt in 0:3) {
+      bump <- reg_T * (10^attempt)
+      T_try <- T_dense
+      diag(T_try) <- diag(T_try) + bump
+      R_try <- try(chol(T_try), silent = TRUE)
+      if (!inherits(R_try, "try-error")) {
+        R <- R_try
         break
       }
     }
-    
-    lambda_old <- lambda # Store current eigenvalues for next iteration's comparison
-    
-    if (iter == max_iter) {
-       warning(sprintf("Subspace iteration did not converge within %d iterations (tol=%.1e, last rel_change=%.2e).", max_iter, tol, rel_change))
+    if (is.null(R)) {
+      stop(sprintf("Cholesky factorization of projected metric failed at iter %d.", iter))
+    }
+
+    S_small <- as.matrix(S_mat)
+    M <- backsolve(R, forwardsolve(t(R), S_small))
+    M <- symm(M)
+
+    ee <- eigen(M, symmetric = TRUE)
+    mu <- ee$values
+    W <- backsolve(R, ee$vectors)
+
+    if (which == "largest") {
+      lambda <- mu
+      ord <- order(lambda, decreasing = TRUE)
+    } else {
+      eps <- 1e-300
+      lambda <- 1 / pmax(abs(mu), eps) * sign(mu)
+      ord <- order(lambda, decreasing = FALSE)
+    }
+    lambda <- lambda[ord]
+    W <- W[, ord, drop = FALSE]
+
+    V <- b_orthonormalize(V_new %*% W, B)
+    if (ncol(V) < length(lambda)) {
+      lambda <- lambda[seq_len(ncol(V))]
+    }
+    q <- ncol(V)
+
+    if (!is.null(lambda_prev)) {
+      common <- min(length(lambda_prev), length(lambda))
+      if (common == 0) {
+        rel_change <- Inf
+      } else {
+        prev_vals <- lambda_prev[seq_len(common)]
+        curr_vals <- lambda[seq_len(common)]
+        valid <- abs(prev_vals) > 1e-12
+        if (any(valid)) {
+          rel_change <- max(abs(curr_vals[valid] - prev_vals[valid]) /
+                              pmax(abs(prev_vals[valid]), 1e-12))
+        } else {
+          rel_change <- Inf
+        }
+      }
+    } else {
+      rel_change <- Inf
+    }
+
+    lambda_prev <- lambda
+    lambda_curr <- lambda
+
+    max_resid <- residual_stats(lambda_curr, V)$max_resid
+
+    if ((iter > 1 && rel_change < tol) || max_resid < tol) {
+      converged <- TRUE
+      break
     }
   }
-  
-  # Return final approximate eigenpairs
-  list(values = lambda_old, vectors = V[, 1:q, drop=FALSE])
-}
 
+  lambda_final <- lambda_curr
+  V_final <- V
+
+  rr_try <- try(rayleigh_ritz(V, S1, S2, which), silent = TRUE)
+  if (!inherits(rr_try, "try-error")) {
+    lambda_final <- rr_try$values
+    V_final <- rr_try$vectors
+  }
+
+  stats_final <- residual_stats(lambda_final, V_final)
+  max_resid <- stats_final$max_resid
+  converged <- converged || max_resid < tol
+  if (!length(lambda_final)) converged <- FALSE
+
+  if (!converged) {
+    warning(sprintf(
+      "Subspace iteration did not converge within %d iterations (tol=%.1e, last rel_change=%.2e, max_resid=%.2e).",
+      max_iter, tol, rel_change, max_resid
+    ))
+  }
+
+  list(
+    values = lambda_final,
+    vectors = V_final[, seq_len(ncol(V_final)), drop = FALSE],
+    iterations = iter,
+    converged = converged,
+    residual = max_resid
+  )
+}

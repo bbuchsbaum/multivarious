@@ -4,18 +4,18 @@
 \alias{reconstruct}
 \title{Reconstruct the data}
 \usage{
-reconstruct(x, comp, rowind, colind, ...)
+reconstruct(x, ...)
 }
 \arguments{
 \item{x}{The model fit, typically an object of a class that implements a \code{reconstruct} method}
 
-\item{comp}{A vector of component indices to use in the reconstruction}
-
-\item{rowind}{The row indices to reconstruct (optional). If not provided, all rows are used.}
-
-\item{colind}{The column indices to reconstruct (optional). If not provided, all columns are used.}
-
-\item{...}{Additional arguments passed to the underlying \code{reconstruct} method}
+\item{...}{Additional arguments passed to specific methods. Common parameters include:
+\describe{
+\item{\code{comp}}{A vector of component indices to use in the reconstruction}
+\item{\code{rowind}}{The row indices to reconstruct (optional)}
+\item{\code{colind}}{The column indices to reconstruct (optional)}
+\item{\code{scores}}{(For \code{composed_projector} only) A numeric matrix of scores to reconstruct from}
+}}
 }
 \value{
 A reconstructed data set based on the selected components, rows, and columns

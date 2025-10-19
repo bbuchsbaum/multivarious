@@ -1,4 +1,3 @@
-library(dplyr)
 library(testthat)
 library(multivarious) # Load the package
 
@@ -10,13 +9,13 @@ prepare_iris_data <- function() {
   X_full <- iris[, 1:4] # Numeric features only
 
   # Calculate between-group means (X_f)
-  X_f <- X_full %>%
-    bind_cols(Species = iris$Species) %>% # Add species for grouping
-    group_by(Species) %>%
-    summarise(across(where(is.numeric), mean), .groups = 'drop') %>% # Use .groups
-    select(-Species) %>% # Remove Species column after summarising
-    as.matrix()
-  rownames(X_f) <- levels(iris$Species) # Assign species names as rownames
+  species <- iris$Species
+  levels_species <- levels(species)
+  X_f <- vapply(levels_species, function(sp) {
+    colMeans(X_full[species == sp, , drop = FALSE])
+  }, FUN.VALUE = numeric(ncol(X_full)))
+  X_f <- t(X_f)
+  rownames(X_f) <- levels_species
 
   # Use original data centered by overall mean as X_b (common use case)
   overall_means <- colMeans(X_full)

@@ -9,8 +9,8 @@ geneig(
   B = NULL,
   ncomp = 2,
   preproc = prep(pass()),
-  method = c("robust", "sdiag", "geigen", "primme"),
-  which = "LR",
+  method = c("robust", "sdiag", "geigen", "primme", "rspectra", "subspace"),
+  which = "LA",
   ...
 )
 }
@@ -29,9 +29,15 @@ geneig(
 \item "sdiag":  Uses a spectral decomposition of B (must be symmetric PD). Requires A to be symmetric for meaningful results.
 \item "geigen": Uses the \pkg{geigen} package for a general solution (A and B can be non-symmetric).
 \item "primme": Uses the \pkg{PRIMME} package for large/sparse symmetric problems (A and B must be symmetric).
+\item "rspectra": Uses \pkg{RSpectra}; if B is SPD it calls \code{eigs_sym(A, B, ...)} directly, otherwise it applies a reciprocal transform to support all targets.
+\item "subspace": Block subspace iteration for symmetric pairs with SPD B (iterative, no external package required).
 }}
 
-\item{which}{Only used for \code{method = "primme"}. Specifies which eigenvalues to compute ("LM", "SM", "LA", "SA", etc.). Default is "LM" (Largest Magnitude). See \code{\link[PRIMME]{eigs_sym}}.}
+\item{which}{Which eigenpairs to return. One of
+\code{"LA"} (largest algebraic), \code{"SA"} (smallest algebraic), \code{"LM"} (largest magnitude),
+or \code{"SM"} (smallest magnitude). Aliases: \code{"top"}/\code{"largest"} → \code{"LA"}, \code{"bottom"}/\code{"smallest"} → \code{"SA"}.
+Dense backends select eigenpairs post hoc; \code{"primme"} supports \code{"LA"}, \code{"SA"}, \code{"SM"} (not \code{"LM"});
+\code{"rspectra"} honors all four options. Default is \code{"LA"}.}
 
 \item{...}{Additional arguments to pass to the underlying solver.}
 }
@@ -40,9 +46,10 @@ A \code{projector} object with generalized eigenvectors and eigenvalues.
 }
 \description{
 Computes the generalized eigenvalues and eigenvectors for the problem: A x = λ B x.
-Various methods differ in assumptions about A and B.
+Supports multiple dense and iterative solvers with a unified eigenpair selection interface.
 }
 \examples{
+\donttest{
 # Simulate two matrices
 set.seed(123)
 A <- matrix(rnorm(50 * 50), 50, 50)
@@ -52,12 +59,10 @@ B <- B \%*\% t(B) + diag(50) * 0.1 # Make B symmetric positive definite
 
 # Solve generalized eigenvalue problem
 result <- geneig(A = A, B = B, ncomp = 3)
+}
 
 }
-\seealso{
-\code{\link{projector}} for the base class structure.
-
-#' @references
+\references{
 Golub, G. H. & Van Loan, C. F. (2013) \emph{Matrix Computations},
 4th ed., § 8.7 – textbook derivation for the "robust" (Cholesky)
 and "sdiag" (spectral) transforms.
@@ -71,4 +76,7 @@ Iterative Multi‑Method Eigensolver". \emph{ACM TOMS} 37 (2): 21:1‑21:30 –
 the algorithmic core of the \code{primme} backend.
 
 See also the \pkg{geigen} (CRAN) and \pkg{PRIMME} documentation.
+}
+\seealso{
+\code{\link{projector}} for the base class structure.
 }

@@ -34,30 +34,45 @@ X <- as.matrix(scale(iris[, 1:4]))  # 150 samples × 4 features
 K <- 5
 fold_ids <- sample(rep(1:K, length.out = nrow(X)))
 folds <- lapply(1:K, function(k) list(
-  train = which(fold_ids != k), 
+  train = which(fold_ids != k),
   test  = which(fold_ids == k)
 ))
 
-# Run cross-validation for PCA
-cv_results <- cv.bi_projector(
-  X,
-  folds = folds,
-  max_comp = 4,           # Test 1-4 components
-  measure = c("rmse"),    # Root Mean Squared Error
-  return_models = FALSE   # Don't store models (saves memory)
-)
+# Define fitting and measuring functions for PCA cross-validation
+fit_pca <- function(train_data, ncomp) {
+  pca(train_data, ncomp = ncomp, preproc = center())
+}
+
+measure_pca <- function(model, test_data) {
+  # Reconstruct test data using the model
+  test_scores <- project(model, test_data)
+  reconstructed <- reconstruct(model, scores = test_scores)
+
+  # Measure reconstruction error
+  measure_reconstruction_error(test_data, reconstructed, metrics = c("rmse"))
+}
+
+# Run cross-validation for different numbers of components
+results_list <- lapply(1:4, function(ncomp) {
+  cv_res <- cv_generic(
+    data = X,
+    folds = folds,
+    .fit_fun = fit_pca,
+    .measure_fun = measure_pca,
+    fit_args = list(ncomp = ncomp),
+    backend = "serial"
+  )
+  cv_res$ncomp <- ncomp
+  cv_res
+})
+
+# Combine results
+cv_results <- do.call(rbind, lapply(results_list, function(x) {
+  data.frame(ncomp = x$ncomp, rmse = mean(x$results$rmse, na.rm = TRUE))
+}))
 
 # View results
 print(cv_results)
-
-# Get average performance across folds
-summary(cv_results)
-
-# Visualize results
-plot(cv_results, metric = "rmse") + 
-  labs(title = "Cross-validation: PCA Reconstruction Error",
-       x = "Number of Components", 
-       y = "RMSE")
 ```
 
 The plot shows that 2 components capture most of the variance, with diminishing returns after that.
@@ -72,13 +87,12 @@ The `cv.bi_projector()` function returns a `cv_fit` object containing:
 
 ```{r understanding_output}
 # Detailed look at one fold's results
-fold1_metrics <- cv_results$component_metrics[[1]]
+fold1_metrics <- cv_results$metrics[[1]]
 print(fold1_metrics)
 
-# Which number of components minimizes error?
-cv_summary <- summary(cv_results)
-best_ncomp <- cv_summary$comp[which.min(cv_summary$rmse)]
-print(paste("Optimal number of components:", best_ncomp))
+# Extract metrics across all folds
+all_metrics <- dplyr::bind_rows(cv_results$metrics)
+print(all_metrics)
 ```
 
 ## Custom Cross-validation Scenarios

@@ -74,26 +74,6 @@
 #' @export
 #' @family pca bootstrap
 #' @examples
-#' # --- Assuming the pca and svd_wrapper functions provided are loaded ---
-#' # Also assuming helper functions like center(), pass(), prep(), init_transform()
-#' # are defined and available. Create simplified mocks if needed:
-#' center <- function() structure(list(scale=FALSE, center=TRUE), class=c("center", "prepper"))
-#' pass <- function() structure(list(scale=FALSE, center=FALSE), class=c("pass", "prepper"))
-#' prep <- function(preproc) {
-#'    xfun <- function(X) scale(X, center = preproc$center, scale = preproc$scale)
-#'    # Add proper reverse logic if needed for projection
-#'    return(structure(list(transform = xfun, reverse = function(X) X), class="prep"))
-#' }
-#' init_transform <- function(proc, X) proc$transform(X)
-#' bi_projector <- function(v, s, sdev, u, preproc, classes, method) {
-#'     structure(list(v=v, s=s, sdev=sdev, u=u, preproc=preproc, method=method),
-#'               class=c(classes, "bi_projector", "projector"))
-#' }
-#' coefficients.projector <- function(x,...) x$v
-#' scores.projector <- function(x,...) x$s
-#' sdev.projector <- function(x,...) x$sdev
-#' # --- End Mock Helpers ---
-#'
 #' # Simulate data (p=50, n=20)
 #' set.seed(123)
 #' p_dim <- 50
@@ -107,26 +87,12 @@
 #' pca_res <- pca(X_mat, ncomp = 5, preproc = center(), method = "fast")
 #'
 #' # Run bootstrap on the pca result
-#' boot_res <- bootstrap_pca(pca_res, nboot = 50, k = 5, seed = 456)
+#' boot_res <- bootstrap_pca(pca_res, nboot = 5, k = 5, seed = 456)
 #'
 #' # Explore results
 #' print(dim(boot_res$z_loadings)) # p x k Z-scores for loadings (coefficients)
 #' print(dim(boot_res$z_scores))   # n x k Z-scores for scores
-#'
-#' # Plot std dev for first loading vector (V)
-#' plot(boot_res$sd_Vb[, 1], ylab = "Bootstrap SD", main = "Loading Vector 1 Variability")
-#'
-#' # Plot std dev for first score vector (S)
-#' plot(boot_res$sd_Scores[, 1], ylab = "Bootstrap SD", main = "Score Vector 1 Variability")
-#'
-#' \dontrun{
-#' # Example with parallel processing (requires future & future.apply)
-#' # library(future)
-#' # library(future.apply)
-#' # plan(multisession) # Set up parallel backend
-#' boot_res_parallel <- bootstrap_pca(pca_res, nboot = 100, k = 5, seed = 456,
-#'                                  parallel = TRUE)
-#' }
+#' 
 #' @importFrom stats sd
 #' @importFrom stats cov
 bootstrap_pca <- function(x, nboot = 100, k = NULL,

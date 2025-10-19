@@ -41,7 +41,8 @@ Imports:
     future,
     geigen,
     PRIMME,
-    GPArotation
+    GPArotation,
+    lifecycle
 Suggests: 
     covr,
     randomForest,

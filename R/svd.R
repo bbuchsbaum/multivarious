@@ -36,8 +36,14 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
                         ...) {
   method <- match.arg(method)
   
-  proc <- prep(preproc)
-  Xp <- init_transform(proc, X)
+  # FIXME: remove old API usage in v1.0
+  # proc <- prep(preproc)
+  # Xp <- init_transform(proc, X)
+  
+  # Use new API
+  result <- fit_transform(preproc, X)
+  proc <- result$preproc
+  Xp <- result$transformed
   
   # Cap ncomp based on dimensions and method requirements
   max_k <- min(dim(Xp))

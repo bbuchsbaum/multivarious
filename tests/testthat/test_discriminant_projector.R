@@ -171,5 +171,3 @@ test_that("predict works when covariance is rank deficient", {
   expect_length(preds, length(Y_rd))
   expect_true(all(levels(preds) == levels(Y_rd)))
 })
-=======
-

@@ -56,6 +56,6 @@ calculated metrics (e.g., \code{mse}, \code{r2}, \code{mae}) or error messages
 data for each fold is included in a list column \code{model_full}.
 }
 \seealso{
-\code{\link{cv_generic}}, \code{\link{summary.cv_fit}}, \code{\link{plot.cv_fit}}
+\code{\link{cv_generic}}
 }
 \concept{cv}

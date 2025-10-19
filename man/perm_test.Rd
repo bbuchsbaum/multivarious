@@ -7,13 +7,11 @@
 \alias{perm_test.discriminant_projector}
 \alias{perm_test.multiblock_biprojector}
 \title{Generic Permutation-Based Test}
-\usage{
-perm_test(x, ...)
-}
 \arguments{
 \item{x}{A fitted model object (e.g. \code{pca}, \code{cross_projector}, \code{discriminant_projector}, \code{multiblock_biprojector}).}
 
-\item{...}{Additional arguments passed down to \code{shuffle_fun} or \code{measure_fun} (if applicable).\n#'   Note: For \code{multiblock} methods, \code{Xlist}, \code{comps}, \code{alpha}, and \code{use_rspectra} (for biprojector) are handled as direct named arguments, not via \code{...}.}
+\item{...}{Additional arguments passed down to \code{shuffle_fun} or \code{measure_fun} (if applicable).
+Note: For \code{multiblock} methods, \code{Xlist}, \code{comps}, \code{alpha}, and \code{use_rspectra} (for biprojector) are handled as direct named arguments, not via \code{...}.}
 
 \item{X}{(Used by \code{pca}, \code{cross_projector}, \code{discriminant_projector}) The original primary data matrix used to fit \code{x}. Ignored by the \code{multiblock_biprojector} method.}
 
@@ -31,7 +29,7 @@ perm_test(x, ...)
 
 \item{stepwise}{(Used by \code{pca}) Logical indicating if sequential testing (P3 projection) should be performed. Default \code{TRUE}. (The multiblock methods also perform sequential testing based on \code{alpha} and \code{comps}, but this argument is ignored). Ignored by other methods.}
 
-\item{parallel}{(Used by all methods) Logical; if \code{TRUE}, attempt parallel execution via \code{future.apply::future_lapply}. Requires the \code{future.apply} package.}
+\item{parallel}{(Used by all methods) Logical; if \code{TRUE}, attempt parallel execution via \code{future.apply::future_lapply}.}
 
 \item{alternative}{(Used by all methods) Character string for the alternative hypothesis: "greater" (default), "less", or "two.sided".}
 
@@ -51,7 +49,7 @@ The structure of the return value depends on the method:
 \item{\strong{\code{cross_projector}} and \strong{\code{discriminant_projector}}:}{
 Returns an object of class \code{perm_test}, a list containing: \code{statistic}, \code{perm_values}, \code{p.value}, \code{alternative}, \code{method}, \code{nperm}, \code{call}.}
 \item{\strong{\code{pca}}, \strong{\code{multiblock_biprojector}}, and \strong{\code{multiblock_projector}}:}{
-Returns an object inheriting from \code{perm_test} (classes \code{perm_test_pca}, \code{perm_test_multiblock}, or \code{perm_test} respectively for multiblock_projector), \n
+Returns an object inheriting from \code{perm_test} (classes \code{perm_test_pca}, \code{perm_test_multiblock}, or \code{perm_test} respectively for multiblock_projector),
 a list containing: \code{component_results} (data frame with observed stat, pval, CIs per component), \code{perm_values} (matrix of permuted stats), \code{alpha} (if applicable), \code{alternative}, \code{method}, \code{nperm} (vector of successful permutations per component), \code{call}.}
 }
 }

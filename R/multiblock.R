@@ -201,7 +201,7 @@ perm_test.multiblock_biprojector <- function(
   n         <- nrow(scores(x))
 
   ## ------------------------------------------------------------------
-  ## 2.  helper  –  get block‑wise score matrix  (n × B)  for comp k
+  ## 2.  helper  -  get block-wise score matrix  (n x B)  for comp k
   ## ------------------------------------------------------------------
   get_Tk <- function(comp_k, data_list = NULL, S_perm = NULL){
       if (is.null(data_list)){          # use stored scores — fast

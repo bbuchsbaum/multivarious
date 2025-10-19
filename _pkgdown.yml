@@ -2,6 +2,12 @@ url: https://bbuchsbaum.github.io/multivarious/
 template:
   bootstrap: 5
 
+code:
+  width: 80
+
+development:
+  mode: auto
+
 reference:
 - title: "Model construction"
   desc: "Functions that compute multivariate decompositions"
@@ -9,6 +15,8 @@ reference:
   - pca
   - svd_wrapper
   - regress
+  - cPCAplus
+  - geneig
 - title: "Model classes for multivariate decompositions and extension"
   desc: "Generic S3 classes use to represented multivariate model fits"
   contents:
@@ -19,7 +27,6 @@ reference:
   - cross_projector
   - multiblock_biprojector
   - multiblock_projector
-  - partial_projector.projector
 - title: "Model Fitting and Projections"
   desc: "Functions for fitting models and applying projections."
   contents:
@@ -34,9 +41,13 @@ reference:
   - inverse_projection
   - partial_inverse_projection
   - compose_projector
-  - compose_projectors
+  - compose_partial_projector
   - refit
-  - nystrom_embedding
+  - nystrom_approx
+  - fit
+  - fit_transform
+  - transform
+  - inverse_transform
 - title: "Cross Projection"
   desc: "Functions for creating and working with cross_projectors for two-way projection between two sets of variables or features."
   contents:
@@ -44,6 +55,10 @@ reference:
   - coef.cross_projector
   - reprocess.cross_projector
   - shape.cross_projector
+  - transfer
+  - inverse_projection.cross_projector
+  - partial_inverse_projection.cross_projector
+  - partial_project.cross_projector
 - title: "Model Components and Properties"
   desc: "Functions for working with model components and properties."
   contents:
@@ -59,17 +74,22 @@ reference:
   - block_indices
   - nblocks
   - prinang
+  - principal_angles
+  - variables_used
+  - vars_for_component
 - title: "Rotation and Transformation"
   desc: "Functions for rotating and transforming model components."
   contents:
   - rotate
   - apply_rotation
-  - convert_domain
 - title: "Resampling and Confidence Intervals"
   desc: "Functions for bootstrapping and estimating confidence intervals."
   contents:
   - starts_with("bootstrap")
   - perm_ci
+  - perm_test
+  - cv
+  - cv_generic
 - title: "Classifier Construction"
   desc: "Functions for constructing classifiers."
   contents:
@@ -77,10 +97,17 @@ reference:
   - rf_classifier
   - rf_classifier.projector
   - predict.classifier
+  - feature_importance
+  - feature_importance.classifier
 - title: "Model Diagnostics and Residuals"
   desc: "Functions for evaluating model fit and residuals."
   contents:
   - residuals
+  - measure_reconstruction_error
+  - measure_interblock_transfer_error
+  - pca_outliers
+  - rank_score
+  - subspace_similarity
 - title: "Pre-processing"
   desc: "Functions for pre-processing data and managing pipelines."
   contents:
@@ -96,10 +123,43 @@ reference:
   - init_transform
   - concat_pre_processors
   - add_node
+  - preprocess
+  - check_fitted
+  - is_fitted
+  - mark_fitted
+  - get_fitted_state
+- title: "Visualization"
+  desc: "Functions for plotting and visualization."
+  contents:
+  - starts_with("biplot")
+  - starts_with("screeplot")
+- title: "Utilities"
+  desc: "Utility functions."
+  contents:
+  - group_means
+  - robust_inv_vTv
+  - topk
+  - reconstruct_new
 - title: "Other"
   desc: "Other functions"
   contents:
   - starts_with("print")
-  - group_means
-  
-  
+  - starts_with("summary")
+  - starts_with("coef")
+  - starts_with("predict")
+  - starts_with("reprocess")
+  - starts_with("project")
+  - starts_with("truncate")
+  - starts_with("block_indices")
+  - starts_with("inverse_projection")
+  - starts_with("partial_inverse_projection")
+  - starts_with("partial_project")
+  - starts_with("reconstruct")
+  - starts_with("rotate")
+  - starts_with("std_scores")
+  - starts_with("is_orthogonal")
+  - starts_with("add_node")
+  - starts_with("shape")
+  - starts_with("transfer")
+
+

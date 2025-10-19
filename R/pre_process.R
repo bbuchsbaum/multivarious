@@ -31,6 +31,13 @@ add_node.prepper <- function(x, step,...) {
 
 #' @export
 prep.prepper <- function(x,...) {
+  lifecycle::deprecate_warn(
+    "0.3.0", 
+    "prep()", 
+    "fit()",
+    details = "The prep() function is deprecated. Use fit() for a more standard interface."
+  )
+  
   # Use local to capture a stable copy of steps
   local({
     steps <- x$steps
@@ -93,6 +100,13 @@ fresh.prepper <- function(x,...) {
 
 #' @export
 init_transform.pre_processor <- function(x, X,...) {
+  lifecycle::deprecate_warn(
+    "0.3.0", 
+    "init_transform()", 
+    "fit_transform()",
+    details = "init_transform() is deprecated. Use fit_transform() for a more standard interface."
+  )
+  
   chk::chk_matrix(X)
   res <- x$init(X)
   # After init, orig_ncol should be set, store it directly in the object? 
@@ -103,6 +117,13 @@ init_transform.pre_processor <- function(x, X,...) {
 
 #' @export
 apply_transform.pre_processor <- function(x, X, colind=NULL,...) {
+  lifecycle::deprecate_warn(
+    "0.3.0", 
+    "apply_transform()", 
+    "transform()",
+    details = "apply_transform() is deprecated. Use transform() for a more standard interface."
+  )
+  
   chk::chk_matrix(X)
   
   # GENERAL CHECK: Ensure preprocessor is initialized before any application
@@ -130,6 +151,13 @@ apply_transform.pre_processor <- function(x, X, colind=NULL,...) {
 
 #' @export
 reverse_transform.pre_processor <- function(x, X, colind=NULL,...) {
+  lifecycle::deprecate_warn(
+    "0.3.0", 
+    "reverse_transform()", 
+    "inverse_transform()",
+    details = "reverse_transform() is deprecated. Use inverse_transform() for a more standard interface."
+  )
+  
   chk::chk_matrix(X)
   
   # GENERAL CHECK: Ensure preprocessor is initialized before any reversal
@@ -679,4 +707,49 @@ print.concat_pre_processor <- function(x, ...) {
   cat(crayon::bold(crayon::green("A concatenated (blockwise) pre-processing pipeline:\n")))
   cat(crayon::cyan("  This object applies different pre-processors to distinct column blocks.\n"))
   invisible(x)
+}
+
+
+# =============================================================================
+# New S3 Methods for Modern Preprocessing API
+# =============================================================================
+
+#' @export
+fit.prepper <- function(object, X, ...) {
+  proc <- prep(object)
+  fitted_proc <- mark_fitted(proc, TRUE)
+  init_transform(fitted_proc, X)
+  fitted_proc
+}
+
+#' @export
+fit_transform.prepper <- function(object, X, ...) {
+  proc <- prep(object)
+  fitted_proc <- mark_fitted(proc, TRUE)
+  transformed <- init_transform(fitted_proc, X)
+  list(preproc = fitted_proc, transformed = transformed)
+}
+
+#' @export
+transform.pre_processor <- function(object, X, ...) {
+  check_fitted(object, "transform")
+  apply_transform(object, X, ...)
+}
+
+#' @export
+inverse_transform.pre_processor <- function(object, X, ...) {
+  check_fitted(object, "inverse_transform")
+  reverse_transform(object, X, ...)
+}
+
+#' @export
+transform.concat_pre_processor <- function(object, X, ...) {
+  check_fitted(object, "transform")
+  apply_transform(object, X, ...)
+}
+
+#' @export
+inverse_transform.concat_pre_processor <- function(object, X, ...) {
+  check_fitted(object, "inverse_transform")
+  reverse_transform(object, X, ...)
 }

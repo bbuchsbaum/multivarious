@@ -43,18 +43,32 @@ all_data <- rbind(background, foreground)
 regular_pca <- pca(all_data, ncomp = 2)
 
 # Contrastive PCA
-cpca_result <- cPCAplus(foreground, background, ncomp = 2)
+cpca_result <- cPCAplus(X_f = foreground, X_b = background, ncomp = 2)
 
 # Compare what each method finds
-par(mfrow = c(1, 2))
+loadings_df <- rbind(
+  data.frame(
+    feature = factor(1:30),
+    value   = abs(regular_pca$v[1:30, 1]),
+    method  = "Standard PCA"
+  ),
+  data.frame(
+    feature = factor(1:30),
+    value   = abs(cpca_result$v[1:30, 1]),
+    method  = "Contrastive PCA"
+  )
+)
 
-# Regular PCA loadings
-barplot(abs(regular_pca$v[1:30, 1]), main = "Standard PCA: PC1 Loadings",
-        names.arg = 1:30, las = 2, cex.names = 0.7)
-
-# Contrastive PCA loadings  
-barplot(abs(cpca_result$v[1:30, 1]), main = "Contrastive PCA: PC1 Loadings",
-        names.arg = 1:30, las = 2, cex.names = 0.7)
+ggplot(loadings_df, aes(x = feature, y = value)) +
+  geom_col(fill = "#1f78b4") +
+  facet_wrap(~method, nrow = 1) +
+  theme_minimal(base_size = 12) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Feature",
+    y = "|Loading|",
+    title = "Top loading coefficients for PC1"
+  )
 ```
 
 Notice how standard PCA focuses on features 1-10 (the common variation), while contrastive PCA correctly identifies features 20-25 (the group-specific signal).
@@ -66,9 +80,9 @@ The `cPCAplus()` function makes contrastive PCA easy to use:
 ```{r basic_usage}
 # Basic usage
 cpca_fit <- cPCAplus(
-  X_foreground = foreground,  # Your group of interest
-  X_background = background,   # Your reference group
-  ncomp = 5                   # Number of components to extract
+  X_f = foreground,  # Your group of interest (foreground)
+  X_b = background,  # Your reference group (background)
+  ncomp = 5          # Number of components to extract
 )
 
 # The result is a bi_projector object with familiar methods
@@ -106,8 +120,8 @@ print(paste("Variance ratios:", paste(round(cpca_fit$values[1:3], 2), collapse =
 ```{r biomedical_example, eval=FALSE}
 # Identify disease-specific patterns
 tumor_cpca <- cPCAplus(
-  X_foreground = tumor_samples,
-  X_background = healthy_tissue,
+  X_f = tumor_samples,
+  X_b = healthy_tissue,
   ncomp = 10
 )
 ```
@@ -116,8 +130,8 @@ tumor_cpca <- cPCAplus(
 ```{r technical_example, eval=FALSE}
 # Use technical replicates as background to find biological signal
 bio_cpca <- cPCAplus(
-  X_foreground = biological_samples,
-  X_background = technical_replicates,
+  X_f = biological_samples,
+  X_b = technical_replicates,
   ncomp = 5
 )
 ```
@@ -126,8 +140,8 @@ bio_cpca <- cPCAplus(
 ```{r time_example, eval=FALSE}
 # Find patterns specific to treatment timepoint
 treatment_cpca <- cPCAplus(
-  X_foreground = after_treatment,
-  X_background = before_treatment,
+  X_f = after_treatment,
+  X_b = before_treatment,
   ncomp = 5
 )
 ```
@@ -146,7 +160,7 @@ X_foreground_hd <- X_background_hd[1:n_f, ] +
                    matrix(c(rnorm(n_f * 20, sd = 2), rep(0, n_f * (p-20))), n_f, p)
 
 # Use sample-space strategy for efficiency
-cpca_hd <- cPCAplus(X_foreground_hd, X_background_hd, 
+cpca_hd <- cPCAplus(X_f = X_foreground_hd, X_b = X_background_hd,
                     ncomp = 5, strategy = "sample")
 ```
 
@@ -159,12 +173,12 @@ If your background covariance is nearly singular, add regularization:
 small_background <- matrix(rnorm(20 * 100), 20, 100)
 small_foreground <- matrix(rnorm(30 * 100), 30, 100)
 
-# Add regularization 
+# Add regularization
 cpca_regularized <- cPCAplus(
-  small_foreground, 
-  small_background,
+  X_f = small_foreground,
+  X_b = small_background,
   ncomp = 5,
-  shrinkage = 0.1  # Shrink background covariance toward diagonal
+  lambda = 0.1  # Regularization parameter for background covariance
 )
 ```
 

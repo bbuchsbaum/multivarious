@@ -159,8 +159,9 @@ message("Running internal checks for perm_test methods...")
 
 # PCA Check
 set.seed(42)
-pca_test_mod <- pca(scale(mtcars), ncomp = 3)
-pt_check_pca <- perm_test(pca_test_mod, mtcars, nperm = 19, comps=2, parallel=FALSE)
+mtcars_mat <- as.matrix(scale(mtcars))
+pca_test_mod <- pca(mtcars_mat, ncomp = 3)
+pt_check_pca <- perm_test(pca_test_mod, mtcars_mat, nperm = 19, comps=2, parallel=FALSE)
 stopifnot(nrow(pt_check_pca$component_results) == 2,
           !is.na(pt_check_pca$component_results$pval[1]))
 

@@ -26,7 +26,10 @@ Transferred data matrix.
 Convert between data representations in a multiblock or cross-decomposition
 model by projecting the input \code{new_data} from the \code{from} domain/block
 onto a latent space and then reconstructing it in the \code{to} domain/block.
-If \code{opts$ls_rr} is \code{TRUE}, the projection step uses a
-ridge-regularized least squares solution with penalty \code{opts$lambda} before
-any component subsetting occurs.
+}
+\details{
+When \code{opts$ls_rr} is \code{TRUE}, the forward projection from the \code{from}
+domain is computed using a ridge-regularized least squares approach.
+The penalty parameter is taken from \code{opts$lambda}. Component subsetting
+via \code{opts$comps} is applied after computing these ridge-based scores.
 }

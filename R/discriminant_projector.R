@@ -157,9 +157,21 @@ predict.discriminant_projector <- function(object,
   # 4) If we want real LDA, we can use stored Sigma or identity if not present
   if (method == "lda") {
     sigma_pooled <- object$Sigma
+    subspace_dim <- ncol(object$s)
     if (is.null(sigma_pooled)) {
-      # fallback to identity
-      sigma_pooled <- diag(ncol(object$s))
+      sigma_pooled <- diag(subspace_dim)
+    } else {
+      sigma_mat <- if (inherits(sigma_pooled, "Matrix")) as.matrix(sigma_pooled) else as.matrix(sigma_pooled)
+      if (ncol(sigma_mat) != subspace_dim) {
+        v_sigma <- if (is.null(colind)) object$v else object$v[colind, , drop = FALSE]
+        if (nrow(v_sigma) == ncol(sigma_mat)) {
+          sigma_mat <- crossprod(v_sigma, sigma_mat %*% v_sigma)
+        } else {
+          warning("Stored covariance has incompatible dimension; using identity in score space.")
+          sigma_mat <- diag(subspace_dim)
+        }
+      }
+      sigma_pooled <- 0.5 * (sigma_mat + t(sigma_mat))
     }
     inv_sigma <- tryCatch(
       solve(sigma_pooled),
@@ -448,4 +460,3 @@ print.discriminant_projector <- function(x,...) {
   cat("Label counts: \n")
   print(x$counts) 
 }
-

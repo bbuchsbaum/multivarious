@@ -46,18 +46,23 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
   method <- match.arg(method)
   
   # --- Preprocessing Handling ---
+  # FIXME: remove old API usage in v1.0
   # Ensure preproc is initialized and apply it to X
   if (!inherits(preproc, "pre_processor")) {
     # If it's a prepper object or similar, finalize it
-    proc <- prep(preproc)
+    # proc <- prep(preproc)
+    result <- fit_transform(preproc, X)
+    proc <- result$preproc
+    X_processed <- result$transformed
   } else {
-    # Already a finalized pre_processor
+    # Already a finalized pre_processor - use old API for now
     proc <- preproc
+    X_processed <- init_transform(proc, X)
   }
   
   # Initialize and apply the transform to X
   # Note: We process X *before* adding the intercept column
-  X_processed <- init_transform(proc, X)
+  # X_processed <- init_transform(proc, X)
   
   # --- Intercept Handling ---
   # Manually add intercept column to the *processed* X if requested,

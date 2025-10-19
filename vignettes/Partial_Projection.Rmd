@@ -56,14 +56,18 @@ p  <- 8
 X  <- matrix(rnorm(n * p), n, p)
 
 # Fit a centred 3-component PCA (via SVD)
-# Assuming bi_projector, prep, center are available
-Xc      <- scale(X, center = TRUE, scale = FALSE)
+# Manually center the data and create fitted preprocessor
+Xc <- scale(X, center = TRUE, scale = FALSE)
 svd_res <- svd(Xc, nu = 0, nv = 3)
-pca     <- bi_projector(              #  <- multiblock helper
+
+# Create a fitted centering preprocessor
+preproc_fitted <- fit(center(), X)
+
+pca <- bi_projector(
   v     = svd_res$v,
   s     = Xc %*% svd_res$v,
   sdev  = svd_res$d[1:3] / sqrt(n-1), # Correct scaling for sdev
-  preproc = prep(center())
+  preproc = preproc_fitted
 )
 ```
 
