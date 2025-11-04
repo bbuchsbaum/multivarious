@@ -9,11 +9,8 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
-# Assuming necessary multiblock functions are loaded
+library(multivarious)  # Ensure pca(), svd_wrapper(), bi_projector, etc. are available
 library(ggplot2)       # for plots below
-# Need to ensure pca, svd_wrapper, bi_projector, center, prep, scores, 
-# reconstruct, truncate, shape, screeplot, biplot, std_scores, perm_test, rotate 
-# are available, likely via loading the package.
 ```
 
 # 1. Why wrap SVD at all?

@@ -46,18 +46,16 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
   method <- match.arg(method)
   
   # --- Preprocessing Handling ---
-  # FIXME: remove old API usage in v1.0
   # Ensure preproc is initialized and apply it to X
   if (!inherits(preproc, "pre_processor")) {
     # If it's a prepper object or similar, finalize it
-    # proc <- prep(preproc)
     result <- fit_transform(preproc, X)
     proc <- result$preproc
     X_processed <- result$transformed
   } else {
-    # Already a finalized pre_processor - use old API for now
+    # Already a finalized pre_processor - use transform
     proc <- preproc
-    X_processed <- init_transform(proc, X)
+    X_processed <- transform(proc, X)
   }
   
   # Initialize and apply the transform to X
@@ -166,6 +164,31 @@ inverse_projection.regress <- function(x,...) {
   t(x$coefficients) # This matches if v = betas
 }
 
+#' Reconstruct fitted or subsetted outputs for a `regress` object
+#'
+#' For regression-based bi_projectors, reconstruction should map from the
+#' design matrix side (scores) to the output space using the regression
+#' coefficients, without applying any reverse preprocessing (which belongs
+#' to the input/basis side).
+#'
+#' @param x A `regress` object produced by \code{regress()}.
+#' @param comp Integer vector of component indices (columns of the design matrix / predictors) to use.
+#' @param rowind Integer vector of row indices in the design matrix (observations) to reconstruct.
+#' @param colind Integer vector of output indices (columns of Y) to reconstruct.
+#' @param ... Ignored.
+#' @export
+reconstruct.regress <- function(x,
+                                comp = 1:ncol(x$coefficients),
+                                rowind = 1:nrow(scores(x)),
+                                colind = 1:nrow(x$coefficients),
+                                ...) {
+  # scores(x): design matrix (Nobs x p_in)
+  # coefficients: betas (p_out x p_in)
+  S <- scores(x)[rowind, comp, drop = FALSE]
+  Bsub_t <- t(x$coefficients[colind, comp, drop = FALSE]) # (length(comp) x length(colind))
+  S %*% Bsub_t
+}
+
 #' @export
 project_vars.regress <- function(x, new_data,...) {
   if (is.vector(new_data)) {
@@ -250,4 +273,3 @@ print.regress <- function(x, ...) {
   
   invisible(x)
 }
-

@@ -176,7 +176,10 @@ predict.discriminant_projector <- function(object,
     inv_sigma <- tryCatch(
       solve(sigma_pooled),
       error = function(e) {
-        warning("Covariance matrix not invertible; using pseudo-inverse via MASS::ginv")
+        warning("Covariance matrix not invertible; attempting pseudo-inverse via MASS::ginv")
+        if (!requireNamespace("MASS", quietly = TRUE)) {
+          stop("Covariance matrix not invertible and package 'MASS' is unavailable for pseudo-inverse computation.", call. = FALSE)
+        }
         MASS::ginv(sigma_pooled)
       }
     )
@@ -198,7 +201,12 @@ predict.discriminant_projector <- function(object,
       return(factor(class_levels[best_idx], levels = class_levels))
     } else {
       # Softmax rowwise
-      disc_exp <- exp(disc_mat - apply(disc_mat, 1, max))
+      if (requireNamespace("matrixStats", quietly = TRUE)) {
+        row_max <- matrixStats::rowMaxs(disc_mat)
+      } else {
+        row_max <- apply(disc_mat, 1, max)
+      }
+      disc_exp <- exp(sweep(disc_mat, 1, row_max, "-"))
       prob_mat <- disc_exp / rowSums(disc_exp)
       colnames(prob_mat) <- class_levels
       rownames(prob_mat) <- rownames(new_data_proc) # Add row names
@@ -297,7 +305,7 @@ perm_test.discriminant_projector <- function(
   if (is.null(fit_fun)) {
     fit_fun <- function(Xtrain_orig, labelstrain, preproc_obj, ...) {
       # Fix: Use apply_transform instead of reprocess, as preproc_obj is the processor, not the model
-      Xtrain_proc <- try(apply_transform(preproc_obj, Xtrain_orig), silent = TRUE)
+      Xtrain_proc <- try(transform(preproc_obj, Xtrain_orig), silent = TRUE)
       if (inherits(Xtrain_proc, "try-error")) {
         # Improved error message
         stop(sprintf("Failed to apply original preprocessor transform in default fit_fun: %s", Xtrain_proc))

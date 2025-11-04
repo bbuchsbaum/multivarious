@@ -49,7 +49,7 @@ project_vars.bi_projector <- function(x, new_data, ...) {
   chk::chk_equal(nrow(new_data), nrow(sc))
 
   # Transform data using the same preprocessor that produced the scores
-  data_proc <- apply_transform(x$preproc, new_data)
+  data_proc <- transform(x$preproc, new_data)
 
   variance <- sdev(x)^2
   if (any(abs(variance) < 1e-12)) {
@@ -72,7 +72,7 @@ project_vars.bi_projector <- function(x, new_data, ...) {
 genreconstruct <- function(x, comp, rowind, colind) {
   ip <- inverse_projection(x)
   out <- scores(x)[rowind,comp,drop=FALSE] %*% ip[comp,,drop=FALSE][,colind,drop=FALSE]
-  reverse_transform(x$preproc, out, colind)
+  inverse_transform(x$preproc, out, colind)
 }
 
 #' @export
@@ -177,7 +177,7 @@ reconstruct_new.bi_projector <- function(x,
   # Apply preprocessing only to the provided columns
   full_data_proc <- matrix(0, nrow = nrow(new_data),
                            ncol = nrow(coef.projector(x)))
-  full_data_proc[, colind] <- apply_transform(x$preproc, new_data, colind)
+  full_data_proc[, colind] <- transform(x$preproc, new_data, colind)
   
   # Project to get scores for all components
   scores_new_full <- project(x, full_data_proc)
@@ -194,6 +194,6 @@ reconstruct_new.bi_projector <- function(x,
   rec_data_sub <- scores_new %*% ip_sub
 
   # Reverse transform for the selected columns
-  rec_data_sub <- reverse_transform(x$preproc, rec_data_sub, colind)
+  rec_data_sub <- inverse_transform(x$preproc, rec_data_sub, colind)
   rec_data_sub
 }

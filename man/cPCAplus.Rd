@@ -18,6 +18,9 @@ cPCAplus(
   lambda = 0,
   method = c("geigen", "primme", "sdiag", "corpcor"),
   strategy = c("auto", "feature", "sample"),
+  verbose = getOption("multivarious.verbose", TRUE),
+  sample_rank = NULL,
+  sample_oversample = 10L,
   ...
 )
 }
@@ -27,8 +30,9 @@ cPCAplus(
 \item{X_b}{A numeric matrix representing the background dataset (samples x features).
 \code{X_f} and \code{X_b} must have the same number of features (columns).}
 
-\item{ncomp}{Integer. The number of contrastive components to compute. Defaults to \code{min(ncol(X_f))},
-but will be capped by the effective rank based on sample sizes.}
+\item{ncomp}{Integer. The number of contrastive components to compute. Defaults to
+\code{min(ncol(X_f), nrow(X_f), nrow(X_b))}, and may be further capped by the
+effective background rank (especially under the sample-space strategy).}
 
 \item{center_background}{Logical. If TRUE (default), both \code{X_f} and \code{X_b} are centered using the
 column means of \code{X_b}. If FALSE, it assumes data is already appropriately centered.}
@@ -51,6 +55,17 @@ results if \code{Rb} is ill-conditioned or singular.}
 \item \code{"feature"}: Forces direct computation via \verb{p x p} covariance matrices.
 \item \code{"sample"}: Forces sample-space computation via SVD and a smaller GEVD (efficient for large \code{p}).
 }}
+
+\item{verbose}{Logical; if TRUE (default), prints brief status messages about strategy
+selection and defaults. Set to FALSE to silence these messages.}
+
+\item{sample_rank}{Optional integer controlling the background subspace rank used in the
+sample-space strategy. If \code{NULL} (default), uses the full background rank \code{min(n_b-1, p)}.
+If provided, the solver will target approximately \code{sample_rank + sample_oversample} and
+will be bounded above by the full background rank.}
+
+\item{sample_oversample}{Integer oversampling margin (default 10) applied when \code{sample_rank}
+is given. Ignored when \code{sample_rank} is \code{NULL}.}
 
 \item{...}{Additional arguments passed to the underlying computation functions
 (\code{geigen::geneig} or \code{irlba::irlba} based on \code{method} and \code{strategy}).}

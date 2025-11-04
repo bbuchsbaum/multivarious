@@ -14,9 +14,9 @@ knitr::opts_chunk$set(
   fig.width = 7,
   fig.height = 4
 )
+library(multivarious)
 library(dplyr)
 library(ggplot2)
-# Assuming necessary multiblock functions are loaded
 ```
 
 # 1. Why partial projection?

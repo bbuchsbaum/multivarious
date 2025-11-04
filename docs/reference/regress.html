@@ -20,9 +20,9 @@ The goal is to find a projection matrix that can be used for mapping and reconst
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/CPCAplus.html">Contrastive PCA: Finding What's Different Between Groups</a></li>
-    <li><a class="dropdown-item" href="../articles/Classifier.html">Classifying in latent space: k-NN &amp; Random-Forest wrappers</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/Classifier.html">Classifying in latent space: k-NN &amp; Random-Forest wrappers</a></li>
     <li><a class="dropdown-item" href="../articles/Composing_Projectors.html">Composing Projectors: Chaining Models</a></li>
+    <li><a class="dropdown-item" href="../articles/CPCAplus.html">Contrastive PCA: Finding What's Different Between Groups</a></li>
     <li><a class="dropdown-item" href="../articles/CrossValidation.html">Cross-validation for Dimensionality Reduction</a></li>
     <li><a class="dropdown-item" href="../articles/Extending.html">Extending multiblock: CCA and glmnet Examples</a></li>
     <li><a class="dropdown-item" href="../articles/Introduction.html">Introduction to the multivarious Package</a></li>
@@ -127,15 +127,12 @@ components as might be typical in other <code>bi_projector</code> contexts (e.g.
 <span class="r-in"><span><span class="co"># Fit regression models and reconstruct the fitted response matrix</span></span></span>
 <span class="r-in"><span><span class="va">r_lm</span> <span class="op">&lt;-</span> <span class="fu">regress</span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, intercept <span class="op">=</span> <span class="cn">FALSE</span>, method <span class="op">=</span> <span class="st">"lm"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">recon_lm</span> <span class="op">&lt;-</span> <span class="fu"><a href="reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">r_lm</span><span class="op">)</span> <span class="co"># Reconstructs fitted Y</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in reverse_transform.pre_processor(x$preproc, out, colind):</span> `colind` must have values matching 1, 2, 3, 4, 5, 6, 7, 8 or 9.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">r_mridge</span> <span class="op">&lt;-</span> <span class="fu">regress</span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, intercept <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"mridge"</span>, lambda <span class="op">=</span> <span class="fl">0.001</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">recon_mridge</span> <span class="op">&lt;-</span> <span class="fu"><a href="reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">r_mridge</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in reverse_transform.pre_processor(x$preproc, out, colind):</span> `colind` must have values matching 1, 2, 3, 4, 5, 6, 7, 8 or 9.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">r_enet</span> <span class="op">&lt;-</span> <span class="fu">regress</span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, intercept <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"enet"</span>, lambda <span class="op">=</span> <span class="fl">0.001</span>, alpha <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">recon_enet</span> <span class="op">&lt;-</span> <span class="fu"><a href="reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">r_enet</span><span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in reverse_transform.pre_processor(x$preproc, out, colind):</span> `colind` must have values matching 1, 2, 3, 4, 5, 6, 7, 8 or 9.</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">r_pls</span> <span class="op">&lt;-</span> <span class="fu">regress</span><span class="op">(</span><span class="va">X</span>, <span class="va">Y</span>, intercept <span class="op">=</span> <span class="cn">TRUE</span>, method <span class="op">=</span> <span class="st">"pls"</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in t.default(cf):</span> argument is not a matrix</span>

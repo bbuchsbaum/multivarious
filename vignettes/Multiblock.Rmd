@@ -48,12 +48,12 @@ blk_idx <- list(A = 1:pA, B = (pA + 1):(pA + pB)) # Named list is good practice
 
 ```{r build_multiblock}
 # 2-component centred PCA (using base SVD for brevity)
-preproc <- prep(center())
-Xc        <- init_transform(preproc, X)          # Centered data)
+preproc_fitted <- fit(center(), X)
+Xc        <- transform(preproc_fitted, X)          # Centered data
 svd_res   <- svd(Xc, nu = 0, nv = 2)               # only V (loadings)
 mb        <- multiblock_projector(
   v             = svd_res$v,                       # p × k loadings
-  preproc       = preproc,                  # remembers centering
+  preproc       = preproc_fitted,                  # remembers centering
   block_indices = blk_idx
 )
 
@@ -108,7 +108,7 @@ bi <- multiblock_biprojector(
   v             = svd_res$v,
   s             = Xc %*% svd_res$v,    # Calculate scores: Xc %*% V
   sdev          = svd_res$d[1:2] / sqrt(n-1), # SVD d are related to sdev
-  preproc       = prep(center()),
+  preproc       = preproc_fitted,
   block_indices = blk_idx
 )
 print(bi)

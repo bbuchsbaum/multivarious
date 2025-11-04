@@ -2,9 +2,9 @@ pandoc: 3.7.0.2
 pkgdown: 2.1.3
 pkgdown_sha: ~
 articles:
-  CPCAplus: CPCAplus.html
   Classifier: Classifier.html
   Composing_Projectors: Composing_Projectors.html
+  CPCAplus: CPCAplus.html
   CrossValidation: CrossValidation.html
   Extending: Extending.html
   Introduction: Introduction.html
@@ -15,7 +15,7 @@ articles:
   PreProcessing: PreProcessing.html
   Regress: Regress.html
   SVD_PCA: SVD_PCA.html
-last_built: 2025-10-08T05:45Z
+last_built: 2025-11-01T17:41Z
 urls:
   reference: https://bbuchsbaum.github.io/multivarious/reference
   article: https://bbuchsbaum.github.io/multivarious/articles

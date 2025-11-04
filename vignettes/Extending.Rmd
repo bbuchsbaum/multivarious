@@ -56,26 +56,26 @@ We create a fitting function that runs standard CCA using `stats::cancor()` and 
 
 ```{r fit_cca_wrapper}
 fit_cca <- function(Xtrain, Ytrain, ncomp = 2, ...) {
-  # Step 1: Run classical CCA
-  # Note: cancor expects centered data; apply_transform within cross_projector handles this.
-  cc <- stats::cancor(Xtrain, Ytrain, xcenter = TRUE, ycenter = TRUE)
+  # Step 1: Define and fit preprocessors with training data
+  # Use center()+z-score for both blocks (swap to center() only if preferred)
+  preproc_x <- fit(colscale(center(), type = "z"), Xtrain)
+  preproc_y <- fit(colscale(center(), type = "z"), Ytrain)
 
-  # Step 2: Define and initialize preprocessors
-  preproc_x <- prep(center(), scale())
-  preproc_y <- prep(center(), scale())
-  # Initialize preprocessors with training data to learn parameters
-  invisible(init_transform(preproc_x, Xtrain))
-  invisible(init_transform(preproc_y, Ytrain))
+  # Step 2: Transform training data with the fitted preprocessors
+  Xp <- transform(preproc_x, Xtrain)
+  Yp <- transform(preproc_y, Ytrain)
 
-  # Step 3: Store loadings and initialized preprocessors in a cross_projector
+  # Step 3: Run CCA on the preprocessed data (no additional centering here)
+  cc <- stats::cancor(Xp, Yp, xcenter = FALSE, ycenter = FALSE)
+
+  # Step 4: Store loadings and preprocessors in a cross_projector
   cp <- cross_projector(
     vx         = cc$xcoef[, 1:ncomp, drop = FALSE],
     vy         = cc$ycoef[, 1:ncomp, drop = FALSE],
-    preproc_x  = preproc_x, # Pass initialized preprocessor
-    preproc_y  = preproc_y, # Pass initialized preprocessor
-    classes    = "cca_cross_projector" # Add a specific class
+    preproc_x  = preproc_x,
+    preproc_y  = preproc_y,
+    classes    = "cca_cross_projector"
   )
-  # Store canonical correlations if needed for interpretation
   attr(cp, "can_cor") <- cc$cor[1:ncomp]
   cp
 }
@@ -103,7 +103,9 @@ Y_hat <- transfer(cp_cca, X, from = "X", to = "Y")
 head(round(Y_hat, 2))
 
 # Evaluate reconstruction quality (comparing original Y to predicted Y)
-# Assuming measure_reconstruction_error is available
+# Note: CCA maximizes correlation in the latent space, not prediction accuracy.
+# With only 2 components and weak relationships between sepal and petal features,
+# the R² may be modest. For prediction tasks, consider PLS instead of CCA.
 measure_reconstruction_error(Y, Y_hat, metrics = c("rmse", "r2"))
 ```
 
@@ -248,9 +250,8 @@ We define a `projector` using these coefficients. The projection `X %*% v` gives
 
 ```{r wrap_glmnet}
 # Define preprocessor
-preproc_glm <- prep(center(), scale())
-# Initialize preprocessor with training data
-invisible(init_transform(preproc_glm, X_glm))
+# Define and fit preprocessor with training data
+preproc_glm <- fit(colscale(center(), type = "z"), X_glm)
 
 # Create the projector
 proj_glm <- projector(
@@ -277,9 +278,9 @@ lasso_scores <- project(proj_glm, X_glm_test)
 head(round(lasso_scores, 3))
 dim(lasso_scores) # Should be n_test x 1 (since v_glm has 1 column)
 
-# Compare with direct calculation using apply_transform
+# Compare with direct calculation using transform
 # Apply the same preprocessing used within project()
-X_glm_test_processed <- apply_transform(preproc_glm, X_glm_test)
+X_glm_test_processed <- transform(preproc_glm, X_glm_test)
 # Calculate scores directly using the processed data and coefficients
 direct_scores <- X_glm_test_processed %*% v_glm
 head(round(direct_scores, 3))

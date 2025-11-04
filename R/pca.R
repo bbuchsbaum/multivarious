@@ -186,7 +186,7 @@ perm_test.pca <- function(x,
   }
   
   # --- Preprocess Data ---
-  Xp <- apply_transform(x$preproc, X)
+  Xp <- transform(x$preproc, X)
   
   # --- Efficient PCA/SVD for Permutations & P3 Projection ---
   get_leading_svd_u <- function(M, k) {
@@ -378,9 +378,9 @@ reconstruct.pca <- function(x, comp = 1:ncomp(x), ...) {
   
   # Use standard PCA reconstruction: scores %*% t(loadings)
   reconstructed_proc <- scores(x)[, comp, drop=FALSE] %*% t(coef(x)[, comp, drop=FALSE])
-  
+
   # Reverse the preprocessing to return data in original scale
-  reverse_transform(x$preproc, reconstructed_proc)
+  inverse_transform(x$preproc, reconstructed_proc)
 }
 
 
@@ -891,5 +891,4 @@ pca_outliers <- function(x, X, ncomp, cutoff=FALSE) {
   
   data.frame(T2 = T2vals, Q = Qvals)
 }
-
 

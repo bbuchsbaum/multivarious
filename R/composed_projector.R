@@ -454,8 +454,8 @@ reconstruct.composed_projector <- function(x, scores, comp = NULL, rowind = NULL
       #    Input: result from step 1 (in input space of stage i, but potentially still centered/scaled)
       #    Output: reconstruction in the input space of stage i (output space of stage i-1)
       if (!is.null(preproc_i) && inherits(preproc_i, "pre_processor")) {
-          # Pass the result of the inverse projection to reverse_transform
-          current_recon <- reverse_transform(preproc_i, current_recon)
+          # Pass the result of the inverse projection to inverse_transform
+          current_recon <- inverse_transform(preproc_i, current_recon)
       } # else: If no preprocessor, current_recon is already correct for this step
 
       # ------------------------

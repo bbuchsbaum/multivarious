@@ -79,20 +79,24 @@ The plot shows that 2 components capture most of the variance, with diminishing 
 
 ## Understanding the Output
 
-The `cv.bi_projector()` function returns a `cv_fit` object containing:
+The `cv_generic()` function returns a tibble containing:
 
-- **Fold-level results**: Each row represents one CV fold
-- **Performance metrics**: Stored in the `component_metrics` column
-- **Summary statistics**: Mean and standard error across folds
+- **fold**: The fold number
+- **model**: The fitted model for each fold (stored as a list column)
+- **metrics**: Performance metrics for each fold (stored as a list column of tibbles)
 
 ```{r understanding_output}
-# Detailed look at one fold's results
-fold1_metrics <- cv_results$metrics[[1]]
-print(fold1_metrics)
+# View the structure of CV results
+str(results_list[[1]], max.level = 2)
 
-# Extract metrics across all folds
-all_metrics <- dplyr::bind_rows(cv_results$metrics)
-print(all_metrics)
+# Extract and combine all metrics across folds
+all_fold_metrics <- lapply(results_list, function(res) {
+  data.frame(
+    ncomp = res$ncomp,
+    fold_metrics = dplyr::bind_rows(res$metrics)
+  )
+})
+print(head(all_fold_metrics[[1]]))
 ```
 
 ## Custom Cross-validation Scenarios
@@ -103,32 +107,23 @@ Use `cv_generic()` to compare different preprocessing pipelines:
 
 ```{r preprocessing_comparison}
 # Define two preprocessing strategies
-prep1 <- prep(center())              # Center only
-prep2 <- prep(center(), scale())     # Center and scale
+prep1 <- center()                       # Center only
+prep2 <- colscale(center(), type = "z") # Center and scale (z-score)
 
-# Fit function that applies preprocessing
+# Fit function that uses PCA with preprocessing
 fit_with_prep <- function(train_data, ncomp, preproc) {
-  # Apply preprocessing to training data
-  train_processed <- init_transform(preproc, train_data)
-  # Fit PCA
-  pca_model <- pca(train_processed, ncomp = ncomp)
-  # Store preprocessor with model
-  pca_model$preproc <- preproc
-  pca_model
+  # PCA will handle preprocessing internally
+  pca(train_data, ncomp = ncomp, preproc = preproc)
 }
 
 # Measure function that handles preprocessing
 measure_with_prep <- function(model, test_data) {
-  # Apply same preprocessing to test data
-  test_processed <- apply_transform(model$preproc, test_data)
-  # Project and reconstruct
-  scores <- project(model, test_processed)
-  recon_processed <- reconstruct(model, test_processed)
-  # Reverse preprocessing for fair comparison
-  recon_original <- reverse_transform(model$preproc, recon_processed)
-  
+  # Project and reconstruct - PCA handles preprocessing automatically
+  scores <- project(model, test_data)
+  recon <- reconstruct(model, scores = scores)
+
   # Calculate metrics
-  measure_reconstruction_error(test_data, recon_original, 
+  measure_reconstruction_error(test_data, recon,
                                metrics = c("rmse", "r2"))
 }
 
@@ -137,21 +132,22 @@ cv_prep1 <- cv_generic(
   X, folds,
   .fit_fun = fit_with_prep,
   .measure_fun = measure_with_prep,
-  preproc = prep1,  # Pass as extra argument
-  max_comp = 3
+  fit_args = list(ncomp = 3, preproc = prep1)
 )
 
 cv_prep2 <- cv_generic(
   X, folds,
   .fit_fun = fit_with_prep,
   .measure_fun = measure_with_prep,
-  preproc = prep2,
-  max_comp = 3
+  fit_args = list(ncomp = 3, preproc = prep2)
 )
 
-# Compare results
-cat("Center only - RMSE:", mean(summary(cv_prep1)$rmse), "\n")
-cat("Center + Scale - RMSE:", mean(summary(cv_prep2)$rmse), "\n")
+# Compare results - extract metrics from the tibble
+metrics1 <- dplyr::bind_rows(cv_prep1$metrics)
+metrics2 <- dplyr::bind_rows(cv_prep2$metrics)
+
+cat("Center only - RMSE:", mean(metrics1$rmse, na.rm = TRUE), "\n")
+cat("Center + Scale - RMSE:", mean(metrics2$rmse, na.rm = TRUE), "\n")
 ```
 
 ### Scenario 2: Parallel Cross-validation
@@ -164,10 +160,12 @@ library(future)
 plan(multisession, workers = 4)
 
 # Run CV in parallel
-cv_parallel <- cv.bi_projector(
-  X, 
+cv_parallel <- cv_generic(
+  X,
   folds = folds,
-  max_comp = 4,
+  .fit_fun = fit_pca,
+  .measure_fun = measure_pca,
+  fit_args = list(ncomp = 4),
   backend = "future"  # Use parallel backend
 )
 
@@ -187,16 +185,32 @@ The `measure_reconstruction_error()` function provides several metrics:
 | `r2` | R-squared (coefficient of determination) | (-∞, 1] |
 
 ```{r multiple_metrics}
+# Define measure function with multiple metrics
+measure_pca_multi <- function(model, test_data) {
+  test_scores <- project(model, test_data)
+  reconstructed <- reconstruct(model, scores = test_scores)
+  measure_reconstruction_error(test_data, reconstructed,
+                               metrics = c("rmse", "r2", "mae"))
+}
+
 # Calculate multiple metrics at once
-cv_multi <- cv.bi_projector(
-  X, 
+cv_multi <- cv_generic(
+  X,
   folds = folds,
-  max_comp = 4,
-  measure = c("rmse", "r2", "mae")
+  .fit_fun = fit_pca,
+  .measure_fun = measure_pca_multi,
+  fit_args = list(ncomp = 4)
 )
 
-# View all metrics
-summary(cv_multi)
+# View all metrics - extract from list column
+all_metrics_multi <- dplyr::bind_rows(cv_multi$metrics)
+print(all_metrics_multi)
+
+# Calculate mean of each metric across folds
+cat("\nMean metrics across folds:\n")
+cat("RMSE:", mean(all_metrics_multi$rmse, na.rm = TRUE), "\n")
+cat("R²:  ", mean(all_metrics_multi$r2, na.rm = TRUE), "\n")
+cat("MAE: ", mean(all_metrics_multi$mae, na.rm = TRUE), "\n")
 ```
 
 ## Tips for Effective Cross-validation
@@ -207,10 +221,16 @@ Always fit preprocessing parameters inside the CV loop:
 ```{r preprocessing_tip, eval=FALSE}
 # WRONG: Preprocessing outside CV
 X_scaled <- scale(X)  # Uses information from all samples!
-cv_wrong <- cv.bi_projector(X_scaled, folds, max_comp = 4)
+cv_wrong <- cv_generic(
+  X_scaled, folds,
+  .fit_fun = fit_pca,
+  .measure_fun = measure_pca,
+  fit_args = list(ncomp = 4)
+)
 
 # RIGHT: Preprocessing inside CV
-# (See custom CV example above)
+# Let PCA handle preprocessing with the preproc parameter
+# (See preprocessing comparison example above)
 ```
 
 ### 2. Choose Appropriate Fold Sizes
@@ -225,29 +245,203 @@ cv_wrong <- cv.bi_projector(X_scaled, folds, max_comp = 4)
 
 ## Advanced: Cross-validating Other Projectors
 
-The CV framework works with any bi_projector:
+The CV framework works with any projector type:
 
 ```{r other_projectors, eval=FALSE}
+# Define fit function for kernel PCA using Nyström approximation
+fit_kernel_pca <- function(train_data, ncomp) {
+  # Defaults to linear kernel; pass a custom kernel_func if needed
+  nystrom_approx(train_data, ncomp = ncomp, nlandmarks = 50)
+}
+
+# Define measure function
+measure_kernel <- function(model, test_data) {
+  test_scores <- project(model, test_data)
+  reconstructed <- reconstruct(model, scores = test_scores)
+  measure_reconstruction_error(test_data, reconstructed, metrics = c("rmse"))
+}
+
 # Cross-validate kernel PCA
-cv_kernel <- cv.bi_projector(
+cv_kernel <- cv_generic(
   X,
   folds = folds,
-  max_comp = 10,
-  projector_fn = function(X, ncomp) {
-    nystrom_approx(X, kernel_func = rbf_kernel, 
-                   ncomp = ncomp, nlandmarks = 50)
-  }
+  .fit_fun = fit_kernel_pca,
+  .measure_fun = measure_kernel,
+  fit_args = list(ncomp = 10)
 )
 
-# Cross-validate discriminant analysis
-cv_lda <- cv.bi_projector(
+# For discriminant analysis with labels (requires passing labels)
+fit_lda <- function(train_data, ncomp, labels) {
+  discriminant_projector(train_data, labels, ncomp = ncomp)
+}
+
+cv_lda <- cv_generic(
   X,
   folds = folds,
-  max_comp = 3,
-  projector_fn = function(X, ncomp) {
-    discriminant_projector(X, iris$Species, ncomp = ncomp)
-  }
+  .fit_fun = fit_lda,
+  .measure_fun = measure_pca,
+  fit_args = list(ncomp = 3, labels = iris$Species)
 )
+```
+
+## Kernel PCA via Nyström (standard and double)
+
+The `nystrom_approx()` function provides two variants:
+
+- `method = "standard"`: Williams–Seeger single-stage Nyström with the usual scaling
+- `method = "double"`: Lim–Jin–Zhang two-stage Nyström (efficient when `p` is large)
+
+With a centered linear kernel and all points as landmarks (`m = N`), the Nyström
+eigen-decomposition recovers the exact top eigenpairs of the kernel matrix `K = X_c X_c^T`.
+Below is a reproducible snippet that demonstrates this and shows how to project new data.
+
+```{r nystrom_demo}
+set.seed(123)
+X <- matrix(rnorm(80 * 10), 80, 10)
+ncomp <- 5
+
+# Exact setting: linear kernel + centering + m = N
+fit_std <- nystrom_approx(
+  X, ncomp = ncomp, landmarks = 1:nrow(X), preproc = center(), method = "standard"
+)
+
+# Compare kernel eigenvalues: eig(K) vs fit_std$sdev^2
+Xc <- transform(fit_std$preproc, X)
+K  <- Xc %*% t(Xc)
+lam_K <- eigen(K, symmetric = TRUE)$values[1:ncomp]
+
+data.frame(
+  component = 1:ncomp,
+  nystrom = sort(fit_std$sdev^2, decreasing = TRUE),
+  exact_K  = sort(lam_K,          decreasing = TRUE)
+)
+
+# Relationship with PCA: prcomp() returns singular values / sqrt(n - 1)
+p <- prcomp(Xc, center = FALSE, scale. = FALSE)
+lam_from_pca <- p$sdev[1:ncomp]^2 * (nrow(X) - 1) # equals eig(K)
+
+data.frame(
+  component = 1:ncomp,
+  from_pca  = sort(lam_from_pca,  decreasing = TRUE),
+  exact_K   = sort(lam_K,         decreasing = TRUE)
+)
+
+# Out-of-sample projection for new rows
+new_rows <- 1:5
+scores_new <- project(fit_std, X[new_rows, , drop = FALSE])
+head(scores_new)
+
+# Double Nyström collapses to standard when l = m = N
+fit_dbl <- nystrom_approx(
+  X, ncomp = ncomp, landmarks = 1:nrow(X), preproc = center(), method = "double", l = nrow(X)
+)
+all.equal(sort(fit_std$sdev^2, decreasing = TRUE), sort(fit_dbl$sdev^2, decreasing = TRUE))
+```
+
+For large feature counts (`p >> n`), set `method = "double"` and choose a modest
+intermediate rank `l` to reduce the small problem size. Provide a custom `kernel_func`
+if you need a non-linear kernel (e.g., RBF).
+
+```{r nystrom_rbf, eval=FALSE}
+# Example RBF kernel
+gaussian_kernel <- function(A, B, sigma = 1) {
+  # ||a-b||^2 = ||a||^2 + ||b||^2 - 2 a·b
+  G  <- A %*% t(B)
+  a2 <- rowSums(A * A)
+  b2 <- rowSums(B * B)
+  D2 <- outer(a2, b2, "+") - 2 * G
+  exp(-D2 / (2 * sigma^2))
+}
+
+fit_rbf <- nystrom_approx(
+  X, ncomp = 8, nlandmarks = 40, preproc = center(), method = "double", l = 20,
+  kernel_func = gaussian_kernel
+)
+scores_rbf <- project(fit_rbf, X[1:10, ])
+```
+
+### Test coverage for Nyström
+
+This package includes unit tests that validate Nyström correctness:
+
+- Standard Nyström recovers the exact kernel eigenpairs when `m = N` (centered linear kernel)
+- Double Nyström matches standard when `l = m = N`
+- `project()` reproduces training scores and matches manual formulas for both methods
+
+See `tests/testthat/test_nystrom.R` in the source for details.
+
+### Cross‑validated kernel RMSE: Nyström vs PCA
+
+Below we compare PCA and Nyström (linear kernel) via a kernel‑space RMSE on held‑out
+folds. For a test block with preprocessed data `X_test_c`, the true kernel is
+`K_true = X_test_c %*% t(X_test_c)`. With a rank‑`k` model, the approximated
+kernel is `K_hat = S %*% t(S)`, where `S` are the component scores returned by
+`project()`.
+
+```{r nystrom_cv_compare}
+set.seed(202)
+
+# PCA fit function (reuses earlier fit_pca)
+fit_pca <- function(train_data, ncomp) {
+  pca(train_data, ncomp = ncomp, preproc = center())
+}
+
+# Nyström fit function (standard variant, linear kernel, no RSpectra needed for small data)
+fit_nystrom <- function(train_data, ncomp, nlandmarks = 50) {
+  nystrom_approx(train_data, ncomp = ncomp, nlandmarks = nlandmarks,
+                 preproc = center(), method = "standard", use_RSpectra = FALSE)
+}
+
+# Kernel-space RMSE metric for a test fold
+measure_kernel_rmse <- function(model, test_data) {
+  S <- project(model, test_data)
+  K_hat <- S %*% t(S)
+  Xc <- reprocess(model, test_data)
+  K_true <- Xc %*% t(Xc)
+  tibble::tibble(kernel_rmse = sqrt(mean((K_hat - K_true)^2)))
+}
+
+# Use a local copy of iris data and local folds for this comparison
+X_cv <- as.matrix(scale(iris[, 1:4]))
+K <- 5
+fold_ids <- sample(rep(1:K, length.out = nrow(X_cv)))
+folds_cv <- lapply(1:K, function(k) list(
+  train = which(fold_ids != k),
+  test  = which(fold_ids == k)
+))
+
+# Compare for k = 3 components
+k_sel <- 3
+cv_pca_kernel <- cv_generic(
+  X_cv, folds_cv,
+  .fit_fun = fit_pca,
+  .measure_fun = measure_kernel_rmse,
+  fit_args = list(ncomp = k_sel)
+)
+
+cv_nys_kernel <- cv_generic(
+  X_cv, folds_cv,
+  .fit_fun = fit_nystrom,
+  .measure_fun = measure_kernel_rmse,
+  fit_args = list(ncomp = k_sel, nlandmarks = 50)
+)
+
+metrics_pca <- dplyr::bind_rows(cv_pca_kernel$metrics)
+metrics_nys <- dplyr::bind_rows(cv_nys_kernel$metrics)
+rmse_pca <- mean(metrics_pca$kernel_rmse, na.rm = TRUE)
+rmse_nys <- mean(metrics_nys$kernel_rmse, na.rm = TRUE)
+
+cv_summary <- data.frame(
+  method = c("PCA", "Nyström (linear)"),
+  kernel_rmse = c(rmse_pca, rmse_nys)
+)
+print(cv_summary)
+
+# Simple bar plot
+ggplot(cv_summary, aes(x = method, y = kernel_rmse, fill = method)) +
+  geom_col(width = 0.6) +
+  guides(fill = "none") +
+  labs(title = "Cross‑validated kernel RMSE (k = 3)", y = "Kernel RMSE", x = NULL)
 ```
 
 ## Summary

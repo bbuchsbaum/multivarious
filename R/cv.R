@@ -83,7 +83,12 @@ measure_interblock_transfer_error <- function(Xtrue, Ytrue, model,
     base_metrics <- gsub("^x2y\\.", "", requested_x2y)
     
     tryCatch({
-      Ypred <- transfer(model, Xtrue, source = "X", target = "Y")
+      Ypred <- transfer(model, Xtrue, from = "X", to = "Y")
+      if (!all(dim(Ypred) == dim(Ytrue))) {
+        stop(sprintf("X->Y transfer returned shape %s but Ytrue is %s.",
+                     paste(dim(Ypred), collapse = "x"),
+                     paste(dim(Ytrue), collapse = "x")))
+      }
       # Assuming measure_reconstruction_error handles missing metrics gracefully
       subres <- measure_reconstruction_error(Ytrue, Ypred, metrics = base_metrics)
       # Update out_list only for successfully computed metrics
@@ -104,7 +109,12 @@ measure_interblock_transfer_error <- function(Xtrue, Ytrue, model,
     base_metrics <- gsub("^y2x\\.", "", requested_y2x)
     
     tryCatch({
-      Xpred <- transfer(model, Ytrue, source = "Y", target = "X")
+      Xpred <- transfer(model, Ytrue, from = "Y", to = "X")
+      if (!all(dim(Xpred) == dim(Xtrue))) {
+        stop(sprintf("Y->X transfer returned shape %s but Xtrue is %s.",
+                     paste(dim(Xpred), collapse = "x"),
+                     paste(dim(Xtrue), collapse = "x")))
+      }
       subres <- measure_reconstruction_error(Xtrue, Xpred, metrics = base_metrics)
       for (nm in names(subres)) {
         out_list[[paste0("y2x.", nm)]] <- subres[[nm]]
@@ -502,5 +512,3 @@ cv_generic <- function(data, folds, .fit_fun, .measure_fun,
 #     stop("No metrics found to plot.")
 #   }
 # }
-
-

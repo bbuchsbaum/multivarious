@@ -2,7 +2,7 @@
 title: "Classifying in latent space: k-NN & Random-Forest wrappers"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Classifying in latent space: k-NN & RF wrappers}
+  %\VignetteIndexEntry{Classifying in latent space: k-NN & Random-Forest wrappers}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -69,10 +69,10 @@ if (!requireNamespace("MASS", quietly = TRUE)) {
 }
 
 
-# 1. Define the pre-processing step
-preproc_def <- prep(center())
-# 2. Prepare and initialize using the data LDA was trained on (X)
-Xp <- init_transform(preproc_def, X)
+# 1. Define and fit the pre-processing step using the training data
+preproc_fitted <- fit(center(), X)
+# 2. Transform the data
+Xp <- transform(preproc_fitted, X)
 
 # Assuming discriminant_projector, prep, center, scores are available
 lda_fit <- MASS::lda(X, grouping = grp)
@@ -83,7 +83,7 @@ disc_proj <- multivarious::discriminant_projector(
   s      = Xp %*% lda_fit$scaling,           # scores   (n × d)
   sdev   = lda_fit$svd,                     # singular values
   labels = grp,
-  preproc = preproc_def            # Pass the *initialized* pre-processor
+  preproc = preproc_fitted            # Pass the fitted pre-processor
 )
 print(disc_proj)
 ```

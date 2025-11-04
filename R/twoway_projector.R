@@ -114,9 +114,9 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
   }
     
   if (source == "X") {
-    apply_transform(x$preproc_x, new_data, colind)
+    transform(x$preproc_x, new_data, colind)
   } else {
-    apply_transform(x$preproc_y, new_data, colind)
+    transform(x$preproc_y, new_data, colind)
   }
   
 }
@@ -154,7 +154,7 @@ partial_project.cross_projector <- function(x, new_data, colind,
   
   # Use correct preprocessor based on source
   preproc <- if (source == "X") x$preproc_x else x$preproc_y
-  nd_proc <- apply_transform(preproc, new_data, colind)
+  nd_proc <- transform(preproc, new_data, colind)
   
   # subset columns in v
   v_full  <- coef.cross_projector(x, source=source)   # shape (p x d)
@@ -221,7 +221,7 @@ transfer.cross_projector <- function(x, new_data,
   }
   
   # Apply transform
-  nd_proc <- apply_transform(px, new_data)
+  nd_proc <- transform(px, new_data)
 
   # ---------- 2. forward projection ----------------------
   # Project the preprocessed data into the latent space
@@ -250,8 +250,8 @@ transfer.cross_projector <- function(x, new_data,
 
   # ---------- 4. undo preprocessing for target -----------
   p_to <- if (to == "X") x$preproc_x else x$preproc_y
-  # Pass the target columns subset (opts$cols) to reverse_transform
-  out  <- reverse_transform(p_to, rec, colind = opts$cols)
+  # Pass the target columns subset (opts$cols) to inverse_transform
+  out  <- inverse_transform(p_to, rec, colind = opts$cols)
 
   # keep dimnames if sensible
   rownames(out) <- rownames(new_data)

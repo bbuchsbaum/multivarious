@@ -93,7 +93,7 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
   chk::chkor(chk::vld_matrix(X), chk::vld_s4_class(X, "Matrix"))
   N <- nrow(X)
   
-  # If no landmarks given, sample them
+  # If no landmarks given, sample them; otherwise validate input
   if (is.null(landmarks)) {
     if (nlandmarks > N) {
       warning("Number of landmarks requested exceeds number of samples. Using N landmarks.")
@@ -103,6 +103,20 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
         stop("'nlandmarks' must be positive.")
     }
     landmarks <- sort(sample(N, nlandmarks))
+  } else {
+    # Validate user-supplied landmarks
+    if (any(!is.finite(landmarks))) {
+      stop("'landmarks' must be finite indices.")
+    }
+    if (any(landmarks != as.integer(landmarks))) {
+      stop("'landmarks' must be integer indices.")
+    }
+    landmarks <- as.integer(landmarks)
+    if (any(landmarks < 1L | landmarks > N)) {
+      stop("'landmarks' indices out of range [1..N].")
+    }
+    landmarks <- sort(unique(landmarks))
+    if (length(landmarks) == 0) stop("'landmarks' cannot be empty after validation.")
   }
   m <- length(landmarks)
   
@@ -175,11 +189,9 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
          return(list(d = eig$values[1:k], v = eig$vectors[, 1:k, drop=FALSE]))
       } else {
           # svds returns U,D,V with M = U D V^T
-          # For symmetric M, eigenvectors are V (or U)
-          # Eigenvalues are d^2 (or d if M is PD and svd(sqrt(M)) was used, but here it's svd(M))
-          # sv$v are right singular vectors = eigenvectors for symmetric M
-          # We assume sv$v is already orthonormal
-          return(list(d = sv$d^2, v = sv$v)) # lambda = sigma^2
+          # For symmetric PSD M, singular values equal eigenvalues (not squared).
+          # sv$v are right singular vectors = eigenvectors for symmetric M.
+          return(list(d = sv$d, v = sv$v))
       }
     }
   }
@@ -447,9 +459,9 @@ reprocess.nystrom_approx <- function(x, new_data, colind = NULL, ...) {
   if (is.null(colind)) {
     # Full dimension check
     chk::chk_equal(ncol(new_data), original_ncol)
-    apply_transform(x$preproc, new_data)
+    transform(x$preproc, new_data)
   } else {
     chk::chk_equal(length(colind), ncol(new_data))
-    apply_transform(x$preproc, new_data, colind)
+    transform(x$preproc, new_data, colind)
   }
 }

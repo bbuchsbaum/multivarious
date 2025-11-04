@@ -602,7 +602,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
         chk::chk_equal(ncol(X), length(unraveled_ids))
         res_list <- lapply(seq_along(map_list), function(i) {
           block_info <- map_list[[i]]
-          apply_transform(block_info$proc, X[, block_info$orig_indices, drop = FALSE])
+          transform(block_info$proc, X[, block_info$orig_indices, drop = FALSE])
         })
         do.call(cbind, res_list)
       } else {
@@ -617,7 +617,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
         chk::chk_equal(ncol(X), length(unraveled_ids))
         res_list <- lapply(seq_along(map_list), function(i) {
           block_info <- map_list[[i]]
-          reverse_transform(block_info$proc, X[, block_info$orig_indices, drop = FALSE])
+          inverse_transform(block_info$proc, X[, block_info$orig_indices, drop = FALSE])
         })
         do.call(cbind, res_list)
       } else {
@@ -716,40 +716,41 @@ print.concat_pre_processor <- function(x, ...) {
 
 #' @export
 fit.prepper <- function(object, X, ...) {
-  proc <- prep(object)
+  # Build and initialize a pre_processor while suppressing deprecated shim warnings
+  proc <- suppressWarnings(prep(object))
   fitted_proc <- mark_fitted(proc, TRUE)
-  init_transform(fitted_proc, X)
+  suppressWarnings(init_transform(fitted_proc, X))
   fitted_proc
 }
 
 #' @export
 fit_transform.prepper <- function(object, X, ...) {
-  proc <- prep(object)
+  proc <- suppressWarnings(prep(object))
   fitted_proc <- mark_fitted(proc, TRUE)
-  transformed <- init_transform(fitted_proc, X)
+  transformed <- suppressWarnings(init_transform(fitted_proc, X))
   list(preproc = fitted_proc, transformed = transformed)
 }
 
 #' @export
-transform.pre_processor <- function(object, X, ...) {
+transform.pre_processor <- function(object, X, colind = NULL, ...) {
   check_fitted(object, "transform")
-  apply_transform(object, X, ...)
+  object$transform(X, colind)
 }
 
 #' @export
-inverse_transform.pre_processor <- function(object, X, ...) {
+inverse_transform.pre_processor <- function(object, X, colind = NULL, ...) {
   check_fitted(object, "inverse_transform")
-  reverse_transform(object, X, ...)
+  object$reverse_transform(X, colind)
 }
 
 #' @export
-transform.concat_pre_processor <- function(object, X, ...) {
+transform.concat_pre_processor <- function(object, X, colind = NULL, ...) {
   check_fitted(object, "transform")
-  apply_transform(object, X, ...)
+  object$transform(X, colind)
 }
 
 #' @export
-inverse_transform.concat_pre_processor <- function(object, X, ...) {
+inverse_transform.concat_pre_processor <- function(object, X, colind = NULL, ...) {
   check_fitted(object, "inverse_transform")
-  reverse_transform(object, X, ...)
+  object$reverse_transform(X, colind)
 }

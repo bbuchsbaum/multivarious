@@ -174,10 +174,10 @@ reprocess.projector <- function(x, new_data, colind = NULL, ...) {
   if (is.null(colind)) {
     # Full dimension
     chk::chk_equal(ncol(new_data), p)
-    apply_transform(x$preproc, new_data)
+    transform(x$preproc, new_data)
   } else {
     chk::chk_equal(length(colind), ncol(new_data))
-    apply_transform(x$preproc, new_data, colind)
+    transform(x$preproc, new_data, colind)
   }
 }
 
@@ -254,8 +254,8 @@ reconstruct_new.projector <- function(x,
     rec_data <- factor_scr %*% t(v_full)
     
     # If you wish, do a reverse transform on rec_data:
-    # Apply reverse transform to return to original space
-    reverse_transform(x$preproc, rec_data)
+    # Apply inverse transform to return to original space
+    inverse_transform(x$preproc, rec_data)
   } else {
     # PARTIAL reconstruction => new_data is (n x length(colind))
     factor_scr <- partial_project.projector(
@@ -266,10 +266,8 @@ reconstruct_new.projector <- function(x,
     v_sub    <- v_full[colind, , drop = FALSE]
     rec_data <- factor_scr %*% t(v_sub)
     
-    # Similarly, you could do a partial reverse_transform:
-    # Apply reverse transform (potentially partial if needed) to return to original space
-    # Assuming reverse_transform handles partial cases correctly based on input dim
-    reverse_transform(x$preproc, rec_data)
+    # Apply inverse transform (potentially partial if needed) to return to original space
+    inverse_transform(x$preproc, rec_data)
   }
 }
 
@@ -315,14 +313,14 @@ reprocess.partial_projector <- function(x, new_data, colind = NULL, ...) {
   if (is.null(colind)) {
     # Full dimension = length(x$colind)
     chk::chk_equal(ncol(new_data), nrow(components(x)))
-    apply_transform(x$preproc, new_data)
+    transform(x$preproc, new_data)
   } else {
     chk::chk_equal(length(colind), ncol(new_data))
     base_colind <- x$colind
     chk::chk_not_null(base_colind)
     # Now map the local colind to the original projector's colind
     # e.g. base_colind[colind]
-    apply_transform(x$preproc, new_data, base_colind[colind])
+    transform(x$preproc, new_data, base_colind[colind])
   }
 }
 

@@ -13,8 +13,9 @@
 #' @param X_f A numeric matrix representing the foreground dataset (samples x features).
 #' @param X_b A numeric matrix representing the background dataset (samples x features).
 #'        `X_f` and `X_b` must have the same number of features (columns).
-#' @param ncomp Integer. The number of contrastive components to compute. Defaults to `min(ncol(X_f))`, 
-#'        but will be capped by the effective rank based on sample sizes.
+#' @param ncomp Integer. The number of contrastive components to compute. Defaults to
+#'        `min(ncol(X_f), nrow(X_f), nrow(X_b))`, and may be further capped by the
+#'        effective background rank (especially under the sample-space strategy).
 #' @param center_background Logical. If TRUE (default), both `X_f` and `X_b` are centered using the
 #'        column means of `X_b`. If FALSE, it assumes data is already appropriately centered.
 #' @param lambda Shrinkage intensity for covariance estimation (0 <= lambda <= 1).
@@ -29,6 +30,14 @@
 #'    - `"auto"` (Default): Chooses based on dimensions (feature vs. sample space).
 #'    - `"feature"`: Forces direct computation via `p x p` covariance matrices.
 #'    - `"sample"`: Forces sample-space computation via SVD and a smaller GEVD (efficient for large `p`).
+#' @param verbose Logical; if TRUE (default), prints brief status messages about strategy
+#'    selection and defaults. Set to FALSE to silence these messages.
+#' @param sample_rank Optional integer controlling the background subspace rank used in the
+#'    sample-space strategy. If `NULL` (default), uses the full background rank `min(n_b-1, p)`.
+#'    If provided, the solver will target approximately `sample_rank + sample_oversample` and
+#'    will be bounded above by the full background rank.
+#' @param sample_oversample Integer oversampling margin (default 10) applied when `sample_rank`
+#'    is given. Ignored when `sample_rank` is `NULL`.
 #' @param ... Additional arguments passed to the underlying computation functions 
 #'    (`geigen::geneig` or `irlba::irlba` based on `method` and `strategy`).
 #'
@@ -130,6 +139,9 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
                      lambda = 0,
                      method = c("geigen", "primme", "sdiag", "corpcor"),
                      strategy = c("auto", "feature", "sample"),
+                     verbose = getOption("multivarious.verbose", TRUE),
+                     sample_rank = NULL,
+                     sample_oversample = 10L,
                      ...) {
 
   # --- Input Validation --- 
@@ -144,12 +156,17 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
   }
   if (is.null(ncomp)) {
     ncomp <- min(ncol(X_f), nrow(X_f), nrow(X_b))
-    message("ncomp not provided, defaulting to min(p, n_f, n_b) = ", ncomp)
+    if (isTRUE(verbose)) {
+      message("ncomp not provided; using min(p, n_f, n_b) = ", ncomp)
+    }
   }
   stopifnot(is.numeric(ncomp), length(ncomp) == 1, ncomp > 0, ncomp == floor(ncomp))
   stopifnot(ncomp <= ncol(X_f))
   stopifnot(is.logical(center_background), length(center_background) == 1)
   stopifnot(is.numeric(lambda), length(lambda) == 1, lambda >= 0, lambda <= 1)
+  stopifnot(is.logical(verbose), length(verbose) == 1)
+  stopifnot(is.null(sample_rank) || (is.numeric(sample_rank) && length(sample_rank) == 1 && sample_rank > 0))
+  stopifnot(is.numeric(sample_oversample), length(sample_oversample) == 1)
 
   # Preserve original row/col names
   rn_f <- rownames(X_f)
@@ -175,8 +192,8 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
   # --- Core Computation --- 
   if (method == "corpcor") {
     if (!requireNamespace("corpcor", quietly = TRUE)) {
-            stop("Package 'corpcor' needed for method='corpcor'. Please install it.", call. = FALSE)
-        }
+      stop("Package 'corpcor' needed for method='corpcor'. Please install it.", call. = FALSE)
+    }
 
     # Compute Rb using cov.shrink on already centered data
     Rb <- corpcor::cov.shrink(X_b_centered, lambda = lambda, verbose = FALSE)
@@ -235,13 +252,9 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
   } else {
     # --- Methods using geigen --- 
     if (!requireNamespace("geigen", quietly = TRUE)) {
-            stop("Package 'geigen' needed for methods 'geigen', 'primme', 'sdiag'. Please install it.", call. = FALSE)
-        }
-    if (!requireNamespace("corpcor", quietly = TRUE)) {
-            # Required for covariance estimation
-            stop("Package 'corpcor' needed for covariance estimation. Please install it.", call. = FALSE)
-        }
-        
+      stop("Package 'geigen' needed for methods 'geigen', 'primme', 'sdiag'. Please install it.", call. = FALSE)
+    }
+
     # Determine strategy: feature space (direct covariance) or sample space (large D)
     p <- ncol(X_f_centered)
     n_f <- nrow(X_f_centered)
@@ -252,7 +265,9 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
     if (strategy == "auto") {
       # Heuristic: p > 5 * max(n_f, n_b)
       if (p > 5 * max(n_f, n_b)) {
-        message("Large dimension detected (p > 5*max(n_f, n_b)). Switching to sample-space GEVD strategy.")
+        if (isTRUE(verbose)) {
+          message("Large dimension detected (p > 5*max(n_f, n_b)); switching to sample-space GEVD strategy.")
+        }
         use_sample_space <- TRUE
         effective_strategy <- "sample"
       } else {
@@ -263,27 +278,51 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
     } # else strategy == "feature" -> use_sample_space remains FALSE
 
     if (lambda != 0 && use_sample_space) {
-        warning("Shrinkage (lambda != 0) is specified but the sample-space strategy is selected. Shrinkage currently only applied to feature-space strategy.")
-        # lambda is ignored in sample-space path computation below
+      warning("lambda != 0 but sample-space strategy is selected; shrinkage is ignored in sample-space path.")
     }
+
+    # Helper to compute covariance with optional shrinkage
+    cov_estimate <- function(mat) {
+      if (lambda == 0) {
+        stats::cov(mat)
+      } else {
+        if (!requireNamespace("corpcor", quietly = TRUE)) {
+          stop("lambda != 0 requires package 'corpcor'. Please install it.", call. = FALSE)
+        }
+        corpcor::cov.shrink(mat, lambda = lambda, verbose = FALSE)
+      }
+    }
+
+    geneig_method <- switch(method,
+                            geigen = "geigen",
+                            primme = "primme",
+                            sdiag  = "sdiag",
+                            stop("Unsupported method: ", method))
 
     # --- Compute Eigen solution based on strategy --- 
     if (use_sample_space) {
         # --- Sample Space Strategy (Large D) --- 
-        message("Using sample-space strategy...")
+        if (isTRUE(verbose)) message("Using sample-space strategy...")
         if (!requireNamespace("irlba", quietly = TRUE))
-            stop("Package 'irlba' needed for large-D sample-space strategy. Install it.", call.=FALSE)
+          stop("Package 'irlba' needed for large-D sample-space strategy. Install it.", call.=FALSE)
 
         # 1. Background SVD (thin)
-        # Oversample slightly for stability
-        r_target <- min(n_b - 1, p, ncomp + 15)
+        r_full <- min(n_b - 1L, p)
+        if (r_full <= 0) stop("Background rank is non-positive.")
+
+        if (!is.null(sample_rank)) {
+          r_target <- min(r_full,
+                          max(1L, as.integer(sample_rank) + as.integer(sample_oversample)))
+        } else {
+          r_target <- r_full
+        }
         if (r_target <= 0) stop("Target rank for background SVD is non-positive.")
 
         svdb <- tryCatch({
-            irlba::irlba(X_b_centered, nv = r_target, nu = 0)
-           }, error = function(e){ 
-               stop("Error during irlba SVD of background matrix X_b: ", e$message)
-           })
+          irlba::irlba(X_b_centered, nv = r_target, nu = 0)
+        }, error = function(e){ 
+          stop("Error during irlba SVD of background matrix X_b: ", e$message)
+        })
         
         V_b  <- svdb$v            # p  x r
         # Use adjusted degrees of freedom for covariance estimate
@@ -301,23 +340,23 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
         # 3. Solve GEVD in r x r space
         ncomp_geigen <- min(ncomp, actual_rank_b)
         if (ncomp_geigen < ncomp) {
-            warning("Reduced ncomp from ", ncomp, " to ", ncomp_geigen, " due to background SVD rank.")
-            ncomp <- ncomp_geigen
+          warning("Reduced ncomp from ", ncomp, " to ", ncomp_geigen, " due to limited background rank.")
+          ncomp <- ncomp_geigen
         }
         if (ncomp == 0) stop("Cannot compute components; ncomp is zero after rank adjustment.")
 
         geig_small <- tryCatch({
-            geigen::geigen(Rf_small, Rb_small, symmetric = TRUE)
-           }, error = function(e) {
-               stop("Error during small GEVD using geigen: ", e$message)
-           })
+          geneig(A = Rf_small, B = Rb_small, ncomp = ncomp, method = geneig_method, ...)
+        }, error = function(e) {
+          stop("Error during small GEVD via geneig(): ", conditionMessage(e))
+        })
         
         # Ensure enough valid eigenvalues/vectors returned
         k_avail_small <- length(geig_small$values)
         actual_ncomp_small <- min(ncomp, k_avail_small)
         if (actual_ncomp_small < ncomp) {
-             warning("Small GEVD returned fewer eigenvalues (", k_avail_small, ") than requested (", ncomp, "). Reducing ncomp to ", actual_ncomp_small, ".")
-             ncomp <- actual_ncomp_small
+          warning("Small GEVD returned fewer eigenvalues (", k_avail_small, ") than requested (", ncomp, "). Reducing ncomp to ", actual_ncomp_small, ".")
+          ncomp <- actual_ncomp_small
         }
         if (ncomp == 0) stop("Small GEVD returned zero components.")
 
@@ -332,35 +371,31 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
             warning("Complex eigenvectors encountered after lifting, taking the real part.")
             v_raw <- Re(v_raw)
         }
-        eigenvectors_ordered <- v_raw # Keep intermediate name
+        eigenvectors_ordered <- v_raw
         eigenvalues_ordered <- eigenvalues_raw
 
     } else {
         # --- Feature Space Strategy (Standard/Small D) --- 
-        message("Using feature-space strategy...")
-        # Compute covariance matrices using shrunk estimates on centered data
-        Rf_obj <- corpcor::cov.shrink(X_f_centered, lambda = lambda, verbose = FALSE)
-        Rb_obj <- corpcor::cov.shrink(X_b_centered, lambda = lambda, verbose = FALSE)
-        
-        # Ensure plain matrix for geigen by removing S3 class
-        Rf <- Rf_obj
-        Rb <- Rb_obj
-        class(Rf) <- "matrix"
-        class(Rb) <- "matrix"
+        if (isTRUE(verbose)) message("Using feature-space strategy...")
+        # Compute covariance matrices using chosen estimator
+        Rf <- cov_estimate(X_f_centered)
+        Rb <- cov_estimate(X_b_centered)
+        Rf <- as.matrix(Rf); class(Rf) <- "matrix"
+        Rb <- as.matrix(Rb); class(Rb) <- "matrix"
 
         # Solve the generalized eigenvalue problem: Rf v = lambda Rb v
         geigen_res <- tryCatch({
-            geigen::geigen(A = Rf, B = Rb, ...)
-            }, error = function(e) {
-               stop("Error during geigen::geigen: ", e$message) 
-            })
+          geneig(A = Rf, B = Rb, ncomp = ncomp, method = geneig_method, ...)
+        }, error = function(e) {
+          stop("Error during geneig(): ", conditionMessage(e))
+        })
 
         # Extract results
         k_avail <- length(geigen_res$values)
         actual_ncomp <- min(ncomp, k_avail)
-         if (actual_ncomp < ncomp) {
-            warning("geigen returned fewer eigenvalues (", k_avail, ") than requested (", ncomp, "). Reducing ncomp to ", actual_ncomp, ".")
-            ncomp <- actual_ncomp
+        if (actual_ncomp < ncomp) {
+          warning("geneig() returned fewer eigenvalues (", k_avail, ") than requested (", ncomp, "). Reducing ncomp to ", actual_ncomp, ".")
+          ncomp <- actual_ncomp
         }
         if (ncomp == 0) stop("Generalized eigenvalue decomposition returned zero components.")
 
@@ -369,18 +404,18 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
 
         # Ensure eigenvectors are real
         if (is.complex(eigenvectors_raw)) {
-            warning("Complex eigenvectors encountered, taking the real part.")
-            eigenvectors_raw <- Re(eigenvectors_raw)
+          warning("Complex eigenvectors encountered, taking the real part.")
+          eigenvectors_raw <- Re(eigenvectors_raw)
         }
-        eigenvectors_ordered <- eigenvectors_raw # Keep intermediate name
+        eigenvectors_ordered <- eigenvectors_raw
         eigenvalues_ordered <- eigenvalues_raw
     }
 
     # --- Post-process results common to both GEVD strategies --- 
     
     # Order by decreasing eigenvalue magnitude
-    ord <- order(abs(eigenvalues_ordered), decreasing = TRUE)
-    eigenvalues <- abs(eigenvalues_ordered[ord]) # Use abs value, should be positive
+    ord <- order(eigenvalues_ordered, decreasing = TRUE)
+    eigenvalues <- eigenvalues_ordered[ord]
     eigenvectors <- eigenvectors_ordered[, ord, drop = FALSE]
 
     # Apply sign flip for consistency
@@ -394,6 +429,10 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
             })
         signs[signs == 0] <- 1 # Handle cases where max element is 0
         eigenvectors <- sweep(eigenvectors, 2, signs, FUN = "*")
+        # Normalize columns to unit 2-norm to stabilize orientation comparisons
+        coln <- sqrt(colSums(eigenvectors^2))
+        coln[coln < .Machine$double.eps] <- 1
+        eigenvectors <- sweep(eigenvectors, 2, coln, "/")
     } else {
         warning("Could not apply sign flip: eigenvectors are not numeric or empty.")
     }
@@ -426,4 +465,3 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
 
   return(projector)
 }
-
