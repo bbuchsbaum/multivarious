@@ -1,249 +1,156 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/404.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/LICENSE.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/articles/Introduction.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/index.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/add_node.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/apply_rotation.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/apply_transform.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/bi_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/bi_projector_union.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/block_indices.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/block_lengths.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/bootstrap.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/bootstrap.pca.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/center.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.discriminant_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.multiblock_biprojector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/coef.cross_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/colscale.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/components.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/compose_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/compose_projectors.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/concat_pre_processors.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/convert_domain.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/cross_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/discriminant_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/fresh.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/group_means.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/init_transform.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/inverse_projection.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/is_orthogonal.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/multiblock_biprojector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/multiblock_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/nblocks.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/ncomp.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/nystrom_embedding.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/partial_inverse_projection.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/partial_project.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/partial_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/partial_projector.projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/pass.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/pca.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/perm_ci.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/predict.classifier.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/prep.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/prinang.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.bi_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.bi_projector_union.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.classifier.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.composed_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.multiblock_biprojector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/print.projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/project.cross_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/project.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/project_block.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/project_vars.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/reconstruct.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/refit.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/regress.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/reprocess.cross_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/reprocess.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/residualize.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/residuals.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/reverse_transform.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/rf_classifier.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/rf_classifier.projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/rotate.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/scores.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/sdev.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/shape.cross_projector.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/shape.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/standardize.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/std_scores.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/svd_wrapper.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/transpose.html</loc>
-  </url>
-  <url>
-    <loc>https://bbuchsbaum.github.io/multivarious/reference/truncate.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://bbuchsbaum.github.io/multivarious/404.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/CLAUDE.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/LICENSE-text.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/LICENSE.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/CPCAplus.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/Classifier.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/Composing_Projectors.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/CrossValidation.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/Extending.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/Introduction.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/Multiblock.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/Nystrom.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/Partial_Projection.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/PermutationTesting.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/PreProcessing.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/Regress.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/SVD_PCA.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/articles/index.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/authors.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/index.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/add_node.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/add_node.prepper.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/apply_rotation.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/apply_transform.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/bi_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/bi_projector_union.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/biplot.pca.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/block_indices.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/block_indices.multiblock_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/block_lengths.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/bootstrap.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/bootstrap_pca.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/cPCAplus.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/center.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/check_fitted.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.discriminant_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.multiblock_biprojector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/classifier.projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/coef.composed_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/coef.cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/coef.multiblock_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/colscale.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/components.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/compose_partial_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/compose_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/concat_pre_processors.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/cv.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/cv_generic.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/discriminant_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/feature_importance.classifier.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/feature_importance.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/fit.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/fit_transform.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/fresh.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/geneig.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/get_fitted_state.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/group_means.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/index.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/init_transform.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/inverse_projection.composed_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/inverse_projection.cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/inverse_projection.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/inverse_transform.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/is_fitted.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/is_orthogonal.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/is_orthogonal.projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/mark_fitted.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/measure_interblock_transfer_error.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/measure_reconstruction_error.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/multiblock_biprojector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/multiblock_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/nblocks.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/ncomp.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/nystrom_approx.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/partial_inverse_projection.cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/partial_inverse_projection.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/partial_inverse_projection.regress.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/partial_project.composed_partial_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/partial_project.cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/partial_project.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/partial_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/pass.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/pca.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/pca_outliers.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/perm_ci.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/perm_test.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/predict.classifier.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/predict.discriminant_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/predict.rf_classifier.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/prep.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/preprocess.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/prinang.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/principal_angles.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.bi_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.bootstrap_pca_result.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.classifier.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.concat_pre_processor.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.multiblock_biprojector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.pca.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.perm_test.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.perm_test_pca.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.pre_processor.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.prepper.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.regress.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/print.rf_classifier.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/project.cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/project.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/project.nystrom_approx.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/project_block.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/project_block.multiblock_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/project_vars.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/rank_score.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/reconstruct.composed_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/reconstruct.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/reconstruct.pca.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/reconstruct_new.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/refit.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/regress.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/reprocess.cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/reprocess.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/reprocess.nystrom_approx.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/residualize.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/residuals.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/reverse_transform.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/rf_classifier.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/rf_classifier.projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/robust_inv_vTv.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/rotate.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/rotate.pca.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/scores.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/screeplot.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/screeplot.pca.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/sdev.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/shape.cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/shape.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/standardize.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/std_scores.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/std_scores.svd.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/subspace_similarity.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/summary.composed_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/svd_wrapper.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/topk.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/transfer.cross_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/transfer.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/transform.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/transpose.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/truncate.composed_projector.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/truncate.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/variables_used.html</loc></url>
+<url><loc>https://bbuchsbaum.github.io/multivarious/reference/vars_for_component.html</loc></url>
 </urlset>
+

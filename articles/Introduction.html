@@ -5,54 +5,58 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<meta name="description" content="multivarious">
 <title>Introduction to the multivarious Package • multivarious</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.11/clipboard.min.js" integrity="sha512-7O5pXpc0oCRrxk8RUfDYFgn0nO1t+jLuIOQdOMRp4APB7uZ4vSjspzp5y6YDtDs4VzUSTbWzBFZ/LKJhnyFOKw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Introduction to the multivarious Package">
-<meta property="og:description" content="multivarious">
-<!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
-<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-<![endif]-->
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Introduction to the multivarious Package">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
-    
 
-    <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light" data-bs-theme="light"><div class="container">
-    
+
+    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
-    
+
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
-<li class="nav-item">
-  <a class="nav-link" href="../reference/index.html">Reference</a>
-</li>
+<li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="active nav-item dropdown">
-  <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" role="button" aria-expanded="false" aria-haspopup="true" id="dropdown-articles">Articles</a>
-  <div class="dropdown-menu" aria-labelledby="dropdown-articles">
-    <a class="dropdown-item" href="../articles/Introduction.html">Introduction to the multivarious Package</a>
-  </div>
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="../articles/Classifier.html">Classifying in latent space: k-NN &amp; Random-Forest wrappers</a></li>
+    <li><a class="dropdown-item" href="../articles/Composing_Projectors.html">Composing Projectors: Chaining Models</a></li>
+    <li><a class="dropdown-item" href="../articles/CPCAplus.html">Contrastive PCA: Finding What's Different Between Groups</a></li>
+    <li><a class="dropdown-item" href="../articles/CrossValidation.html">Cross-validation for Dimensionality Reduction</a></li>
+    <li><a class="dropdown-item" href="../articles/Extending.html">Extending multiblock: CCA and glmnet Examples</a></li>
+    <li><a class="dropdown-item" href="../articles/Introduction.html">Introduction to the multivarious Package</a></li>
+    <li><a class="dropdown-item" href="../articles/Multiblock.html">Multiblock basics: one projector, many tables</a></li>
+    <li><a class="dropdown-item" href="../articles/Nystrom.html">Kernel PCA Made Fast: The Nyström Approximation</a></li>
+    <li><a class="dropdown-item" href="../articles/Partial_Projection.html">Partial projection: working with incomplete feature sets</a></li>
+    <li><a class="dropdown-item" href="../articles/PermutationTesting.html">Permutation Testing in multivarious</a></li>
+    <li><a class="dropdown-item" href="../articles/PreProcessing.html">Pre-processing pipelines in multiblock</a></li>
+    <li><a class="dropdown-item" href="../articles/Regress.html">Linear Re-representation with regress()</a></li>
+    <li><a class="dropdown-item" href="../articles/SVD_PCA.html">SVD wrapper, PCA and the bi_projector</a></li>
+  </ul>
 </li>
       </ul>
-<form class="form-inline my-2 my-lg-0" role="search">
-        <input type="search" class="form-control me-sm-2" aria-label="Toggle navigation" name="search-input" data-search-index="../search.json" id="search-input" placeholder="Search for" autocomplete="off">
-</form>
-
-      <ul class="navbar-nav"></ul>
+<ul class="navbar-nav">
+<li class="nav-item"><form class="form-inline" role="search">
+ <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
+</form></li>
+      </ul>
 </div>
 
-    
+
   </div>
 </nav><div class="container template-article">
 
@@ -61,168 +65,243 @@
 
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
-      <img src="" class="logo" alt=""><h1>Introduction to the multivarious Package</h1>
+
+      <h1>Introduction to the multivarious Package</h1>
             
       
-      
+
       <div class="d-none name"><code>Introduction.Rmd</code></div>
     </div>
 
     
     
 <div class="section level2">
-<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+<h2 id="the-goal-unified-dimensionality-reduction">The Goal: Unified Dimensionality Reduction<a class="anchor" aria-label="anchor" href="#the-goal-unified-dimensionality-reduction"></a>
 </h2>
-<p>The multivarious package provides generic functions and some basic
-implementations for dimensionality reduction of high-dimensional data.
-This vignette focuses on two main classes in the package, projector and
-bi_projector, and demonstrates how to use the project function for
-projecting new data onto a lower-dimensional subspace.</p>
+<p>Multivariate data analysis often involves reducing dimensionality or
+transforming data using techniques like Principal Component Analysis
+(PCA), Partial Least Squares (PLS), Contrastive PCA (cPCA), Nyström
+approximation for Kernel PCA, or representing data in a specific basis
+(e.g., Fourier, splines). While each method has unique mathematical
+underpinnings, they share common operational needs:</p>
+<ul>
+<li>Fitting the model to training data.</li>
+<li>Extracting key components (scores, loadings/coefficients).</li>
+<li>Projecting <em>new</em> data points into the reduced/transformed
+space.</li>
+<li>Reconstructing approximations of the original data from the reduced
+space.</li>
+<li>Integrating these steps with pre-processing (like centering or
+scaling).</li>
+<li>Comparing or tuning models using cross-validation.</li>
+</ul>
+<p>Handling these tasks consistently across different algorithms can
+lead to repetitive code and complex workflows. The
+<strong><code>multivarious</code> package aims to simplify this by
+providing a unified interface</strong> centered around the concept of a
+<strong><code>bi_projector</code></strong>.</p>
 </div>
 <div class="section level2">
-<h2 id="projector-and-bi-projector-classes">Projector and Bi-projector Classes<a class="anchor" aria-label="anchor" href="#projector-and-bi-projector-classes"></a>
+<h2 id="the-bi_projector-a-two-way-map">The <code>bi_projector</code>: A Two-Way Map<a class="anchor" aria-label="anchor" href="#the-bi_projector-a-two-way-map"></a>
 </h2>
-<p>projector and bi_projector are two core classes in the
-<code>multivarious</code> package. They represent linear transformations
-from a high-dimensional space to a lower-dimensional space.</p>
+<p>The <code>bi_projector</code> class is the cornerstone of
+<code>multivarious</code>. It represents a linear transformation (or an
+approximation thereof) that provides a <strong>two-way
+mapping</strong>:</p>
+<ol style="list-style-type: decimal">
+<li>
+<strong>Samples (Rows) ↔︎ Scores:</strong> Maps data points from the
+original high-dimensional space to a lower-dimensional latent space
+(scores), and potentially back.</li>
+<li>
+<strong>Variables (Columns) ↔︎ Components/Loadings:</strong> Maps
+original variables to their representation in the latent space
+(loadings/components), and potentially back.</li>
+</ol>
+<p>Think of it as encapsulating the core results of a dimensionality
+reduction technique (like the U, S, V components of an SVD, or the
+scores and loadings of PCA/PLS) along with any necessary pre-processing
+information.</p>
+<p>Crucially, many functions within <code>multivarious</code> (e.g.,
+<code><a href="../reference/pca.html">pca()</a></code>, <code>pls()</code>, <code><a href="../reference/cPCAplus.html">cPCAplus()</a></code>,
+<code><a href="../reference/nystrom_approx.html">nystrom_approx()</a></code>, <code><a href="../reference/regress.html">regress()</a></code>) return objects
+that inherit from <code>bi_projector</code>.</p>
 </div>
 <div class="section level2">
-<h2 id="projector">Projector<a class="anchor" aria-label="anchor" href="#projector"></a>
+<h2 id="key-actions-with-a-bi_projector">Key Actions with a <code>bi_projector</code><a class="anchor" aria-label="anchor" href="#key-actions-with-a-bi_projector"></a>
 </h2>
-<p>A projector instance maps a matrix from an <span class="math inline">\(N\)</span>-dimensional space to a <span class="math inline">\(d\)</span>-dimensional space, where <span class="math inline">\(d\)</span> may be less than <span class="math inline">\(N\)</span>. The projection matrix, <span class="math inline">\(V\)</span>, is not necessarily orthogonal. This
-class can be used for various dimensionality reduction techniques like
-PCA, LDA, etc.</p>
+<p>Because different methods return a <code>bi_projector</code>, you can
+perform common tasks using a consistent set of verbs:</p>
+<ul>
+<li>
+<code>scores(model)</code>: Get the scores (latent space
+representation) of the <em>training</em> data.</li>
+<li>
+<code>coef(model)</code> or <code>loadings(model)</code>: Get the
+loadings or coefficients mapping variables to components.</li>
+<li>
+<code>project(model, newdata)</code>: Project <em>new</em> samples
+(rows of <code>newdata</code>) into the latent space defined by the
+<code>model</code>.</li>
+<li>
+<code>reconstruct(model, ...)</code>: Reconstruct an approximation
+of the original data from the latent space (either from training scores
+or provided new scores/coefficients).</li>
+<li>
+<code>truncate(model, ncomp)</code>: Reduce the number of components
+kept in the model.</li>
+<li>
+<code>summary(model)</code>: Get a concise summary of the model
+dimensions.</li>
+</ul>
+<p>This consistent API simplifies writing generic analysis code and
+makes it easier to swap between different dimensionality reduction
+methods.</p>
 </div>
 <div class="section level2">
-<h2 id="bi-projector">Bi-projector<a class="anchor" aria-label="anchor" href="#bi-projector"></a>
+<h2 id="example-pca-workflow">Example: PCA Workflow<a class="anchor" aria-label="anchor" href="#example-pca-workflow"></a>
 </h2>
-<p>A bi_projector instance offers a two-way mapping from samples (rows)
-to scores and from variables (columns) to components. This allows
-projecting from a <span class="math inline">\(D\)</span>-dimensional
-input space to a <span class="math inline">\(d\)</span>-dimensional
-subspace, and projecting from an <span class="math inline">\(n\)</span>-dimensional variable space to the <span class="math inline">\(d\)</span>-dimensional component space. The
-singular value decomposition (SVD) is a canonical example of such a
-two-way mapping.</p>
-</div>
-<div class="section level2">
-<h2 id="the-project-function">The Project Function<a class="anchor" aria-label="anchor" href="#the-project-function"></a>
-</h2>
-<p>The project function is a generic function that takes a model fit
-(typically an object of class bi_projector or any other class that
-implements a project method) and new observations. It projects these
-observations onto the subspace defined by the model. This enables the
-transformation of new data into the same lower-dimensional space as the
-original data. Mathematically, projection consists of the following:</p>
-<p><span class="math display">\[
-X \approx USV^T
-\]</span></p>
-<p><span class="math display">\[
-\text{projected_data} = \text{new_data} \cdot V
-\]</span></p>
-</div>
-<div class="section level2">
-<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
-</h2>
-<p>In this example, we will demonstrate how to create a bi_projector
-object using the results of an SVD and project new data onto the same
-subspace as the original data.</p>
+<p>Let’s demonstrate a typical workflow using PCA on the classic
+<code>iris</code> dataset.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># Load the multivarious package</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bbuchsbaum.github.io/multivarious/">multivarious</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Load iris dataset and select numeric columns</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 1. Define a pre-processor (center the data)</span></span>
+<span><span class="va">preproc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># 2. Fit PCA using svd_wrapper, keeping 3 components</span></span>
+<span><span class="co">#    The pre-processor is applied internally.</span></span>
+<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">3</span>, preproc <span class="op">=</span> <span class="va">preproc</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># The result 'fit' is a bi_projector</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00; font-weight: bold;">PCA object</span>  -- derived from SVD</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'multivarious'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:stats':</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">Data: </span>150 observations x 4 variables</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">Components retained: </span>3</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     residuals</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
+<span><span class="co">#&gt; <span style="font-weight: bold;">Variance explained (per component):</span></span></span>
+<span><span class="co"><span style="font-weight: bold;">#&gt; </span> 1 2 3  92.95  5.33  1.72%  (cumulative:  92.95 98.28   100%)</span></span>
+<span></span>
+<span><span class="co"># 3. Access results</span></span>
+<span><span class="va">iris_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scores.html">scores</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># Scores of the centered training data (150 x 3)</span></span>
+<span><span class="va">iris_loadings</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/loadings.html" class="external-link">loadings</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="co"># Loadings (4 x 3)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nDimensions of Scores:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">iris_scores</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     truncate</span></span>
+<span><span class="co">#&gt; Dimensions of Scores: 150 3</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions of Loadings:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">iris_loadings</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Dimensions of Loadings:</span></span>
 <span></span>
-<span><span class="co"># Create a synthetic dataset</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">42</span><span class="op">)</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span>, <span class="fl">10</span>, <span class="fl">20</span><span class="op">)</span></span>
+<span><span class="co"># 4. Project new data</span></span>
+<span><span class="co"># Create some new iris-like samples (5 samples, 4 variables)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">new_iris_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span> <span class="op">*</span> <span class="fl">4</span>, mean <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colMeans</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, sd <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">X</span>, <span class="fl">2</span>, <span class="va">sd</span><span class="op">)</span><span class="op">)</span>, </span>
+<span>                        nrow <span class="op">=</span> <span class="fl">5</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Perform SVD on the dataset</span></span>
-<span><span class="va">svdfit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/svd.html" class="external-link">svd</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span></span>
+<span><span class="co"># Project the new data into the PCA space defined by 'fit'</span></span>
+<span><span class="co"># Pre-processing (centering using training data means) is applied automatically.</span></span>
+<span><span class="va">projected_new_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">new_iris_data</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nDimensions of Projected New Data Scores:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">projected_new_scores</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Dimensions of Projected New Data Scores: 5 3</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">projected_new_scores</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;            [,1]       [,2]        [,3]</span></span>
+<span><span class="co">#&gt; [1,] -2.2172144  0.8590909 -0.44924532</span></span>
+<span><span class="co">#&gt; [2,] -0.3270495 -0.5478369  0.07965279</span></span>
+<span><span class="co">#&gt; [3,] -1.7602954  0.9106117 -0.52932939</span></span>
+<span><span class="co">#&gt; [4,]  0.2367242 -0.3204326 -0.50433574</span></span>
+<span><span class="co">#&gt; [5,] -1.1529598  0.5426518  0.85478044</span></span>
 <span></span>
-<span><span class="co"># Create a bi_projector object</span></span>
-<span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bi_projector.html">bi_projector</a></span><span class="op">(</span><span class="va">svdfit</span><span class="op">$</span><span class="va">v</span>, s <span class="op">=</span> <span class="va">svdfit</span><span class="op">$</span><span class="va">u</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/diag.html" class="external-link">diag</a></span><span class="op">(</span><span class="va">svdfit</span><span class="op">$</span><span class="va">d</span><span class="op">)</span>, sdev <span class="op">=</span> <span class="va">svdfit</span><span class="op">$</span><span class="va">d</span><span class="op">)</span></span>
+<span><span class="co"># 5. Reconstruct approximated original data from scores</span></span>
+<span><span class="co"># Reconstruct the first few original samples</span></span>
+<span><span class="va">reconstructed_X_approx</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">fit</span>, comp<span class="op">=</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">)</span> <span class="co"># uses scores(fit) by default</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nReconstructed Approximation of Original Data (first 5 rows):\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Reconstructed Approximation of Original Data (first 5 rows):</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">reconstructed_X_approx</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;          [,1]     [,2]     [,3]      [,4]</span></span>
+<span><span class="co">#&gt; [1,] 5.099286 3.500723 1.401086 0.1982949</span></span>
+<span><span class="co">#&gt; [2,] 4.868758 3.031661 1.447517 0.1253679</span></span>
+<span><span class="co">#&gt; [3,] 4.693700 3.206384 1.309582 0.1849507</span></span>
+<span><span class="co">#&gt; [4,] 4.623843 3.075837 1.463736 0.2569583</span></span>
+<span><span class="co">#&gt; [5,] 5.019326 3.580414 1.370606 0.2461680</span></span>
+<span><span class="co">#&gt; [6,] 5.407635 3.892262 1.688387 0.4182392</span></span>
 <span></span>
-<span><span class="co"># Generate new data to project onto the same subspace as the original data</span></span>
-<span><span class="va">new_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">5</span> <span class="op">*</span> <span class="fl">20</span><span class="op">)</span>, <span class="fl">5</span>, <span class="fl">20</span><span class="op">)</span></span>
-<span></span>
-<span><span class="va">projected_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">p</span>, <span class="va">new_data</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">projected_data</span><span class="op">)</span></span>
-<span><span class="co">#&gt;            [,1]       [,2]       [,3]       [,4]         [,5]       [,6]</span></span>
-<span><span class="co">#&gt; [1,] -0.7864046 -0.4800612 -0.8865129 -0.2262336  0.678323845  2.3448302</span></span>
-<span><span class="co">#&gt; [2,] -0.1325076  1.3903017 -1.5064698  1.2550899  0.673332975  0.5718498</span></span>
-<span><span class="co">#&gt; [3,]  0.2864814 -0.2701905 -0.8181929 -0.8490030  0.006430116 -1.2933359</span></span>
-<span><span class="co">#&gt; [4,]  1.1311516  0.2891873 -1.0273319 -1.7338016  2.030170740 -2.8299146</span></span>
-<span><span class="co">#&gt; [5,] -0.8503584  0.1281519 -0.3367642  1.1956792 -0.315282938  1.2275375</span></span>
-<span><span class="co">#&gt;              [,7]       [,8]       [,9]      [,10]</span></span>
-<span><span class="co">#&gt; [1,] -0.985947936 -0.3905921 -0.8155574  1.2573170</span></span>
-<span><span class="co">#&gt; [2,] -0.006895692  1.5533483 -0.9853844  0.1021079</span></span>
-<span><span class="co">#&gt; [3,] -1.018713344 -0.8993998  1.1744588  1.1175886</span></span>
-<span><span class="co">#&gt; [4,] -0.520309205  0.8700092  0.5702875  0.1959549</span></span>
-<span><span class="co">#&gt; [5,]  1.078096512  0.1897177 -0.9757569 -1.1833003</span></span></code></pre></div>
-<p>In the <code>multivarious</code> package, the
-<code>bi_projector</code> class allows you to project new variables into
-the subspace defined by the model. The <code>project_vars</code>
-function is a generic function that operates on an object of a class
-implementing the <code>project_vars</code> method, such as a
-<code>bi_projector</code> object. This function projects one or more
-variables onto a subspace, which can be computed for a biorthogonal
-decomposition like Singular Value Decomposition (SVD).</p>
-<p>Remember, given an original data matrix <span class="math inline">\(X\)</span>, the SVD of <span class="math inline">\(X\)</span> can be written as:</p>
-<p><span class="math display">\[
-X \approx USV^T
-\]</span></p>
-<p>Where <span class="math inline">\(U\)</span> contains the left
-singular vectors (scores), <span class="math inline">\(S\)</span> is a
-diagonal matrix containing the singular values, and <span class="math inline">\(V^T\)</span> contains the right singular vectors
-(components). When we have new variables (columns) that we want to
-project into the same subspace as the original data, we can use the
-<code>project_vars</code> function.</p>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span> <span class="co"># Original data for comparison</span></span>
+<span><span class="co">#&gt;      Sepal.Length Sepal.Width Petal.Length Petal.Width</span></span>
+<span><span class="co">#&gt; [1,]          5.1         3.5          1.4         0.2</span></span>
+<span><span class="co">#&gt; [2,]          4.9         3.0          1.4         0.2</span></span>
+<span><span class="co">#&gt; [3,]          4.7         3.2          1.3         0.2</span></span>
+<span><span class="co">#&gt; [4,]          4.6         3.1          1.5         0.2</span></span>
+<span><span class="co">#&gt; [5,]          5.0         3.6          1.4         0.2</span></span>
+<span><span class="co">#&gt; [6,]          5.4         3.9          1.7         0.4</span></span></code></pre></div>
+<p>This example shows how fitting (<code>pca</code>), accessing results
+(<code>scores</code>, <code>loadings</code>), and applying the model to
+new data (<code>project</code>) follow a consistent pattern, regardless
+of whether the underlying method was PCA, PLS, or another technique
+returning a <code>bi_projector</code>.</p>
 </div>
 <div class="section level2">
-<h2 id="projecting-new-variables-onto-the-subspace">Projecting New Variables onto the Subspace<a class="anchor" aria-label="anchor" href="#projecting-new-variables-onto-the-subspace"></a>
+<h2 id="beyond-basic-projection-the-multivarious-ecosystem">Beyond Basic Projection: The <code>multivarious</code>
+Ecosystem<a class="anchor" aria-label="anchor" href="#beyond-basic-projection-the-multivarious-ecosystem"></a>
 </h2>
-<p>Let’s say we have a new data matrix <code>new_data</code> with the
-same number of rows as the original data. To project these new variables
-into the subspace, we can compute:</p>
-<p> = U^T </p>
-<p>The result is a matrix or vector of the projected variables in the
-subspace.</p>
-<p>Here’s an example of how you can use the <code>svd_wrapper</code>
-function in the <code>multivarious</code> package with the
-<code>iris</code> dataset to compute the SVD and project new variables
-into the subspace.</p>
-<p>First, let’s load the <code>iris</code> dataset and compute the SVD
-using the <code>svd_wrapper</code> function:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Load iris dataset and select the first four columns</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span>
-<span></span>
-<span><span class="co"># Compute SVD using the base method and 3 components</span></span>
-<span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/svd_wrapper.html">svd_wrapper</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">3</span>, preproc <span class="op">=</span> <span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span>, method <span class="op">=</span> <span class="st">"base"</span><span class="op">)</span></span></code></pre></div>
-<p>Now, let’s assume we have a new data matrix <code>new_data</code>
-with the same number of rows as the original data. To project these new
-variables into the subspace, we can use the <code>project_vars</code>
-function:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define new_data</span></span>
-<span><span class="va">new_data</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">iris</span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Project the new variables into the subspace</span></span>
-<span><span class="va">projected_vars</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_vars.html">project_vars</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">new_data</span><span class="op">)</span></span></code></pre></div>
-<p>This example demonstrates how to compute the SVD using the
-<code>svd_wrapper</code> function and project new variables into the
-subspace defined by the SVD using the <code>project_vars</code>
-function.</p>
+<p>The unified <code>bi_projector</code> interface enables several
+powerful features within the package:</p>
+<ul>
+<li>
+<strong>Pre-processing Pipelines:</strong> Define reusable
+pre-processing steps (see <code><a href="../articles/PreProcessing.html">vignette("PreProcessing")</a></code>).</li>
+<li>
+<strong>Model Composition:</strong> Chain multiple
+<code>bi_projector</code> steps together (e.g., pre-processing → PCA →
+rotation) into a single composite projector (see
+<code><a href="../articles/Composing_Projectors.html">vignette("Composing_Projectors")</a></code>).</li>
+<li>
+<strong>Cross-Validation:</strong> Easily perform cross-validation
+to select hyperparameters (like the number of components) using helpers
+that understand the <code>bi_projector</code> structure (see
+<code><a href="../articles/CrossValidation.html">vignette("CrossValidation")</a></code>).</li>
+</ul>
 </div>
-  </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
+<div class="section level2">
+<h2 id="projecting-variables-project_vars">Projecting Variables (<code>project_vars</code>)<a class="anchor" aria-label="anchor" href="#projecting-variables-project_vars"></a>
+</h2>
+<p>While <code><a href="../reference/project.html">project()</a></code> operates on new samples (rows), the
+<code>bi_projector</code> also supports projecting new
+<em>variables</em> (columns) into the component space defined by the
+model’s scores (U vectors in SVD terms). This is done using
+<code><a href="../reference/project_vars.html">project_vars()</a></code>.</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Using the 'fit' object from the PCA example above</span></span>
+<span></span>
+<span><span class="co"># Create a new variable (column) with the same number of samples as original data</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">456</span><span class="op">)</span></span>
+<span><span class="va">new_variable</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># Project this new variable into the component space defined by the PCA scores (fit$s)</span></span>
+<span><span class="co"># Result shows how the new variable relates to the principal components.</span></span>
+<span><span class="va">projected_variable_loadings</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_vars.html">project_vars</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">new_variable</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Warning in sweep(X, 2, cm, "-"): STATS is longer than the extent of</span></span>
+<span><span class="co">#&gt; 'dim(x)[MARGIN]'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nProjection of new variable onto components:"</span>, <span class="va">projected_variable_loadings</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Projection of new variable onto components: 0.0003296036 -0.0005098876 0.004254116</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+</h2>
+<p>The <code>multivarious</code> package provides a consistent and
+extensible framework for common dimensionality reduction and related
+linear transformation tasks. By leveraging the <code>bi_projector</code>
+class, it offers a unified API for fitting models, projecting new data,
+reconstruction, and accessing key model components. This simplifies
+workflows, promotes code reuse, and facilitates integration with
+pre-processing, model composition, and cross-validation tools within the
+package ecosystem.</p>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
 </div>
 
@@ -233,15 +312,15 @@ function.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.9.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
 </div>
 
     </footer>
 </div>
 
-  
 
-  
+
+
 
   </body>
 </html>
