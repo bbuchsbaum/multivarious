@@ -48,11 +48,18 @@ This is a basic example which shows you how to solve a common problem:
 library(multivarious)
 #> 
 #> Attaching package: 'multivarious'
-#> The following object is masked from 'package:stats':
+#> The following objects are masked from 'package:stats':
 #> 
-#>     residuals
-#> The following object is masked from 'package:base':
+#>     residuals, screeplot
+#> The following objects are masked from 'package:base':
 #> 
-#>     truncate
+#>     transform, truncate
 ## basic example code
 ```
+
+## Albers theme
+
+This package uses the albersdown theme. Vignettes are styled with
+`vignettes/albers.css` and a local `vignettes/albers.js`; the palette
+family is provided via `params$family` (default ‘red’). The pkgdown site
+uses `template: { package: albersdown }`.

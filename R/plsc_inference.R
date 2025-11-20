@@ -17,6 +17,7 @@ perm_test.plsc <- function(x,
                            Y,
                            nperm = 1000,
                            comps = ncomp(x),
+                           stepwise = TRUE,
                            shuffle_fun = NULL,
                            parallel = FALSE,
                            alternative = c("greater", "less", "two.sided"),
@@ -34,18 +35,44 @@ perm_test.plsc <- function(x,
   Yp <- transform(x$preproc_y, Y)
 
   if (is.null(shuffle_fun)) {
-    shuffle_fun <- function(Ymat) Ymat[sample(nrow(Ymat)), , drop = FALSE]
+    shuffle_fun <- function(Ymat) Ymat[sample.int(nrow(Ymat)), , drop = FALSE]
   }
 
-  obs_vals <- x$singvals[seq_len(comps)]
   n <- nrow(Xp)
 
-  one_perm <- function(i) {
-    Yperm <- shuffle_fun(Yp)
-    Cperm <- crossprod(Xp, Yperm) / (n - 1)
-    sv <- try(svd(Cperm, nu = comps, nv = comps), silent = TRUE)
-    if (inherits(sv, "try-error")) return(rep(NA_real_, comps))
-    sv$d[seq_len(comps)]
+  # helper to get leading singular value of cross-covariance
+  stat_lead_sv <- function(Xr, Yr) {
+    Cxy <- crossprod(Xr, Yr) / (n - 1)
+    sv <- try(svd(Cxy, nu = 1, nv = 1), silent = TRUE)
+    if (inherits(sv, "try-error") || length(sv$d) == 0) return(NA_real_)
+    sv$d[1]
+  }
+
+  # Prepare observed residuals per step (stepwise deflation like PCA P3 idea)
+  X_res <- Xp
+  Y_res <- Yp
+  obs_vals <- numeric(comps)
+  X_res_list <- vector("list", comps)
+  Y_res_list <- vector("list", comps)
+
+  for (a in seq_len(comps)) {
+    obs_vals[a] <- stat_lead_sv(X_res, Y_res)
+    X_res_list[[a]] <- X_res
+    Y_res_list[[a]] <- Y_res
+    if (stepwise && a < comps) {
+      # Deflate using current LV from observed model
+      vxa <- coef(x, "X")[, a, drop = FALSE]
+      vya <- coef(x, "Y")[, a, drop = FALSE]
+      sx_a <- X_res %*% vxa
+      sy_a <- Y_res %*% vya
+      X_res <- X_res - sx_a %*% t(vxa)
+      Y_res <- Y_res - sy_a %*% t(vya)
+    }
+  }
+
+  one_perm <- function(i, a, Xr, Yr) {
+    Yperm <- shuffle_fun(Yr)
+    stat_lead_sv(Xr, Yperm)
   }
 
   apply_fun <- if (parallel) {
@@ -57,9 +84,10 @@ perm_test.plsc <- function(x,
     lapply
   }
 
-  perm_list <- do.call(apply_fun, list(X = seq_len(nperm), FUN = one_perm))
-  perm_mat <- do.call(rbind, perm_list)
-  n_complete <- colSums(is.finite(perm_mat))
+  perm_mat <- matrix(NA_real_, nrow = nperm, ncol = comps)
+  n_complete <- integer(comps)
+  pvals <- rep(NA_real_, comps)
+  comps_tested <- 0
 
   get_p <- function(vals, obs) {
     vals <- vals[is.finite(vals)]
@@ -75,10 +103,25 @@ perm_test.plsc <- function(x,
     }
   }
 
-  pvals <- vapply(seq_len(comps), function(j) get_p(perm_mat[, j], obs_vals[j]), numeric(1))
+  for (a in seq_len(comps)) {
+    perm_args <- list(X = seq_len(nperm), FUN = one_perm,
+                      a = a,
+                      Xr = if (stepwise) X_res_list[[a]] else Xp,
+                      Yr = if (stepwise) Y_res_list[[a]] else Yp)
+    if (parallel) perm_args$future.seed <- TRUE
+    perm_vals_list <- do.call(apply_fun, perm_args)
+    perm_vec <- unlist(perm_vals_list)
+    perm_mat[, a] <- perm_vec
+    n_complete[a] <- sum(is.finite(perm_vec))
+    pvals[a] <- get_p(perm_vec, obs_vals[a])
+    comps_tested <- a
+    if (!is.na(pvals[a]) && pvals[a] > alpha) {
+      break
+    }
+  }
 
-  lower_ci <- upper_ci <- rep(NA_real_, comps)
-  for (j in seq_len(comps)) {
+  lower_ci <- upper_ci <- rep(NA_real_, comps_tested)
+  for (j in seq_len(comps_tested)) {
     if (n_complete[j] > 1) {
       qs <- stats::quantile(stats::na.omit(perm_mat[, j]), probs = c(0.025, 0.975))
       lower_ci[j] <- qs[1]; upper_ci[j] <- qs[2]
@@ -86,7 +129,7 @@ perm_test.plsc <- function(x,
   }
 
   n_significant <- 0
-  for (j in seq_len(comps)) {
+  for (j in seq_len(comps_tested)) {
     if (!is.na(pvals[j]) && pvals[j] <= alpha) {
       n_significant <- j
     } else {
@@ -95,9 +138,9 @@ perm_test.plsc <- function(x,
   }
 
   component_results <- tibble::tibble(
-    comp = seq_len(comps),
-    observed = obs_vals,
-    pval = pvals,
+    comp = seq_len(comps_tested),
+    observed = obs_vals[seq_len(comps_tested)],
+    pval = pvals[seq_len(comps_tested)],
     lower_ci = lower_ci,
     upper_ci = upper_ci
   )
@@ -105,11 +148,11 @@ perm_test.plsc <- function(x,
   out <- list(
     call = match.call(),
     component_results = component_results,
-    perm_values = perm_mat,
+    perm_values = perm_mat[, seq_len(comps_tested), drop = FALSE],
     alpha = alpha,
     alternative = alternative,
-    method = "Permutation test for PLSC (row-shuffle Y; statistic = singular value)",
-    nperm = n_complete,
+    method = sprintf("Permutation test for PLSC (row-shuffle Y; statistic = leading singular value; stepwise=%s)", stepwise),
+    nperm = n_complete[seq_len(comps_tested)],
     n_significant = n_significant
   )
   class(out) <- c("perm_test_plsc", "perm_test")
