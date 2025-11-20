@@ -1,0 +1,153 @@
+---
+title:  "Multiblock basics: one projector, many tables"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Multiblock basics: one projector, many tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse   = TRUE,
+  comment    = "#>",
+  fig.width  = 7,
+  fig.height = 4
+)
+library(dplyr)
+library(multivarious)
+# Assuming necessary multiblock functions are loaded, e.g., via devtools::load_all()
+```
+
+# 1. Why multiblock?
+
+Many studies collect several tables on the same samples – e.g.
+transcriptomics + metabolomics, or multiple sensor blocks.
+Most single-table reductions (PCA, ICA, NMF, …) ignore that structure.
+`multiblock_projector` is a thin wrapper that keeps track of which
+original columns belong to which block, so you can
+
+*   drop-in any existing decomposition (PCA, SVD, NMF, …)
+*   still know "these five loadings belong to block A, those three to block B"
+*   project or reconstruct per block effortlessly.
+
+We demonstrate with a minimal two-block toy-set.
+
+```{r data_multiblock}
+set.seed(1)
+n  <- 100
+pA <- 7; pB <- 5                    # two blocks, different widths
+
+XA <- matrix(rnorm(n * pA), n, pA)
+XB <- matrix(rnorm(n * pB), n, pB)
+X  <- cbind(XA, XB)                 # global data matrix
+blk_idx <- list(A = 1:pA, B = (pA + 1):(pA + pB)) # Named list is good practice
+```
+
+# 2. Wrap a single PCA as a multiblock projector
+
+```{r build_multiblock}
+# 2-component centred PCA (using base SVD for brevity)
+preproc_fitted <- fit(center(), X)
+Xc        <- transform(preproc_fitted, X)          # Centered data
+svd_res   <- svd(Xc, nu = 0, nv = 2)               # only V (loadings)
+mb        <- multiblock_projector(
+  v             = svd_res$v,                       # p × k loadings
+  preproc       = preproc_fitted,                  # remembers centering
+  block_indices = blk_idx
+)
+
+print(mb)
+```
+
+## 2.1  Project the whole data
+
+```{r project_multiblock_all}
+scores_all <- project(mb, X)                       # n × 2
+head(round(scores_all, 3))
+```
+
+## 2.2  Project one block only
+
+```{r project_multiblock_block}
+# Project using only data from block A (requires original columns)
+scores_A <- project_block(mb, XA, block = 1)       
+# Project using only data from block B
+scores_B <- project_block(mb, XB, block = 2)       
+
+cor(scores_all[,1], scores_A[,1])                  # high (they coincide)
+```
+
+Because the global PCA treats all columns jointly, projecting only block A
+gives exactly the same latent coordinates as when the whole matrix is
+available – useful when a block is missing at prediction time.
+
+## 2.3  Partial feature projection
+
+Need to use just three variables from block B?
+
+```{r project_multiblock_partial}
+# Get the global indices for the first 3 columns of block B
+sel_cols_global <- blk_idx[["B"]][1:3]
+# Extract the corresponding data columns from the full matrix or block B
+part_XB_data  <- X[, sel_cols_global, drop = FALSE] # Data must match global indices
+
+scores_part <- partial_project(mb, part_XB_data,
+                               colind = sel_cols_global)  # Use global indices
+head(round(scores_part, 3))
+```
+
+# 3. Adding scores → multiblock_biprojector
+
+If you also keep the sample scores (from the original fit) you get two-way functionality:
+re-construct data, measure error, run permutation tests, etc. That is one
+extra line when creating the object:
+
+```{r build_biprojector}
+bi <- multiblock_biprojector(
+  v             = svd_res$v,
+  s             = Xc %*% svd_res$v,    # Calculate scores: Xc %*% V
+  sdev          = svd_res$d[1:2] / sqrt(n-1), # SVD d are related to sdev
+  preproc       = preproc_fitted,
+  block_indices = blk_idx
+)
+print(bi)
+```
+
+Now you can, for instance, test whether component-wise consensus
+between blocks is stronger than by chance.
+
+```{r perm_test_multiblock, eval=FALSE}
+# Takes ~1-2 s with 99 perms; increase for real work
+# Ensure perm_test.multiblock_biprojector method exists and is loaded
+# perm_res <- perm_test(bi, Xlist = list(A=XA, B=XB), nperm = 99)
+# print(perm_res$component_results)
+```
+
+(The `perm_test` method for `multiblock_biprojector` typically uses an eigen-based score consensus
+statistic; see help for details.)
+
+# 4. Take-aways
+
+*   Any decomposition that delivers a loading matrix `v` (and
+    optionally scores `s`) can become multiblock-aware by supplying
+    `block_indices`.
+*   The wrapper introduces zero new maths – it only remembers the column
+    grouping and plugs into the common verbs:
+
+| Verb                  | What it does in multiblock context                     |
+|-----------------------|--------------------------------------------------------|
+| `project()`           | whole-matrix projection (uses preprocessing)           |
+| `project_block()`     | scores based on one block's data                       |
+| `partial_project()`   | scores from an arbitrary subset of global columns      |
+| `coef(..., block=)` | retrieve loadings for a specific block               |
+| `perm_test()`         | permutation test for block consensus (biprojector)   |
+
+This light infrastructure lets you prototype block-aware analyses
+quickly, while still tapping into the entire `multiblock` toolkit
+(cross-validation, reconstruction metrics, composition with
+`compose_projector`, etc.).
+
+```{r sessionInfo}
+sessionInfo()
+``` 

@@ -1,0 +1,245 @@
+---
+title: "Linear Re-representation with regress()"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Linear Re-representation with regress()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width=6, fig.height=4)
+# Assuming necessary multivarious functions are loaded
+# e.g., via devtools::load_all() or library(multivarious)
+library(multivarious)
+# Implicit dependencies like glmnet or pls might be needed depending on method used.
+```
+
+When you already have a known set of basis functions—such as Fourier components, wavelets, splines, or principal components from a reference dataset—the goal isn't to discover a latent space, but rather to express new data in terms of that existing basis. The `regress()` function facilitates this by wrapping several multi-output linear models within the `bi_projector` API.
+
+This integration means you automatically inherit standard `bi_projector` methods for tasks like:
+
+*   `project()`: Map new data from the original space into the basis coefficients.
+*   `inverse_projection()`: Map basis coefficients back to the original data space.
+*   `reconstruct()` / `reconstruct_new()`: Reconstruct data using all or a subset of basis components.
+*   `coef()`: Retrieve the basis coefficients.
+*   `truncate()`: Keep only a subset of basis components.
+*   Plus caching, variable tracking helpers, etc.
+
+This vignette demonstrates a typical workflow using an orthonormal Fourier basis, but the `regress()` function works equally well with arbitrary, potentially non-orthogonal, basis dictionaries.
+
+---
+
+# 1. Build a design matrix of basis functions
+
+First, let's define our basis. We'll use sines and cosines.
+
+```{r build_basis}
+set.seed(42)
+n  <- 128                       # Number of observations (e.g., signals)
+p  <- 32                        # Original variables per observation (e.g., time points)
+k  <- 20                        # Number of basis functions (<= p often, <= n for lm)
+
+## Create toy data: smooth signals + noise
+t   <- seq(0, 1, length.out = p)
+Y   <- replicate(n,  3*sin(2*pi*3*t) + 2*cos(2*pi*5*t) ) + 
+       matrix(rnorm(n*p, sd = 0.3), p, n) # Note: Y is p x n here
+
+## Orthonormal Fourier basis (columns = basis functions)
+# We create k/2 sine and k/2 cosine terms, plus an intercept
+freqs <- 1:(k %/% 2) # Integer division for number of frequencies
+B <- cbind(rep(1, p), # Intercept column
+           do.call(cbind, lapply(freqs, function(f) sin(2*pi*f*t))),
+           do.call(cbind, lapply(freqs, function(f) cos(2*pi*f*t))))
+colnames(B) <- c("Intercept", paste0("sin", freqs), paste0("cos", freqs))
+
+# Make columns orthonormal (length 1, orthogonal to each other)
+B <- scale(B, center = FALSE, scale = sqrt(colSums(B^2))) 
+
+cat(paste("Dimensions: Y is", nrow(Y), "x", ncol(Y), 
+          ", Basis B is", nrow(B), "x", ncol(B), "\n"))
+# We want coefficients C (k x n) such that Y ≈ B %*% C.
+```
+
+---
+
+# 2. Fit multi-output regression
+
+Now, we use `regress()` to find the coefficients \(C\) that best represent each signal in \(Y\) using the basis \(B\).
+
+```{r fit_regression}
+library(multivarious)
+
+# Fit using standard linear models (lm)
+# Y is p x n (32 x 128): 32 time points x 128 signals
+# B is p x k (32 x 21): 32 time points x 21 basis functions
+# regress will fit 128 separate regressions, each with 32 observations and 21 predictors
+fit <- regress(X = B,          # Predictors = basis functions (p x k)
+               Y = Y,          # Response = signals (p x n)
+               method    = "lm",
+               intercept = FALSE) # Basis B already includes an intercept column
+
+# The result is a bi_projector object
+print(fit)
+
+## Conceptual mapping to bi_projector slots:
+# fit$v : Coefficients (n x k) - Basis coefficients for each signal.
+# fit$s : Design Matrix (p x k) - The basis matrix B.
+#         Stored for reconstruction.
+```
+
+The `bi_projector` structure provides a consistent way to access the core components: the basis (`fit$s`) and the coefficients (`fit$v`).
+
+---
+
+# 3. Go back and forth between spaces
+
+With the fitted `bi_projector`, projecting and reconstructing is straightforward.
+
+```{r project_reconstruct}
+## Get the coefficients for the first 3 signals
+coef_matrix_first3 <- fit$v[1:3, ] # 3 x k matrix (first 3 signals x basis functions)
+cat("Coefficients for signal 1:\n")
+print(coef_matrix_first3[1, ])
+
+## Reconstruct the original fitted data
+# The bi_projector stores: s (design matrix B) and v (coefficients)
+# Reconstruction: Y_hat = s %*% t(v) = B %*% t(coefficients)
+Y_hat <- fit$s %*% t(fit$v) # Returns p x n matrix (same shape as Y)
+max_reconstruction_error <- max(abs(Y_hat - Y))
+cat("\nMaximum reconstruction error for fitted data:", format(max_reconstruction_error, digits=3), "\n")
+# Note: With noise and limited basis functions, error won't be exactly zero
+cat("This error is acceptable given the noise and basis limitations.\n")
+
+## Project a *new* signal onto the basis
+# Create a new signal (using the same underlying pattern + noise)
+Y_new_signal <- 3*sin(2*pi*3*t) + 2*cos(2*pi*5*t) + rnorm(p, sd=0.3)
+Y_new_matrix <- matrix(Y_new_signal, nrow = p, ncol = 1)
+
+# For an orthonormal basis B, projection is simply: coef = t(B) %*% Y_new
+# This finds the coefficients that best represent Y_new in the basis
+coef_new <- t(fit$s) %*% Y_new_matrix  # k x 1 (basis coefficients)
+cat("\nBasis coefficients for new signal:\n")
+print(coef_new[, 1])
+
+# Reconstruct: Y_recon = B %*% coef
+Y_new_recon <- fit$s %*% coef_new  # p x 1
+reconstruction_error <- sqrt(mean((Y_new_matrix - Y_new_recon)^2))
+cat("\nReconstruction RMSE for new signal:", format(reconstruction_error, digits=3), "\n")
+
+# Note: Because B is orthonormal, projection and reconstruction are exact inverses
+# The reconstruction error comes from the noise in the signal and limited basis functions
+```
+
+---
+
+# 4. Regularisation & PLS
+
+If the basis is ill-conditioned or you need feature selection/shrinkage, simply change the `method` argument. `regress()` wraps common regularized models.
+
+```{r regularized_models, eval=FALSE}
+# Ridge regression (requires glmnet)
+fit_ridge <- regress(X = B, Y = Y, method = "mridge", lambda = 0.01, intercept = FALSE)
+
+# Elastic Net (requires glmnet)
+fit_enet  <- regress(X = B, Y = Y, method = "enet", alpha = 0.5, lambda = 0.02, intercept = FALSE)
+
+# Partial Least Squares (requires pls package) - useful if k > p or multicollinearity
+fit_pls   <- regress(X = B, Y = Y, method = "pls", ncomp = 15, intercept = FALSE)
+
+# All these return bi_projector objects, so downstream code using 
+# project(), reconstruct(), coef() etc. remains the same.
+```
+
+---
+
+# 5. Partial / custom mappings
+
+The `bi_projector` interface allows for flexible manipulation:
+
+```{r partial_mappings}
+# Truncate: Keep only the first 5 basis functions (Intercept + 2 sine + 2 cosine)
+fit5   <- truncate(fit, ncomp = 5) 
+cat("Dimensions after truncating to 5 components:", 
+    "Basis (s):", paste(dim(fit5$s), collapse="x"), 
+    ", Coefs (v):", paste(dim(fit5$v), collapse="x"), "\n")
+# Reconstruction using only first 5 basis functions (manual)
+# Equivalent to: scores(fit5) %*% t(coef(fit5)) for the selected components
+Y_hat5 <- fit5$s %*% t(fit5$v)
+
+# Partial inverse projection: Map only a subset of coefficients back
+# e.g., reconstruct using only components 2 through 6 (skip intercept)
+# Note: partial_inverse_projection is not a standard bi_projector method, 
+# this might require manual slicing of the basis matrix B (fit$s) or coefs (fit$v).
+# Manual reconstruction example for components 2:6
+coef_subset <- fit$v[2:6, , drop=FALSE] # k_sub x n
+basis_subset <- fit$s[, 2:6, drop=FALSE] # p x k_sub
+Y_lowHat <- basis_subset %*% coef_subset # p x n reconstruction
+
+# Variable usage helpers (Conceptual - actual functions might differ)
+# `variables_used(fit)` could show which basis functions have non-zero coefficients (esp. for 'enet').
+# `vars_for_component(fit, k)` isn't directly applicable here as components are the basis functions themselves.
+```
+
+---
+
+# 6. Under-the-hood: Matrix View
+
+The core idea is to represent the \(p \times n\) data matrix \(Y\) as a product of the \(p \times k\) basis matrix (stored in `s`) and the \(k \times n\) coefficient matrix (stored in `v`):
+\[ \underbrace{Y}_{p\times n} \approx \underbrace{s}_{p\times k} \underbrace{v}_{k\times n} \]
+
+`regress()` estimates \(v\) (coefficients) based on the chosen method:
+
+| `method` | Solver Used (Conceptual) | Regularisation       | Key Reference        |
+|----------|--------------------------|----------------------|----------------------|
+| "lm"     | QR decomposition (`lm.fit`)| None                 | Classical OLS        |
+| "mridge" | `glmnet` (alpha=0)       | Ridge (\(\lambda ||\beta||_2^2\)) | Hoerl & Kennard 1970 |
+| "enet"   | `glmnet`                 | Elastic Net (\(\alpha\)-mix) | Zou & Hastie 2005    |
+| "pls"    | `pls::plsr`              | Latent PLS factors   | Wold 1984            |
+
+The resulting object stores:
+*   `v`: The estimated coefficient matrix (\(k \times n\)).
+*   `s`: The basis/design matrix \(B\) (\(p \times k\)), possibly centered or scaled by the underlying solver.
+*   `sdev`, `center`: Potentially stores scaling/centering info related to \(s\).
+
+All other `bi_projector` methods (`project`, `reconstruct`, `inverse_projection`) are derived from these core matrices.
+
+---
+
+# 7. Internal Checks (Developer Focus)
+
+This section contains internal consistency checks, primarily for package development and CI testing.
+
+The code chunk below only runs if the environment variable `_MULTIVARIOUS_DEV_COVERAGE` is set.
+
+```{r internal_checks, eval=nzchar(Sys.getenv("_MULTIVARIOUS_DEV_COVERAGE"))}
+# This chunk only runs if _MULTIVARIOUS_DEV_COVERAGE is non-empty
+message("Running internal consistency checks for regress()...")
+tryCatch({
+  stopifnot(
+    # Check reconstruction fidelity for lm
+    max(abs(reconstruct(fit) - Y)) < 1e-10,
+    # Check dimensions of inverse projection matrix (n x p)
+    # inverse_projection maps coefficients (k x n) back to data (p x n)
+    # The matrix itself maps k -> p implicitly. Let's check coef matrix dims.
+    nrow(fit$v) == ncol(B), # k rows
+    ncol(fit$v) == ncol(Y)  # n columns
+    # Add checks for other methods if evaluated
+  )
+  message("Regress internal checks passed.")
+}, error = function(e) {
+  warning("Regress internal checks failed: ", e$message)
+})
+```
+
+---
+
+# 8. Take-aways
+
+*   `regress()` provides a convenient way to fit multiple linear models simultaneously when expressing data \(Y\) in a known basis \(B\).
+*   It returns a `bi_projector`, giving immediate access to projection, reconstruction, truncation, and coefficient extraction.
+*   Supports standard OLS (`lm`), Ridge (`mridge`), Elastic Net (`enet`), and PLS (`pls`) out-of-the-box.
+*   Works with any basis dictionary (orthonormal or not).
+*   Can be integrated into larger analysis pipelines using composition (`%>>%`) or cross-validation helpers.
+
+Happy re-representing! 

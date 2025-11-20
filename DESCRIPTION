@@ -52,3 +52,4 @@ Suggests:
     rmarkdown
 URL: https://bbuchsbaum.github.io/multivarious/
 VignetteBuilder: knitr
+Config/Needs/website: albersdown

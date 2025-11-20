@@ -1,13 +1,23 @@
 ---
-title: "Permutation Testing in multivarious"
+title: Permutation Testing in multivarious
 output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Permutation Testing in multivarious}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+vignette: '%\VignetteIndexEntry{Permutation Testing in multivarious} %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}'
+params:
+  family: red
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+
 ---
 
 ```{r setup, include=FALSE}
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(params$family))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(multivarious)
 # library(future) # Load if using parallel = TRUE
