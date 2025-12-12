@@ -44,6 +44,10 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
                     # Default ncomp for PLS: arbitrary, consider tuning
                     ncomp=ceiling(ncol(X)/2), ...) {
   method <- match.arg(method)
+
+  # --- Input Validation ---
+  # Ensure design matrix and response have compatible dimensions
+  chk::chk_equal(nrow(X), nrow(Y))
   
   # --- Preprocessing Handling ---
   # Ensure preproc is initialized and apply it to X
