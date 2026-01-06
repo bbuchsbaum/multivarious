@@ -754,3 +754,60 @@ inverse_transform.concat_pre_processor <- function(object, X, colind = NULL, ...
   check_fitted(object, "inverse_transform")
   object$reverse_transform(X, colind)
 }
+
+
+#' Create a fitted no-op preprocessor (internal helper)
+#'
+#' Creates a pre_processor that performs no transformation, useful as a default.
+#' This function avoids deprecation warnings by directly constructing the pre_processor.
+#'
+#' @return A fitted `pre_processor` object that passes data through unchanged.
+#' @keywords internal
+#' @noRd
+.make_pass_preproc <- function() {
+  # Directly construct a pre_processor without going through deprecated prep()
+  pass_prepper <- pass()
+
+  proc <- local({
+    steps <- pass_prepper$steps
+    orig_ncol <- NULL
+
+    tinit <- function(X) {
+      assign("orig_ncol", ncol(X), envir = parent.env(environment()))
+      xin <- X
+      for (st in steps) {
+        xin <- st$forward(xin)
+      }
+      xin
+    }
+
+    tform <- function(X, colind = NULL) {
+      xin <- X
+      for (st in steps) {
+        xin <- st$apply(xin, colind)
+      }
+      xin
+    }
+
+    rtform <- function(X, colind = NULL) {
+      xin <- X
+      for (st in rev(steps)) {
+        xin <- st$reverse(xin, colind)
+      }
+      xin
+    }
+
+    ret <- list(
+      preproc = pass_prepper,
+      init = tinit,
+      transform = tform,
+      reverse_transform = rtform,
+      get_orig_ncol = function() orig_ncol
+    )
+
+    class(ret) <- "pre_processor"
+    ret
+  })
+
+  mark_fitted(proc, TRUE)
+}

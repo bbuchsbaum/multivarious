@@ -27,7 +27,7 @@
 #' dp <- discriminant_projector(lda_fit$scaling, X %*% lda_fit$scaling, sdev = lda_fit$svd, 
 #' labels = labels)
 #' @export
-discriminant_projector <- function(v, s, sdev, preproc=prep(pass()), labels, classes=NULL, ...) {
+discriminant_projector <- function(v, s, sdev, preproc=.make_pass_preproc(), labels, classes=NULL, ...) {
   
   chk::vld_matrix(v)
   chk::vld_matrix(s)

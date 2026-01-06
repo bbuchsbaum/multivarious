@@ -28,7 +28,7 @@
 #' # Create a cross_projector object using the canonical correlation analysis results
 #' canfit <- cross_projector(cres$xcoef, cres$ycoef, cor = cres$cor,
 #'                           sx = sx, sy = sy, classes = "cancor")
-cross_projector <- function(vx, vy, preproc_x=prep(pass()), preproc_y=prep(pass()), 
+cross_projector <- function(vx, vy, preproc_x=.make_pass_preproc(), preproc_y=.make_pass_preproc(),
                              ..., classes=NULL) {
   
   chk::chkor_vld(chk::vld_matrix(vx), chk::vld_s4_class(vx, "Matrix"))
@@ -46,11 +46,12 @@ cross_projector <- function(vx, vy, preproc_x=prep(pass()), preproc_y=prep(pass(
       preproc=preproc_x,
       preproc_x=preproc_x,
       preproc_y=preproc_y,
-      .cache = new.env(parent = emptyenv()),
       ...),
     class= c(classes, "cross_projector", "projector")
   )
-  
+
+  # Add cache environment as attribute (consistent with base projector)
+  attr(out, ".cache") <- new.env(parent = emptyenv())
   out
 }
 
@@ -353,7 +354,7 @@ partial_inverse_projection.cross_projector <- function(x, colind, domain=c("X","
   chk::chk_all(colind > 0, "Column indices must be positive")
   
   # Robust caching check
-  cache_env <- x$.cache
+  cache_env <- attr(x, ".cache")
   use_caching <- !is.null(cache_env) && is.environment(cache_env)
   key <- paste0("partial_inv_proj_", domain, "@", paste0(sort(unique(colind)), collapse = "_"))
 
@@ -590,7 +591,7 @@ print.cross_projector <- function(x,...) {
 # Not exported, internal helper
 .cache_inv <- function(x, domain, colind = NULL, lambda = 1e-6) {
   # Robust caching check
-  cache_env <- x$.cache
+  cache_env <- attr(x, ".cache")
   use_caching <- !is.null(cache_env) && is.environment(cache_env)
 
   # Create a unique key based on domain, target columns, and lambda

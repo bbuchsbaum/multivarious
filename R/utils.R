@@ -24,9 +24,9 @@ group_means <- function (Y, X) {
   chk::chk_equal(nrow(X), length(Y))
   
   if (all(table(Y) == 1)) {
-    warnings("`Y` does not contain more than one replicate of any level")
+    warning("`Y` does not contain more than one replicate of any level")
     row.names(X) <- names(table(Y))
-    X
+    return(X)
   }
   else {
     if (any(is.na(X))) {

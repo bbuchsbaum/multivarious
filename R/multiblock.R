@@ -26,7 +26,7 @@
 #'
 #' # Project multiblock data using the multiblock projector
 #' mb_scores <- project(mb_proj, X)
-multiblock_projector <- function(v, preproc=prep(pass()), ..., block_indices, classes=NULL) {
+multiblock_projector <- function(v, preproc=.make_pass_preproc(), ..., block_indices, classes=NULL) {
   chk::chk_list(block_indices)
   sumind <- sum(sapply(block_indices, length))
   chk::chk_equal(sumind, nrow(v))
@@ -51,7 +51,7 @@ multiblock_projector <- function(v, preproc=prep(pass()), ..., block_indices, cl
 #'
 #' @seealso bi_projector, multiblock_projector
 #' @export
-multiblock_biprojector <- function(v, s, sdev, preproc=prep(pass()), ..., block_indices, classes=NULL) {
+multiblock_biprojector <- function(v, s, sdev, preproc=.make_pass_preproc(), ..., block_indices, classes=NULL) {
   sumind <- sum(sapply(block_indices, length))
   chk::chk_equal(sumind, nrow(v))
   bi_projector(v, s=s, sdev=sdev, preproc=preproc, block_indices=block_indices, ..., classes=c(classes, "multiblock_biprojector", "multiblock_projector"))

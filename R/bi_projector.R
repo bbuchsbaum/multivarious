@@ -16,7 +16,7 @@
 #'
 #' p <- bi_projector(svdfit$v, s = svdfit$u %*% diag(svdfit$d), sdev=svdfit$d)
 #' @export
-bi_projector <- function(v, s, sdev, preproc=prep(pass()), classes=NULL, ...) {
+bi_projector <- function(v, s, sdev, preproc=.make_pass_preproc(), classes=NULL, ...) {
   chk::vld_matrix(v)
   chk::vld_matrix(s)
   chk::vld_numeric(sdev)

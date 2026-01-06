@@ -12,7 +12,7 @@
 #' @return An instance of type `projector`.
 #'
 #' @export
-projector <- function(v, preproc = prep(pass()), ..., classes = NULL) {
+projector <- function(v, preproc = .make_pass_preproc(), ..., classes = NULL) {
   # B3: Ensure v is matrix
   if (!is.matrix(v)) {
     v <- as.matrix(v)
@@ -88,6 +88,7 @@ robust_inv_vTv <- function(v, lambda = 1e-6) {
 }
 
 
+#' @export
 #' @importFrom assertthat assert_that
 inverse_projection.projector <- function(x, ...) {
   assertthat::assert_that(inherits(x, "projector"))

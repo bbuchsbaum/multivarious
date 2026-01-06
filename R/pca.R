@@ -23,8 +23,8 @@ pca <- function(X, ncomp=min(dim(X)), preproc=center(),
   svdres <- svd_wrapper(X, ncomp, preproc, method=method, ...)
   
   ## todo add rownames slot to `bi_projector`?
-  if (!is.null(row.names(scores))) {
-    row.names(scores) <- row.names(X)[seq_along(svdres$d)]
+  if (!is.null(row.names(svdres$s))) {
+    row.names(svdres$s) <- row.names(X)[seq_along(svdres$d)]
   }
   
 
@@ -88,6 +88,13 @@ truncate.pca <- function(x, ncomp) {
   x$sdev <- x$sdev[1:ncomp]
   x$s <- x$s[,1:ncomp,drop=FALSE]
   x$u <- x$u[, 1:ncomp, drop=FALSE]
+
+  # Clear cache to prevent stale values after truncation
+  cache <- attr(x, ".cache")
+  if (!is.null(cache) && is.environment(cache)) {
+    rm(list = ls(cache), envir = cache)
+  }
+
   x
 }
 
