@@ -37,7 +37,7 @@
 
 #' Generalized Eigenvalue Decomposition
 #'
-#' Computes the generalized eigenvalues and eigenvectors for the problem: A x = λ B x.
+#' Computes the generalized eigenvalues and eigenvectors for the problem: A x = lambda B x.
 #' Supports multiple dense and iterative solvers with a unified eigenpair selection interface.
 #'
 #' @param A The left-hand side square matrix.
@@ -53,7 +53,7 @@
 #'   - "subspace": Block subspace iteration for symmetric pairs with SPD B (iterative, no external package required).
 #' @param which Which eigenpairs to return. One of
 #'   `"LA"` (largest algebraic), `"SA"` (smallest algebraic), `"LM"` (largest magnitude),
-#'   or `"SM"` (smallest magnitude). Aliases: `"top"`/`"largest"` → `"LA"`, `"bottom"`/`"smallest"` → `"SA"`.
+#'   or `"SM"` (smallest magnitude). Aliases: `"top"`/`"largest"` -> `"LA"`, `"bottom"`/`"smallest"` -> `"SA"`.
 #'   Dense backends select eigenpairs post hoc; `"primme"` supports `"LA"`, `"SA"`, `"SM"` (not `"LM"`);
 #'   `"rspectra"` honors all four options. Default is `"LA"`.
 #' @param ... Additional arguments to pass to the underlying solver.
@@ -62,15 +62,15 @@
 #'
 #' @references
 #' Golub, G. H. & Van Loan, C. F. (2013) *Matrix Computations*,
-#'   4th ed., § 8.7 – textbook derivation for the "robust" (Cholesky)
+#'   4th ed., Section 8.7 -- textbook derivation for the "robust" (Cholesky)
 #'   and "sdiag" (spectral) transforms.
 #'
 #' Moler, C. & Stewart, G. (1973) "An Algorithm for Generalized Matrix
-#'   Eigenvalue Problems". *SIAM J. Numer. Anal.*, 10 (2): 241‑256 –
+#'   Eigenvalue Problems". *SIAM J. Numer. Anal.*, 10 (2): 241-256 --
 #'   the QZ algorithm behind the \code{geigen} backend.
 #'
 #' Stathopoulos, A. & McCombs, J. R. (2010) "PRIMME: PReconditioned
-#'   Iterative Multi‑Method Eigensolver". *ACM TOMS* 37 (2): 21:1‑21:30 –
+#'   Iterative Multi-Method Eigensolver". *ACM TOMS* 37 (2): 21:1-21:30 --
 #'   the algorithmic core of the \code{primme} backend.
 #'
 #' See also the \pkg{geigen} (CRAN) and \pkg{PRIMME} documentation.
@@ -333,7 +333,7 @@
 
         tiny <- sqrt(.Machine$double.eps)
         if (any(abs(mu) < tiny)) {
-          warning("Some μ ≈ 0 in the rspectra reciprocal fallback; corresponding λ may overflow. Consider method='primme' or 'geigen' with a shift.")
+          warning("Some mu near 0 in the rspectra reciprocal fallback; corresponding lambda may overflow. Consider method='primme' or 'geigen' with a shift.")
         }
 
         lam <- 1 / mu
@@ -474,16 +474,16 @@ orthonormalize <- function(X) {
 
 #' Subspace Iteration for Generalized Eigenproblem
 #'
-#' Iteratively solves S1 x = λ S2 x using a subspace approach.
+#' Iteratively solves S1 x = lambda S2 x using a subspace approach.
 #' Assumes S1, S2 are symmetric. For `which = "largest"`, S2 must be SPD;
 #' for `which = "smallest"`, S1 must be SPD.
 #'
 #' The iteration always applies the operator B^{-1} C while keeping the
 #' subspace B-orthonormalized, where (C, B) equals (S1, S2) for `which = "largest"`
 #' and (S2, S1) for `which = "smallest"`. The reduced problem solves
-#' `T = V^T B V` (SPD) and `S = V^T C V`, with eigenvalues `μ` of
-#' `R^{-T} S R^{-1}` mapping directly to `λ` in the "largest" case and
-#' `λ = 1 / μ` in the "smallest" case.
+#' `T = V^T B V` (SPD) and `S = V^T C V`, with eigenvalues `mu` of
+#' `R^{-T} S R^{-1}` mapping directly to `lambda` in the "largest" case and
+#' `lambda = 1 / mu` in the "smallest" case.
 #'
 #' @param S1 A square symmetric matrix (e.g., n x n).
 #' @param S2 A square symmetric positive definite matrix of the same dimension.
