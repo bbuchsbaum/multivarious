@@ -49,13 +49,13 @@ orth_distances.pca <- function(x, ncomp, xorig) {
     if (i < ncomp) {
       res <- res +
         tcrossprod(
-          scores[, (i + 1):ncomp, drop = F],
-          loadings[, (i + 1):ncomp, drop = F]
+          scores[, (i + 1):ncomp, drop = FALSE],
+          loadings[, (i + 1):ncomp, drop = FALSE]
         )
     }
     
     Q[, i] <- rowSums(res^2)
-    #T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
+    #T2[, i] <- rowSums(scoresn[, seq_len(i), drop = FALSE]^2)
   }
   
   Q
@@ -72,7 +72,7 @@ score_distances.pca <- function(x, ncomp, xorig) {
   
   T2 <- matrix(0, nrow = nrow(scores), ncol = ncomp)
   for (i in seq_len(ncomp)) {
-    T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
+    T2[, i] <- rowSums(scoresn[, seq_len(i), drop = FALSE]^2)
   }
   
   T2
