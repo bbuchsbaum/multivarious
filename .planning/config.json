@@ -1,0 +1,8 @@
+{
+  "mode": "yolo",
+  "depth": "standard",
+  "parallelization": true,
+  "planning": {
+    "commit_docs": true
+  }
+}
