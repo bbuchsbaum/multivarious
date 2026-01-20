@@ -405,7 +405,7 @@ refit <- function(x, new_data, ...) UseMethod("refit")
 #' @examples
 #' # Example using the svd_wrapper function
 #' data(iris)
-#' X <- iris[, 1:4]
+#' X <- as.matrix(iris[, 1:4])
 #' fit <- svd_wrapper(X, ncomp = 3, preproc = center(), method = "base")
 #' ncomp(fit) # Should return 3
 ncomp <- function(x) UseMethod("ncomp")
