@@ -16,17 +16,18 @@
 
 ## Current Position
 
-**Phase:** 1 - Code Fixes
-**Plan:** Not yet created
-**Status:** Not Started
+**Phase:** 1 of 4 (Code Fixes)
+**Plan:** 3 of 5 complete
+**Status:** In progress
+**Last activity:** 2026-01-20 - Completed 01-03-PLAN.md
 
 **Progress:**
 ```
-Phase 1: [..........] 0%
+Phase 1: [##........] 20% (1/5 plans)
 Phase 2: [..........] 0%
 Phase 3: [..........] 0%
 Phase 4: [..........] 0%
-Overall: [..........] 0/11 requirements
+Overall: [..........] ~1/11 requirements (partial)
 ```
 
 ---
@@ -42,6 +43,13 @@ Overall: [..........] 0/11 requirements
 - [ ] REQ-004: Zero warnings in R CMD check
 - [ ] REQ-007: All tests pass
 
+**Plan Status:**
+- [ ] 01-01: T/F shorthand fix
+- [ ] 01-02: \dontrun{} fixes
+- [x] 01-03: Missing imports fix (coefficients, combn, tidyr removal)
+- [ ] 01-04: (pending)
+- [ ] 01-05: (pending)
+
 **Known issues from research:**
 - T/F at R/pca.R:52, 53, 75 - `drop = F` must become `drop = FALSE`
 - \dontrun{} in R/cPCA.R, R/pca.R, R/all_generic.R - review for \donttest{} conversion
@@ -52,10 +60,10 @@ Overall: [..........] 0/11 requirements
 
 | Metric | Value |
 |--------|-------|
-| Session count | 0 |
+| Session count | 1 |
 | Requirements completed | 0/11 |
 | Phases completed | 0/4 |
-| Plans completed | 0 |
+| Plans completed | 1 |
 
 ---
 
@@ -68,6 +76,7 @@ Overall: [..........] 0/11 requirements
 | 4 phases | Research recommended; natural delivery boundaries | 2026-01-20 |
 | Keep 29 imports | Explain in cran-comments.md rather than refactor | 2026-01-20 |
 | Version bump to 0.3.0 | Standard increment for CRAN resubmission | 2026-01-20 |
+| Verified tidyr unused | All tidyr references in R/cv.R are commented out | 2026-01-20 |
 
 ### Technical Notes
 
@@ -75,6 +84,8 @@ Overall: [..........] 0/11 requirements
 - 14 vignettes present - may affect build time
 - Deprecated functions use lifecycle package - acceptable if documented
 - PRIMME package in Imports - less common but available on CRAN
+- coefficients() used in R/bi_projector.R reconstruct.bi_projector()
+- combn() used in R/multiblock.R perm_test.multiblock_projector()
 
 ### Open Questions
 
@@ -91,16 +102,16 @@ None currently.
 
 ### Last Session
 
-**Date:** N/A (initial state)
-**Duration:** N/A
-**Completed:** Roadmap and state initialization
+**Date:** 2026-01-20
+**Duration:** ~2 min
+**Completed:** 01-03-PLAN.md - Fix missing imports and remove unused tidyr
 
 ### Resume Context
 
 To continue this project:
-1. Run `/gsd:plan-phase 1` to create execution plan for Phase 1
-2. Phase 1 focuses on fixing T/F shorthand and \dontrun{} issues
-3. Success verified by clean R CMD check output
+1. Execute remaining plans in phase 1 (01-01, 01-02, 01-04, 01-05)
+2. 01-03 fixed import NOTEs (coefficients, combn, tidyr)
+3. Verify R CMD check improvements after each plan
 
 ---
 *State initialized: 2026-01-20*
