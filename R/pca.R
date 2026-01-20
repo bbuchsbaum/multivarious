@@ -636,7 +636,7 @@ rotate.pca <- function(x, ncomp, type=c("varimax", "quartimax", "promax"),
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(iris)
 #' X <- as.matrix(iris[,1:4])
 #' pca_res <- pca(X, ncomp=2)

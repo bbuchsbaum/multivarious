@@ -115,8 +115,8 @@
 #'   print(head(res_cpca_plus$v))
 #' }
 #'
-#' \dontrun{
-#' # Plot example (not run to avoid graphics device issues)
+#' \donttest{
+#' # Plot example (slow graphics)
 #' if (requireNamespace("geigen", quietly = TRUE) && requireNamespace("corpcor", quietly = TRUE)) {
 #'   set.seed(123)
 #'   X_b <- matrix(rnorm(150 * 50), nrow=150, ncol=50)

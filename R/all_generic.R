@@ -693,7 +693,7 @@ feature_importance <- function(x, ...) UseMethod("feature_importance")
 #'                          shuffle_fun=row_shuffle, parallel=FALSE)
 #' print(res_pca_row)
 #'
-#' \dontrun{
+#' \donttest{
 #' # Cross Projector Example (using cancor)
 #' X <- as.matrix(iris[,1:2])
 #' Y <- as.matrix(iris[,3:4])
@@ -723,7 +723,7 @@ feature_importance <- function(x, ...) UseMethod("feature_importance")
 #' # Multiblock Bi-Projector Example
 #' # (Requires a multiblock model 'mod_mb' from e.g. MFA or ComDim)
 #' # Assuming 'mod_mb' exists and has 2 blocks:
-#' # res_mb <- perm_test(mod_mb, nperm=50, comps=3) 
+#' # res_mb <- perm_test(mod_mb, nperm=50, comps=3)
 #' # print(res_mb)
 #' # Example using provided Xlist (list of matrices X1, X2):
 #' # X1 <- matrix(rnorm(50*10), 50, 10)
