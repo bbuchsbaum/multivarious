@@ -52,6 +52,12 @@ Plans:
 
 **Dependencies:** Phase 1 (need clean R CMD check results for cran-comments.md)
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md - Update .Rbuildignore, bump version to 0.3.0, create NEWS.md
+- [ ] 02-02-PLAN.md - Update cran-comments.md and final verification
+
 **Requirements:**
 - REQ-005: Create NEWS.md
 - REQ-006: Update cran-comments.md
@@ -120,8 +126,8 @@ Plans:
 
 | Phase | Status | Requirements | Completed |
 |-------|--------|--------------|-----------|
-| 1 - Code Fixes | Complete ✓ | 5 | 5/5 |
-| 2 - Documentation | Not Started | 4 | 0/4 |
+| 1 - Code Fixes | Complete | 5 | 5/5 |
+| 2 - Documentation | Planned | 4 | 0/4 |
 | 3 - Cross-Platform | Not Started | 2 | 0/2 |
 | 4 - Submission | Not Started | 0 | - |
 
@@ -147,4 +153,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-01-20*
-*Last updated: 2026-01-20 (Phase 1 complete)*
+*Last updated: 2026-01-20 (Phase 2 planned)*
