@@ -101,7 +101,7 @@ Here we keep it light for the vignette; use ≥500–1000 in practice.
 
 ```{r bootstrap}
 set.seed(321)
-boot_plsc <- bootstrap(fit_plsc, X, Y, nboot = 120, comps = 2, parallel = FALSE)
+boot_plsc <- bootstrap(fit_plsc, nboot = 120, X = X, Y = Y, comps = 2, parallel = FALSE)
 
 # X-loadings bootstrap ratios for LV1
 df_bsr <- data.frame(
