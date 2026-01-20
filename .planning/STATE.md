@@ -16,18 +16,18 @@
 
 ## Current Position
 
-**Phase:** 1 of 4 (Code Fixes) - COMPLETE
-**Plan:** 5 of 5 complete (in phase 1)
-**Status:** Phase 1 complete, ready for Phase 2
-**Last activity:** 2026-01-20 - Completed 01-05-PLAN.md (R CMD check verification)
+**Phase:** 2 of 4 (Documentation)
+**Plan:** 1 of 3 complete (in phase 2)
+**Status:** In progress
+**Last activity:** 2026-01-20 - Completed 02-01-PLAN.md (Package Metadata)
 
 **Progress:**
 ```
 Phase 1: [##########] 100% (5/5 plans) - COMPLETE
-Phase 2: [..........] 0%
+Phase 2: [###.......] 33% (1/3 plans)
 Phase 3: [..........] 0%
 Phase 4: [..........] 0%
-Overall: [#####.....] 5/11 requirements
+Overall: [######....] 6/11 requirements
 ```
 
 ---
@@ -81,14 +81,36 @@ Overall: [#####.....] 5/11 requirements
 
 ---
 
+## Phase 2 Overview - IN PROGRESS
+
+**Goal:** Prepare all CRAN submission documentation and metadata.
+
+**Requirements in scope:**
+- [x] REQ-005: Version bump to 0.3.0 - DONE in 02-01
+- [x] REQ-006: NEWS.md documents changes - DONE in 02-01
+- [ ] REQ-008: cran-comments.md explains notes - Pending 02-02
+- [ ] REQ-009: Final submission checklist - Pending 02-03
+
+**Plan Status:**
+- [x] 02-01: Package Metadata (.Rbuildignore, DESCRIPTION, NEWS.md)
+- [ ] 02-02: cran-comments.md creation
+- [ ] 02-03: Final package checks
+
+**Completed in 02-01:**
+- Added 6 patterns to .Rbuildignore (planning, claude, CLAUDE.md, figure, check.log, README.html)
+- Bumped version from 0.2.0 to 0.3.0
+- Created NEWS.md with Bug Fixes, Internal Changes, Deprecated sections
+
+---
+
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Session count | 5 |
-| Requirements completed | 5/11 (REQ-001, REQ-002, REQ-003, REQ-004, REQ-007) |
+| Session count | 6 |
+| Requirements completed | 7/11 (REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007) |
 | Phases completed | 1/4 |
-| Plans completed | 5 |
+| Plans completed | 6 |
 
 ---
 
@@ -109,6 +131,8 @@ Overall: [#####.....] 5/11 requirements
 | Explicit params for perm_test.plsc | Clearer than fixing inheritance chain for deprecated method | 2026-01-20 |
 | Remove broken perm_test examples | Examples required fitted preprocessors not available in scope | 2026-01-20 |
 | Filter X/Y from ... in bootstrap.plsc | Prevents duplicate argument error when callers use named args | 2026-01-20 |
+| NEWS.md uses CRAN-compliant format | # package version headings recognized by utils::news() | 2026-01-20 |
+| Exclude dev artifacts from tarball | .planning, .claude, CLAUDE.md, figure, check.log, README.html | 2026-01-20 |
 
 ### Technical Notes
 
@@ -139,15 +163,15 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-20
-**Duration:** ~15 min
-**Completed:** 01-05-PLAN.md - R CMD check verification (Phase 1 complete)
+**Duration:** ~3 min
+**Completed:** 02-01-PLAN.md - Package Metadata (.Rbuildignore, DESCRIPTION, NEWS.md)
 
 ### Resume Context
 
 To continue this project:
-1. Begin Phase 2 (CRAN Metadata) with plan 02-01
-2. Phase 1 complete: R CMD check passes with 0 errors, 0 warnings
-3. Next tasks: Version bump to 0.3.0, NEWS.md, cran-comments.md, .Rbuildignore
+1. Continue Phase 2 with plan 02-02 (cran-comments.md)
+2. Package now at version 0.3.0 with NEWS.md
+3. Next tasks: cran-comments.md, final package checks
 
 ---
 *State initialized: 2026-01-20*
