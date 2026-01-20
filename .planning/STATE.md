@@ -17,17 +17,17 @@
 ## Current Position
 
 **Phase:** 1 of 4 (Code Fixes)
-**Plan:** 1 of 3 complete (in phase 1)
+**Plan:** 2 of 3 complete (in phase 1)
 **Status:** In progress
-**Last activity:** 2026-01-20 - Completed 01-01-PLAN.md
+**Last activity:** 2026-01-20 - Completed 01-02-PLAN.md
 
 **Progress:**
 ```
-Phase 1: [###.......] 33% (1/3 plans)
+Phase 1: [######....] 67% (2/3 plans)
 Phase 2: [..........] 0%
 Phase 3: [..........] 0%
 Phase 4: [..........] 0%
-Overall: [#.........] ~2/11 requirements (partial)
+Overall: [##........] ~3/11 requirements (partial)
 ```
 
 ---
@@ -45,7 +45,7 @@ Overall: [#.........] ~2/11 requirements (partial)
 
 **Plan Status:**
 - [x] 01-01: Critical blocking issues (examples, non-ASCII, T/F)
-- [ ] 01-02: S3 method registration
+- [x] 01-02: S3 method registration
 - [ ] 01-03: Missing imports fix
 
 **Completed fixes in 01-01:**
@@ -53,16 +53,23 @@ Overall: [#.........] ~2/11 requirements (partial)
 - Replaced all non-ASCII characters in R/geneig.R and R/multiblock.R
 - Fixed T/F shorthand to TRUE/FALSE in R/pca.R
 
+**Completed fixes in 01-02:**
+- Fixed bootstrap.plsc signature to match bootstrap generic (x, nboot, ...)
+- Registered classifier.projector as S3 method
+- Registered inverse_projection.projector as S3 method
+- Registered perm_ci.pca as S3 method
+- NAMESPACE updated with 3 new S3method entries (112 -> 115)
+
 ---
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Session count | 2 |
+| Session count | 3 |
 | Requirements completed | 1/11 (REQ-001) |
 | Phases completed | 0/4 |
-| Plans completed | 1 |
+| Plans completed | 2 |
 
 ---
 
@@ -77,6 +84,8 @@ Overall: [#.........] ~2/11 requirements (partial)
 | Version bump to 0.3.0 | Standard increment for CRAN resubmission | 2026-01-20 |
 | Greek letters to ASCII text | Use "lambda", "mu" instead of Unicode escapes for clarity | 2026-01-20 |
 | Special chars to ASCII | Em-dashes to --, multiplication to x, arrows to -> | 2026-01-20 |
+| bootstrap.plsc backward compat | Extract X/Y from ... to match generic while supporting existing callers | 2026-01-20 |
+| Export deprecated perm_ci.pca | Proper S3 registration required even for deprecated methods | 2026-01-20 |
 
 ### Technical Notes
 
@@ -86,6 +95,8 @@ Overall: [#.........] ~2/11 requirements (partial)
 - PRIMME package in Imports - less common but available on CRAN
 - coefficients() used in R/bi_projector.R reconstruct.bi_projector()
 - combn() used in R/multiblock.R perm_test.multiblock_projector()
+- S3 methods must match generic signature exactly; use ... for extra args
+- NAMESPACE now has 115 S3method entries
 
 ### Open Questions
 
@@ -103,15 +114,15 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-20
-**Duration:** ~3 min
-**Completed:** 01-01-PLAN.md - Fix critical blocking issues (examples, non-ASCII, T/F)
+**Duration:** 3 min
+**Completed:** 01-02-PLAN.md - Fix S3 method consistency issues
 
 ### Resume Context
 
 To continue this project:
-1. Execute remaining plans in phase 1 (01-02, 01-03)
-2. 01-01 fixed: example matrix conversion, non-ASCII chars, T/F shorthand
-3. Verify R CMD check improvements after each plan
+1. Execute remaining plan in phase 1 (01-03: Missing imports fix)
+2. 01-02 fixed: S3 method warnings (bootstrap.plsc signature, 3 method registrations)
+3. Verify R CMD check shows no S3-related warnings
 
 ---
 *State initialized: 2026-01-20*
