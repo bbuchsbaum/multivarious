@@ -19,16 +19,28 @@
 )
 }
 \arguments{
+\item{x}{A fitted \code{plsc} model object.}
+
 \item{X}{Original X block used to fit \code{x}.}
 
 \item{Y}{Original Y block used to fit \code{x}.}
 
+\item{nperm}{Number of permutations to perform (default 1000).}
+
 \item{comps}{Number of components (LVs) to test. Defaults to \code{ncomp(x)}.}
+
+\item{stepwise}{Logical; if TRUE (default), perform sequential testing with deflation.}
 
 \item{shuffle_fun}{Optional function to permute Y; defaults to shuffling rows.}
 
+\item{parallel}{Logical; if TRUE, use parallel processing via future.apply.}
+
+\item{alternative}{Character string for the alternative hypothesis: "greater" (default), "less", or "two.sided".}
+
 \item{alpha}{Significance level used to report \code{n_significant}; not used
 directly in p-value calculation.}
+
+\item{...}{Additional arguments (currently unused).}
 }
 \description{
 Uses row-wise permutation of the Y block to assess the significance of each

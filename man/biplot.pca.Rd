@@ -69,7 +69,7 @@ those values will appear in the axis labels. Otherwise, the axes are labeled sim
 \code{repel_vars=FALSE}, or install \pkg{ggrepel}.
 }
 \examples{
-\dontrun{
+\donttest{
 data(iris)
 X <- as.matrix(iris[,1:4])
 pca_res <- pca(X, ncomp=2)

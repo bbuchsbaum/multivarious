@@ -4,13 +4,18 @@
 #' latent variable (LV) in a fitted \code{plsc} model. The test statistic is the
 #' singular value of the cross-covariance matrix for each LV.
 #'
-#' @inheritParams perm_test.pca
+#' @param x A fitted \code{plsc} model object.
 #' @param X Original X block used to fit \code{x}.
 #' @param Y Original Y block used to fit \code{x}.
+#' @param nperm Number of permutations to perform (default 1000).
 #' @param comps Number of components (LVs) to test. Defaults to \code{ncomp(x)}.
+#' @param stepwise Logical; if TRUE (default), perform sequential testing with deflation.
 #' @param shuffle_fun Optional function to permute Y; defaults to shuffling rows.
+#' @param parallel Logical; if TRUE, use parallel processing via future.apply.
+#' @param alternative Character string for the alternative hypothesis: "greater" (default), "less", or "two.sided".
 #' @param alpha Significance level used to report \code{n_significant}; not used
 #'   directly in p-value calculation.
+#' @param ... Additional arguments (currently unused).
 #' @export
 perm_test.plsc <- function(x,
                            X,
@@ -184,6 +189,7 @@ print.perm_test_plsc <- function(x, ...) {
 #' @param seed Optional integer seed for reproducibility.
 #' @param parallel Use future.apply for parallelization (default FALSE).
 #' @param epsilon Small positive constant to stabilize division for ratios.
+#' @param ... Additional arguments (currently unused).
 #' @export
 bootstrap_plsc <- function(x,
                            X,
