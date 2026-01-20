@@ -13,3 +13,9 @@ experimental
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
 .cursor
+^\.planning$
+^\.claude$
+^CLAUDE\.md$
+^figure$
+^check\.log$
+^README\.html$
