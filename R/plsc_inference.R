@@ -284,8 +284,18 @@ bootstrap_plsc <- function(x,
   out
 }
 
+#' @rdname bootstrap
 #' @export
-bootstrap.plsc <- function(x, X, Y, nboot = 500, ...) {
+bootstrap.plsc <- function(x, nboot = 500, ...) {
+  # Extract X and Y from ... to match generic signature
+  args <- list(...)
+  X <- args$X
+  Y <- args$Y
+
+  if (is.null(X) || is.null(Y)) {
+    stop("bootstrap.plsc requires X and Y to be passed as named arguments via ...", call. = FALSE)
+  }
+
   bootstrap_plsc(x, X = X, Y = Y, nboot = nboot, ...)
 }
 
