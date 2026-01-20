@@ -17,6 +17,12 @@ perm_ci(x, X, nperm, ...)
 \item{nperm}{The number of permutations to perform for the confidence interval estimation.}
 
 \item{...}{Additional arguments to be passed to the specific model implementation of \code{perm_ci}.}
+
+\item{k}{Number of components to test (default 4).}
+
+\item{distr}{Distribution assumption (default "gamma"); currently ignored in forwarding.}
+
+\item{parallel}{Logical; if TRUE, use parallel processing.}
 }
 \value{
 A list containing the estimated lower and upper bounds of the confidence intervals for model parameters.

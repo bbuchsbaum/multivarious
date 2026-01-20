@@ -94,6 +94,9 @@ truncate.pca <- function(x, ncomp) {
 
 
 #' @rdname perm_ci
+#' @param k Number of components to test (default 4).
+#' @param distr Distribution assumption (default "gamma"); currently ignored in forwarding.
+#' @param parallel Logical; if TRUE, use parallel processing.
 #' @export
 perm_ci.pca <- function(x, X, nperm=100, k=4, distr="gamma", parallel=FALSE, ...) {
   .Deprecated("perm_test.pca", package="multivarious", 
