@@ -17,17 +17,17 @@
 ## Current Position
 
 **Phase:** 1 of 4 (Code Fixes)
-**Plan:** 2 of 3 complete (in phase 1)
+**Plan:** 4 of 5 complete (in phase 1)
 **Status:** In progress
-**Last activity:** 2026-01-20 - Completed 01-02-PLAN.md
+**Last activity:** 2026-01-20 - Completed 01-04-PLAN.md
 
 **Progress:**
 ```
-Phase 1: [######....] 67% (2/3 plans)
+Phase 1: [########..] 80% (4/5 plans)
 Phase 2: [..........] 0%
 Phase 3: [..........] 0%
 Phase 4: [..........] 0%
-Overall: [##........] ~3/11 requirements (partial)
+Overall: [###.......] ~4/11 requirements (partial)
 ```
 
 ---
@@ -38,7 +38,7 @@ Overall: [##........] ~3/11 requirements (partial)
 
 **Requirements in scope:**
 - [x] REQ-001: Fix T/F shorthand (R/pca.R lines 52, 53, 75) - DONE in 01-01
-- [ ] REQ-002: Fix \dontrun{} misuse (R/cPCA.R, R/pca.R, R/all_generic.R)
+- [x] REQ-002: Fix \dontrun{} misuse (R/cPCA.R, R/pca.R, R/all_generic.R) - DONE in 01-04
 - [ ] REQ-003: Zero errors in R CMD check
 - [ ] REQ-004: Zero warnings in R CMD check
 - [ ] REQ-007: All tests pass
@@ -46,7 +46,9 @@ Overall: [##........] ~3/11 requirements (partial)
 **Plan Status:**
 - [x] 01-01: Critical blocking issues (examples, non-ASCII, T/F)
 - [x] 01-02: S3 method registration
-- [ ] 01-03: Missing imports fix
+- [x] 01-03: Missing imports fix
+- [x] 01-04: Documentation fixes (dontrun, undocumented args)
+- [ ] 01-05: R CMD check verification
 
 **Completed fixes in 01-01:**
 - Fixed data frame to matrix conversion in R/svd.R and R/all_generic.R examples
@@ -60,16 +62,23 @@ Overall: [##........] ~3/11 requirements (partial)
 - Registered perm_ci.pca as S3 method
 - NAMESPACE updated with 3 new S3method entries (112 -> 115)
 
+**Completed fixes in 01-03:**
+- Added missing imports (coefficients, combn)
+
+**Completed fixes in 01-04:**
+- Converted \dontrun{} to \donttest{} in pca.R, cPCA.R, all_generic.R
+- Documented missing args in perm_test.plsc, bootstrap_plsc, perm_ci.pca
+
 ---
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Session count | 3 |
-| Requirements completed | 1/11 (REQ-001) |
+| Session count | 4 |
+| Requirements completed | 2/11 (REQ-001, REQ-002) |
 | Phases completed | 0/4 |
-| Plans completed | 2 |
+| Plans completed | 4 |
 
 ---
 
@@ -86,6 +95,8 @@ Overall: [##........] ~3/11 requirements (partial)
 | Special chars to ASCII | Em-dashes to --, multiplication to x, arrows to -> | 2026-01-20 |
 | bootstrap.plsc backward compat | Extract X/Y from ... to match generic while supporting existing callers | 2026-01-20 |
 | Export deprecated perm_ci.pca | Proper S3 registration required even for deprecated methods | 2026-01-20 |
+| donttest for slow examples | CRAN policy: dontrun only for non-executable code | 2026-01-20 |
+| Explicit params for perm_test.plsc | Clearer than fixing inheritance chain for deprecated method | 2026-01-20 |
 
 ### Technical Notes
 
@@ -97,6 +108,7 @@ Overall: [##........] ~3/11 requirements (partial)
 - combn() used in R/multiblock.R perm_test.multiblock_projector()
 - S3 methods must match generic signature exactly; use ... for extra args
 - NAMESPACE now has 115 S3method entries
+- plsc.Rd has escaped LaTeX warnings (low priority)
 
 ### Open Questions
 
@@ -114,15 +126,15 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-20
-**Duration:** 3 min
-**Completed:** 01-02-PLAN.md - Fix S3 method consistency issues
+**Duration:** 5 min
+**Completed:** 01-04-PLAN.md - Documentation fixes
 
 ### Resume Context
 
 To continue this project:
-1. Execute remaining plan in phase 1 (01-03: Missing imports fix)
-2. 01-02 fixed: S3 method warnings (bootstrap.plsc signature, 3 method registrations)
-3. Verify R CMD check shows no S3-related warnings
+1. Execute remaining plan in phase 1 (01-05: R CMD check verification)
+2. 01-04 fixed: \dontrun{} -> \donttest{}, undocumented arguments
+3. All code fixes in phase 1 complete; ready for final verification
 
 ---
 *State initialized: 2026-01-20*
