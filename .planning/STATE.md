@@ -17,17 +17,17 @@
 ## Current Position
 
 **Phase:** 1 of 4 (Code Fixes)
-**Plan:** 3 of 5 complete
+**Plan:** 1 of 3 complete (in phase 1)
 **Status:** In progress
-**Last activity:** 2026-01-20 - Completed 01-03-PLAN.md
+**Last activity:** 2026-01-20 - Completed 01-01-PLAN.md
 
 **Progress:**
 ```
-Phase 1: [##........] 20% (1/5 plans)
+Phase 1: [###.......] 33% (1/3 plans)
 Phase 2: [..........] 0%
 Phase 3: [..........] 0%
 Phase 4: [..........] 0%
-Overall: [..........] ~1/11 requirements (partial)
+Overall: [#.........] ~2/11 requirements (partial)
 ```
 
 ---
@@ -37,22 +37,21 @@ Overall: [..........] ~1/11 requirements (partial)
 **Goal:** Package passes R CMD check with zero errors and warnings on local machine.
 
 **Requirements in scope:**
-- [ ] REQ-001: Fix T/F shorthand (R/pca.R lines 52, 53, 75)
+- [x] REQ-001: Fix T/F shorthand (R/pca.R lines 52, 53, 75) - DONE in 01-01
 - [ ] REQ-002: Fix \dontrun{} misuse (R/cPCA.R, R/pca.R, R/all_generic.R)
 - [ ] REQ-003: Zero errors in R CMD check
 - [ ] REQ-004: Zero warnings in R CMD check
 - [ ] REQ-007: All tests pass
 
 **Plan Status:**
-- [ ] 01-01: T/F shorthand fix
-- [ ] 01-02: \dontrun{} fixes
-- [x] 01-03: Missing imports fix (coefficients, combn, tidyr removal)
-- [ ] 01-04: (pending)
-- [ ] 01-05: (pending)
+- [x] 01-01: Critical blocking issues (examples, non-ASCII, T/F)
+- [ ] 01-02: S3 method registration
+- [ ] 01-03: Missing imports fix
 
-**Known issues from research:**
-- T/F at R/pca.R:52, 53, 75 - `drop = F` must become `drop = FALSE`
-- \dontrun{} in R/cPCA.R, R/pca.R, R/all_generic.R - review for \donttest{} conversion
+**Completed fixes in 01-01:**
+- Fixed data frame to matrix conversion in R/svd.R and R/all_generic.R examples
+- Replaced all non-ASCII characters in R/geneig.R and R/multiblock.R
+- Fixed T/F shorthand to TRUE/FALSE in R/pca.R
 
 ---
 
@@ -60,8 +59,8 @@ Overall: [..........] ~1/11 requirements (partial)
 
 | Metric | Value |
 |--------|-------|
-| Session count | 1 |
-| Requirements completed | 0/11 |
+| Session count | 2 |
+| Requirements completed | 1/11 (REQ-001) |
 | Phases completed | 0/4 |
 | Plans completed | 1 |
 
@@ -76,7 +75,8 @@ Overall: [..........] ~1/11 requirements (partial)
 | 4 phases | Research recommended; natural delivery boundaries | 2026-01-20 |
 | Keep 29 imports | Explain in cran-comments.md rather than refactor | 2026-01-20 |
 | Version bump to 0.3.0 | Standard increment for CRAN resubmission | 2026-01-20 |
-| Verified tidyr unused | All tidyr references in R/cv.R are commented out | 2026-01-20 |
+| Greek letters to ASCII text | Use "lambda", "mu" instead of Unicode escapes for clarity | 2026-01-20 |
+| Special chars to ASCII | Em-dashes to --, multiplication to x, arrows to -> | 2026-01-20 |
 
 ### Technical Notes
 
@@ -103,14 +103,14 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-20
-**Duration:** ~2 min
-**Completed:** 01-03-PLAN.md - Fix missing imports and remove unused tidyr
+**Duration:** ~3 min
+**Completed:** 01-01-PLAN.md - Fix critical blocking issues (examples, non-ASCII, T/F)
 
 ### Resume Context
 
 To continue this project:
-1. Execute remaining plans in phase 1 (01-01, 01-02, 01-04, 01-05)
-2. 01-03 fixed import NOTEs (coefficients, combn, tidyr)
+1. Execute remaining plans in phase 1 (01-02, 01-03)
+2. 01-01 fixed: example matrix conversion, non-ASCII chars, T/F shorthand
 3. Verify R CMD check improvements after each plan
 
 ---
