@@ -17,17 +17,17 @@
 ## Current Position
 
 **Phase:** 2 of 4 (Documentation)
-**Plan:** 1 of 3 complete (in phase 2)
+**Plan:** 2 of 3 complete (in phase 2)
 **Status:** In progress
-**Last activity:** 2026-01-20 - Completed 02-01-PLAN.md (Package Metadata)
+**Last activity:** 2026-01-20 - Completed 02-02-PLAN.md (cran-comments.md)
 
 **Progress:**
 ```
 Phase 1: [##########] 100% (5/5 plans) - COMPLETE
-Phase 2: [###.......] 33% (1/3 plans)
+Phase 2: [######....] 67% (2/3 plans)
 Phase 3: [..........] 0%
 Phase 4: [..........] 0%
-Overall: [######....] 6/11 requirements
+Overall: [#######...] 8/11 requirements
 ```
 
 ---
@@ -88,12 +88,12 @@ Overall: [######....] 6/11 requirements
 **Requirements in scope:**
 - [x] REQ-005: Version bump to 0.3.0 - DONE in 02-01
 - [x] REQ-006: NEWS.md documents changes - DONE in 02-01
-- [ ] REQ-008: cran-comments.md explains notes - Pending 02-02
+- [x] REQ-008: cran-comments.md explains notes - DONE in 02-02
 - [ ] REQ-009: Final submission checklist - Pending 02-03
 
 **Plan Status:**
 - [x] 02-01: Package Metadata (.Rbuildignore, DESCRIPTION, NEWS.md)
-- [ ] 02-02: cran-comments.md creation
+- [x] 02-02: cran-comments.md creation
 - [ ] 02-03: Final package checks
 
 **Completed in 02-01:**
@@ -101,16 +101,22 @@ Overall: [######....] 6/11 requirements
 - Bumped version from 0.2.0 to 0.3.0
 - Created NEWS.md with Bug Fixes, Internal Changes, Deprecated sections
 
+**Completed in 02-02:**
+- Fixed vignette YAML headers in all 14 .Rmd files (blocking issue)
+- Updated cran-comments.md with resubmission notes and NOTE explanations
+- Added check_output.log and multivarious.Rcheck to .Rbuildignore
+- R CMD check: 0 errors | 0 warnings | 2 notes
+
 ---
 
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Session count | 6 |
-| Requirements completed | 7/11 (REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007) |
+| Session count | 7 |
+| Requirements completed | 8/11 (REQ-001, REQ-002, REQ-003, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008) |
 | Phases completed | 1/4 |
-| Plans completed | 6 |
+| Plans completed | 7 |
 
 ---
 
@@ -121,7 +127,7 @@ Overall: [######....] 6/11 requirements
 | Decision | Rationale | Date |
 |----------|-----------|------|
 | 4 phases | Research recommended; natural delivery boundaries | 2026-01-20 |
-| Keep 29 imports | Explain in cran-comments.md rather than refactor | 2026-01-20 |
+| Keep 27 imports | Explain in cran-comments.md rather than refactor | 2026-01-20 |
 | Version bump to 0.3.0 | Standard increment for CRAN resubmission | 2026-01-20 |
 | Greek letters to ASCII text | Use "lambda", "mu" instead of Unicode escapes for clarity | 2026-01-20 |
 | Special chars to ASCII | Em-dashes to --, multiplication to x, arrows to -> | 2026-01-20 |
@@ -133,24 +139,24 @@ Overall: [######....] 6/11 requirements
 | Filter X/Y from ... in bootstrap.plsc | Prevents duplicate argument error when callers use named args | 2026-01-20 |
 | NEWS.md uses CRAN-compliant format | # package version headings recognized by utils::news() | 2026-01-20 |
 | Exclude dev artifacts from tarball | .planning, .claude, CLAUDE.md, figure, check.log, README.html | 2026-01-20 |
+| Fix vignette YAML to multi-line | Standard format required for R CMD check vignette engine detection | 2026-01-20 |
 
 ### Technical Notes
 
 - Package was previously on CRAN (v0.2.0)
-- 14 vignettes present - may affect build time
+- 14 vignettes present - vignette rebuild takes ~24 seconds
 - Deprecated functions use lifecycle package - acceptable if documented
 - PRIMME package in Imports - less common but available on CRAN
 - coefficients() used in R/bi_projector.R reconstruct.bi_projector()
 - combn() used in R/multiblock.R perm_test.multiblock_projector()
 - S3 methods must match generic signature exactly; use ... for extra args
 - NAMESPACE now has 115 S3method entries
-- plsc.Rd has escaped LaTeX warnings (low priority)
-- R CMD check returns 2 acceptable notes (hidden files, CLAUDE.md)
+- plsc.Rd has escaped LaTeX warnings - documented in cran-comments.md
+- R CMD check returns 2 NOTEs: escaped LaTeX specials, albersdown vignette dependency
 
 ### Open Questions
 
-- Vignette build time not yet measured (target <10 minutes)
-- Reverse dependencies not yet checked
+- Reverse dependencies not yet checked (none expected)
 
 ### Blockers
 
@@ -163,15 +169,15 @@ None currently.
 ### Last Session
 
 **Date:** 2026-01-20
-**Duration:** ~3 min
-**Completed:** 02-01-PLAN.md - Package Metadata (.Rbuildignore, DESCRIPTION, NEWS.md)
+**Duration:** ~7 min
+**Completed:** 02-02-PLAN.md - cran-comments.md creation
 
 ### Resume Context
 
 To continue this project:
-1. Continue Phase 2 with plan 02-02 (cran-comments.md)
-2. Package now at version 0.3.0 with NEWS.md
-3. Next tasks: cran-comments.md, final package checks
+1. Continue Phase 2 with plan 02-03 (Final package checks)
+2. Package ready for CRAN submission after 02-03 verification
+3. cran-comments.md complete with all NOTE explanations
 
 ---
 *State initialized: 2026-01-20*
