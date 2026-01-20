@@ -93,8 +93,8 @@ truncate.pca <- function(x, ncomp) {
 
 
 
-#' @keywords internal
-#' @noRd
+#' @rdname perm_ci
+#' @export
 perm_ci.pca <- function(x, X, nperm=100, k=4, distr="gamma", parallel=FALSE, ...) {
   .Deprecated("perm_test.pca", package="multivarious", 
               msg = "'perm_ci.pca' is deprecated. Please use 'perm_test.pca' with distribution=\"empirical\" instead.")

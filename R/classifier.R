@@ -234,7 +234,7 @@ rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
 
 
 #' create classifier from a projector
-#' 
+#'
 #' @param x projector
 #' @param colind ...
 #' @param labels ...
@@ -242,7 +242,8 @@ rf_classifier.projector <- function(x, colind=NULL, labels, scores, ...) {
 #' @param knn ...
 #' @param global_scores ...
 #' @param ... extra args
-#' @method classifier projector
+#' @rdname classifier
+#' @export
 #' @family classifier
 #' @examples
 #' # Assume proj is a fitted projector object

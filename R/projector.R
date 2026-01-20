@@ -88,6 +88,8 @@ robust_inv_vTv <- function(v, lambda = 1e-6) {
 }
 
 
+#' @rdname inverse_projection
+#' @export
 #' @importFrom assertthat assert_that
 inverse_projection.projector <- function(x, ...) {
   assertthat::assert_that(inherits(x, "projector"))
