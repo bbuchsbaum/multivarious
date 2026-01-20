@@ -84,6 +84,12 @@ Plans:
 
 **Dependencies:** Phase 2 (submit final version for external checks)
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 03-01-PLAN.md - Submit to win-builder and mac-builder, await results
+- [ ] 03-02-PLAN.md - Update cran-comments.md with cross-platform results
+
 **Requirements:**
 - REQ-009: Cross-platform verification
 - REQ-010: R-devel compatibility
@@ -128,7 +134,7 @@ Plans:
 |-------|--------|--------------|-----------|
 | 1 - Code Fixes | Complete | 5 | 5/5 |
 | 2 - Documentation | Complete | 4 | 4/4 |
-| 3 - Cross-Platform | Not Started | 2 | 0/2 |
+| 3 - Cross-Platform | In Progress | 2 | 0/2 |
 | 4 - Submission | Not Started | 0 | - |
 
 **Overall:** 9/11 requirements complete
@@ -153,4 +159,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-01-20*
-*Last updated: 2026-01-20 (Phase 2 complete)*
+*Last updated: 2026-01-20 (Phase 3 planned)*
