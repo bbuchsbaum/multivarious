@@ -35,7 +35,7 @@ geneig(
 
 \item{which}{Which eigenpairs to return. One of
 \code{"LA"} (largest algebraic), \code{"SA"} (smallest algebraic), \code{"LM"} (largest magnitude),
-or \code{"SM"} (smallest magnitude). Aliases: \code{"top"}/\code{"largest"} → \code{"LA"}, \code{"bottom"}/\code{"smallest"} → \code{"SA"}.
+or \code{"SM"} (smallest magnitude). Aliases: \code{"top"}/\code{"largest"} -> \code{"LA"}, \code{"bottom"}/\code{"smallest"} -> \code{"SA"}.
 Dense backends select eigenpairs post hoc; \code{"primme"} supports \code{"LA"}, \code{"SA"}, \code{"SM"} (not \code{"LM"});
 \code{"rspectra"} honors all four options. Default is \code{"LA"}.}
 
@@ -45,7 +45,7 @@ Dense backends select eigenpairs post hoc; \code{"primme"} supports \code{"LA"},
 A \code{projector} object with generalized eigenvectors and eigenvalues.
 }
 \description{
-Computes the generalized eigenvalues and eigenvectors for the problem: A x = λ B x.
+Computes the generalized eigenvalues and eigenvectors for the problem: A x = lambda B x.
 Supports multiple dense and iterative solvers with a unified eigenpair selection interface.
 }
 \examples{
@@ -64,15 +64,15 @@ result <- geneig(A = A, B = B, ncomp = 3)
 }
 \references{
 Golub, G. H. & Van Loan, C. F. (2013) \emph{Matrix Computations},
-4th ed., § 8.7 – textbook derivation for the "robust" (Cholesky)
+4th ed., Section 8.7 -- textbook derivation for the "robust" (Cholesky)
 and "sdiag" (spectral) transforms.
 
 Moler, C. & Stewart, G. (1973) "An Algorithm for Generalized Matrix
-Eigenvalue Problems". \emph{SIAM J. Numer. Anal.}, 10 (2): 241‑256 –
+Eigenvalue Problems". \emph{SIAM J. Numer. Anal.}, 10 (2): 241-256 --
 the QZ algorithm behind the \code{geigen} backend.
 
 Stathopoulos, A. & McCombs, J. R. (2010) "PRIMME: PReconditioned
-Iterative Multi‑Method Eigensolver". \emph{ACM TOMS} 37 (2): 21:1‑21:30 –
+Iterative Multi-Method Eigensolver". \emph{ACM TOMS} 37 (2): 21:1-21:30 --
 the algorithmic core of the \code{primme} backend.
 
 See also the \pkg{geigen} (CRAN) and \pkg{PRIMME} documentation.

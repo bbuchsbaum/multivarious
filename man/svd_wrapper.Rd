@@ -43,7 +43,7 @@ It is designed to be an easy-to-use wrapper for various SVD methods available in
 \examples{
 # Load iris dataset and select the first four columns
 data(iris)
-X <- iris[, 1:4]
+X <- as.matrix(iris[, 1:4])
 
 # Compute SVD using the base method and 3 components
 fit <- svd_wrapper(X, ncomp = 3, preproc = center(), method = "base")

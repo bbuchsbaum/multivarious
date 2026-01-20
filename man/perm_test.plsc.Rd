@@ -10,6 +10,7 @@
   Y,
   nperm = 1000,
   comps = ncomp(x),
+  stepwise = TRUE,
   shuffle_fun = NULL,
   parallel = FALSE,
   alternative = c("greater", "less", "two.sided"),

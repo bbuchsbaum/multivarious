@@ -34,7 +34,7 @@ Uses \code{randomForest} to train a random forest on the provided scores and lab
 \code{\link[randomForest]{randomForest}}
 
 Other classifier: 
-\code{\link{classifier.multiblock_biprojector}()},
-\code{\link{classifier.projector}()}
+\code{\link{classifier}()},
+\code{\link{classifier.multiblock_biprojector}()}
 }
 \concept{classifier}
