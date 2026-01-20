@@ -75,8 +75,9 @@ genreconstruct <- function(x, comp, rowind, colind) {
   inverse_transform(x$preproc, out, colind)
 }
 
+#' @importFrom stats coefficients
 #' @export
-reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)), 
+reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)),
                                      colind=1:nrow(coefficients(x)), ...) {
   chk::chk_numeric(comp)
   chk::chk_true(max(comp) <= ncomp(x))

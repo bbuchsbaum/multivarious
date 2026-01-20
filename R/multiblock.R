@@ -172,6 +172,7 @@ print.multiblock_biprojector <- function(x, ...) {
 
 
 #' @importFrom stats var
+#' @importFrom utils combn
 #' @importFrom RSpectra svds
 #' @importFrom future.apply future_lapply
 #' @export
