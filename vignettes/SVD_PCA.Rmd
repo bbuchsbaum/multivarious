@@ -1,8 +1,10 @@
 ---
 title: SVD wrapper, PCA and the bi_projector
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{SVD wrapper, PCA and the bi_projector} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{SVD wrapper, PCA and the bi_projector}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css

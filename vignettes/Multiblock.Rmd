@@ -1,8 +1,10 @@
 ---
 title: 'Multiblock basics: one projector, many tables'
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Multiblock basics: one projector, many tables} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Multiblock basics: one projector, many tables}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css

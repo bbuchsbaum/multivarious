@@ -1,8 +1,10 @@
 ---
 title: Permutation Testing in multivarious
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Permutation Testing in multivarious} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Permutation Testing in multivarious}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css

@@ -1,8 +1,10 @@
 ---
 title: Linear Re-representation with regress()
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Linear Re-representation with regress()} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Linear Re-representation with regress()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css

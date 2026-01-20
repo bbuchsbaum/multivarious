@@ -18,4 +18,6 @@ experimental
 ^CLAUDE\.md$
 ^figure$
 ^check\.log$
+^check_output\.log$
 ^README\.html$
+^multivarious\.Rcheck$

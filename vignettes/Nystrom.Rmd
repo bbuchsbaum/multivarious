@@ -1,8 +1,10 @@
 ---
-title: 'Kernel PCA Made Fast: The Nyström Approximation'
+title: 'Kernel PCA Made Fast: The Nystrom Approximation'
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Kernel PCA Made Fast: The Nyström Approximation} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Kernel PCA Made Fast: The Nystrom Approximation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css

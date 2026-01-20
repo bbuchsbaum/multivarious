@@ -1,8 +1,10 @@
 ---
 title: 'Composing Projectors: Chaining Models'
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Composing Projectors: Chaining Models} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Composing Projectors: Chaining Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css

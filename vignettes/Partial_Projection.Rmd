@@ -1,8 +1,10 @@
 ---
 title: 'Partial projection: working with incomplete feature sets'
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Partial projection: working with incomplete feature
-  sets} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Partial projection: working with incomplete feature sets}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css

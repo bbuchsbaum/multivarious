@@ -1,8 +1,10 @@
 ---
 title: 'Classifying in latent space: k-NN & Random-Forest wrappers'
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Classifying in latent space: k-NN & Random-Forest
-  wrappers} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Classifying in latent space: k-NN & Random-Forest wrappers}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css
