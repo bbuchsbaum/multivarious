@@ -71,7 +71,7 @@ test_that("bootstrap.plsc dispatch works and stabilizes signal loadings", {
   dat <- make_signal_blocks(noise = 0.05, pX = 4L, pY = 4L, d = 1L)
   fit <- plsc(dat$X, dat$Y, ncomp = 1)
   set.seed(7)
-  bres <- bootstrap(fit, dat$X, dat$Y, nboot = 40, comps = 1, parallel = FALSE)
+  bres <- bootstrap(fit, nboot = 40, X = dat$X, Y = dat$Y, comps = 1, parallel = FALSE)
   expect_s3_class(bres, "bootstrap_plsc_result")
   # Signal variables (rows 1:2) should have larger |z| than noise rows (3:4)
   zsig <- colMeans(abs(bres$z_vx[1:2, , drop = FALSE]))
@@ -83,9 +83,9 @@ test_that("bootstrap.plsc sign-alignment keeps loadings oriented and reproducibl
   dat <- make_signal_blocks(noise = 0.02, pX = 5L, pY = 5L, d = 1L)
   fit <- plsc(dat$X, dat$Y, ncomp = 1)
   set.seed(99)
-  b1 <- bootstrap(fit, dat$X, dat$Y, nboot = 25, comps = 1, parallel = FALSE)
+  b1 <- bootstrap(fit, nboot = 25, X = dat$X, Y = dat$Y, comps = 1, parallel = FALSE)
   set.seed(99)
-  b2 <- bootstrap(fit, dat$X, dat$Y, nboot = 25, comps = 1, parallel = FALSE)
+  b2 <- bootstrap(fit, nboot = 25, X = dat$X, Y = dat$Y, comps = 1, parallel = FALSE)
   # reproducible under seed
   expect_equal(b1$z_vx, b2$z_vx)
   # bootstrap means align in sign with fitted loadings

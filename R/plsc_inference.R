@@ -302,7 +302,11 @@ bootstrap.plsc <- function(x, nboot = 500, ...) {
     stop("bootstrap.plsc requires X and Y to be passed as named arguments via ...", call. = FALSE)
   }
 
-  bootstrap_plsc(x, X = X, Y = Y, nboot = nboot, ...)
+  # Remove X and Y from args to avoid duplicate argument error
+  args$X <- NULL
+  args$Y <- NULL
+
+  do.call(bootstrap_plsc, c(list(x = x, X = X, Y = Y, nboot = nboot), args))
 }
 
 #' @export
