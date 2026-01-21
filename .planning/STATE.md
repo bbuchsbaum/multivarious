@@ -4,7 +4,7 @@
 
 **Core Value:** Pass R CMD check with no errors and minimal warnings/notes, ready for CRAN submission.
 
-**Current Focus:** Preparing package for CRAN resubmission with targeted fixes.
+**Current Focus:** Package verified on all platforms, ready for CRAN submission.
 
 **Key Files:**
 - `.planning/PROJECT.md` - Project definition
@@ -16,18 +16,18 @@
 
 ## Current Position
 
-**Phase:** 2 of 4 (Documentation) - COMPLETE
-**Plan:** 2 of 2 complete (in phase 2)
-**Status:** Phase 2 complete, ready for Phase 3
-**Last activity:** 2026-01-20 - Completed 02-02-PLAN.md (cran-comments.md)
+**Phase:** 3 of 4 (Cross-Platform Verification) - COMPLETE
+**Plan:** 2 of 2 complete (in phase 3)
+**Status:** Phase 3 complete, ready for Phase 4 (CRAN Submission)
+**Last activity:** 2026-01-21 - Completed 03-02-PLAN.md (cross-platform documentation)
 
 **Progress:**
 ```
 Phase 1: [##########] 100% (5/5 plans) - COMPLETE
 Phase 2: [##########] 100% (2/2 plans) - COMPLETE
-Phase 3: [..........] 0%
+Phase 3: [##########] 100% (2/2 plans) - COMPLETE
 Phase 4: [..........] 0%
-Overall: [#########.] 9/11 requirements
+Overall: [###########] 11/11 requirements
 ```
 
 ---
@@ -108,14 +108,48 @@ Overall: [#########.] 9/11 requirements
 
 ---
 
+## Phase 3 Overview - COMPLETE
+
+**Goal:** Verify package works correctly on Windows and macOS via CRAN build services.
+
+**Requirements in scope:**
+- [x] REQ-009: Cross-platform verification - VERIFIED in 03-01
+- [x] REQ-010: R-devel compatibility - VERIFIED in 03-01
+
+**Plan Status:**
+- [x] 03-01: Submit to cross-platform build services
+- [x] 03-02: Document results in cran-comments.md
+
+**Completed in 03-01:**
+- Fixed requireNamespace() parameter from quiet to quietly (R-devel strict checking)
+- Removed escaped underscores from plsc.R documentation
+- Removed albersdown theme references from all 14 vignettes
+- All platforms pass with 0 errors | 0 warnings | 0 notes
+
+**Completed in 03-02:**
+- Updated cran-comments.md with 4 test environments
+- Updated R CMD check results to 0E/0W/0N
+- Final local verification: 0 errors | 0 warnings | 0 notes
+
+**Cross-platform verification results:**
+
+| Platform | Result |
+|----------|--------|
+| Local (macOS Sonoma, R 4.5.1) | 0E/0W/0N |
+| win-builder R-release | 0E/0W/0N |
+| win-builder R-devel | 0E/0W/0N |
+| mac-builder | 0E/0W/0N |
+
+---
+
 ## Performance Metrics
 
 | Metric | Value |
 |--------|-------|
-| Session count | 8 |
-| Requirements completed | 9/11 (REQ-001 through REQ-008, REQ-011) |
-| Phases completed | 2/4 |
-| Plans completed | 7 |
+| Session count | 10 |
+| Requirements completed | 11/11 (all complete) |
+| Phases completed | 3/4 |
+| Plans completed | 9 |
 
 ---
 
@@ -139,23 +173,23 @@ Overall: [#########.] 9/11 requirements
 | NEWS.md uses CRAN-compliant format | # package version headings recognized by utils::news() | 2026-01-20 |
 | Exclude dev artifacts from tarball | .planning, .claude, CLAUDE.md, figure, check.log, README.html | 2026-01-20 |
 | Fix vignette YAML to multi-line | Standard format required for R CMD check vignette engine detection | 2026-01-20 |
+| Eliminate NOTEs for cleaner submission | Remove escaped underscores and albersdown refs rather than explain | 2026-01-21 |
 
 ### Technical Notes
 
 - Package was previously on CRAN (v0.2.0)
-- 14 vignettes present - vignette rebuild takes ~24 seconds
+- 14 vignettes present - vignette rebuild takes ~23 seconds
 - Deprecated functions use lifecycle package - acceptable if documented
 - PRIMME package in Imports - less common but available on CRAN
 - coefficients() used in R/bi_projector.R reconstruct.bi_projector()
 - combn() used in R/multiblock.R perm_test.multiblock_projector()
 - S3 methods must match generic signature exactly; use ... for extra args
 - NAMESPACE now has 115 S3method entries
-- plsc.Rd has escaped LaTeX warnings - documented in cran-comments.md
-- R CMD check returns 2 NOTEs: escaped LaTeX specials, albersdown vignette dependency
+- R CMD check now returns 0 NOTEs (escaped LaTeX and albersdown issues resolved)
 
 ### Open Questions
 
-- Reverse dependencies not yet checked (none expected)
+None - all requirements complete.
 
 ### Blockers
 
@@ -167,17 +201,17 @@ None currently.
 
 ### Last Session
 
-**Date:** 2026-01-20
-**Duration:** ~7 min
-**Completed:** 02-02-PLAN.md - cran-comments.md creation
+**Date:** 2026-01-21
+**Duration:** ~2 min
+**Completed:** 03-02-PLAN.md - cross-platform results documentation
 
 ### Resume Context
 
 To continue this project:
-1. Begin Phase 3 (Cross-Platform Verification)
-2. Submit package to win-builder and mac-builder
-3. Package is ready locally: 0 errors, 0 warnings, 2 acceptable NOTEs
+1. Begin Phase 4 (CRAN Submission)
+2. Package is ready: 0 errors, 0 warnings, 0 notes on all platforms
+3. cran-comments.md is complete with all test environments documented
 
 ---
 *State initialized: 2026-01-20*
-*Last updated: 2026-01-20*
+*Last updated: 2026-01-21*
