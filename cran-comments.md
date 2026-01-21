@@ -8,17 +8,14 @@ This is a resubmission. In this version I have:
 * Fixed S3 method registration (classifier.projector, inverse_projection.projector, perm_ci.pca)
 * Added missing `importFrom` directives for `coefficients` and `combn`
 * Fixed vignette YAML headers to use standard multi-line format
+* Fixed `requireNamespace()` parameter from `quiet` to `quietly` (R-devel strict checking)
+* Removed escaped underscores from plsc.R documentation
+* Removed albersdown theme references from vignettes
 * Created NEWS.md documenting all changes
 
 ## R CMD check results
 
-0 errors | 0 warnings | 2 notes
-
-* NOTE: Escaped LaTeX specials in plsc.Rd
-  - Escaped underscores are intentional for correct rendering of variable names with subscripts (e.g., X_scores, Y_loadings).
-
-* NOTE: Unstated dependencies in vignettes - 'albersdown'
-  - albersdown is used conditionally for vignette styling. It is listed in Config/Needs/website, not as a runtime dependency. The vignettes check for its availability with `requireNamespace()` before use.
+0 errors | 0 warnings | 0 notes
 
 ## Package dependencies
 
@@ -49,3 +46,6 @@ There are currently no reverse dependencies for this package.
 ## Test environments
 
 * Local: macOS Sonoma 14.3, R 4.5.1 (aarch64-apple-darwin20)
+* win-builder: Windows Server 2022, R-release (R 4.5.0)
+* win-builder: Windows Server 2022, R-devel
+* mac-builder: macOS, R-release (Apple Silicon)
