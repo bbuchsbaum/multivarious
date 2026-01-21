@@ -114,15 +114,24 @@ Plans:
 
 **Dependencies:** Phase 3 (all verification complete)
 
+**Plans:** 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md - Pre-submission verification and commit
+- [ ] 04-02-PLAN.md - CRAN submission and confirmation
+
 **Requirements:**
 - All previous requirements verified complete
 
 **Success Criteria:**
-1. `devtools::release()` completes without error
-2. CRAN incoming queue shows package received
-3. CRAN acceptance email received (or issues identified for next iteration)
+1. `devtools::submit_cran()` completes without error
+2. Email confirmation link clicked
+3. CRAN incoming queue shows package received
+4. CRAN acceptance email received (or issues identified for next iteration)
 
 **Deliverables:**
+- Committed package code (v0.3.0)
+- Fresh R CMD check verification
 - Submitted package to CRAN
 - Confirmation of submission receipt
 
@@ -135,7 +144,7 @@ Plans:
 | 1 - Code Fixes | Complete | 5 | 5/5 |
 | 2 - Documentation | Complete | 4 | 4/4 |
 | 3 - Cross-Platform | Complete | 2 | 2/2 |
-| 4 - Submission | Not Started | 0 | - |
+| 4 - Submission | In Progress | 0 | - |
 
 **Overall:** 11/11 requirements complete
 
@@ -159,4 +168,4 @@ Plans:
 
 ---
 *Roadmap created: 2026-01-20*
-*Last updated: 2026-01-21 (Phase 3 complete)*
+*Last updated: 2026-01-21 (Phase 4 planned)*
