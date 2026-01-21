@@ -128,15 +128,15 @@ print(bi)
 Now you can, for instance, test whether component-wise consensus
 between blocks is stronger than by chance.
 
-```{r perm_test_multiblock, eval=FALSE}
-# Takes ~1-2 s with 99 perms; increase for real work
-# Ensure perm_test.multiblock_biprojector method exists and is loaded
-# perm_res <- perm_test(bi, Xlist = list(A=XA, B=XB), nperm = 99)
-# print(perm_res$component_results)
+```{r perm_test_multiblock}
+# Quick permutation test (use more permutations for real analyses)
+# use_rspectra=FALSE needed for this 2-block example; larger problems can use TRUE
+perm_res <- perm_test(bi, Xlist = list(A = XA, B = XB), nperm = 99, use_rspectra = FALSE)
+print(perm_res$component_results)
 ```
 
-(The `perm_test` method for `multiblock_biprojector` typically uses an eigen-based score consensus
-statistic; see help for details.)
+The `perm_test` method for `multiblock_biprojector` uses an eigen-based score consensus
+statistic to assess whether blocks share more variance than expected by chance.
 
 # 4. Take-aways
 

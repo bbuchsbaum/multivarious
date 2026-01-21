@@ -141,16 +141,30 @@ as cheap as a matrix multiplication.
 
 # 4. Block-wise convenience
 
-For multiblock fits (created with `multiblock_projector()`), 
-you can instead write
+For multiblock fits (created with `multiblock_projector()`),
+`project_block()` provides a convenient wrapper around `partial_project()`:
 
-```r
-# Assuming mb is a multiblock_projector and data_blockB is the data for block B
-# project_block(mb, data_blockB, block = "B") # Or block = 2
+```{r multiblock_example}
+# Create a multiblock projector from our PCA
+# Suppose columns 1-4 are "Block A" (block 1) and columns 5-8 are "Block B" (block 2)
+block_indices <- list(1:4, 5:8)
+
+mb <- multiblock_projector(
+  v = pca$v,
+  preproc = pca$preproc,
+  block_indices = block_indices
+)
+
+# Now we can project using only Block 2's data (columns 5-8)
+X_block2 <- X[, 5:8]
+scores_block2 <- project_block(mb, X_block2, block = 2)
+
+# Compare to full projection
+head(round(cbind(full = scores_full[,1], block2 = scores_block2[,1]), 2))
 ```
 
-which is just a wrapper around `partial_project()` using the block's
-column indices.
+This is equivalent to calling `partial_project(mb, X_block2, colind = 5:8)`
+but reads more naturally when working with block structures.
 
 ---
 
@@ -202,26 +216,26 @@ If the two sets of scores align tightly, the ROI variables are
 driving this component. A strong deviation would reveal that other
 variables dominate the global pattern.
 
-## 5.2 Single-subject positioning in a multiblock design (Conceptual)
+## 5.2 Single-subject positioning in a multiblock design
 
-```{r block_conceptual, eval=FALSE}
-# imagine `mb_pca` is a multiblock_biprojector with 2 blocks:
-#   Block 1 = questionnaire (Q1–Q30)
-#   Block 2 = reaction-time curves (RT1–RT120)
+Using the multiblock projector from Section 4, we can see how individual
+observations score when viewed through just one block:
 
-# Assume data_subject7_block2 contains only the reaction time data for subject 7
-# subject_7_scores <- project_block(mb_pca,
-#                                   new_data   = data_subject7_block2,
-#                                   block      = 2)   # only RT variables
+```{r block_single_subject}
+# Get scores for observation 1 using only Block 1 variables (columns 1-4)
+subject1_block1 <- project_block(mb, X[1, 1:4, drop = FALSE], block = 1)
 
-# cat("Subject 7, component scores derived *solely* from reaction times:\n")
-# print(round(subject_7_scores, 2))
+# Get scores for the same observation using only Block 2 variables (columns 5-8)
+subject1_block2 <- project_block(mb, X[1, 5:8, drop = FALSE], block = 2)
+
+# Compare: do both blocks tell the same story about this observation?
+cat("Subject 1 scores from Block 1:", round(subject1_block1, 2), "\n")
+cat("Subject 1 scores from Block 2:", round(subject1_block2, 2), "\n")
+cat("Subject 1 scores from full data:", round(scores_full[1,], 2), "\n")
 ```
 
-You can now overlay these scores on a map built from all subjects'
-global scores to see whether subject 7's behavioural profile is
-consistent with their psychometrics, or an outlier when viewed from this
-angle alone.
+This lets you assess whether an observation's position in the latent space
+is consistent across blocks, or whether one block tells a different story.
 
 ---
 

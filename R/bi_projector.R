@@ -40,16 +40,21 @@ sdev.bi_projector <- function(x) {
 
 #' @export
 project_vars.bi_projector <- function(x, new_data, ...) {
+
   if (is.vector(new_data)) {
     new_data <- matrix(new_data, ncol = 1)
   }
   chk::chk_matrix(new_data)
-  
+
   sc <- scores(x)
   chk::chk_equal(nrow(new_data), nrow(sc))
 
-  # Transform data using the same preprocessor that produced the scores
-  data_proc <- transform(x$preproc, new_data)
+ # Center new variables by their own column means (not by original preprocessing).
+  # For supplementary variable projection, we compute correlations between
+  # the new variable(s) and the component scores, which requires centering
+  # the new variable(s) by their own means.
+  col_means <- colMeans(new_data)
+  data_proc <- sweep(new_data, 2, col_means, "-")
 
   variance <- sdev(x)^2
   if (any(abs(variance) < 1e-12)) {
@@ -150,7 +155,7 @@ truncate.bi_projector <- function(x, ncomp) {
 }
 
 #' @export
-reconstruct_new.bi_projector <- function(x, 
+reconstruct_new.bi_projector <- function(x,
                                          new_data,
                                          comp = 1:ncomp(x),
                                          colind = 1:nrow(coef.projector(x)),
@@ -159,42 +164,43 @@ reconstruct_new.bi_projector <- function(x,
   # Validate inputs
   chk::chk_subset(comp, 1:ncomp(x))
   chk::chk_subset(colind, 1:nrow(coef.projector(x)))
-  
+
   # Validate new_data
   if (is.vector(new_data)) {
     new_data <- matrix(new_data, nrow = 1)
   }
   chk::chk_matrix(new_data)
-  
+
   # Handle empty selections
   if (length(comp) == 0 || length(colind) == 0) {
     return(matrix(0, nrow = nrow(new_data), ncol = length(colind)))
   }
-  
-  # Check dimensions after preprocessing
-  chk::chk_equal(ncol(new_data), length(colind))
-  
-  # Use standard project method for consistency
-  # Apply preprocessing only to the provided columns
-  full_data_proc <- matrix(0, nrow = nrow(new_data),
-                           ncol = nrow(coef.projector(x)))
-  full_data_proc[, colind] <- transform(x$preproc, new_data, colind)
-  
-  # Project to get scores for all components
-  scores_new_full <- project(x, full_data_proc)
-  
-  # Select only the requested components
-  scores_new <- scores_new_full[, comp, drop = FALSE]
-  
-  # Reconstruct using selected components and columns
-  # Get the inverse projection for the selected components
-  ip <- inverse_projection(x)
-  ip_sub <- ip[comp, colind, drop = FALSE]
-  
-  # Reconstruct
-  rec_data_sub <- scores_new %*% ip_sub
 
-  # Reverse transform for the selected columns
-  rec_data_sub <- inverse_transform(x$preproc, rec_data_sub, colind)
-  rec_data_sub
+  nvars <- nrow(coef.projector(x))
+  all_cols <- length(colind) == nvars && all(colind == 1:nvars)
+
+  if (all_cols) {
+    # Common case: all columns provided
+    # project() handles preprocessing internally
+    chk::chk_equal(ncol(new_data), nvars)
+    scores_new <- project(x, new_data)[, comp, drop = FALSE]
+
+    # Reconstruct: scores %*% t(loadings) for selected components
+    v_sub <- components(x)[, comp, drop = FALSE]
+    rec_data <- scores_new %*% t(v_sub)
+
+    # Reverse preprocessing
+    inverse_transform(x$preproc, rec_data)
+  } else {
+    # Partial columns: use partial_project
+    chk::chk_equal(ncol(new_data), length(colind))
+    scores_new <- partial_project(x, new_data, colind)[, comp, drop = FALSE]
+
+    # Reconstruct only the provided columns
+    v_sub <- components(x)[colind, comp, drop = FALSE]
+    rec_data <- scores_new %*% t(v_sub)
+
+    # Reverse preprocessing for selected columns only
+    inverse_transform(x$preproc, rec_data, colind)
+  }
 }

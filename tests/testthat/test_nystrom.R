@@ -19,7 +19,7 @@ test_that("standard Nyström equals exact kernel eigendecomposition when m = N (
   )
 
   # Recreate centered X used internally
-  Xc <- apply_transform(fit$preproc, X)
+  Xc <- multivarious::transform(fit$preproc, X)
   K <- Xc %*% t(Xc)
 
   ee <- eigen(K, symmetric = TRUE)
@@ -69,7 +69,7 @@ test_that("double Nyström matches standard when l = m = N (linear kernel, cente
   expect_equal(sort(fit_dbl$sdev^2, decreasing = TRUE), sort(fit_std$sdev^2, decreasing = TRUE), tolerance = 1e-6)
 
   # Same eigen-equation residual quality
-  Xc <- apply_transform(fit_std$preproc, X)
+  Xc <- multivarious::transform(fit_std$preproc, X)
   K <- Xc %*% t(Xc)
   Kv_d <- K %*% fit_dbl$v
   vLam_d <- fit_dbl$v %*% diag(fit_dbl$sdev^2, ncomp)

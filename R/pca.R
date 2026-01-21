@@ -759,7 +759,7 @@ biplot.pca <- function(x,
                  aes(x = 0, y = 0, xend = .data$PCx, yend = .data$PCy),
                  arrow = arrow(length = unit(0.02, "npc")),
                  color = arrow_color,
-                 size = 0.7)
+                 linewidth = 0.7)
   
   # Add variable names near arrow tips
   if (repel_vars && can_repel) {

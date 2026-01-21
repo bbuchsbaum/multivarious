@@ -152,7 +152,8 @@ test_that("predict works when covariance is rank deficient", {
   X_rd <- cbind(X_rd, X_rd[,1])
   Y_rd <- factor(rep(c("A", "B"), each = 25))
 
-  lda_fit <- lda(X_rd, grouping = Y_rd)
+  # Suppress expected collinearity warning
+  lda_fit <- suppressWarnings(lda(X_rd, grouping = Y_rd))
 
   # manually supply rank deficient Sigma
   Sigma_rd <- cov(X_rd)
