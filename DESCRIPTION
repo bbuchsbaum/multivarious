@@ -1,6 +1,6 @@
 Package: multivarious
 Title: Extensible Data Structures for Multivariate Analysis
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: 
     person(given = "Bradley",
            family = "Buchsbaum",
@@ -30,7 +30,6 @@ Imports:
     ggrepel,
     future.apply,
     tibble,
-    tidyr,
     dplyr,
     crayon,
     MASS,

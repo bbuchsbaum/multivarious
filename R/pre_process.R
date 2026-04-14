@@ -607,7 +607,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
         do.call(cbind, res_list)
       } else {
         # Apply blockwise respecting colind order
-        apply_blockwise(apply_transform, X, colind)
+        apply_blockwise(transform, X, colind)
       }
     },
     reverse_transform = function(X, colind = NULL) {
@@ -622,7 +622,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
         do.call(cbind, res_list)
       } else {
         # Reverse blockwise respecting colind order
-        apply_blockwise(reverse_transform, X, colind)
+        apply_blockwise(inverse_transform, X, colind)
       }
     }
     # Store map_list? Might be useful for introspection.

@@ -172,6 +172,7 @@ print.multiblock_biprojector <- function(x, ...) {
 
 
 #' @importFrom stats var
+#' @importFrom utils combn
 #' @importFrom RSpectra svds
 #' @importFrom future.apply future_lapply
 #' @export
@@ -204,14 +205,14 @@ perm_test.multiblock_biprojector <- function(
   ## 2.  helper  -  get block-wise score matrix  (n x B)  for comp k
   ## ------------------------------------------------------------------
   get_Tk <- function(comp_k, data_list = NULL, S_perm = NULL){
-      if (is.null(data_list)){          # use stored scores — fast
+      if (is.null(data_list)){          # use stored scores -- fast
           # If S_perm is provided (already shuffled full score matrix), use it
           # Otherwise, use the original scores (only for calculating observed stat)
           sc_matrix <- if (!is.null(S_perm)) S_perm else scores(x)
-          sc <- sc_matrix[ , comp_k, drop = FALSE]   # n × 1
+          sc <- sc_matrix[ , comp_k, drop = FALSE]   # n x 1
           # Return a matrix with B identical columns of these scores
           do.call(cbind, replicate(B, sc, simplify = FALSE))
-      } else {                          # re‑project if user gave data
+      } else {                          # re-project if user gave data
           # Project each block in data_list onto component k using original model x
           lapply(seq_len(B), function(b){
               xb <- data_list[[b]]
@@ -224,11 +225,11 @@ perm_test.multiblock_biprojector <- function(
   }
 
   ## ------------------------------------------------------------------
-  ## 3.  statistic per component  –  leading eigenvalue of  TᵀT
+  ## 3.  statistic per component  --  leading eigenvalue of  T^T T
   ## ------------------------------------------------------------------
   comp_stat <- function(Tk){
-      S <- crossprod(Tk)                       # B × B
-      if (B == 1) return(sum(Tk^2))            # trivial 1‑block case
+      S <- crossprod(Tk)                       # B x B
+      if (B == 1) return(sum(Tk^2))            # trivial 1-block case
       if (use_rspectra && requireNamespace("RSpectra", quietly = TRUE))
            RSpectra::svds(S, k = 1, nu = 0, nv = 1)$d[1]
       else eigen(S, symmetric = TRUE, only.values = TRUE)$values[1]
@@ -264,7 +265,7 @@ perm_test.multiblock_biprojector <- function(
   n_ok    <- integer(comps)
 
   apply_fun <- if (parallel) future.apply::future_lapply else lapply
-  if (parallel) message("perm_test.multiblock_biprojector : permutations in parallel …")
+  if (parallel) message("perm_test.multiblock_biprojector : permutations in parallel ...")
 
   # Pre-calculate observed stats outside loop
   obs_stats <- sapply(seq_len(comps), function(k) {
@@ -294,7 +295,7 @@ perm_test.multiblock_biprojector <- function(
       Fperm[, k] <- perm_vals_k # Store results for component k
       n_ok[k]    <- sum(is.finite(perm_vals_k))
 
-      ## empirical p‑value for component k
+      ## empirical p-value for component k
       obs_k <- obs_stats[k]
       g      <- sum(perm_vals_k >= obs_k, na.rm = TRUE)
       l      <- sum(perm_vals_k <= obs_k, na.rm = TRUE)
@@ -303,7 +304,7 @@ perm_test.multiblock_biprojector <- function(
                        less      = (l + 1)/(n_ok[k] + 1),
                        two.sided = min(1, 2*min((g + 1)/(n_ok[k]+1),
                                                 (l + 1)/(n_ok[k]+1))))
-      if (!is.na(pval) && pval > alpha){          # Vitale‑like stop rule
+      if (!is.na(pval) && pval > alpha){          # Vitale-like stop rule
           comps_tested <- k
           Fperm <- Fperm[, seq_len(comps_tested), drop = FALSE]
           n_ok  <- n_ok[seq_len(comps_tested)]
@@ -334,7 +335,7 @@ perm_test.multiblock_biprojector <- function(
           alpha             = alpha,
           alternative       = alternative,
           method            = sprintf(
-              "Permutation test for multiblock consensus (stat = leading‑eigenvalue, %d blocks)", B),
+              "Permutation test for multiblock consensus (stat = leading-eigenvalue, %d blocks)", B),
           nperm             = n_ok),
      class = c("perm_test_multiblock","perm_test")
   )
@@ -381,7 +382,7 @@ perm_test.multiblock_projector <- function(x,
   alternative <- match.arg(alternative)
 
   ## ---------- helpers ----------
-  # block‑specific preprocessing (reuse x$preproc) ----
+  # block-specific preprocessing (reuse x$preproc) ----
   prep_all <- function(Xl) {
     # Concatenate, apply transform to full matrix, then split back
     p_all <- sum(p_each)
@@ -405,10 +406,10 @@ perm_test.multiblock_projector <- function(x,
 
   # compute block scores for first K comps using original model 'x' ----
   get_block_scores <- function(Xp_list, K) {
-    v      <- coef(x)        # Use original model's loadings (p_tot × d)
+    v      <- coef(x)        # Use original model's loadings (p_tot x d)
     vlist  <- lapply(seq_len(B), function(b)
                      v[ blk_idx[[b]], 1:K, drop = FALSE ])
-    mapply(`%*%`, Xp_list, vlist, SIMPLIFY = FALSE)  # list of (N × K) matrices
+    mapply(`%*%`, Xp_list, vlist, SIMPLIFY = FALSE)  # list of (N x K) matrices
   }
 
   # default statistic: mean |corr| across block pairs ----
@@ -480,7 +481,7 @@ perm_test.multiblock_projector <- function(x,
   n_ok <- nrow(perm_mat)
   if (n_ok == 0) stop("All permutations failed.")
 
-  ## ---------- p‑values & sequential stop ----------
+  ## ---------- p-values & sequential stop ----------
   keep   <- seq_len(Kmax)
   pvals  <- rep(NA_real_, Kmax)
   stopat <- Kmax
@@ -489,7 +490,7 @@ perm_test.multiblock_projector <- function(x,
       pvals[k] <- (sum(perm_mat[, k] >= T_obs[k]) + 1) / (n_ok + 1)
     else if (alternative == "less")
       pvals[k] <- (sum(perm_mat[, k] <= T_obs[k]) + 1) / (n_ok + 1)
-    else {          # two‑sided
+    else {          # two-sided
       p_high <- (sum(perm_mat[, k] >= T_obs[k]) + 1) / (n_ok + 1)
       p_low  <- (sum(perm_mat[, k] <= T_obs[k]) + 1) / (n_ok + 1)
       pvals[k] <- 2 * min(p_high, p_low)

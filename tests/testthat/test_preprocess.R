@@ -25,7 +25,7 @@ test_that("can apply a centering transform", {
   pp <- center()
   x <- prep(pp)
   x2 <- init_transform(x,mat1)
-  x3 <- apply_transform(x,mat1)
+  x3 <- multivarious::transform(x, mat1)
   expect_equal(x2,x3)
 })
 
@@ -34,9 +34,9 @@ test_that("can apply a scaling transform", {
   pp <- standardize()
   x <- prep(pp)
   x2 <- init_transform(x, mat1)
-  x3 <- apply_transform(x, mat1)
+  x3 <- multivarious::transform(x, mat1)
   expect_equal(x2,x3)
- 
+
 })
 
 test_that("can preprocess a matrix with column scaling", {
@@ -45,7 +45,7 @@ test_that("can preprocess a matrix with column scaling", {
   pp <- colscale(type="weights", weights=wts)
   x <- prep(pp)
   xinit <- init_transform(x, mat1)
-  xrev <- reverse_transform(x, xinit)
+  xrev <- multivarious::inverse_transform(x, xinit)
   expect_equal(mat1,xrev)
 })
 
@@ -63,7 +63,7 @@ test_that("can reverse transform a matrix after standardization", {
   pp <- standardize()
   x <- prep(pp)
   x1 <- init_transform(x,mat1)
-  x2 <- reverse_transform(x, x1)
+  x2 <- multivarious::inverse_transform(x, x1)
   expect_equal(mat1,x2)
 })
 
@@ -72,9 +72,9 @@ test_that("can reverse transform a matrix after standardization", {
 test_that("can compose two pre-processors", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
   x <- center() %>% colscale(type="z") %>% prep()
-  
+
   x1 <- init_transform(x,mat1)
-  x2 <- reverse_transform(x, x1)
+  x2 <- multivarious::inverse_transform(x, x1)
   expect_equal(mat1,x2)
 
 })
@@ -185,10 +185,10 @@ test_that("new API: works with different preprocessing types", {
 test_that("can preprocess a matrix with a colind", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
   pp <- center() %>% prep()
-  
+
   x <- init_transform(pp,mat1)
-  ret <- apply_transform(pp, mat1[,1:2], colind=1:2)
-  
+  ret <- multivarious::transform(pp, mat1[,1:2], colind=1:2)
+
   expect_equal(ret, x[,1:2])
 })
 
@@ -205,11 +205,12 @@ test_that("can concatenate two pre-processors", {
   m2 <- init_transform(proclist[[2]], mat2)
   proc <- concat_pre_processors(proclist, list(1:15, 16:30))
   
-  a1 <- apply_transform(proc, cbind(mat1,mat2))
-  a2 <- apply_transform(proc, mat1, colind=1:15)
-  a3 <- apply_transform(proc, mat2, colind=16:30)
+  a1 <- multivarious::transform(proc, cbind(mat1,mat2))
+  a2 <- multivarious::transform(proc, mat1, colind=1:15)
+  a3 <- multivarious::transform(proc, mat2, colind=16:30)
   
-  pres<- pca(cbind(mat1,mat2), ncomp=12)
+  # Suppress expected warning about ncomp reduction due to matrix dimensions
+  pres <- suppressWarnings(pca(cbind(mat1,mat2), ncomp=12))
   proj <- multiblock_biprojector(pres$v, s=pres$s, sdev=pres$sdev, proc, block_indices=list(1:15, 16:30))
   p1 <- project_block(proj, m1, 1)
   p2 <- project_block(proj, m2, 2)
@@ -257,12 +258,12 @@ test_that("concat_pre_processors handles complex colind across different block t
   test_mat_apply <- cbind(mat1[, c(2, 4)], mat2[, c(2, 3)], mat3[, 2, drop=FALSE])
   
   # Apply the concatenated transform
-  result_apply <- apply_transform(proc_concat, test_mat_apply, colind = colind_global)
-  
+  result_apply <- multivarious::transform(proc_concat, test_mat_apply, colind = colind_global)
+
   # Manually apply transforms to corresponding original blocks and columns
-  manual_res1 <- apply_transform(p1, mat1[, c(2, 4), drop = FALSE], colind = c(2, 4)) # Local indices: 2, 4
-  manual_res2 <- apply_transform(p2, mat2[, c(2, 3), drop = FALSE], colind = c(2, 3)) # Local indices: 2, 3
-  manual_res3 <- apply_transform(p3, mat3[, 2, drop = FALSE], colind = 2)        # Local index: 2
+  manual_res1 <- multivarious::transform(p1, mat1[, c(2, 4), drop = FALSE], colind = c(2, 4)) # Local indices: 2, 4
+  manual_res2 <- multivarious::transform(p2, mat2[, c(2, 3), drop = FALSE], colind = c(2, 3)) # Local indices: 2, 3
+  manual_res3 <- multivarious::transform(p3, mat3[, 2, drop = FALSE], colind = 2)        # Local index: 2
   
   # Combine manual results in the order defined by colind_global
   expected_apply <- cbind(manual_res1[, 1, drop=FALSE],  # Corresponds to global col 2
@@ -273,17 +274,17 @@ test_that("concat_pre_processors handles complex colind across different block t
   
   expect_equal(result_apply, expected_apply, tolerance = 1e-7)
   
-  # --- Test reverse_transform --- 
-  # Input for reverse is the result from apply_transform
+  # --- Test inverse_transform ---
+  # Input for inverse is the result from transform
   test_mat_reverse <- result_apply
-  
-  # Reverse using concatenated processor
-  result_reverse <- reverse_transform(proc_concat, test_mat_reverse, colind = colind_global)
-  
-  # Manually reverse transforms using the outputs from the manual forward transforms
-  manual_rev1 <- reverse_transform(p1, manual_res1, colind = c(2, 4))
-  manual_rev2 <- reverse_transform(p2, manual_res2, colind = c(2, 3))
-  manual_rev3 <- reverse_transform(p3, manual_res3, colind = 2)
+
+  # Inverse using concatenated processor
+  result_reverse <- multivarious::inverse_transform(proc_concat, test_mat_reverse, colind = colind_global)
+
+  # Manually inverse transforms using the outputs from the manual forward transforms
+  manual_rev1 <- multivarious::inverse_transform(p1, manual_res1, colind = c(2, 4))
+  manual_rev2 <- multivarious::inverse_transform(p2, manual_res2, colind = c(2, 3))
+  manual_rev3 <- multivarious::inverse_transform(p3, manual_res3, colind = 2)
   
   # Combine manual reverse results in the order defined by colind_global
   expected_reverse <- cbind(manual_rev1[, 1, drop=FALSE], 

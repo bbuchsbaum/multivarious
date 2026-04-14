@@ -1,8 +1,10 @@
 ---
 title: SVD wrapper, PCA and the bi_projector
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{SVD wrapper, PCA and the bi_projector} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{SVD wrapper, PCA and the bi_projector}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css
@@ -17,7 +19,6 @@ includes:
 ---
 
 ```{r setup, include=FALSE}
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(params$family))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
 library(multivarious)  # Ensure pca(), svd_wrapper(), bi_projector, etc. are available
 library(ggplot2)       # for plots below
@@ -42,21 +43,21 @@ That means immediate access to verbs such as `project()`,
 `reconstruct()`, `truncate()`, `partial_project()`.
 
 ```{r svd_wrapper_example}
-set.seed(1); X <- matrix(rnorm(35*10), 35, 10)   # 35 obs × 10 vars
+set.seed(1)
+X <- matrix(rnorm(35*10), 35, 10)   # 35 obs × 10 vars
 
-sv_fast  <- svd_wrapper(X, ncomp = 5, preproc = center(), method = "fast")
-# Ensure irlba is installed if testing this method
-if (requireNamespace("irlba", quietly=TRUE)) {
-  sv_irlba <- svd_wrapper(X, ncomp = 5, preproc = center(), method = "irlba")
-} else {
-  sv_irlba <- NULL # Skip if irlba not available
+sv_fast <- svd_wrapper(X, ncomp = 5, preproc = center(), method = "fast")
+
+# irlba backend (if installed) gives identical results
+sv_irlba <- if (requireNamespace("irlba", quietly = TRUE)) {
+  suppressWarnings(svd_wrapper(X, ncomp = 5, preproc = center(), method = "irlba"))
 }
 
 # Same downstream code works for both objects:
 head(scores(sv_fast)) # 35 × 5
 
 if (!is.null(sv_irlba)) {
-  all.equal(scores(sv_fast), scores(sv_irlba)) # TRUE for this random X
+  all.equal(scores(sv_fast), scores(sv_irlba))
 }
 ```
 
@@ -83,9 +84,9 @@ screeplot(pca_fit, type = "lines", main = "Iris PCA – scree plot")
 
 ## 2.2 Quick biplot
 
-```{r pca_biplot}
+```{r pca_biplot, warning=FALSE, message=FALSE}
 # Requires ggrepel for repulsion, but works without it
-biplot(pca_fit, repel_points = TRUE, repel_vars = TRUE, group_var = iris$Species)
+biplot(pca_fit, repel_points = TRUE, repel_vars = TRUE)
 ```
 
 (If you do not have ggrepel installed the text is placed without repulsion.)

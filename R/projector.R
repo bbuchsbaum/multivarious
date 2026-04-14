@@ -88,6 +88,8 @@ robust_inv_vTv <- function(v, lambda = 1e-6) {
 }
 
 
+#' @rdname inverse_projection
+#' @export
 #' @importFrom assertthat assert_that
 inverse_projection.projector <- function(x, ...) {
   assertthat::assert_that(inherits(x, "projector"))
@@ -103,7 +105,7 @@ inverse_projection.projector <- function(x, ...) {
 
   # Compute if not cached or cache not available
   v <- coef(x)
-  if (!requireNamespace("corpcor", quiet=TRUE)) {
+  if (!requireNamespace("corpcor", quietly=TRUE)) {
     stop("package corpcor required for inverse_projection.")
   }
   inv_p <- corpcor::pseudoinverse(v)
@@ -136,7 +138,7 @@ partial_inverse_projection.projector <- function(x, colind, ...) {
 
   # Compute if not cached or cache not available
   v <- coef(x)[, colind, drop=FALSE]
-  if (!requireNamespace("corpcor", quiet=TRUE)) {
+  if (!requireNamespace("corpcor", quietly=TRUE)) {
       stop("package corpcor required for partial_inverse_projection.")
   }
   pinv_sub <- corpcor::pseudoinverse(v)

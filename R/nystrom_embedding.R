@@ -90,7 +90,7 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
   method <- match.arg(method)
   
   # Basic checks
-  chk::chkor(chk::vld_matrix(X), chk::vld_s4_class(X, "Matrix"))
+  chk::chkor_vld(chk::vld_matrix(X), chk::vld_s4_class(X, "Matrix"))
   N <- nrow(X)
   
   # If no landmarks given, sample them; otherwise validate input

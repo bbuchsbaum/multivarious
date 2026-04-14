@@ -32,6 +32,8 @@ bootstrap_plsc(
 \item{parallel}{Use future.apply for parallelization (default FALSE).}
 
 \item{epsilon}{Small positive constant to stabilize division for ratios.}
+
+\item{...}{Additional arguments (currently unused).}
 }
 \description{
 Provides bootstrap ratios (mean / sd) for X and Y loadings to assess stability,

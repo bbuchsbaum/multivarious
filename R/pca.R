@@ -49,13 +49,13 @@ orth_distances.pca <- function(x, ncomp, xorig) {
     if (i < ncomp) {
       res <- res +
         tcrossprod(
-          scores[, (i + 1):ncomp, drop = F],
-          loadings[, (i + 1):ncomp, drop = F]
+          scores[, (i + 1):ncomp, drop = FALSE],
+          loadings[, (i + 1):ncomp, drop = FALSE]
         )
     }
     
     Q[, i] <- rowSums(res^2)
-    #T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
+    #T2[, i] <- rowSums(scoresn[, seq_len(i), drop = FALSE]^2)
   }
   
   Q
@@ -72,7 +72,7 @@ score_distances.pca <- function(x, ncomp, xorig) {
   
   T2 <- matrix(0, nrow = nrow(scores), ncol = ncomp)
   for (i in seq_len(ncomp)) {
-    T2[, i] <- rowSums(scoresn[, seq_len(i), drop = F]^2)
+    T2[, i] <- rowSums(scoresn[, seq_len(i), drop = FALSE]^2)
   }
   
   T2
@@ -93,8 +93,11 @@ truncate.pca <- function(x, ncomp) {
 
 
 
-#' @keywords internal
-#' @noRd
+#' @rdname perm_ci
+#' @param k Number of components to test (default 4).
+#' @param distr Distribution assumption (default "gamma"); currently ignored in forwarding.
+#' @param parallel Logical; if TRUE, use parallel processing.
+#' @export
 perm_ci.pca <- function(x, X, nperm=100, k=4, distr="gamma", parallel=FALSE, ...) {
   .Deprecated("perm_test.pca", package="multivarious", 
               msg = "'perm_ci.pca' is deprecated. Please use 'perm_test.pca' with distribution=\"empirical\" instead.")
@@ -636,7 +639,7 @@ rotate.pca <- function(x, ncomp, type=c("varimax", "quartimax", "promax"),
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' data(iris)
 #' X <- as.matrix(iris[,1:4])
 #' pca_res <- pca(X, ncomp=2)
@@ -756,7 +759,7 @@ biplot.pca <- function(x,
                  aes(x = 0, y = 0, xend = .data$PCx, yend = .data$PCy),
                  arrow = arrow(length = unit(0.02, "npc")),
                  color = arrow_color,
-                 size = 0.7)
+                 linewidth = 0.7)
   
   # Add variable names near arrow tips
   if (repel_vars && can_repel) {

@@ -8,7 +8,13 @@
 #' using the *background mean*.
 #'
 #' @references
-#' Salloum, R., Kuo, C. C. J. (2022). cPCA++: An efficient method for contrastive feature learning. Pattern Recognition, 124, 108378. (Algorithm 1)
+#' Abid, A., Zhang, M. J., Bagaria, V. K., & Zou, J. (2018). Exploring patterns enriched in a dataset with contrastive principal component analysis. Nature Communications, 9(1), 2134.
+#'
+#' Salloum, R., & Kuo, C. C. J. (2022). cPCA++: An efficient method for contrastive feature learning. Pattern Recognition, 124, 108378.
+#'
+#' Wu, M., Sun, Q., & Yang, Y. (2025). PCA++: How Uniformity Induces Robustness to Background Noise in Contrastive Learning. arXiv preprint arXiv:2511.12278.
+#'
+#' Woller, J. P., Menrath, D., & Gharabaghi, A. (2025). Generalized contrastive PCA is equivalent to generalized eigendecomposition. PLOS Computational Biology, 21(10), e1013555.
 #'
 #' @param X_f A numeric matrix representing the foreground dataset (samples x features).
 #' @param X_b A numeric matrix representing the background dataset (samples x features).
@@ -115,8 +121,8 @@
 #'   print(head(res_cpca_plus$v))
 #' }
 #'
-#' \dontrun{
-#' # Plot example (not run to avoid graphics device issues)
+#' \donttest{
+#' # Plot example (slow graphics)
 #' if (requireNamespace("geigen", quietly = TRUE) && requireNamespace("corpcor", quietly = TRUE)) {
 #'   set.seed(123)
 #'   X_b <- matrix(rnorm(150 * 50), nrow=150, ncol=50)

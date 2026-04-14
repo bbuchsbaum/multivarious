@@ -63,7 +63,7 @@ Prediction behavior is further controlled by arguments passed to \code{predict.c
 }
 \seealso{
 Other classifier: 
-\code{\link{classifier.projector}()},
+\code{\link{classifier}()},
 \code{\link{rf_classifier.projector}()}
 }
 \concept{classifier}

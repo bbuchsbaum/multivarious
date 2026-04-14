@@ -116,6 +116,8 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
       }
       fit <- pls::plsr(Y ~ scores, ncomp = ncomp, data = data.frame(Y=Y, scores=scores), ...) # Need data frame for formula
       cf <- stats::coef(fit, ncomp = ncomp, intercept = FALSE) # Intercept already in 'scores'
+      # pls::coef returns a 3D array (p_in x p_out x 1), drop the third dimension
+      cf <- drop(cf)
       # Result is typically p_in x p_out, need p_out x p_in
       t(cf)
     }

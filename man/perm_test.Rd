@@ -106,45 +106,6 @@ res_pca_row <- perm_test(mod_pca, X_iris, nperm=50, comps=3,
                          shuffle_fun=row_shuffle, parallel=FALSE)
 print(res_pca_row)
 
-\dontrun{
-# Cross Projector Example (using cancor)
-X <- as.matrix(iris[,1:2])
-Y <- as.matrix(iris[,3:4])
-ccr <- cancor(X, Y)
-mod_cp <- cross_projector(ccr$xcoef, ccr$ycoef)
-
-# Perm test (is x2y.mse lower than chance?)
-res_cp <- perm_test(mod_cp, X, Y=Y, nperm=50, alternative="less")
-print(res_cp)
-
-# Discriminant Projector Example (using LDA)
-library(MASS)
-lda_fit <- lda(X_iris, grouping=iris$Species)
-mod_dp <- discriminant_projector(
-  v = lda_fit$scaling,
-  s = X_iris \%*\% lda_fit$scaling,
-  sdev = lda_fit$svd,
-  labels = iris$Species,
-  preproc = prep(center()), # Assuming center() was intended for LDA
-  Sigma = lda_fit$covariance # Needed for LDA prediction method
-)
-
-# Perm test (is accuracy higher than chance?)
-res_dp <- perm_test(mod_dp, X_iris, nperm=50, alternative="greater")
-print(res_dp)
-
-# Multiblock Bi-Projector Example
-# (Requires a multiblock model 'mod_mb' from e.g. MFA or ComDim)
-# Assuming 'mod_mb' exists and has 2 blocks:
-# res_mb <- perm_test(mod_mb, nperm=50, comps=3) 
-# print(res_mb)
-# Example using provided Xlist (list of matrices X1, X2):
-# X1 <- matrix(rnorm(50*10), 50, 10)
-# X2 <- matrix(rnorm(50*15), 50, 15)
-# Assume mod_mb was fit on cbind(X1, X2) with block_indices=list(1:10, 11:25)
-# res_mb_xlist <- perm_test(mod_mb, Xlist=list(X1, X2), nperm=50, comps=3)
-# print(res_mb_xlist)
-}
 }
 \references{
 Buja, A., & Eyuboglu, N. (1992). Remarks on parallel analysis. \emph{Multivariate Behavioral Research}, 27(4), 509-540. (Relevant for PCA permutation concepts)

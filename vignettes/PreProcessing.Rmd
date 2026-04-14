@@ -1,8 +1,10 @@
 ---
 title: Pre-processing pipelines in multiblock
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Pre-processing pipelines in multiblock} %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Pre-processing pipelines in multiblock}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css
@@ -17,7 +19,6 @@ includes:
 ---
 
 ```{r setup, include=FALSE}
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(params$family))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width=6, fig.height=4)
 library(multivarious)
 library(dplyr) # Needed for %>% and tibble manipulation
@@ -27,8 +28,8 @@ library(ggplot2)
 
 # 1. Why a pipeline at all?
 
-Most chemometrics / ML code mutates the data in place (e.g. `scale(X)`),
-which is convenient in a script but dangerous inside reusable functions:
+Code that mutates data in place (e.g. `scale(X)`) is convenient in a script
+but dangerous inside reusable functions:
 
 *   **Data-leak avoidance**: Fitted means/SDs live inside the pre-processor object, calculated only once (typically on training data).
 *   **Reversibility**: `inverse_transform()` gives you proper back-transforms (handy for reconstruction error or publication plots).

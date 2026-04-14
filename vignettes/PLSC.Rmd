@@ -1,8 +1,10 @@
 ---
 title: Partial Least Squares Correlation (PLSC) with Inference
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Partial Least Squares Correlation (PLSC) with Inference}
-  %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Partial Least Squares Correlation (PLSC) with Inference}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css
@@ -17,7 +19,6 @@ includes:
 ---
 
 ```{r setup, include=FALSE}
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(params$family))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 7, fig.height = 4.5)
 library(multivarious)
 library(ggplot2)
@@ -101,7 +102,7 @@ Here we keep it light for the vignette; use ≥500–1000 in practice.
 
 ```{r bootstrap}
 set.seed(321)
-boot_plsc <- bootstrap(fit_plsc, X, Y, nboot = 120, comps = 2, parallel = FALSE)
+boot_plsc <- bootstrap(fit_plsc, nboot = 120, X = X, Y = Y, comps = 2, parallel = FALSE)
 
 # X-loadings bootstrap ratios for LV1
 df_bsr <- data.frame(

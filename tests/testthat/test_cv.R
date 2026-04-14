@@ -1,5 +1,5 @@
 library(testthat)
-library(tibble) # Needed for dummy_eval
+suppressWarnings(library(tibble)) # Needed for dummy_eval (suppress version mismatch warning)
 # Assuming measure_reconstruction_error and cv_generic/cv.bi_projector are loaded
 # May need to load the package being tested, e.g., using devtools::load_all()
 
@@ -53,9 +53,9 @@ dummy_eval <- function(model, test_data, ...) {
 test_that("cv_generic gracefully records fit errors", {
   X     <- matrix(rnorm(20), 10, 2)
   folds <- list(list(train = 1:8, test = 9:10))
-  
-  # Assuming cv_generic is available
-  res <- cv_generic(X, folds, error_fit, dummy_eval)
+
+  # Assuming cv_generic is available (suppress expected warning about fit failure)
+  res <- suppressWarnings(cv_generic(X, folds, error_fit, dummy_eval))
   
   expect_true(grepl("Fit failed", res$metrics[[1]]$error[1]))
   expect_null(res$model[[1]])

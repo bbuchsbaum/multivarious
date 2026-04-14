@@ -14,9 +14,9 @@ plsc(
 )
 }
 \arguments{
-\item{X}{Numeric matrix of predictors (n x p\_x).}
+\item{X}{Numeric matrix of predictors (n x p_x).}
 
-\item{Y}{Numeric matrix of outcomes/behaviors (n x p\_y). Must have the same
+\item{Y}{Numeric matrix of outcomes/behaviors (n x p_y). Must have the same
 number of rows as \code{X}.}
 
 \item{ncomp}{Number of latent variables to return. Defaults to

@@ -1,8 +1,10 @@
 ---
 title: 'Contrastive PCA: Finding What''s Different Between Groups'
 output: rmarkdown::html_vignette
-vignette: '%\VignetteIndexEntry{Contrastive PCA: Finding What''s Different Between
-  Groups} %\VignetteEngine{knitr::rmarkdown} %\VignetteEncoding{UTF-8}'
+vignette: >
+  %\VignetteIndexEntry{Contrastive PCA: Finding What's Different Between Groups}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 params:
   family: red
 css: albers.css
@@ -17,7 +19,6 @@ includes:
 ---
 
 ```{r setup, include=FALSE}
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(params$family))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
 library(multivarious)
 library(ggplot2)
@@ -227,6 +228,16 @@ The `geneig()` function provides the underlying solver with multiple algorithm o
 - `"primme"`: Efficient for very large sparse matrices
 
 </details>
+
+## References
+
+- Abid, A., Zhang, M. J., Bagaria, V. K., & Zou, J. (2018). Exploring patterns enriched in a dataset with contrastive principal component analysis. *Nature Communications*, 9(1), 2134.
+
+- Salloum, R., & Kuo, C. C. J. (2022). cPCA++: An efficient method for contrastive feature learning. *Pattern Recognition*, 124, 108378.
+
+- Wu, M., Sun, Q., & Yang, Y. (2025). PCA++: How Uniformity Induces Robustness to Background Noise in Contrastive Learning. *arXiv preprint arXiv:2511.12278*.
+
+- Woller, J. P., Menrath, D., & Gharabaghi, A. (2025). Generalized contrastive PCA is equivalent to generalized eigendecomposition. *PLOS Computational Biology*, 21(10), e1013555.
 
 ## See Also
 

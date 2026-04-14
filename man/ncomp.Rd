@@ -18,7 +18,7 @@ This function returns the total number of components in the fitted model.
 \examples{
 # Example using the svd_wrapper function
 data(iris)
-X <- iris[, 1:4]
+X <- as.matrix(iris[, 1:4])
 fit <- svd_wrapper(X, ncomp = 3, preproc = center(), method = "base")
 ncomp(fit) # Should return 3
 }

@@ -1,11 +1,51 @@
+## Resubmission
+
+This is a resubmission. In this version I have:
+
+* Fixed T/F shorthand usage to TRUE/FALSE for CRAN compliance
+* Converted `\dontrun{}` to `\donttest{}` for executable examples
+* Fixed `bootstrap.plsc()` duplicate argument handling
+* Fixed S3 method registration (classifier.projector, inverse_projection.projector, perm_ci.pca)
+* Added missing `importFrom` directives for `coefficients` and `combn`
+* Fixed vignette YAML headers to use standard multi-line format
+* Fixed `requireNamespace()` parameter from `quiet` to `quietly` (R-devel strict checking)
+* Removed escaped underscores from plsc.R documentation
+* Removed albersdown theme references from vignettes
+* Created NEWS.md documenting all changes
+
 ## R CMD check results
 
-0 errors | 0 warnings | 1 note
+0 errors | 0 warnings | 0 notes
 
-* This is a new release.
+## Package dependencies
 
-* @return tags are now added for all functions referenced in previous CRAN review.
+This package imports from 27 non-default packages. This package provides a comprehensive framework for multivariate analysis methods, and each import is actively used:
 
-* There are no references that generically relate to this package.
+- **Matrix**: Sparse matrix operations for efficient computation
+- **RSpectra/irlba/PRIMME/rsvd**: Efficient eigendecomposition for large matrices
+- **pls**: Partial least squares algorithms
+- **glmnet**: Regularized regression methods
+- **corpcor**: Correlation and covariance estimation
+- **future.apply/future**: Parallel processing support
+- **geigen/GPArotation**: Generalized eigenvalue problems and factor rotation
+- **ggplot2/ggrepel**: Visualization methods
+- **matrixStats**: Efficient row/column statistics
+- **proxy**: Distance and similarity computations
+- **dplyr/tibble**: Data manipulation utilities
+- **rlang/chk/assertthat/cli/crayon**: Input validation and messaging
+- **withr**: Safe temporary state management
+- **lifecycle**: Function deprecation support
+- **methods/MASS/svd**: Core statistical methods
 
-* an "options" call within "residualize" was removed to comply with CRAN guidance.
+Reducing imports would require removing core functionality that users depend on.
+
+## Reverse dependencies
+
+There are currently no reverse dependencies for this package.
+
+## Test environments
+
+* Local: macOS Sonoma 14.3, R 4.5.1 (aarch64-apple-darwin20)
+* win-builder: Windows Server 2022, R-release (R 4.5.0)
+* win-builder: Windows Server 2022, R-devel
+* mac-builder: macOS, R-release (Apple Silicon)
