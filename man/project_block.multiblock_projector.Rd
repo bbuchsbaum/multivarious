@@ -4,7 +4,7 @@
 \alias{project_block.multiblock_projector}
 \title{Project Data onto a Specific Block}
 \usage{
-\method{project_block}{multiblock_projector}(x, new_data, block, least_squares = TRUE, ...)
+\method{project_block}{multiblock_projector}(x, new_data, block, least_squares = FALSE, ...)
 }
 \arguments{
 \item{x}{A \code{multiblock_projector} object.}
@@ -13,7 +13,7 @@
 
 \item{block}{The block index (1-based) to project onto.}
 
-\item{least_squares}{Logical. If \code{TRUE} (default), use least squares projection.}
+\item{least_squares}{Logical. If \code{TRUE}, use least squares projection (default FALSE).}
 
 \item{...}{Additional arguments passed to \code{partial_project}.}
 }

@@ -110,7 +110,6 @@ perm_ci.pca <- function(x, X, nperm=100, k=4, distr="gamma", parallel=FALSE, ...
 
 
 #' @importFrom stats quantile na.omit
-#' @importFrom future.apply future_lapply
 #' @export
 #' @seealso \code{\link{perm_test}}, \code{\link{pca}}
 perm_test.pca <- function(x,
@@ -347,7 +346,7 @@ perm_test.pca <- function(x,
           upper_ci = upper_ci
       )
   }
-  component_results <- dplyr::bind_rows(comp_df_list)
+  component_results <- do.call(rbind, comp_df_list)
   
   # ---------- Output Structure ----------
   out <- list(
@@ -463,7 +462,6 @@ print.perm_test_pca <- function(x, ...) {
 #'   \item{rotation}{A list with rotation details: \code{type}, \code{R} (orth) or \code{Phi} (oblique), and \code{loadings_type}}
 #' }
 #'
-#' @importFrom GPArotation GPForth GPFoblq
 #' @export
 #'
 #' @examples
@@ -634,8 +632,7 @@ rotate.pca <- function(x, ncomp, type=c("varimax", "quartimax", "promax"),
 #'
 #' @return A \code{ggplot} object.
 #'
-#' @import ggplot2
-#' @importFrom ggrepel geom_text_repel
+#' @importFrom rlang .data
 #' @export
 #'
 #' @examples
@@ -659,8 +656,11 @@ biplot.pca <- function(x,
                        text_color = "red",
                        repel_points = TRUE,
                        repel_vars = FALSE,
-                       ...) 
+                       ...)
 {
+  if (!requireNamespace("ggplot2", quietly = TRUE)) {
+    stop("Package 'ggplot2' is required for biplot. Please install it.", call. = FALSE)
+  }
   # Check dims
   n_comps <- ncomp(x)
   if (any(dims > n_comps)) {
@@ -733,46 +733,46 @@ biplot.pca <- function(x,
   }
   
   # Start building the plot
-  plt <- ggplot(scores_df, aes(x = .data$PCx, y = .data$PCy)) +
-    geom_point(alpha = alpha_points, size = point_size, color = "blue") +
-    theme_minimal(base_size = 12) +
-    coord_equal() +
-    xlab(pcx_lab) +
-    ylab(pcy_lab)
-  
+  plt <- ggplot2::ggplot(scores_df, ggplot2::aes(x = .data$PCx, y = .data$PCy)) +
+    ggplot2::geom_point(alpha = alpha_points, size = point_size, color = "blue") +
+    ggplot2::theme_minimal(base_size = 12) +
+    ggplot2::coord_equal() +
+    ggplot2::xlab(pcx_lab) +
+    ggplot2::ylab(pcy_lab)
+
   # Add text labels for points
   # Use ggrepel if repel_points=TRUE and ggrepel is installed
   # fallback to geom_text if not installed or repel_points=FALSE
   can_repel <- requireNamespace("ggrepel", quietly = TRUE)
-  
+
   if (repel_points && can_repel) {
-    plt <- plt + 
-      ggrepel::geom_text_repel(aes(label = .data$labels), color = "black", size = 3, ...)
+    plt <- plt +
+      ggrepel::geom_text_repel(ggplot2::aes(label = .data$labels), color = "black", size = 3, ...)
   } else {
-    plt <- plt + 
-      geom_text(aes(label = .data$labels), hjust = 1.1, vjust = 0.5, color = "black", size = 3, ...)
+    plt <- plt +
+      ggplot2::geom_text(ggplot2::aes(label = .data$labels), hjust = 1.1, vjust = 0.5, color = "black", size = 3, ...)
   }
-  
+
   # Add loadings arrows
   plt <- plt +
-    geom_segment(data = loadings_df,
-                 aes(x = 0, y = 0, xend = .data$PCx, yend = .data$PCy),
-                 arrow = arrow(length = unit(0.02, "npc")),
+    ggplot2::geom_segment(data = loadings_df,
+                 ggplot2::aes(x = 0, y = 0, xend = .data$PCx, yend = .data$PCy),
+                 arrow = grid::arrow(length = grid::unit(0.02, "npc")),
                  color = arrow_color,
                  linewidth = 0.7)
-  
+
   # Add variable names near arrow tips
   if (repel_vars && can_repel) {
     plt <- plt +
       ggrepel::geom_text_repel(data = loadings_df,
-                               aes(x = .data$PCx, y = .data$PCy, label = .data$var),
+                               ggplot2::aes(x = .data$PCx, y = .data$PCy, label = .data$var),
                                color = text_color,
                                size = 3,
                                ...)
   } else {
     plt <- plt +
-      geom_text(data = loadings_df,
-                aes(x = .data$PCx, y = .data$PCy, label = .data$var),
+      ggplot2::geom_text(data = loadings_df,
+                ggplot2::aes(x = .data$PCx, y = .data$PCy, label = .data$var),
                 color = text_color, vjust = -0.5, size = 3,
                 ...)
   }
@@ -790,25 +790,25 @@ biplot.pca <- function(x,
 #' @export
 print.pca <- function(x, ...) {
   cat(
-    crayon::bold(crayon::green("PCA object")),
+    cli::style_bold(cli::col_green("PCA object")),
     " -- derived from SVD\n\n"
   )
-  
+
   # Basic dims
   nobs <- nrow(x$s)         # number of observations
   nvars <- nrow(x$v)        # number of variables
   ncomp_used <- ncol(x$s)   # how many comps we actually have
-  
-  cat(crayon::cyan("Data: "), nobs, " observations x ", nvars, " variables\n", sep = "")
-  cat(crayon::cyan("Components retained: "), ncomp_used, "\n\n", sep = "")
-  
+
+  cat(cli::col_cyan("Data: "), nobs, " observations x ", nvars, " variables\n", sep = "")
+  cat(cli::col_cyan("Components retained: "), ncomp_used, "\n\n", sep = "")
+
   # Possibly show proportion of variance if available
   if (!is.null(x$sdev)) {
     eigenvals <- x$sdev^2
     prop_var <- eigenvals / sum(eigenvals)
     cum_var <- cumsum(prop_var)
-    
-    cat(crayon::bold("Variance explained (per component):\n"))
+
+    cat(cli::style_bold("Variance explained (per component):\n"))
     cat(
       formatC(seq_len(ncomp_used), width = 2), " ",
       formatC(round(prop_var * 100, 2), width=6), "%  ",
@@ -818,23 +818,23 @@ print.pca <- function(x, ...) {
     )
     cat("\n")
   }
-  
+
   # If we have an explained_variance field (like from rotate), use that
   if (!is.null(x$explained_variance)) {
-    cat(crayon::bold("Explained variance from rotation:\n"))
+    cat(cli::style_bold("Explained variance from rotation:\n"))
     cat(paste(round(x$explained_variance * 100, 2), "%\n"), "\n\n")
   }
-  
+
   # Possibly show info about rotation
   if (!is.null(x$rotation)) {
-    cat(crayon::bold("Rotation details:\n"))
+    cat(cli::style_bold("Rotation details:\n"))
     cat("  Type:", x$rotation$type, "\n")
     if (!is.null(x$rotation$loadings_type)) {
       cat("  Loadings type:", x$rotation$loadings_type, "\n")
     }
     cat("\n")
   }
-  
+
   invisible(x)
 }
 

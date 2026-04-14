@@ -4,7 +4,14 @@
 \alias{partial_project}
 \title{Partially project a new sample onto subspace}
 \usage{
-partial_project(x, new_data, colind, least_squares = TRUE, lambda = 1e-06, ...)
+partial_project(
+  x,
+  new_data,
+  colind,
+  least_squares = FALSE,
+  lambda = 1e-06,
+  ...
+)
 }
 \arguments{
 \item{x}{The fitted model, e.g. \code{bi_projector}, that has a partial_project method.}
@@ -15,7 +22,7 @@ the observations to be projected.}
 \item{colind}{A numeric vector of column indices in the original data space
 that correspond to \code{new_data}'s columns.}
 
-\item{least_squares}{Logical; if TRUE (default), do a ridge-regularized solve.}
+\item{least_squares}{Logical; if TRUE, do a ridge-regularized solve (default FALSE).}
 
 \item{lambda}{Numeric; ridge penalty (default 1e-6). Ignored if \code{least_squares=FALSE}.}
 

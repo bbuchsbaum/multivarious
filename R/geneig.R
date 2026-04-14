@@ -76,7 +76,6 @@
 #' See also the \pkg{geigen} (CRAN) and \pkg{PRIMME} documentation.
 #'
 #' @importFrom geigen geigen
-#' @importFrom RSpectra eigs
 #' @importFrom Matrix Cholesky solve forceSymmetric Diagonal t isSymmetric
 #' @export
 #' @examples
@@ -95,7 +94,7 @@
  geneig <- function(A = NULL,
                     B = NULL,
                     ncomp = 2,
-                    preproc = prep(pass()),
+                    preproc = NULL,
                     method = c("robust", "sdiag", "geigen", "primme", "rspectra", "subspace"),
                     which = "LA", ...) {
    method <- match.arg(method)

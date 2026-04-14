@@ -86,11 +86,11 @@ nblocks.multiblock_projector <- function(x) {
 #' @param x A `multiblock_projector` object.
 #' @param new_data The new data to be projected.
 #' @param block The block index (1-based) to project onto.
-#' @param least_squares Logical. If `TRUE` (default), use least squares projection.
+#' @param least_squares Logical. If `TRUE`, use least squares projection (default FALSE).
 #' @param ... Additional arguments passed to `partial_project`.
 #' @return The projected scores for the specified block.
 #' @export
-project_block.multiblock_projector <- function(x, new_data, block,least_squares=TRUE, ...) {
+project_block.multiblock_projector <- function(x, new_data, block,least_squares=FALSE, ...) {
   # Check block validity
   nb <- nblocks(x)
   if (block < 1 || block > nb) {
@@ -98,7 +98,7 @@ project_block.multiblock_projector <- function(x, new_data, block,least_squares=
   }
   
   ind <- block_indices(x)[[block]]
-  partial_project(x, new_data, colind=ind, least_squares,...)
+  partial_project(x, new_data, colind=ind, least_squares = least_squares, ...)
 }
 
 #' Coefficients for a Multiblock Projector
@@ -173,8 +173,6 @@ print.multiblock_biprojector <- function(x, ...) {
 
 #' @importFrom stats var
 #' @importFrom utils combn
-#' @importFrom RSpectra svds
-#' @importFrom future.apply future_lapply
 #' @export
 perm_test.multiblock_biprojector <- function(
     x,

@@ -61,7 +61,6 @@
 #' Lim, D., Jin, R., & Zhang, L. (2015). An Efficient and Accurate Nystrom Scheme for Large-Scale Data Sets. 
 #' *Proceedings of the Twenty-Ninth AAAI Conference on Artificial Intelligence* (pp. 2765-2771).
 #'
-#' @importFrom RSpectra svds
 #' @importFrom stats rnorm
 #' @export
 #'
@@ -88,6 +87,11 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
                            l=NULL, use_RSpectra=TRUE, ...) {
   
   method <- match.arg(method)
+
+  if (use_RSpectra && !requireNamespace("RSpectra", quietly = TRUE)) {
+    warning("Package 'RSpectra' not available. Falling back to base eigen decomposition.", call. = FALSE)
+    use_RSpectra <- FALSE
+  }
   
   # Basic checks
   chk::chkor_vld(chk::vld_matrix(X), chk::vld_s4_class(X, "Matrix"))

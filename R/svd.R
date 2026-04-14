@@ -14,11 +14,6 @@
 #' @param ... extra arguments passed to the selected SVD function
 #' @return an SVD object that extends `bi_projector`
 #' @export
-#' @importFrom RSpectra svds
-#' @importFrom rsvd rsvd
-#' @importFrom irlba irlba
-#' @importFrom corpcor fast.svd
-#' @importFrom svd propack.svd
 #' @examples
 #' # Load iris dataset and select the first four columns
 #' data(iris)

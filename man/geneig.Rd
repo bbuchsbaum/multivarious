@@ -8,7 +8,7 @@ geneig(
   A = NULL,
   B = NULL,
   ncomp = 2,
-  preproc = prep(pass()),
+  preproc = NULL,
   method = c("robust", "sdiag", "geigen", "primme", "rspectra", "subspace"),
   which = "LA",
   ...

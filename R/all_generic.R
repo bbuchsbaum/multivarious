@@ -34,7 +34,7 @@ project <- function(x, new_data, ...) UseMethod("project")
 #'   the observations to be projected.
 #' @param colind A numeric vector of column indices in the original data space
 #'   that correspond to \code{new_data}'s columns.
-#' @param least_squares Logical; if TRUE (default), do a ridge-regularized solve.
+#' @param least_squares Logical; if TRUE, do a ridge-regularized solve (default FALSE).
 #' @param lambda Numeric; ridge penalty (default 1e-6). Ignored if `least_squares=FALSE`.
 #' @param ... Additional arguments passed to class-specific partial_project methods.
 #'
@@ -42,7 +42,7 @@ project <- function(x, new_data, ...) UseMethod("project")
 #'   those columns only.
 #' @export
 partial_project <- function(x, new_data, colind,
-                            least_squares = TRUE,
+                            least_squares = FALSE,
                             lambda = 1e-6,
                             ...) {
   UseMethod("partial_project")
@@ -794,5 +794,4 @@ variables_used <- function(x, ...) {
 vars_for_component <- function(x, k, ...) {
     UseMethod("vars_for_component")
 }
-
 

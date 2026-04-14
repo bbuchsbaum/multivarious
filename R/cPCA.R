@@ -137,7 +137,6 @@
 #' @importFrom stats prcomp
 #' @importFrom Matrix crossprod
 #' @importFrom stats coef prcomp
-#' @importFrom corpcor pseudoinverse
 #' @importFrom geigen geigen
 #' @export
 cPCAplus <- function(X_f, X_b, ncomp = NULL,
@@ -186,13 +185,13 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
     if(any(is.na(mean_b))) stop("NA values encountered in background mean calculation.")
     X_f_centered <- sweep(X_f, 2, mean_b, "-")
     X_b_centered <- sweep(X_b, 2, mean_b, "-")
-    # Create a finalized preprocessor using the calculated means
-    proc <- prep(center(cmeans = mean_b))
+    # Create a fitted preprocessor using the calculated means.
+    proc <- fit(center(cmeans = mean_b), matrix(0, nrow = 1, ncol = ncol(X_f)))
   } else {
     X_f_centered <- X_f
     X_b_centered <- X_b
-    # Create a finalized identity preprocessor
-    proc <- prep(pass())
+    # Create a fitted identity preprocessor.
+    proc <- fit(pass(), matrix(0, nrow = 1, ncol = ncol(X_f)))
   }
 
   # --- Core Computation --- 

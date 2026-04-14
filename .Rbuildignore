@@ -21,3 +21,4 @@ experimental
 ^check_output\.log$
 ^README\.html$
 ^multivarious\.Rcheck$
+^\.omc$

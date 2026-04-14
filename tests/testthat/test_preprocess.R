@@ -2,9 +2,17 @@ context("pre-processing")
 library(magrittr)
 library(testthat)
 
+legacy_prep <- function(x) {
+  suppressWarnings(prep(x))
+}
+
+legacy_init_transform <- function(x, X) {
+  suppressWarnings(init_transform(x, X))
+}
+
 test_that("can preprocess a matrix no center, no scale", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
-  pp <- pass() %>% prep()
+  pp <- pass() %>% legacy_prep()
   X <- pp$init(mat1)
   x2 <- pp$reverse_transform(X)
   expect_equal(mat1,x2)
@@ -13,7 +21,7 @@ test_that("can preprocess a matrix no center, no scale", {
 
 test_that("can preprocess a matrix center only", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
-  pp <- center() %>% prep()
+  pp <- center() %>% legacy_prep()
   Xp <- pp$init(mat1)
   x2 <- pp$reverse_transform(Xp)
   expect_equal(mat1,x2)
@@ -23,8 +31,8 @@ test_that("can preprocess a matrix center only", {
 test_that("can apply a centering transform", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
   pp <- center()
-  x <- prep(pp)
-  x2 <- init_transform(x,mat1)
+  x <- legacy_prep(pp)
+  x2 <- legacy_init_transform(x, mat1)
   x3 <- multivarious::transform(x, mat1)
   expect_equal(x2,x3)
 })
@@ -32,8 +40,8 @@ test_that("can apply a centering transform", {
 test_that("can apply a scaling transform", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
   pp <- standardize()
-  x <- prep(pp)
-  x2 <- init_transform(x, mat1)
+  x <- legacy_prep(pp)
+  x2 <- legacy_init_transform(x, mat1)
   x3 <- multivarious::transform(x, mat1)
   expect_equal(x2,x3)
 
@@ -43,8 +51,8 @@ test_that("can preprocess a matrix with column scaling", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
   wts <- 2:16
   pp <- colscale(type="weights", weights=wts)
-  x <- prep(pp)
-  xinit <- init_transform(x, mat1)
+  x <- legacy_prep(pp)
+  xinit <- legacy_init_transform(x, mat1)
   xrev <- multivarious::inverse_transform(x, xinit)
   expect_equal(mat1,xrev)
 })
@@ -61,8 +69,8 @@ test_that("can preprocess a matrix with column scaling", {
 test_that("can reverse transform a matrix after standardization", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
   pp <- standardize()
-  x <- prep(pp)
-  x1 <- init_transform(x,mat1)
+  x <- legacy_prep(pp)
+  x1 <- legacy_init_transform(x, mat1)
   x2 <- multivarious::inverse_transform(x, x1)
   expect_equal(mat1,x2)
 })
@@ -71,9 +79,9 @@ test_that("can reverse transform a matrix after standardization", {
 
 test_that("can compose two pre-processors", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
-  x <- center() %>% colscale(type="z") %>% prep()
+  x <- center() %>% colscale(type="z") %>% legacy_prep()
 
-  x1 <- init_transform(x,mat1)
+  x1 <- legacy_init_transform(x, mat1)
   x2 <- multivarious::inverse_transform(x, x1)
   expect_equal(mat1,x2)
 
@@ -147,7 +155,7 @@ test_that("new API: error handling for unfitted preprocessor", {
   
   # Create a pre_processor but don't initialize it properly
   # This simulates an unfitted preprocessor from the new API
-  proc <- prep(center())
+  proc <- legacy_prep(center())
   attr(proc, "fitted") <- FALSE
   
   expect_error(
@@ -184,9 +192,9 @@ test_that("new API: works with different preprocessing types", {
 
 test_that("can preprocess a matrix with a colind", {
   mat1 <- matrix(rnorm(10*15), 10, 15)
-  pp <- center() %>% prep()
+  pp <- center() %>% legacy_prep()
 
-  x <- init_transform(pp,mat1)
+  x <- legacy_init_transform(pp, mat1)
   ret <- multivarious::transform(pp, mat1[,1:2], colind=1:2)
 
   expect_equal(ret, x[,1:2])
@@ -198,11 +206,11 @@ test_that("can concatenate two pre-processors", {
   p <- center()
   
   proclist <- lapply(1:2, function(i) {
-    fresh(p) %>% prep()
+    fresh(p) %>% legacy_prep()
   })
   
-  m1 <- init_transform(proclist[[1]], mat1)
-  m2 <- init_transform(proclist[[2]], mat2)
+  m1 <- legacy_init_transform(proclist[[1]], mat1)
+  m2 <- legacy_init_transform(proclist[[2]], mat2)
   proc <- concat_pre_processors(proclist, list(1:15, 16:30))
   
   a1 <- multivarious::transform(proc, cbind(mat1,mat2))
@@ -236,14 +244,14 @@ test_that("concat_pre_processors handles complex colind across different block t
   mat2 <- matrix(rnorm(10*7, mean=20, sd=5), 10, 7)
   mat3 <- matrix(rnorm(10*3, mean=0, sd=1), 10, 3)
   
-  p1 <- center() %>% prep()       # Center only
-  p2 <- standardize() %>% prep()  # Center and scale
-  p3 <- pass() %>% prep()         # No-op
+  p1 <- center() %>% legacy_prep()       # Center only
+  p2 <- standardize() %>% legacy_prep()  # Center and scale
+  p3 <- pass() %>% legacy_prep()         # No-op
   
   # Initialize individual processors
-  m1_init <- init_transform(p1, mat1)
-  m2_init <- init_transform(p2, mat2)
-  m3_init <- init_transform(p3, mat3)
+  m1_init <- legacy_init_transform(p1, mat1)
+  m2_init <- legacy_init_transform(p2, mat2)
+  m3_init <- legacy_init_transform(p3, mat3)
   
   proclist <- list(p1, p2, p3)
   block_indices <- list(1:5, 6:12, 13:15)
@@ -341,7 +349,6 @@ test_that("concat_pre_processors handles complex colind across different block t
 #   
 #   expect_equivalent(project(bm, block_index=2), unclass(pdat))
 # })
-
 
 
 

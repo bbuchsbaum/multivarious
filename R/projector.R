@@ -48,9 +48,8 @@ coef.projector <- function(object, ...) {
 
 
 #' @export
-#' @importFrom assertthat assert_that
 ncomp.projector <- function(x) {
-  assertthat::assert_that(inherits(x, "projector"))
+  stopifnot(inherits(x, "projector"))
   ncol(components(x))
 }
 
@@ -61,9 +60,8 @@ ncomp.projector <- function(x) {
 #' @param tol tolerance for checking orthogonality
 #' @param x the projector object
 #' @export
-#' @importFrom assertthat assert_that
 is_orthogonal.projector <- function(x, tol=1e-6) {
-  assertthat::assert_that(inherits(x, "projector"))
+  stopifnot(inherits(x, "projector"))
   v <- components(x)
   
   # If p >= d, check crossprod(v). Otherwise, check tcrossprod(v).
@@ -90,9 +88,8 @@ robust_inv_vTv <- function(v, lambda = 1e-6) {
 
 #' @rdname inverse_projection
 #' @export
-#' @importFrom assertthat assert_that
 inverse_projection.projector <- function(x, ...) {
-  assertthat::assert_that(inherits(x, "projector"))
+  stopifnot(inherits(x, "projector"))
   
   # Robust caching check
   cache_env <- attr(x, ".cache")
@@ -121,7 +118,7 @@ inverse_projection.projector <- function(x, ...) {
 
 #' @export
 partial_inverse_projection.projector <- function(x, colind, ...) {
-  assertthat::assert_that(inherits(x, "projector"))
+  stopifnot(inherits(x, "projector"))
   chk::chk_vector(colind)
   chk::chk_whole_numeric(colind)
   chk::chk_range(max(colind, na.rm=TRUE), c(1, ncol(coef(x))))
@@ -208,7 +205,7 @@ project.projector <- function(x, new_data, ...) {
 partial_project.projector <- function(x,
                                       new_data,
                                       colind,
-                                      least_squares = TRUE,
+                                      least_squares = FALSE,
                                       lambda = 1e-6,
                                       ...)
 {
@@ -276,19 +273,19 @@ reconstruct_new.projector <- function(x,
 
 #' @export
 print.projector <- function(x, ...) {
-  cat(crayon::bold(crayon::green("Projector object:\n")))
-  cat(crayon::yellow("  Input dimension: "),  shape(x)[1], "\n", sep = "")
-  cat(crayon::yellow("  Output dimension: "), shape(x)[2], "\n", sep = "")
-  
+  cat(cli::style_bold(cli::col_green("Projector object:\n")))
+  cat(cli::col_yellow("  Input dimension: "),  shape(x)[1], "\n", sep = "")
+  cat(cli::col_yellow("  Output dimension: "), shape(x)[2], "\n", sep = "")
+
   if (!is.null(x$preproc)) {
-    cat(crayon::cyan("  With pre-processing:\n"))
+    cat(cli::col_cyan("  With pre-processing:\n"))
     if (inherits(x$preproc, "pre_processor")) {
       print(x$preproc)
     } else {
-      cat(crayon::cyan("    (pre-processing pipeline not fully available)\n"))
+      cat(cli::col_cyan("    (pre-processing pipeline not fully available)\n"))
     }
   } else {
-    cat(crayon::cyan("  No pre-processing pipeline.\n"))
+    cat(cli::col_cyan("  No pre-processing pipeline.\n"))
   }
   invisible(x)
 }

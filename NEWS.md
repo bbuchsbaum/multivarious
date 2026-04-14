@@ -1,3 +1,25 @@
+# multivarious 0.3.1
+
+## Behavior Changes
+
+* Changed `partial_project()` default `least_squares` from `TRUE` to `FALSE`.
+* Changed `project_block.multiblock_projector()` default `least_squares` from `TRUE` to `FALSE` (now matches `partial_project()`).
+
+## Bug Fixes
+
+* Fixed `reconstruct_new.bi_projector()` double-preprocessing bug that caused incorrect reconstruction when applied to held-out data.
+
+## Vignette Improvements
+
+* Rewrote CrossValidation vignette with working examples (fixed broken `reconstruct()` usage and results extraction).
+* Cleaned up PermutationTesting vignette: improved structure, replaced dense tables with readable prose.
+* Cleaned up Regress vignette: broke up long code block into focused subsections.
+* Cleaned up Extending vignette: removed commented-out code walls, simplified examples.
+
+## Tests
+
+* Added regression tests for `reconstruct_new()` on held-out data.
+
 # multivarious 0.3.0
 
 ## Bug Fixes

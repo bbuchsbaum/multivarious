@@ -246,7 +246,6 @@ predict.discriminant_projector <- function(object,
 
 
 #' @importFrom stats quantile predict na.omit
-#' @importFrom future.apply future_lapply
 #' @export
 #'@family perm_test
 #' @seealso \code{\link{perm_test}} for the generic permutation test function

@@ -12,5 +12,5 @@
 \item{...}{Additional arguments (ignored).}
 }
 \description{
-Uses \code{crayon} to produce a colorful and readable representation of the pipeline steps.
+Uses \code{cli} to produce a colorful and readable representation of the pipeline steps.
 }

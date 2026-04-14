@@ -649,7 +649,7 @@ reverse_transform.concat_pre_processor <- function(x, X, colind=NULL,...) {
 
 #' Print a prepper pipeline
 #' 
-#' Uses `crayon` to produce a colorful and readable representation of the pipeline steps.
+#' Uses `cli` to produce a colorful and readable representation of the pipeline steps.
 #'
 #' @param x A `prepper` object.
 #' @param ... Additional arguments (ignored).
@@ -657,13 +657,13 @@ reverse_transform.concat_pre_processor <- function(x, X, colind=NULL,...) {
 print.prepper <- function(x,...) {
   nn <- sapply(x$steps, function(st) st$name)
   if (length(nn) == 0) {
-    cat(crayon::cyan("A preprocessor with no steps.\n"))
+    cat(cli::col_cyan("A preprocessor with no steps.\n"))
     return(invisible(x))
   }
-  
-  cat(crayon::bold(crayon::green("Preprocessor pipeline:\n")))
+
+  cat(cli::style_bold(cli::col_green("Preprocessor pipeline:\n")))
   for (i in seq_along(nn)) {
-    cat(crayon::magenta(" Step ", i, ": "), crayon::cyan(nn[i]), "\n", sep="")
+    cat(cli::col_magenta(paste0(" Step ", i, ": ")), cli::col_cyan(nn[i]), "\n", sep="")
   }
   invisible(x)
 }
@@ -671,7 +671,7 @@ print.prepper <- function(x,...) {
 
 #' Print a pre_processor object
 #' 
-#' Display information about a `pre_processor` using crayon-based formatting.
+#' Display information about a `pre_processor` using cli-based formatting.
 #' 
 #' @param x A `pre_processor` object.
 #' @param ... Additional arguments (ignored).
@@ -681,18 +681,18 @@ print.pre_processor <- function(x, ...) {
   # It has x$preproc to show original steps.
   # Let's show the chain of steps and indicate it's finalized.
   
-  cat(crayon::bold(crayon::green("A finalized pre-processing pipeline:\n")))
+  cat(cli::style_bold(cli::col_green("A finalized pre-processing pipeline:\n")))
   if (!is.null(x$preproc) && inherits(x$preproc, "prepper")) {
     nn <- sapply(x$preproc$steps, function(st) st$name)
     if (length(nn) == 0) {
-      cat(crayon::cyan("  No steps.\n"))
+      cat(cli::col_cyan("  No steps.\n"))
     } else {
       for (i in seq_along(nn)) {
-        cat(crayon::magenta(" Step ", i, ": "), crayon::cyan(nn[i]), "\n", sep="")
+        cat(cli::col_magenta(paste0(" Step ", i, ": ")), cli::col_cyan(nn[i]), "\n", sep="")
       }
     }
   } else {
-    cat(crayon::cyan("  No associated prepper information.\n"))
+    cat(cli::col_cyan("  No associated prepper information.\n"))
   }
   invisible(x)
 }
@@ -704,8 +704,8 @@ print.pre_processor <- function(x, ...) {
 #' @param ... Additional arguments (ignored).
 #' @export
 print.concat_pre_processor <- function(x, ...) {
-  cat(crayon::bold(crayon::green("A concatenated (blockwise) pre-processing pipeline:\n")))
-  cat(crayon::cyan("  This object applies different pre-processors to distinct column blocks.\n"))
+  cat(cli::style_bold(cli::col_green("A concatenated (blockwise) pre-processing pipeline:\n")))
+  cat(cli::col_cyan("  This object applies different pre-processors to distinct column blocks.\n"))
   invisible(x)
 }
 

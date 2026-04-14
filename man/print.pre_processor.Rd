@@ -12,5 +12,5 @@
 \item{...}{Additional arguments (ignored).}
 }
 \description{
-Display information about a \code{pre_processor} using crayon-based formatting.
+Display information about a \code{pre_processor} using cli-based formatting.
 }

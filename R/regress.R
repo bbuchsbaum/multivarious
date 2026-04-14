@@ -17,9 +17,7 @@
 #'   including an intercept) used in the fit, not the standard deviations of latent
 #'   components as might be typical in other `bi_projector` contexts (e.g., SVD).
 #' @export
-#' @importFrom glmnet glmnet
 #' @importFrom Matrix t
-#' @importFrom pls plsr
 #' @importFrom stats coef lm.fit sd
 #' @examples
 #' # Generate synthetic data
@@ -138,7 +136,11 @@ regress <- function(X, Y, preproc=pass(), method=c("lm", "enet", "mridge", "pls"
   # Y_approx = s %*% t(v)
   
   # Calculate sdev for the scores matrix (X_fit)
-  sds <- matrixStats::colSds(as.matrix(scores))
+  sds <- if (requireNamespace("matrixStats", quietly = TRUE)) {
+    matrixStats::colSds(as.matrix(scores))
+  } else {
+    apply(as.matrix(scores), 2, sd)
+  }
   # Handle columns with zero standard deviation (like intercept)
   zero_sd_idx <- sds < .Machine$double.eps
   if (any(zero_sd_idx)) {
@@ -254,24 +256,24 @@ partial_inverse_projection.regress <- function(x, colind, ...) {
 #' @param ... Additional arguments passed to `print()`.
 #' @export
 print.regress <- function(x, ...) {
-  cat(crayon::bold(crayon::green("Regression bi_projector object:\n")))
-  
+  cat(cli::style_bold(cli::col_green("Regression bi_projector object:\n")))
+
   # Display method
   if (!is.null(x$method)) {
-    cat(crayon::yellow("  Method: "), crayon::cyan(x$method), "\n", sep="")
+    cat(cli::col_yellow("  Method: "), cli::col_cyan(x$method), "\n", sep="")
   } else {
-    cat(crayon::yellow("  Method: "), crayon::cyan("unknown"), "\n", sep="")
+    cat(cli::col_yellow("  Method: "), cli::col_cyan("unknown"), "\n", sep="")
   }
-  
+
   # Input/Output dims from v
-  cat(crayon::yellow("  Input dimension: "), nrow(x$v), "\n", sep="")
-  cat(crayon::yellow("  Output dimension: "), ncol(x$v), "\n", sep="")
-  
+  cat(cli::col_yellow("  Input dimension: "), nrow(x$v), "\n", sep="")
+  cat(cli::col_yellow("  Output dimension: "), ncol(x$v), "\n", sep="")
+
   # Check if intercept was used: If intercept present, betas includes an extra row
   # but we have no direct flag. The code doesn't store intercept explicitly,
   # so we won't guess. Let's just print coefficients dim:
-  cat(crayon::yellow("  Coefficients dimension: "),
+  cat(cli::col_yellow("  Coefficients dimension: "),
       paste(dim(x$coefficients), collapse=" x "), "\n")
-  
+
   invisible(x)
 }

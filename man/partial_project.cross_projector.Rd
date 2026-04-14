@@ -8,7 +8,7 @@
   x,
   new_data,
   colind,
-  least_squares = TRUE,
+  least_squares = FALSE,
   lambda = 1e-06,
   source = c("X", "Y"),
   ...
@@ -23,7 +23,7 @@ the observations corresponding to the columns specified by \code{colind}.}
 \item{colind}{A numeric vector of column indices in the original data space
 (either X or Y domain, specified by \code{source}) that correspond to \code{new_data}'s columns.}
 
-\item{least_squares}{Logical; if TRUE (default), use ridge-regularized least squares for projection.}
+\item{least_squares}{Logical; if TRUE, use ridge-regularized least squares for projection (default FALSE).}
 
 \item{lambda}{Numeric; ridge penalty (default 1e-6). Ignored if \code{least_squares=FALSE}.}
 

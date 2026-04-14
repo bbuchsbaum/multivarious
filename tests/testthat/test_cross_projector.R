@@ -43,6 +43,10 @@ make_blocks_nonortho <- function(n = 40L,
   )
 }
 
+noop_preproc <- function(p) {
+  fit(pass(), matrix(0, nrow = 1, ncol = p))
+}
+
 
 # =========================================================================
 # 1. ‑‑ Constructor + accessor sanity -------------------------------------
@@ -50,8 +54,7 @@ make_blocks_nonortho <- function(n = 40L,
 test_that("cross_projector stores and reports correct shapes & coefficients", {
 
   dims <- make_blocks()
-  preproc <- prep(pass())
-  Xp <- init_transform(preproc, dims$X)
+  preproc <- noop_preproc(nrow(dims$Vx))
   cp   <- cross_projector(dims$Vx, dims$Vy, preproc_x = preproc, preproc_y = preproc)
 
   ## classes
@@ -73,8 +76,7 @@ test_that("cross_projector stores and reports correct shapes & coefficients", {
 test_that("project and partial_project yield expected factor scores", {
 
   dims <- make_blocks()
-  preproc <- prep(pass())
-  Xp <- init_transform(preproc, dims$X)
+  preproc <- noop_preproc(nrow(dims$Vx))
   cp   <- cross_projector(dims$Vx, dims$Vy, preproc_x = preproc, preproc_y = preproc)
 
   ## ----------   full projection on X   ----------
@@ -106,8 +108,7 @@ test_that("project and partial_project yield expected factor scores", {
 test_that("transfer converts X‑>Y (and Y‑>X) with low reconstruction error", {
 
   dims <- make_blocks()
-  preproc <- prep(pass())
-  Xp <- init_transform(preproc, dims$X)
+  preproc <- noop_preproc(nrow(dims$Vx))
   cp   <- cross_projector(dims$Vx, dims$Vy, preproc_x = preproc, preproc_y = preproc)
 
   ## X  →  latent  →  Y
@@ -131,7 +132,7 @@ test_that("transfer converts X‑>Y (and Y‑>X) with low reconstruction error",
 # -------------------------------------------------------------------------
 test_that("transfer uses ridge regularized projection when opts$ls_rr", {
   dims <- make_blocks_nonortho()
-  preproc <- prep(pass())
+  preproc <- noop_preproc(nrow(dims$Vx))
   cp   <- cross_projector(dims$Vx, dims$Vy, preproc_x = preproc, preproc_y = preproc)
   lambda <- 0.5
 
@@ -152,8 +153,7 @@ test_that("transfer uses ridge regularized projection when opts$ls_rr", {
 test_that("reprocess.cross_projector validates column indices", {
 
   dims <- make_blocks()
-  preproc <- prep(pass())
-  Xp <- init_transform(preproc, dims$X)
+  preproc <- noop_preproc(nrow(dims$Vx))
   cp   <- cross_projector(dims$Vx, dims$Vy, preproc_x = preproc, preproc_y = preproc)
 
   # Valid subset works
@@ -162,4 +162,3 @@ test_that("reprocess.cross_projector validates column indices", {
   # Invalid index should error
   expect_error(reprocess(cp, dims$X[, 1:2], colind = c(1, 10), source = "X"))
 })
-

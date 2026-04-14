@@ -160,7 +160,6 @@ measure_interblock_transfer_error <- function(Xtrue, Ytrue, model,
 #'   \item{fold}{integer fold index}
 #'   \item{model}{list of fitted models}
 #'   \item{metrics}{list of metric tibbles/lists}
-#' @importFrom dplyr bind_rows
 #' @importFrom tibble tibble
 #' @export
 cv_generic <- function(data, folds, .fit_fun, .measure_fun, 
@@ -239,7 +238,7 @@ cv_generic <- function(data, folds, .fit_fun, .measure_fun,
                          fit_args=fit_args, measure_args=measure_args)
   }
   
-  dplyr::bind_rows(res_list)
+  do.call(rbind, res_list)
 }
 
 

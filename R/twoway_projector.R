@@ -131,7 +131,7 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
 #'   the observations corresponding to the columns specified by `colind`.
 #' @param colind A numeric vector of column indices in the original data space
 #'   (either X or Y domain, specified by `source`) that correspond to `new_data`'s columns.
-#' @param least_squares Logical; if TRUE (default), use ridge-regularized least squares for projection.
+#' @param least_squares Logical; if TRUE, use ridge-regularized least squares for projection (default FALSE).
 #' @param lambda Numeric; ridge penalty (default 1e-6). Ignored if `least_squares=FALSE`.
 #' @param source Character, either "X" or "Y", indicating which domain `new_data` and `colind` belong to.
 #' @param ... Additional arguments (currently ignored).
@@ -139,7 +139,7 @@ reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y
 #' @return A numeric matrix (n x d) of factor scores in the latent subspace.
 #' @export
 partial_project.cross_projector <- function(x, new_data, colind,
-                                            least_squares=TRUE,
+                                            least_squares=FALSE,
                                             lambda=1e-6,
                                             source=c("X","Y"),
                                             ...) {

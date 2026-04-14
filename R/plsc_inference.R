@@ -311,7 +311,7 @@ bootstrap.plsc <- function(x, nboot = 500, ...) {
 
 #' @export
 print.bootstrap_plsc_result <- function(x, ...) {
-  cat(crayon::bold(crayon::green("PLSC bootstrap (loadings)\n")))
+  cat(cli::style_bold(cli::col_green("PLSC bootstrap (loadings)\n")))
   cat("Components: ", x$comps, 
       " | Successful resamples: ", x$successful_nboot, 
       "/", x$requested_nboot, "\n", sep = "")

@@ -971,13 +971,7 @@ feature_importance.classifier <- function(x, new_data,
 #' # print(clf)
 print.classifier <- function(x, ...) {
   # Helper function for optional coloring
-  maybe_cyan <- function(text) {
-    if (requireNamespace("crayon", quietly = TRUE)) {
-      crayon::cyan(text)
-    } else {
-      text
-    }
-  }
+  maybe_cyan <- function(text) cli::col_cyan(text)
 
   cat("k-NN Classifier object:\n")
   cat(maybe_cyan("  k-NN Neighbors (k):"), x$knn, "\n")
@@ -1013,13 +1007,7 @@ print.classifier <- function(x, ...) {
 #' # print(rf_clf)
 print.rf_classifier <- function(x, ...) {
   # Helper function for optional coloring
-  maybe_cyan <- function(text) {
-    if (requireNamespace("crayon", quietly = TRUE)) {
-      crayon::cyan(text)
-    } else {
-      text
-    }
-  }
+  maybe_cyan <- function(text) cli::col_cyan(text)
 
   cat("Random Forest Classifier object:\n")
 

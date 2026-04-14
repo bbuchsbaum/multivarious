@@ -24,15 +24,17 @@ Y_signal <- factor(rep(c("A", "B"), each = n_per))
 X_noise  <- X_signal                       # same features
 Y_noise  <- factor(sample(Y_signal))       # labels unrelated to X
 
+noop_preproc <- function(p) {
+  fit(pass(), matrix(0, nrow = 1, ncol = p))
+}
+
 # -------------------------------------------------------------------------
 # 1. Constructor integrity -------------------------------------------------
 # -------------------------------------------------------------------------
 test_that("discriminant_projector constructor stores consistent state", {
 
   lda_fit  <- lda(X_signal, grouping = Y_signal)
-  # Initialize the default preprocessor (pass() does nothing, but follows pattern)
-  preproc <- prep(pass())
-  Xp <- init_transform(preproc, X_signal)
+  preproc <- noop_preproc(ncol(X_signal))
   
   dp       <- discriminant_projector(
                 v      = lda_fit$scaling,
@@ -55,8 +57,7 @@ test_that("discriminant_projector preserves factor level order", {
 
   labs_custom <- factor(Y_signal, levels = c("B", "A"))
   lda_fit  <- lda(X_signal, grouping = labs_custom)
-  preproc <- prep(pass())
-  Xp <- init_transform(preproc, X_signal)
+  preproc <- noop_preproc(ncol(X_signal))
 
   dp <- discriminant_projector(
           v      = lda_fit$scaling,
@@ -74,9 +75,7 @@ test_that("discriminant_projector preserves factor level order", {
 # -------------------------------------------------------------------------
 test_that("predict.discriminant_projector produces sensible classes & probabilities", {
 
-  # Initialize the default preprocessor
-  preproc <- prep(pass())
-  Xp <- init_transform(preproc, X_signal)
+  preproc <- noop_preproc(ncol(X_signal))
   
   dp <- {
     lda_fit <- lda(X_signal, grouping = Y_signal)
@@ -109,11 +108,8 @@ test_that("predict.discriminant_projector produces sensible classes & probabilit
 # -------------------------------------------------------------------------
 test_that("perm_test.discriminant_projector yields small p for signal and large p for noise", {
 
-  # Initialize the default preprocessor
-  preproc1 <- prep(pass())
-  preproc2 <- prep(pass())
-  initialized_proc <- init_transform(preproc1, X_signal)
-  initialized_proc_noise <- init_transform(preproc2, X_noise) # Need one for noise data too
+  preproc1 <- noop_preproc(ncol(X_signal))
+  preproc2 <- noop_preproc(ncol(X_noise))
   
   ## fit on signal ---------------------------------------------------------
   lda_sig <- lda(X_signal, grouping = Y_signal)
@@ -158,8 +154,7 @@ test_that("predict works when covariance is rank deficient", {
   # manually supply rank deficient Sigma
   Sigma_rd <- cov(X_rd)
 
-  preproc <- prep(pass())
-  init_transform(preproc, X_rd)
+  preproc <- noop_preproc(ncol(X_rd))
 
   dp <- discriminant_projector(v      = lda_fit$scaling,
                                s      = X_rd %*% lda_fit$scaling,

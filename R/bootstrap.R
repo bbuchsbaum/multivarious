@@ -222,7 +222,14 @@ bootstrap_pca <- function(x, nboot = 100, k = NULL,
     res_list <- future.apply::future_lapply(1:nboot, svd_one_bootstrap_sample, future.seed = seed)
   } else {
     # Set seed locally if not running in parallel
-    if (!is.null(seed)) withr::local_seed(seed)
+    if (!is.null(seed)) {
+      old_seed <- if (exists(".Random.seed", envir = globalenv())) .Random.seed else NULL
+      on.exit({
+        if (!is.null(old_seed)) .Random.seed <<- old_seed
+        else rm(".Random.seed", envir = globalenv())
+      }, add = TRUE)
+      set.seed(seed)
+    }
     res_list <- lapply(1:nboot, svd_one_bootstrap_sample)
   }
 

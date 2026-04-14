@@ -1,6 +1,16 @@
-## Resubmission
+## Resubmission (0.3.1)
 
-This is a resubmission. In this version I have:
+This is a patch release to fix issues discovered after submitting version 0.3.0:
+
+* **Bug fix**: `reconstruct_new.bi_projector()` had a double-preprocessing bug that caused incorrect results when reconstructing held-out data. This affected cross-validation workflows.
+
+* **Vignette corrections**: Several vignettes contained broken or misleading examples that we discovered after submission. The CrossValidation vignette had non-working code that produced warnings/errors. Other vignettes had excessive commented-out code and unclear explanations. All vignettes have been reviewed and corrected.
+
+* **Added regression tests** to prevent the `reconstruct_new()` bug from recurring.
+
+We apologize for the oversight in 0.3.0. The vignettes were not sufficiently tested before submission.
+
+## Previous submission (0.3.0)
 
 * Fixed T/F shorthand usage to TRUE/FALSE for CRAN compliance
 * Converted `\dontrun{}` to `\donttest{}` for executable examples
@@ -46,6 +56,6 @@ There are currently no reverse dependencies for this package.
 ## Test environments
 
 * Local: macOS Sonoma 14.3, R 4.5.1 (aarch64-apple-darwin20)
-* win-builder: Windows Server 2022, R-release (R 4.5.0)
+* win-builder: Windows Server 2022, R-release
 * win-builder: Windows Server 2022, R-devel
 * mac-builder: macOS, R-release (Apple Silicon)

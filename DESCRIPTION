@@ -1,6 +1,6 @@
 Package: multivarious
 Title: Extensible Data Structures for Multivariate Analysis
-Version: 0.3.0
+Version: 0.3.1
 Authors@R: 
     person(given = "Bradley",
            family = "Buchsbaum",
@@ -13,42 +13,42 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
-Imports: 
+Imports:
     rlang,
     chk,
-    glmnet,
     corpcor,
     Matrix,
-    rsvd,
-    svd,
-    pls,
-    irlba,
-    RSpectra,
-    proxy,
-    matrixStats,
-    ggplot2,
-    ggrepel,
-    future.apply,
+    geigen,
     tibble,
-    dplyr,
-    crayon,
-    MASS,
     methods,
     cli,
-    withr,
-    assertthat,
-    future,
-    geigen,
-    PRIMME,
-    GPArotation,
     lifecycle
-Suggests: 
+Suggests:
+    assertthat,
     covr,
-    randomForest,
-    testthat,
-    magrittr,
+    crayon,
+    dplyr,
+    future,
+    future.apply,
+    ggplot2,
+    ggrepel,
+    glmnet,
+    GPArotation,
+    irlba,
     knitr,
-    rmarkdown
+    magrittr,
+    MASS,
+    matrixStats,
+    pls,
+    PRIMME,
+    proxy,
+    randomForest,
+    rmarkdown,
+    rsvd,
+    RSpectra,
+    svd,
+    testthat,
+    withr
 URL: https://bbuchsbaum.github.io/multivarious/
 VignetteBuilder: knitr
 Config/Needs/website: albersdown

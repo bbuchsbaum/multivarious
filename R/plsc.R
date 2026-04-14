@@ -93,10 +93,10 @@ plsc <- function(X,
 
 #' @export
 print.plsc <- function(x, ...) {
-  cat(crayon::bold(crayon::green("PLSC object (cross-projector)\n\n")))
-  cat(crayon::cyan("Samples: "), nrow(x$sx), "\n", sep = "")
-  cat(crayon::cyan("X vars: "), nrow(x$vx), " | Y vars: ", nrow(x$vy), "\n", sep = "")
-  cat(crayon::cyan("Components: "), ncomp(x), "\n", sep = "")
+  cat(cli::style_bold(cli::col_green("PLSC object (cross-projector)\n\n")))
+  cat(cli::col_cyan("Samples: "), nrow(x$sx), "\n", sep = "")
+  cat(cli::col_cyan("X vars: "), nrow(x$vx), " | Y vars: ", nrow(x$vy), "\n", sep = "")
+  cat(cli::col_cyan("Components: "), ncomp(x), "\n", sep = "")
   if (!is.null(x$singvals)) {
     cat("Singular values: ", paste(round(x$singvals, 4), collapse = ", "), "\n")
   }
