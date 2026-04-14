@@ -66,3 +66,29 @@ test_that("cca supports block-specific ridge shrinkage", {
   expect_equal(dim(scores(fit, "X")), c(nrow(dat$X), 2))
   expect_equal(dim(scores(fit, "Y")), c(nrow(dat$Y), 2))
 })
+
+test_that("cca subclass methods preserve paired state after truncation", {
+  set.seed(44)
+  dat <- make_cca_signal(n = 50, pX = 8, pY = 7, d = 3, noise = 0.03)
+
+  fit <- cca(dat$X, dat$Y, ncomp = 3, lambda = 0.05)
+  fit2 <- truncate(fit, 2)
+
+  expect_s3_class(fit2, c("cca", "cross_projector", "projector"))
+  expect_equal(dim(coef(fit2, "X")), c(ncol(dat$X), 2))
+  expect_equal(dim(coef(fit2, "Y")), c(ncol(dat$Y), 2))
+  expect_equal(dim(scores(fit2, "X")), c(nrow(dat$X), 2))
+  expect_equal(dim(scores(fit2, "Y")), c(nrow(dat$Y), 2))
+  expect_length(fit2$cor, 2)
+  expect_equal(project(fit2, dat$X, source = "X"), fit2$sx, tolerance = 1e-8)
+  expect_equal(
+    reprocess(fit2, dat$Y, source = "Y"),
+    transform(fit2$preproc_y, dat$Y),
+    tolerance = 1e-8
+  )
+
+  Y_hat <- transfer(fit2, dat$X, from = "X", to = "Y",
+                    opts = list(ls_rr = TRUE, comps = 1:2))
+  expect_equal(dim(Y_hat), dim(dat$Y))
+  expect_true(all(is.finite(Y_hat)))
+})

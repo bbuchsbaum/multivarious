@@ -147,6 +147,12 @@ print.cca <- function(x, ...) {
   invisible(x)
 }
 
+#' @export
+coef.cca <- function(object, source = c("X", "Y"), ...) {
+  source <- match.arg(source)
+  coef.cross_projector(object, source = source, ...)
+}
+
 #' Extract scores from a CCA fit
 #'
 #' @param x A \code{cca} object.
@@ -161,6 +167,59 @@ scores.cca <- function(x, block = c("X", "Y"), ...) {
   } else {
     x$sy
   }
+}
+
+#' @export
+reprocess.cca <- function(x, new_data, colind = NULL, source = c("X", "Y"), ...) {
+  source <- match.arg(source)
+  reprocess.cross_projector(x, new_data, colind = colind, source = source, ...)
+}
+
+#' @export
+transfer.cca <- function(x, new_data, from, to, opts = list(), ...) {
+  transfer.cross_projector(x, new_data, from = from, to = to, opts = opts, ...)
+}
+
+#' @export
+truncate.cca <- function(x, ncomp) {
+  old_ncomp <- ncomp(x)
+  chk::chk_number(ncomp)
+  if (ncomp < 1 || ncomp > old_ncomp) {
+    stop("Requested ncomp must be between 1 and ", old_ncomp)
+  }
+
+  keep <- seq_len(ncomp)
+  x$vx <- x$vx[, keep, drop = FALSE]
+  x$vy <- x$vy[, keep, drop = FALSE]
+  x$v <- x$vx
+
+  if (!is.null(x$sx)) {
+    x$sx <- x$sx[, keep, drop = FALSE]
+  }
+  if (!is.null(x$sy)) {
+    x$sy <- x$sy[, keep, drop = FALSE]
+  }
+  if (!is.null(x$cor)) {
+    x$cor <- x$cor[keep]
+  }
+  if (!is.null(x$cancor)) {
+    x$cancor <- x$cancor[keep]
+  }
+  if (!is.null(x$explained_cor)) {
+    explained <- x$explained_cor[keep]
+    denom <- sum(explained)
+    if (is.finite(denom) && denom > 0) {
+      explained <- explained / denom
+    }
+    x$explained_cor <- explained
+  }
+
+  cache_env <- x$.cache
+  if (is.environment(cache_env)) {
+    rm(list = ls(cache_env), envir = cache_env)
+  }
+
+  x
 }
 
 .cca_penalty_scale <- function(S, lambda) {
