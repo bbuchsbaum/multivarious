@@ -10,7 +10,8 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Extending multiblock: CCA and glmnet Examples">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="Extending multiblock: CCA and glmnet Examples">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,24 +31,8 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/Classifier.html">Classifying in latent space: k-NN &amp; Random-Forest wrappers</a></li>
-    <li><a class="dropdown-item" href="../articles/Composing_Projectors.html">Composing Projectors: Chaining Models</a></li>
-    <li><a class="dropdown-item" href="../articles/CPCAplus.html">Contrastive PCA: Finding What's Different Between Groups</a></li>
-    <li><a class="dropdown-item" href="../articles/CrossValidation.html">Cross-validation for Dimensionality Reduction</a></li>
-    <li><a class="dropdown-item" href="../articles/Extending.html">Extending multiblock: CCA and glmnet Examples</a></li>
-    <li><a class="dropdown-item" href="../articles/Introduction.html">Introduction to the multivarious Package</a></li>
-    <li><a class="dropdown-item" href="../articles/Multiblock.html">Multiblock basics: one projector, many tables</a></li>
-    <li><a class="dropdown-item" href="../articles/Nystrom.html">Kernel PCA Made Fast: The Nyström Approximation</a></li>
-    <li><a class="dropdown-item" href="../articles/Partial_Projection.html">Partial projection: working with incomplete feature sets</a></li>
-    <li><a class="dropdown-item" href="../articles/PermutationTesting.html">Permutation Testing in multivarious</a></li>
-    <li><a class="dropdown-item" href="../articles/PreProcessing.html">Pre-processing pipelines in multiblock</a></li>
-    <li><a class="dropdown-item" href="../articles/Regress.html">Linear Re-representation with regress()</a></li>
-    <li><a class="dropdown-item" href="../articles/SVD_PCA.html">SVD wrapper, PCA and the bi_projector</a></li>
-  </ul>
-</li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -180,8 +165,7 @@ and permutation testing (<code>perm_test</code>).</li>
 <p>Let’s predict the Y-block (Petal measurements) using the X-block
 (Sepal measurements).</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Predict Y from X</span></span>
-<span><span class="va">Y_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/transfer.html">transfer</a></span><span class="op">(</span><span class="va">cp_cca</span>, <span class="va">X</span>, from <span class="op">=</span> <span class="st">"X"</span>, to <span class="op">=</span> <span class="st">"Y"</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">Y_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/transfer.html">transfer</a></span><span class="op">(</span><span class="va">cp_cca</span>, <span class="va">X</span>, from <span class="op">=</span> <span class="st">"X"</span>, to <span class="op">=</span> <span class="st">"Y"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">Y_hat</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;      [,1] [,2]</span></span>
 <span><span class="co">#&gt; [1,] 1.84 0.54</span></span>
@@ -191,10 +175,6 @@ and permutation testing (<code>perm_test</code>).</li>
 <span><span class="co">#&gt; [5,] 1.54 0.46</span></span>
 <span><span class="co">#&gt; [6,] 2.06 0.85</span></span>
 <span></span>
-<span><span class="co"># Evaluate reconstruction quality (comparing original Y to predicted Y)</span></span>
-<span><span class="co"># Note: CCA maximizes correlation in the latent space, not prediction accuracy.</span></span>
-<span><span class="co"># With only 2 components and weak relationships between sepal and petal features,</span></span>
-<span><span class="co"># the R² may be modest. For prediction tasks, consider PLS instead of CCA.</span></span>
 <span><span class="fu"><a href="../reference/measure_reconstruction_error.html">measure_reconstruction_error</a></span><span class="op">(</span><span class="va">Y</span>, <span class="va">Y_hat</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rmse"</span>, <span class="st">"r2"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 1 × 2</span></span></span>
 <span><span class="co">#&gt;    rmse    r2</span></span>
@@ -205,106 +185,72 @@ and permutation testing (<code>perm_test</code>).</li>
 <h3 id="using-partial-features">1.4 Using Partial Features<a class="anchor" aria-label="anchor" href="#using-partial-features"></a>
 </h3>
 <p>What if we only have Sepal.Length (the first column of X) at
-prediction time?</p>
+prediction time? We can still project into the latent space:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">new_x_partial</span>   <span class="op">&lt;-</span> <span class="va">X</span><span class="op">[</span>, <span class="fl">1</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span> <span class="co"># One column matrix</span></span>
-<span><span class="va">col_index</span>       <span class="op">&lt;-</span> <span class="fl">1</span>                     <span class="co"># Its index in the original X block</span></span>
+<code class="sourceCode R"><span><span class="va">new_x_partial</span> <span class="op">&lt;-</span> <span class="va">X</span><span class="op">[</span>, <span class="fl">1</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span></span>
 <span></span>
-<span><span class="co"># Project this partial data into the latent space</span></span>
-<span><span class="co"># Note: partial_project needs 'source' for cross_projector</span></span>
-<span><span class="va">scores_partial</span>  <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial_project.html">partial_project</a></span><span class="op">(</span><span class="va">cp_cca</span>, <span class="va">new_x_partial</span>,</span>
-<span>                                   colind <span class="op">=</span> <span class="va">col_index</span>,</span>
-<span>                                   source <span class="op">=</span> <span class="st">"X"</span><span class="op">)</span> <span class="co"># Specify source block</span></span>
+<span><span class="va">scores_partial</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial_project.html">partial_project</a></span><span class="op">(</span><span class="va">cp_cca</span>, <span class="va">new_x_partial</span>,</span>
+<span>                                  colind <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>                                  source <span class="op">=</span> <span class="st">"X"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">scores_partial</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;        [,1]   [,2]</span></span>
-<span><span class="co">#&gt; [1,]  9.564 -5.187</span></span>
-<span><span class="co">#&gt; [2,] 12.137 -6.582</span></span>
-<span><span class="co">#&gt; [3,] 14.710 -7.978</span></span>
-<span><span class="co">#&gt; [4,] 15.997 -8.676</span></span>
-<span><span class="co">#&gt; [5,] 10.851 -5.885</span></span>
-<span><span class="co">#&gt; [6,]  5.704 -3.093</span></span>
-<span></span>
-<span><span class="co"># We could then map these scores back to the Y-block space if needed,</span></span>
-<span><span class="co"># though interpretation might require care. Example using inverse_projection:</span></span>
-<span><span class="co"># Assuming inverse_projection method exists for cross_projector</span></span>
-<span><span class="co"># y_from_partial  &lt;- scores_partial %*% inverse_projection(cp_cca, domain = "Y")</span></span>
-<span><span class="co"># head(round(y_from_partial, 2))</span></span></code></pre></div>
+<span><span class="co">#&gt;       [,1]   [,2]</span></span>
+<span><span class="co">#&gt; [1,] 0.065 -0.035</span></span>
+<span><span class="co">#&gt; [2,] 0.083 -0.045</span></span>
+<span><span class="co">#&gt; [3,] 0.100 -0.054</span></span>
+<span><span class="co">#&gt; [4,] 0.109 -0.059</span></span>
+<span><span class="co">#&gt; [5,] 0.074 -0.040</span></span>
+<span><span class="co">#&gt; [6,] 0.039 -0.021</span></span></code></pre></div>
+<p>These scores represent the best estimate of position in the latent
+space given only partial input. This is useful for missing data
+scenarios or when only some measurements are available.</p>
 </div>
 <div class="section level3">
 <h3 id="cross-validated-component-selection">1.5 Cross-validated Component Selection<a class="anchor" aria-label="anchor" href="#cross-validated-component-selection"></a>
 </h3>
-<p>We can use the <code>cv_generic</code> function (or a dedicated
-<code>cv</code> method if available for <code>cross_projector</code>) to
-evaluate performance across components. Here, we measure the Root Mean
-Squared Error (RMSE) for transferring between blocks.</p>
+<p>Cross-validation for two-block models requires wrapper functions that
+handle both X and Y blocks. The pattern is:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
-<span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu">kfold_split</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, k <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> <span class="co"># Create 5 folds</span></span>
+<span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu">kfold_split</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>, k <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Note: Using cv_generic requires careful handling of two-block data.</span></span>
-<span><span class="co"># The following demonstrates the concept, assuming a cv method exists</span></span>
-<span><span class="co"># that can handle X, Y inputs directly or that cv_generic is adapted.</span></span>
-<span><span class="co"># For a real application, one might need helper functions within .fit_fun</span></span>
-<span><span class="co"># and .measure_fun to split/combine the data blocks within each fold.</span></span>
+<span><span class="va">cv_fit</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">train_data</span>, <span class="va">ncomp</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu">fit_cca</span><span class="op">(</span><span class="va">train_data</span><span class="op">$</span><span class="va">X</span>, <span class="va">train_data</span><span class="op">$</span><span class="va">Y</span>, ncomp <span class="op">=</span> <span class="va">ncomp</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Placeholder call assuming an appropriate `cv` method or adapted `cv_generic`:</span></span>
-<span><span class="co"># cv_res &lt;- cv( # Or cv_generic(...)</span></span>
-<span><span class="co">#   X, Y, # Hypothetical interface accepting two blocks</span></span>
-<span><span class="co">#   folds          = folds,</span></span>
-<span><span class="co">#   max_comp       = 2,</span></span>
-<span><span class="co">#   fit_fun        = fit_cca,</span></span>
-<span><span class="co">#   measure_fun    = measure_interblock_transfer_error,</span></span>
-<span><span class="co">#   measure_args   = list(metrics = c("x2y.rmse", "y2x.rmse"))</span></span>
-<span><span class="co"># )</span></span>
-<span><span class="co"># print(summary(cv_res)) # Would show average RMSE per component</span></span>
+<span><span class="va">cv_measure</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/measure_interblock_transfer_error.html">measure_interblock_transfer_error</a></span><span class="op">(</span></span>
+<span>    <span class="va">test_data</span><span class="op">$</span><span class="va">X</span>, <span class="va">test_data</span><span class="op">$</span><span class="va">Y</span>, <span class="va">model</span>,</span>
+<span>    metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"x2y.rmse"</span>, <span class="st">"y2x.rmse"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Example using cv_generic with wrappers (conceptual)</span></span>
-<span><span class="co"># Define wrappers carefully based on how data/folds are structured</span></span>
-<span><span class="co"># .fit_wrapper &lt;- function(train_data_list, ncomp, ...) {</span></span>
-<span><span class="co">#    fit_cca(train_data_list$X, train_data_list$Y, ncomp=ncomp, ...)</span></span>
-<span><span class="co"># }</span></span>
-<span><span class="co"># .measure_wrapper &lt;- function(model, test_data_list, metrics) {</span></span>
-<span><span class="co">#    measure_interblock_transfer_error(test_data_list$X, test_data_list$Y, model, metrics=metrics)</span></span>
-<span><span class="co"># }</span></span>
-<span><span class="co"># cv_generic_res &lt;- cv_generic(</span></span>
-<span><span class="co">#    data = list(X=X, Y=Y), # Requires folds based on row indices of X &amp; Y</span></span>
-<span><span class="co">#    folds = folds,</span></span>
-<span><span class="co">#    .fit_fun = .fit_wrapper,</span></span>
-<span><span class="co">#    fit_args = list(ncomp=2), # Pass ncomp here if fit_cca needs it</span></span>
-<span><span class="co">#    .measure_fun = .measure_wrapper,</span></span>
-<span><span class="co">#    measure_args = list(metrics=c("x2y.rmse", "y2x.rmse"))</span></span>
-<span><span class="co"># )</span></span>
-<span><span class="co"># print(summary(cv_generic_res)) # This would work if wrappers are correct</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Skipping CV execution in vignette for brevity/simplicity.\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Skipping CV execution in vignette for brevity/simplicity.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Users should adapt cv/cv_generic call based on package structure.\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Users should adapt cv/cv_generic call based on package structure.</span></span></code></pre></div>
+<span><span class="va">cv_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
+<span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>X <span class="op">=</span> <span class="va">X</span>, Y <span class="op">=</span> <span class="va">Y</span><span class="op">)</span>,</span>
+<span>  folds <span class="op">=</span> <span class="va">folds</span>,</span>
+<span>  .fit_fun <span class="op">=</span> <span class="va">cv_fit</span>,</span>
+<span>  .measure_fun <span class="op">=</span> <span class="va">cv_measure</span>,</span>
+<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>The key is packaging X and Y together so fold indices apply to both
+blocks simultaneously.</p>
 </div>
 <div class="section level3">
 <h3 id="permutation-test">1.6 Permutation Test<a class="anchor" aria-label="anchor" href="#permutation-test"></a>
 </h3>
-<p>We can test the significance of the relationship found by CCA using
-<code>perm_test</code>. This shuffles the rows of one block (e.g., Y)
-relative to the other to see if the observed transfer error is lower
-than expected by chance.</p>
+<p>We can test the significance of the X-Y relationship using
+<code><a href="../reference/perm_test.html">perm_test()</a></code>. The default shuffles rows of Y relative to X
+and measures whether the observed transfer error is lower than expected
+by chance.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Assuming perm_test.cross_projector method exists</span></span>
-<span><span class="co"># perm_res &lt;- perm_test(</span></span>
-<span><span class="co">#   cp_cca, X, Y = Y, # Pass the cross_projector and original data blocks</span></span>
-<span><span class="co">#   nperm = 100, # Use more perms (e.g., 1000) in practice</span></span>
-<span><span class="co">#   alternative = "less", # Test if observed error is less than permuted error</span></span>
-<span><span class="co">#   # Need to specify the statistic measured by perm_test for cross_projector</span></span>
-<span><span class="co">#   # e.g., measure_fun = function(model, X, Y) {</span></span>
-<span><span class="co">#   #    Yh &lt;- transfer(model, X, from="X", to="Y"); measure_reconstruction_error(Y, Yh, "rmse")$rmse</span></span>
-<span><span class="co">#   # }</span></span>
-<span><span class="co"># )</span></span>
-<span><span class="co"># print(perm_res)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Skipping permutation test execution in vignette.\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Skipping permutation test execution in vignette.</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Requires perm_test method for cross_projector, specifying the test statistic.\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Requires perm_test method for cross_projector, specifying the test statistic.</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="va">perm_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/perm_test.html">perm_test</a></span><span class="op">(</span></span>
+<span>  <span class="va">cp_cca</span>, <span class="va">X</span>, Y <span class="op">=</span> <span class="va">Y</span>,</span>
+<span>  nperm <span class="op">=</span> <span class="fl">199</span>,</span>
+<span>  alternative <span class="op">=</span> <span class="st">"less"</span></span>
+<span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">perm_res</span><span class="op">)</span></span></code></pre></div>
+<p>The default statistic is <code>x2y.mse</code> (mean squared error
+when predicting Y from X). A significant result (low p-value) indicates
+the CCA relationship is unlikely due to chance.</p>
 </div>
 <div class="section level3">
 <h3 id="cca-take-aways">1.7 CCA Take-aways<a class="anchor" aria-label="anchor" href="#cca-take-aways"></a>
@@ -394,8 +340,8 @@ scaling as preprocessing, often recommended for <code>glmnet</code>.</p>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">  Output dimension: </span>1</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">  With pre-processing:</span></span></span>
 <span><span class="co"><span style="color: #00BBBB;">#&gt; </span><span style="color: #00BB00; font-weight: bold;">A finalized pre-processing pipeline:</span></span></span>
-<span><span class="co"><span style="color: #00BB00; font-weight: bold;">#&gt; </span><span style="color: #BB00BB;"> Step  1 : </span><span style="color: #00BBBB;">center</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BB00BB;"> Step  2 : </span><span style="color: #00BBBB;">colscale</span></span></span></code></pre></div>
+<span><span class="co"><span style="color: #00BB00; font-weight: bold;">#&gt; </span><span style="color: #BB00BB;"> Step 1: </span><span style="color: #00BBBB;">center</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BB00BB;"> Step 2: </span><span style="color: #00BBBB;">colscale</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="project-new-data">2.3 Project New Data<a class="anchor" aria-label="anchor" href="#project-new-data"></a>
@@ -453,7 +399,7 @@ linear predictor score for new data.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>

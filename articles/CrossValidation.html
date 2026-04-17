@@ -10,7 +10,8 @@
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
-<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Cross-validation for Dimensionality Reduction">
+<script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
+<script src="../extra.js"></script><meta property="og:title" content="Cross-validation for Dimensionality Reduction">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -20,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -30,24 +31,8 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
-<li class="active nav-item dropdown">
-  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/Classifier.html">Classifying in latent space: k-NN &amp; Random-Forest wrappers</a></li>
-    <li><a class="dropdown-item" href="../articles/Composing_Projectors.html">Composing Projectors: Chaining Models</a></li>
-    <li><a class="dropdown-item" href="../articles/CPCAplus.html">Contrastive PCA: Finding What's Different Between Groups</a></li>
-    <li><a class="dropdown-item" href="../articles/CrossValidation.html">Cross-validation for Dimensionality Reduction</a></li>
-    <li><a class="dropdown-item" href="../articles/Extending.html">Extending multiblock: CCA and glmnet Examples</a></li>
-    <li><a class="dropdown-item" href="../articles/Introduction.html">Introduction to the multivarious Package</a></li>
-    <li><a class="dropdown-item" href="../articles/Multiblock.html">Multiblock basics: one projector, many tables</a></li>
-    <li><a class="dropdown-item" href="../articles/Nystrom.html">Kernel PCA Made Fast: The Nyström Approximation</a></li>
-    <li><a class="dropdown-item" href="../articles/Partial_Projection.html">Partial projection: working with incomplete feature sets</a></li>
-    <li><a class="dropdown-item" href="../articles/PermutationTesting.html">Permutation Testing in multivarious</a></li>
-    <li><a class="dropdown-item" href="../articles/PreProcessing.html">Pre-processing pipelines in multiblock</a></li>
-    <li><a class="dropdown-item" href="../articles/Regress.html">Linear Re-representation with regress()</a></li>
-    <li><a class="dropdown-item" href="../articles/SVD_PCA.html">SVD wrapper, PCA and the bi_projector</a></li>
-  </ul>
-</li>
+<li class="active nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><form class="form-inline" role="search">
@@ -79,19 +64,23 @@
 <h2 id="why-cross-validate-dimensionality-reduction">Why Cross-validate Dimensionality Reduction?<a class="anchor" aria-label="anchor" href="#why-cross-validate-dimensionality-reduction"></a>
 </h2>
 <p>When using PCA or other dimensionality reduction methods, we often
-face questions like: - How many components should I keep? - How well
-does my model generalize to new data? - Which preprocessing strategy
-works best?</p>
+face questions like:</p>
+<ul>
+<li>How many components should I keep?</li>
+<li>How well does my model generalize to new data?</li>
+<li>Which preprocessing strategy works best?</li>
+</ul>
 <p>Cross-validation provides principled answers by testing how well
 models trained on one subset of data perform on held-out data.</p>
 </div>
 <div class="section level2">
 <h2 id="quick-example-finding-the-right-number-of-components">Quick Example: Finding the Right Number of Components<a class="anchor" aria-label="anchor" href="#quick-example-finding-the-right-number-of-components"></a>
 </h2>
-<p>Let’s use the iris dataset to demonstrate:</p>
+<p>Let’s use the iris dataset to find the optimal number of PCA
+components via reconstruction error.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Prepare data</span></span>
-<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">)</span>  <span class="co"># 150 samples × 4 features</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">iris</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span>  <span class="co"># 150 samples x 4 features</span></span>
 <span></span>
 <span><span class="co"># Create 5-fold cross-validation splits</span></span>
 <span><span class="va">K</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
@@ -99,157 +88,91 @@ models trained on one subset of data perform on held-out data.</p>
 <span><span class="va">folds</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="va">K</span>, <span class="kw">function</span><span class="op">(</span><span class="va">k</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
 <span>  train <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">fold_ids</span> <span class="op">!=</span> <span class="va">k</span><span class="op">)</span>,</span>
 <span>  test  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">fold_ids</span> <span class="op">==</span> <span class="va">k</span><span class="op">)</span></span>
-<span><span class="op">)</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Define fitting and measuring functions for PCA cross-validation</span></span>
-<span><span class="va">fit_pca</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">train_data</span>, <span class="va">ncomp</span><span class="op">)</span> <span class="op">{</span></span>
+<span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Define the fitting and measurement functions. The measurement
+function projects test data, reconstructs it, and computes RMSE:</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">fit_pca</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">train_data</span>, <span class="va">ncomp</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">train_data</span>, ncomp <span class="op">=</span> <span class="va">ncomp</span>, preproc <span class="op">=</span> <span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="va">measure_pca</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Reconstruct test data using the model</span></span>
-<span>  <span class="va">test_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
-<span>  <span class="va">reconstructed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">model</span>, scores <span class="op">=</span> <span class="va">test_scores</span><span class="op">)</span></span>
+<span><span class="va">measure_reconstruction</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Project test data to score space</span></span>
+<span> <span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
 <span></span>
-<span>  <span class="co"># Measure reconstruction error</span></span>
-<span>  <span class="fu"><a href="../reference/measure_reconstruction_error.html">measure_reconstruction_error</a></span><span class="op">(</span><span class="va">test_data</span>, <span class="va">reconstructed</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rmse"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
+<span>  <span class="co"># Reconstruct: scores %*% t(loadings), then reverse centering</span></span>
+<span> <span class="va">recon</span> <span class="op">&lt;-</span> <span class="va">scores</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">v</span><span class="op">)</span></span>
+<span>  <span class="va">recon</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/inverse_transform.html">inverse_transform</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">preproc</span>, <span class="va">recon</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Run cross-validation for different numbers of components</span></span>
-<span><span class="va">results_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="kw">function</span><span class="op">(</span><span class="va">ncomp</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="co"># Compute RMSE</span></span>
+<span>  <span class="va">rmse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">test_data</span> <span class="op">-</span> <span class="va">recon</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>rmse <span class="op">=</span> <span class="va">rmse</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
+<p>Now run cross-validation for 1–4 components:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">results_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="kw">function</span><span class="op">(</span><span class="va">nc</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="va">cv_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
 <span>    data <span class="op">=</span> <span class="va">X</span>,</span>
 <span>    folds <span class="op">=</span> <span class="va">folds</span>,</span>
 <span>    .fit_fun <span class="op">=</span> <span class="va">fit_pca</span>,</span>
-<span>    .measure_fun <span class="op">=</span> <span class="va">measure_pca</span>,</span>
-<span>    fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="va">ncomp</span><span class="op">)</span>,</span>
+<span>    .measure_fun <span class="op">=</span> <span class="va">measure_reconstruction</span>,</span>
+<span>    fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="va">nc</span><span class="op">)</span>,</span>
 <span>    backend <span class="op">=</span> <span class="st">"serial"</span></span>
 <span>  <span class="op">)</span></span>
-<span>  <span class="va">cv_res</span><span class="op">$</span><span class="va">ncomp</span> <span class="op">&lt;-</span> <span class="va">ncomp</span></span>
-<span>  <span class="va">cv_res</span></span>
+<span>  <span class="co"># Extract RMSE from each fold and average</span></span>
+<span>  <span class="va">fold_rmse</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">cv_res</span><span class="op">$</span><span class="va">metrics</span>, <span class="kw">function</span><span class="op">(</span><span class="va">m</span><span class="op">)</span> <span class="va">m</span><span class="op">$</span><span class="va">rmse</span><span class="op">)</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="va">nc</span>, rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">fold_rmse</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 1: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 2: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 3: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 4: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 5: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 1: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 2: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 3: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 4: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 5: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 1: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 2: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 3: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 4: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 5: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 1: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 2: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 3: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 4: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 5: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
 <span></span>
-<span><span class="co"># Combine results</span></span>
-<span><span class="va">cv_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">results_list</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="va">x</span><span class="op">$</span><span class="va">ncomp</span>, rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">results</span><span class="op">$</span><span class="va">rmse</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `results`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(x$results$rmse, na.rm = TRUE): argument is not numeric</span></span>
-<span><span class="co">#&gt; or logical: returning NA</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `results`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(x$results$rmse, na.rm = TRUE): argument is not numeric</span></span>
-<span><span class="co">#&gt; or logical: returning NA</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `results`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(x$results$rmse, na.rm = TRUE): argument is not numeric</span></span>
-<span><span class="co">#&gt; or logical: returning NA</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `results`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(x$results$rmse, na.rm = TRUE): argument is not numeric</span></span>
-<span><span class="co">#&gt; or logical: returning NA</span></span>
-<span></span>
-<span><span class="co"># View results</span></span>
+<span><span class="va">cv_results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/do.call.html" class="external-link">do.call</a></span><span class="op">(</span><span class="va">rbind</span>, <span class="va">results_list</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">cv_results</span><span class="op">)</span></span>
-<span><span class="co">#&gt;    ncomp rmse</span></span>
-<span><span class="co">#&gt; 1      1   NA</span></span>
-<span><span class="co">#&gt; 2      1   NA</span></span>
-<span><span class="co">#&gt; 3      1   NA</span></span>
-<span><span class="co">#&gt; 4      1   NA</span></span>
-<span><span class="co">#&gt; 5      1   NA</span></span>
-<span><span class="co">#&gt; 6      2   NA</span></span>
-<span><span class="co">#&gt; 7      2   NA</span></span>
-<span><span class="co">#&gt; 8      2   NA</span></span>
-<span><span class="co">#&gt; 9      2   NA</span></span>
-<span><span class="co">#&gt; 10     2   NA</span></span>
-<span><span class="co">#&gt; 11     3   NA</span></span>
-<span><span class="co">#&gt; 12     3   NA</span></span>
-<span><span class="co">#&gt; 13     3   NA</span></span>
-<span><span class="co">#&gt; 14     3   NA</span></span>
-<span><span class="co">#&gt; 15     3   NA</span></span>
-<span><span class="co">#&gt; 16     4   NA</span></span>
-<span><span class="co">#&gt; 17     4   NA</span></span>
-<span><span class="co">#&gt; 18     4   NA</span></span>
-<span><span class="co">#&gt; 19     4   NA</span></span>
-<span><span class="co">#&gt; 20     4   NA</span></span></code></pre></div>
-<p>The plot shows that 2 components capture most of the variance, with
-diminishing returns after that.</p>
+<span><span class="co">#&gt;   ncomp         rmse</span></span>
+<span><span class="co">#&gt; 1     1 2.949027e-01</span></span>
+<span><span class="co">#&gt; 2     2 1.603380e-01</span></span>
+<span><span class="co">#&gt; 3     3 7.673558e-02</span></span>
+<span><span class="co">#&gt; 4     4 5.576655e-16</span></span></code></pre></div>
+<p>Two components capture most of the structure; additional components
+yield diminishing returns.</p>
 </div>
 <div class="section level2">
 <h2 id="understanding-the-output">Understanding the Output<a class="anchor" aria-label="anchor" href="#understanding-the-output"></a>
 </h2>
-<p>The <code><a href="../reference/cv_generic.html">cv_generic()</a></code> function returns a tibble
-containing:</p>
+<p>The <code><a href="../reference/cv_generic.html">cv_generic()</a></code> function returns a tibble with three
+columns:</p>
 <ul>
 <li>
-<strong>fold</strong>: The fold number</li>
+<strong>fold</strong>: The fold number (integer)</li>
 <li>
-<strong>model</strong>: The fitted model for each fold (stored as a
-list column)</li>
+<strong>model</strong>: The fitted model for that fold (list
+column)</li>
 <li>
-<strong>metrics</strong>: Performance metrics for each fold (stored
-as a list column of tibbles)</li>
+<strong>metrics</strong>: Performance metrics for that fold (list
+column of tibbles)</li>
 </ul>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># View the structure of CV results</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">results_list</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, max.level <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
-<span><span class="co">#&gt; tibble [5 × 4] (S3: tbl_df/tbl/data.frame)</span></span>
-<span><span class="co">#&gt;  $ fold   : int [1:5] 1 2 3 4 5</span></span>
-<span><span class="co">#&gt;  $ model  :List of 5</span></span>
-<span><span class="co">#&gt;  $ metrics:List of 5</span></span>
-<span><span class="co">#&gt;  $ ncomp  : int [1:5] 1 1 1 1 1</span></span>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Run CV once to inspect the structure</span></span>
+<span><span class="va">cv_example</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
+<span>  <span class="va">X</span>, <span class="va">folds</span>,</span>
+<span>  .fit_fun <span class="op">=</span> <span class="va">fit_pca</span>,</span>
+<span>  .measure_fun <span class="op">=</span> <span class="va">measure_reconstruction</span>,</span>
+<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Extract and combine all metrics across folds</span></span>
-<span><span class="va">all_fold_metrics</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">results_list</span>, <span class="kw">function</span><span class="op">(</span><span class="va">res</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
-<span>    ncomp <span class="op">=</span> <span class="va">res</span><span class="op">$</span><span class="va">ncomp</span>,</span>
-<span>    fold_metrics <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">res</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">all_fold_metrics</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ncomp                                    error</span></span>
-<span><span class="co">#&gt; 1     1 all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; 2     1 all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; 3     1 all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; 4     1 all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; 5     1 all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span></code></pre></div>
+<span><span class="co"># Structure overview</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/str.html" class="external-link">str</a></span><span class="op">(</span><span class="va">cv_example</span>, max.level <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
+<span><span class="co">#&gt; tibble [5 × 3] (S3: tbl_df/tbl/data.frame)</span></span>
+<span></span>
+<span><span class="co"># Extract metrics from all folds</span></span>
+<span><span class="va">all_metrics</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">cv_example</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">all_metrics</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 1</span></span></span>
+<span><span class="co">#&gt;    rmse</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 0.157</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 0.135</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 0.181</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 0.132</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 0.197</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="custom-cross-validation-scenarios">Custom Cross-validation Scenarios<a class="anchor" aria-label="anchor" href="#custom-cross-validation-scenarios"></a>
@@ -257,85 +180,46 @@ as a list column of tibbles)</li>
 <div class="section level3">
 <h3 id="scenario-1-comparing-preprocessing-strategies">Scenario 1: Comparing Preprocessing Strategies<a class="anchor" aria-label="anchor" href="#scenario-1-comparing-preprocessing-strategies"></a>
 </h3>
-<p>Use <code><a href="../reference/cv_generic.html">cv_generic()</a></code> to compare different preprocessing
-pipelines:</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define two preprocessing strategies</span></span>
-<span><span class="va">prep1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span>                       <span class="co"># Center only</span></span>
-<span><span class="va">prep2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/colscale.html">colscale</a></span><span class="op">(</span><span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"z"</span><span class="op">)</span> <span class="co"># Center and scale (z-score)</span></span>
+<p>Use <code><a href="../reference/cv_generic.html">cv_generic()</a></code> to compare centering alone versus
+z-scoring:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">prep_center</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">prep_zscore</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/colscale.html">colscale</a></span><span class="op">(</span><span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span>, type <span class="op">=</span> <span class="st">"z"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Fit function that uses PCA with preprocessing</span></span>
 <span><span class="va">fit_with_prep</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">train_data</span>, <span class="va">ncomp</span>, <span class="va">preproc</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># PCA will handle preprocessing internally</span></span>
 <span>  <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">train_data</span>, ncomp <span class="op">=</span> <span class="va">ncomp</span>, preproc <span class="op">=</span> <span class="va">preproc</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Measure function that handles preprocessing</span></span>
-<span><span class="va">measure_with_prep</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Project and reconstruct - PCA handles preprocessing automatically</span></span>
-<span>  <span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
-<span>  <span class="va">recon</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">model</span>, scores <span class="op">=</span> <span class="va">scores</span><span class="op">)</span></span>
-<span></span>
-<span>  <span class="co"># Calculate metrics</span></span>
-<span>  <span class="fu"><a href="../reference/measure_reconstruction_error.html">measure_reconstruction_error</a></span><span class="op">(</span><span class="va">test_data</span>, <span class="va">recon</span>,</span>
-<span>                               metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rmse"</span>, <span class="st">"r2"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># Compare both strategies</span></span>
-<span><span class="va">cv_prep1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
+<span><span class="co"># Compare both strategies with 3 components</span></span>
+<span><span class="va">cv_center</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
 <span>  <span class="va">X</span>, <span class="va">folds</span>,</span>
 <span>  .fit_fun <span class="op">=</span> <span class="va">fit_with_prep</span>,</span>
-<span>  .measure_fun <span class="op">=</span> <span class="va">measure_with_prep</span>,</span>
-<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">3</span>, preproc <span class="op">=</span> <span class="va">prep1</span><span class="op">)</span></span>
+<span>  .measure_fun <span class="op">=</span> <span class="va">measure_reconstruction</span>,</span>
+<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">3</span>, preproc <span class="op">=</span> <span class="va">prep_center</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 1: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 2: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 3: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 4: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 5: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
 <span></span>
-<span><span class="va">cv_prep2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
+<span><span class="va">cv_zscore</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
 <span>  <span class="va">X</span>, <span class="va">folds</span>,</span>
 <span>  .fit_fun <span class="op">=</span> <span class="va">fit_with_prep</span>,</span>
-<span>  .measure_fun <span class="op">=</span> <span class="va">measure_with_prep</span>,</span>
-<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">3</span>, preproc <span class="op">=</span> <span class="va">prep2</span><span class="op">)</span></span>
+<span>  .measure_fun <span class="op">=</span> <span class="va">measure_reconstruction</span>,</span>
+<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">3</span>, preproc <span class="op">=</span> <span class="va">prep_zscore</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 1: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 2: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 3: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 4: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 5: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
 <span></span>
-<span><span class="co"># Compare results - extract metrics from the tibble</span></span>
-<span><span class="va">metrics1</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">cv_prep1</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
-<span><span class="va">metrics2</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">cv_prep2</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
+<span><span class="va">rmse_center</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">cv_center</span><span class="op">$</span><span class="va">metrics</span>, <span class="va">`[[`</span>, <span class="st">"rmse"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">rmse_zscore</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="va">cv_zscore</span><span class="op">$</span><span class="va">metrics</span>, <span class="va">`[[`</span>, <span class="st">"rmse"</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Center only - RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">metrics1</span><span class="op">$</span><span class="va">rmse</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `rmse`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(metrics1$rmse, na.rm = TRUE): argument is not numeric</span></span>
-<span><span class="co">#&gt; or logical: returning NA</span></span>
-<span><span class="co">#&gt; Center only - RMSE: NA</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Center + Scale - RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">metrics2</span><span class="op">$</span><span class="va">rmse</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `rmse`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(metrics2$rmse, na.rm = TRUE): argument is not numeric</span></span>
-<span><span class="co">#&gt; or logical: returning NA</span></span>
-<span><span class="co">#&gt; Center + Scale - RMSE: NA</span></span></code></pre></div>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Center only - RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">rmse_center</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Center only - RMSE: 0.0764</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Z-score     - RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">rmse_zscore</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Z-score     - RMSE: 0.1053</span></span></code></pre></div>
+<p>For iris, centering alone performs slightly better since the
+variables are already on similar scales.</p>
 </div>
 <div class="section level3">
 <h3 id="scenario-2-parallel-cross-validation">Scenario 2: Parallel Cross-validation<a class="anchor" aria-label="anchor" href="#scenario-2-parallel-cross-validation"></a>
 </h3>
 <p>For larger datasets, run folds in parallel:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Setup parallel backend</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://future.futureverse.org" class="external-link">future</a></span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://future.futureverse.org/reference/plan.html" class="external-link">plan</a></span><span class="op">(</span><span class="va">multisession</span>, workers <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
@@ -355,98 +239,82 @@ pipelines:</p>
 </div>
 </div>
 <div class="section level2">
-<h2 id="available-metrics">Available Metrics<a class="anchor" aria-label="anchor" href="#available-metrics"></a>
+<h2 id="computing-multiple-metrics">Computing Multiple Metrics<a class="anchor" aria-label="anchor" href="#computing-multiple-metrics"></a>
 </h2>
-<p>The <code><a href="../reference/measure_reconstruction_error.html">measure_reconstruction_error()</a></code> function provides
-several metrics:</p>
+<p>You can return multiple metrics from the measurement function:</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">measure_multi</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="va">recon</span> <span class="op">&lt;-</span> <span class="va">scores</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">v</span><span class="op">)</span></span>
+<span>  <span class="va">recon</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/inverse_transform.html">inverse_transform</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">preproc</span>, <span class="va">recon</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="va">residuals</span> <span class="op">&lt;-</span> <span class="va">test_data</span> <span class="op">-</span> <span class="va">recon</span></span>
+<span>  <span class="va">ss_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
+<span>  <span class="va">ss_tot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="op">(</span><span class="va">test_data</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">test_data</span><span class="op">)</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span></span>
+<span></span>
+<span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>    rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">residuals</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    mae  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">residuals</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>    r2   <span class="op">=</span> <span class="fl">1</span> <span class="op">-</span> <span class="va">ss_res</span> <span class="op">/</span> <span class="va">ss_tot</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="va">cv_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
+<span>  <span class="va">X</span>, <span class="va">folds</span>,</span>
+<span>  .fit_fun <span class="op">=</span> <span class="va">fit_pca</span>,</span>
+<span>  .measure_fun <span class="op">=</span> <span class="va">measure_multi</span>,</span>
+<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">all_metrics</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">cv_multi</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">all_metrics</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 3</span></span></span>
+<span><span class="co">#&gt;     rmse    mae    r2</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 0.069<span style="text-decoration: underline;">0</span> 0.047<span style="text-decoration: underline;">5</span> 0.999</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 0.060<span style="text-decoration: underline;">3</span> 0.043<span style="text-decoration: underline;">1</span> 0.999</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 0.106  0.071<span style="text-decoration: underline;">6</span> 0.997</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 0.062<span style="text-decoration: underline;">4</span> 0.045<span style="text-decoration: underline;">3</span> 0.999</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 0.086<span style="text-decoration: underline;">3</span> 0.068<span style="text-decoration: underline;">0</span> 0.998</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nMean across folds:\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Mean across folds:</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">all_metrics</span><span class="op">$</span><span class="va">rmse</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; RMSE: 0.0767</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"MAE: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">all_metrics</span><span class="op">$</span><span class="va">mae</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; MAE:  0.0551</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"R2:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">all_metrics</span><span class="op">$</span><span class="va">r2</span><span class="op">)</span>, <span class="fl">4</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
+<span><span class="co">#&gt; R2:   0.9984</span></span></code></pre></div>
 <table class="table">
+<colgroup>
+<col width="21%">
+<col width="35%">
+<col width="43%">
+</colgroup>
 <thead><tr class="header">
 <th>Metric</th>
 <th>Description</th>
-<th>Range</th>
+<th>Interpretation</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code>mse</code></td>
-<td>Mean Squared Error</td>
-<td>[0, ∞)</td>
+<td>RMSE</td>
+<td>Root mean squared error</td>
+<td>Lower is better; in original units</td>
 </tr>
 <tr class="even">
-<td><code>rmse</code></td>
-<td>Root Mean Squared Error</td>
-<td>[0, ∞)</td>
+<td>MAE</td>
+<td>Mean absolute error</td>
+<td>Less sensitive to outliers than RMSE</td>
 </tr>
 <tr class="odd">
-<td><code>mae</code></td>
-<td>Mean Absolute Error</td>
-<td>[0, ∞)</td>
-</tr>
-<tr class="even">
-<td><code>r2</code></td>
-<td>R-squared (coefficient of determination)</td>
-<td>(-∞, 1]</td>
+<td>R²</td>
+<td>Coefficient of determination</td>
+<td>Proportion of variance explained (1 = perfect)</td>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define measure function with multiple metrics</span></span>
-<span><span class="va">measure_pca_multi</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">test_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
-<span>  <span class="va">reconstructed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">model</span>, scores <span class="op">=</span> <span class="va">test_scores</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="../reference/measure_reconstruction_error.html">measure_reconstruction_error</a></span><span class="op">(</span><span class="va">test_data</span>, <span class="va">reconstructed</span>,</span>
-<span>                               metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rmse"</span>, <span class="st">"r2"</span>, <span class="st">"mae"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="co"># Calculate multiple metrics at once</span></span>
-<span><span class="va">cv_multi</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
-<span>  <span class="va">X</span>,</span>
-<span>  folds <span class="op">=</span> <span class="va">folds</span>,</span>
-<span>  .fit_fun <span class="op">=</span> <span class="va">fit_pca</span>,</span>
-<span>  .measure_fun <span class="op">=</span> <span class="va">measure_pca_multi</span>,</span>
-<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 1: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 2: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 3: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 4: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Measuring failed for fold 5: all(dim(Xtrue) ==</span></span>
-<span><span class="co">#&gt; dim(Xrec)) is not TRUE</span></span>
-<span></span>
-<span><span class="co"># View all metrics - extract from list column</span></span>
-<span><span class="va">all_metrics_multi</span> <span class="op">&lt;-</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/bind_rows.html" class="external-link">bind_rows</a></span><span class="op">(</span><span class="va">cv_multi</span><span class="op">$</span><span class="va">metrics</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">all_metrics_multi</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5 × 1</span></span></span>
-<span><span class="co">#&gt;   error                                   </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> all(dim(Xtrue) == dim(Xrec)) is not TRUE</span></span>
-<span></span>
-<span><span class="co"># Calculate mean of each metric across folds</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"\nMean metrics across folds:\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Mean metrics across folds:</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"RMSE:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">all_metrics_multi</span><span class="op">$</span><span class="va">rmse</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `rmse`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(all_metrics_multi$rmse, na.rm = TRUE): argument is not</span></span>
-<span><span class="co">#&gt; numeric or logical: returning NA</span></span>
-<span><span class="co">#&gt; RMSE: NA</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"R²:  "</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">all_metrics_multi</span><span class="op">$</span><span class="va">r2</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `r2`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(all_metrics_multi$r2, na.rm = TRUE): argument is not</span></span>
-<span><span class="co">#&gt; numeric or logical: returning NA</span></span>
-<span><span class="co">#&gt; R²:   NA</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"MAE: "</span>, <span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="va">all_metrics_multi</span><span class="op">$</span><span class="va">mae</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Unknown or uninitialised column: `mae`.</span></span>
-<span><span class="co">#&gt; Warning in mean.default(all_metrics_multi$mae, na.rm = TRUE): argument is not</span></span>
-<span><span class="co">#&gt; numeric or logical: returning NA</span></span>
-<span><span class="co">#&gt; MAE:  NA</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="tips-for-effective-cross-validation">Tips for Effective Cross-validation<a class="anchor" aria-label="anchor" href="#tips-for-effective-cross-validation"></a>
@@ -455,19 +323,16 @@ several metrics:</p>
 <h3 id="preprocessing-inside-the-loop">1. Preprocessing Inside the Loop<a class="anchor" aria-label="anchor" href="#preprocessing-inside-the-loop"></a>
 </h3>
 <p>Always fit preprocessing parameters inside the CV loop:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># WRONG: Preprocessing outside CV</span></span>
-<span><span class="va">X_scaled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>  <span class="co"># Uses information from all samples!</span></span>
-<span><span class="va">cv_wrong</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
-<span>  <span class="va">X_scaled</span>, <span class="va">folds</span>,</span>
-<span>  .fit_fun <span class="op">=</span> <span class="va">fit_pca</span>,</span>
-<span>  .measure_fun <span class="op">=</span> <span class="va">measure_pca</span>,</span>
-<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># WRONG: Preprocessing outside CV leaks information</span></span>
+<span><span class="va">X_scaled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>  <span class="co"># Uses mean/sd from ALL samples including test!</span></span>
+<span><span class="va">cv_wrong</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span><span class="va">X_scaled</span>, <span class="va">folds</span>, <span class="va">...</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># RIGHT: Preprocessing inside CV</span></span>
-<span><span class="co"># Let PCA handle preprocessing with the preproc parameter</span></span>
-<span><span class="co"># (See preprocessing comparison example above)</span></span></code></pre></div>
+<span><span class="co"># RIGHT: Let the model handle preprocessing internally</span></span>
+<span><span class="co"># Each fold fits centering/scaling on training data only</span></span>
+<span><span class="va">fit_pca</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">train_data</span>, <span class="va">ncomp</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">train_data</span>, ncomp <span class="op">=</span> <span class="va">ncomp</span>, preproc <span class="op">=</span> <span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="choose-appropriate-fold-sizes">2. Choose Appropriate Fold Sizes<a class="anchor" aria-label="anchor" href="#choose-appropriate-fold-sizes"></a>
@@ -497,41 +362,28 @@ explained</li>
 <div class="section level2">
 <h2 id="advanced-cross-validating-other-projectors">Advanced: Cross-validating Other Projectors<a class="anchor" aria-label="anchor" href="#advanced-cross-validating-other-projectors"></a>
 </h2>
-<p>The CV framework works with any projector type:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Define fit function for kernel PCA using Nyström approximation</span></span>
-<span><span class="va">fit_kernel_pca</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">train_data</span>, <span class="va">ncomp</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="co"># Defaults to linear kernel; pass a custom kernel_func if needed</span></span>
-<span>  <span class="fu"><a href="../reference/nystrom_approx.html">nystrom_approx</a></span><span class="op">(</span><span class="va">train_data</span>, ncomp <span class="op">=</span> <span class="va">ncomp</span>, nlandmarks <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
+<p>The CV framework works with any projector type. The key is writing
+appropriate fit and measure functions.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># Nyström approximation for kernel PCA</span></span>
+<span><span class="va">fit_nystrom</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">train_data</span>, <span class="va">ncomp</span><span class="op">)</span> <span class="op">{</span></span>
+<span>  <span class="fu"><a href="../reference/nystrom_approx.html">nystrom_approx</a></span><span class="op">(</span><span class="va">train_data</span>, ncomp <span class="op">=</span> <span class="va">ncomp</span>, nlandmarks <span class="op">=</span> <span class="fl">50</span>, preproc <span class="op">=</span> <span class="fu"><a href="../reference/center.html">center</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Define measure function</span></span>
+<span><span class="co"># Kernel-space reconstruction error</span></span>
 <span><span class="va">measure_kernel</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="va">test_scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
-<span>  <span class="va">reconstructed</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">model</span>, scores <span class="op">=</span> <span class="va">test_scores</span><span class="op">)</span></span>
-<span>  <span class="fu"><a href="../reference/measure_reconstruction_error.html">measure_reconstruction_error</a></span><span class="op">(</span><span class="va">test_data</span>, <span class="va">reconstructed</span>, metrics <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rmse"</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="va">S</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="va">K_hat</span> <span class="op">&lt;-</span> <span class="va">S</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">S</span><span class="op">)</span></span>
+<span>  <span class="va">Xc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reprocess.html">reprocess</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="va">K_true</span> <span class="op">&lt;-</span> <span class="va">Xc</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">Xc</span><span class="op">)</span></span>
+<span>  <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>kernel_rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">K_hat</span> <span class="op">-</span> <span class="va">K_true</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Cross-validate kernel PCA</span></span>
-<span><span class="va">cv_kernel</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
-<span>  <span class="va">X</span>,</span>
-<span>  folds <span class="op">=</span> <span class="va">folds</span>,</span>
-<span>  .fit_fun <span class="op">=</span> <span class="va">fit_kernel_pca</span>,</span>
+<span><span class="va">cv_nystrom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
+<span>  <span class="va">X</span>, <span class="va">folds</span>,</span>
+<span>  .fit_fun <span class="op">=</span> <span class="va">fit_nystrom</span>,</span>
 <span>  .measure_fun <span class="op">=</span> <span class="va">measure_kernel</span>,</span>
 <span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
-<span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># For discriminant analysis with labels (requires passing labels)</span></span>
-<span><span class="va">fit_lda</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">train_data</span>, <span class="va">ncomp</span>, <span class="va">labels</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="fu"><a href="../reference/discriminant_projector.html">discriminant_projector</a></span><span class="op">(</span><span class="va">train_data</span>, <span class="va">labels</span>, ncomp <span class="op">=</span> <span class="va">ncomp</span><span class="op">)</span></span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">cv_lda</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
-<span>  <span class="va">X</span>,</span>
-<span>  folds <span class="op">=</span> <span class="va">folds</span>,</span>
-<span>  .fit_fun <span class="op">=</span> <span class="va">fit_lda</span>,</span>
-<span>  .measure_fun <span class="op">=</span> <span class="va">measure_pca</span>,</span>
-<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">3</span>, labels <span class="op">=</span> <span class="va">iris</span><span class="op">$</span><span class="va">Species</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -551,7 +403,7 @@ Nyström with the usual scaling</li>
 top eigenpairs of the kernel matrix <code>K = X_c X_c^T</code>. Below is
 a reproducible snippet that demonstrates this and shows how to project
 new data.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">80</span> <span class="op">*</span> <span class="fl">10</span><span class="op">)</span>, <span class="fl">80</span>, <span class="fl">10</span><span class="op">)</span></span>
 <span><span class="va">ncomp</span> <span class="op">&lt;-</span> <span class="fl">5</span></span>
@@ -616,7 +468,7 @@ new data.</p>
 <code>l</code> to reduce the small problem size. Provide a custom
 <code>kernel_func</code> if you need a non-linear kernel (e.g.,
 RBF).</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Example RBF kernel</span></span>
 <span><span class="va">gaussian_kernel</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">A</span>, <span class="va">B</span>, <span class="va">sigma</span> <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># ||a-b||^2 = ||a||^2 + ||b||^2 - 2 a·b</span></span>
@@ -659,7 +511,7 @@ RMSE on held‑out folds. For a test block with preprocessed data
 rank‑<code>k</code> model, the approximated kernel is
 <code>K_hat = S %*% t(S)</code>, where <code>S</code> are the component
 scores returned by <code><a href="../reference/project.html">project()</a></code>.</p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">202</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># PCA fit function (reuses earlier fit_pca)</span></span>
@@ -726,7 +578,7 @@ scores returned by <code><a href="../reference/project.html">project()</a></code
 <span>  <span class="fu">geom_col</span><span class="op">(</span>width <span class="op">=</span> <span class="fl">0.6</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">guides</span><span class="op">(</span>fill <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Cross‑validated kernel RMSE (k = 3)"</span>, y <span class="op">=</span> <span class="st">"Kernel RMSE"</span>, x <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
-<p><img src="CrossValidation_files/figure-html/nystrom_cv_compare-1.png" width="576"></p>
+<p><img src="CrossValidation_files/figure-html/nystrom_cv_compare-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 </div>
 <div class="section level2">
@@ -750,7 +602,7 @@ your dimensionality reduction generalizes well to new data.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
