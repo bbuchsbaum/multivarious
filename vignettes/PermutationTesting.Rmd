@@ -118,6 +118,58 @@ For multi-block analyses, the null hypothesis is that blocks share no common str
 
 **Statistic:** Consensus measures (leading eigenvalue or mean absolute correlation between block scores).
 
+## Effect operators from `mixed_regress()`
+
+For mixed or repeated-measures multivariate regression, the null hypothesis is attached to a named fixed-effect term rather than a whole model. The shuffle scheme depends on the term:
+
+- between-subject terms use whole-subject block permutation,
+- within-subject terms use within-subject row shuffles,
+- mixed terms use grouped reduced-model residual resampling.
+
+**Statistics:**
+
+- omnibus trace statistic: `tr(T_H)`,
+- sequential rank statistic: relative leading singular-value energy after projected-residual rank correction.
+
+The workflow is:
+
+```{r mixed_effect_perm_example}
+set.seed(11)
+
+design <- expand.grid(
+  subject = factor(seq_len(8)),
+  level = factor(c("low", "mid", "high"), levels = c("low", "mid", "high")),
+  KEEP.OUT.ATTRS = FALSE
+)
+design$group <- factor(rep(c("A", "B"), each = 12))
+
+level_num <- c(low = -1, mid = 0, high = 1)[as.character(design$level)]
+group_num <- ifelse(design$group == "B", 1, 0)
+subj_idx <- as.integer(design$subject)
+b0 <- rnorm(8, sd = 0.5)
+
+Y <- cbind(
+  b0[subj_idx] + level_num + rnorm(nrow(design), sd = 0.15),
+  group_num + rnorm(nrow(design), sd = 0.15),
+  level_num * group_num + rnorm(nrow(design), sd = 0.15),
+  rnorm(nrow(design), sd = 0.15)
+)
+
+fit_mixed <- mixed_regress(
+  Y,
+  design = design,
+  fixed = ~ group * level,
+  random = ~ 1 | subject,
+  basis = shared_pca(3),
+  preproc = pass()
+)
+
+E_int <- effect(fit_mixed, "group:level")
+pt_int <- perm_test(E_int, nperm = 49, alpha = 0.10)
+
+pt_int$component_results
+```
+
 ---
 
 # 4. Custom Statistics and Shuffle Schemes

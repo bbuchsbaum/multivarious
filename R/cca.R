@@ -150,7 +150,7 @@ print.cca <- function(x, ...) {
 #' @export
 coef.cca <- function(object, source = c("X", "Y"), ...) {
   source <- match.arg(source)
-  coef.cross_projector(object, source = source, ...)
+  NextMethod()
 }
 
 #' Extract scores from a CCA fit
@@ -172,12 +172,12 @@ scores.cca <- function(x, block = c("X", "Y"), ...) {
 #' @export
 reprocess.cca <- function(x, new_data, colind = NULL, source = c("X", "Y"), ...) {
   source <- match.arg(source)
-  reprocess.cross_projector(x, new_data, colind = colind, source = source, ...)
+  NextMethod()
 }
 
 #' @export
 transfer.cca <- function(x, new_data, from, to, opts = list(), ...) {
-  transfer.cross_projector(x, new_data, from = from, to = to, opts = opts, ...)
+  NextMethod()
 }
 
 #' @export

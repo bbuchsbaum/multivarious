@@ -514,8 +514,8 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
 #' @return a new `pre_processor` object that applies the correct transformations blockwise
 #' @examples 
 #' 
-#' p1 <- center() |> prep()
-#' p2 <- center() |> prep()
+#' p1 <- prep(center())
+#' p2 <- prep(center())
 #' 
 #' x1 <- rbind(1:10, 2:11)
 #' x2 <- rbind(1:10, 2:11)

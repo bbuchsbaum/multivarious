@@ -1,0 +1,272 @@
+---
+title: Mixed Effect Operators with mixed_regress()
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Mixed Effect Operators with mixed_regress()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+params:
+  family: red
+css: albers.css
+resource_files:
+- albers.css
+- albers.js
+includes:
+  in_header: |-
+    <script src="albers.js"></script>
+    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
+library(multivarious)
+```
+
+# 1. Operator-valued ANOVA
+
+`mixed_regress()` treats each named fixed-effect term as a multivariate object rather than a scalar test. The package-level idea is:
+
+- fit the row-side geometry once,
+- extract a named effect,
+- analyze that effect with the existing `multivarious` verbs.
+
+For a term `H`, the effect matrix is
+
+$$
+M_H = P_H^{(\Omega)} Y B
+$$
+
+where:
+
+- `Y` is the stacked observation-by-feature response matrix,
+- `P_H^{(\Omega)}` is the covariance-weighted projector for the term,
+- `B` is an optional shared feature basis.
+
+The returned `effect_operator` behaves like a `bi_projector`, so you can call `components()`, `scores()`, `truncate()`, `reconstruct()`, `perm_test()`, and `bootstrap()` directly.
+
+---
+
+# 2. Simulate a repeated-measures design
+
+We generate a simple low/mid/high repeated-measures dataset with a between-subject group factor, a random intercept, and a random slope on the ordered within-subject effect.
+
+```{r simulate_data}
+set.seed(1)
+
+n_subject <- 18
+levels_within <- c("low", "mid", "high")
+
+design <- expand.grid(
+  subject = factor(seq_len(n_subject)),
+  level = factor(levels_within, levels = levels_within),
+  KEEP.OUT.ATTRS = FALSE
+)
+
+subject_group <- rep(c("A", "B"), length.out = n_subject)
+design$group <- factor(subject_group[as.integer(design$subject)])
+
+level_num <- c(low = -1, mid = 0, high = 1)[as.character(design$level)]
+group_num <- ifelse(design$group == "B", 1, 0)
+subj_idx <- as.integer(design$subject)
+
+b0 <- rnorm(n_subject, sd = 0.7)
+b1 <- rnorm(n_subject, sd = 0.3)
+
+n <- nrow(design)
+p <- 8
+
+Y <- cbind(
+  b0[subj_idx] + 1.2 * level_num + rnorm(n, sd = 0.2),
+  0.8 * group_num + rnorm(n, sd = 0.2),
+  1.4 * level_num * group_num + rnorm(n, sd = 0.2),
+  -0.9 * level_num + rnorm(n, sd = 0.2),
+  b1[subj_idx] * level_num + rnorm(n, sd = 0.2),
+  rnorm(n, sd = 0.2),
+  rnorm(n, sd = 0.2),
+  rnorm(n, sd = 0.2)
+)
+
+dim(Y)
+```
+
+---
+
+# 3. Fit the model
+
+The current implementation supports one grouping variable and a shared row covariance across features. You can supply either a single random-effects bar such as `~ 1 + level | subject` or multiple bars that collapse to the same grouping variable, such as `~ (1 | subject) + (0 + level | subject)`.
+
+```{r fit_model}
+fit <- mixed_regress(
+  Y,
+  design = design,
+  fixed = ~ group * level,
+  random = ~ 1 + level | subject,
+  basis = shared_pca(ncomp = 4),
+  preproc = center()
+)
+
+print(fit)
+summary(fit)
+```
+
+The fit stores:
+
+- the design matrix,
+- the grouped row metric,
+- the shared feature basis,
+- metadata for named fixed-effect terms.
+
+---
+
+# 4. Extract a named effect
+
+Now extract the interaction effect as a first-class multivariate object.
+
+```{r extract_effect}
+E <- effect(fit, "group:level")
+
+print(E)
+ncomp(E)
+components(E)[1:8, ]
+```
+
+Because `E` is an `effect_operator` and inherits from `bi_projector`, the familiar decomposition grammar carries over:
+
+- `components(E)` gives feature directions,
+- `scores(E)` gives observation-side effect scores,
+- `truncate(E, k)` keeps only the first `k` axes.
+
+---
+
+# 5. Reconstruct the effect
+
+You can reconstruct the fitted contribution of the effect on different scales.
+
+```{r reconstruct_effect}
+E_proc <- reconstruct(E, scale = "processed")
+E_orig <- reconstruct(E, scale = "original")
+
+dim(E_proc)
+dim(E_orig)
+round(E_orig[1:6, 1:4], 3)
+```
+
+Typical choices:
+
+- `scale = "whitened"` for the covariance-adjusted effect geometry,
+- `scale = "processed"` for the response scale after preprocessing,
+- `scale = "original"` for the final effect contribution on the original variables.
+
+---
+
+# 6. Omnibus and rank inference
+
+`perm_test()` works directly on the extracted effect object.
+
+```{r permutation_test}
+set.seed(2)
+pt <- perm_test(E, nperm = 99, alpha = 0.10)
+
+print(pt)
+pt$component_results
+```
+
+The permutation result provides:
+
+- an omnibus trace test,
+- a sequential rank test based on relative singular-value statistics,
+- `ncomp(pt)` as the selected number of significant effect axes.
+
+```{r truncate_to_selected_rank}
+k <- ncomp(pt)
+E_sig <- truncate(E, k)
+
+k
+ncomp(E_sig)
+```
+
+---
+
+# 7. Stability by bootstrap
+
+Permutation asks whether an effect exists. Bootstrap asks whether the geometry is stable under subject resampling.
+
+```{r bootstrap_effect}
+set.seed(3)
+bres <- bootstrap(E, nboot = 49, resample = "subject")
+
+print(bres)
+bres$singular_values_mean
+```
+
+The bootstrap result contains means and standard deviations for:
+
+- singular values,
+- feature loadings,
+- full loading arrays across resamples.
+
+---
+
+# 8. Array input
+
+Repeated-measures arrays can be supplied directly. Internally they are normalized to the same stacked representation.
+
+```{r array_input}
+Y_array <- array(NA_real_, dim = c(n_subject, length(levels_within), p))
+idx <- 1
+for (i in seq_len(n_subject)) {
+  for (j in seq_along(levels_within)) {
+    Y_array[i, j, ] <- Y[idx, ]
+    idx <- idx + 1
+  }
+}
+
+fit_array <- mixed_regress(
+  Y_array,
+  design = design,
+  fixed = ~ group * level,
+  random = ~ 1 | subject,
+  basis = shared_pca(ncomp = 4),
+  preproc = center()
+)
+
+effect(fit_array, "level")$term
+```
+
+---
+
+# 9. Current scope
+
+The present implementation is intentionally narrow:
+
+- Gaussian multivariate responses,
+- one grouping variable,
+- random intercepts and random slopes,
+- grouped permutation and subject bootstrap,
+- shared feature basis or identity basis.
+
+The calibration harness used for the empirical checks in this vignette lives in `experimental/mixed_effect_operator_calibration.R`. Batch outputs can be written to `experimental/results/` for larger Monte Carlo runs outside the package test suite.
+
+Still to come:
+
+- richer exchangeability schemes for repeated-measures contrasts,
+- broader support beyond one grouping variable,
+- more extensive mixed-model examples across design families.
+
+---
+
+```{r internal_checks, eval=nzchar(Sys.getenv("_MULTIVARIOUS_DEV_COVERAGE")), include=FALSE}
+set.seed(4)
+chk_fit <- mixed_regress(
+  Y,
+  design = design,
+  fixed = ~ group * level,
+  random = ~ 1 | subject,
+  basis = shared_pca(ncomp = 3),
+  preproc = pass()
+)
+chk_E <- effect(chk_fit, "group:level")
+chk_pt <- perm_test(chk_E, nperm = 19, alpha = 0.2)
+stopifnot(inherits(chk_E, "effect_operator"))
+stopifnot(is.numeric(chk_pt$omnibus_p_value))
+```

@@ -257,7 +257,7 @@ reconstruct_new.projector <- function(x,
     inverse_transform(x$preproc, rec_data)
   } else {
     # PARTIAL reconstruction => new_data is (n x length(colind))
-    factor_scr <- partial_project.projector(
+    factor_scr <- partial_project(
       x, new_data, colind,
       least_squares = least_squares,
       lambda        = lambda

@@ -19,8 +19,8 @@ concatenate a sequence of pre-processors, each applied to a block of data.
 }
 \examples{
 
-p1 <- center() |> prep()
-p2 <- center() |> prep()
+p1 <- prep(center())
+p2 <- prep(center())
 
 x1 <- rbind(1:10, 2:11)
 x2 <- rbind(1:10, 2:11)

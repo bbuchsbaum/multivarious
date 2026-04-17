@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -17,6 +17,7 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><a class="nav-link" href="../articles/index.html">Articles</a></li>
+<li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
       </ul></div>
@@ -56,6 +57,13 @@
 
         <dt>
 
+          <code><a href="cca.html">cca()</a></code>
+
+        </dt>
+        <dd>Canonical Correlation Analysis (CCA)</dd>
+
+        <dt>
+
           <code><a href="svd_wrapper.html">svd_wrapper()</a></code>
 
         </dt>
@@ -70,6 +78,13 @@
 
         <dt>
 
+          <code><a href="mixed_regress.html">mixed_regress()</a></code>
+
+        </dt>
+        <dd>Mixed-effect multivariate regression</dd>
+
+        <dt>
+
           <code><a href="cPCAplus.html">cPCAplus()</a></code>
 
         </dt>
@@ -81,6 +96,27 @@
 
         </dt>
         <dd>Generalized Eigenvalue Decomposition</dd>
+
+        <dt>
+
+          <code><a href="identity_basis.html">identity_basis()</a></code>
+
+        </dt>
+        <dd>Identity basis specification</dd>
+
+        <dt>
+
+          <code><a href="shared_pca.html">shared_pca()</a></code>
+
+        </dt>
+        <dd>Shared PCA basis specification</dd>
+
+        <dt>
+
+          <code><a href="supplied_basis.html">supplied_basis()</a></code>
+
+        </dt>
+        <dd>Supplied basis specification</dd>
       </dl></div><div class="section level2">
       <h2 id="model-classes-for-multivariate-decompositions-and-extension">Model classes for multivariate decompositions and extension<a class="anchor" aria-label="anchor" href="#model-classes-for-multivariate-decompositions-and-extension"></a></h2>
 
@@ -104,6 +140,13 @@
 
         </dt>
         <dd>Construct a bi_projector instance</dd>
+
+        <dt>
+
+          <code><a href="effect_operator.html">effect_operator()</a></code>
+
+        </dt>
+        <dd>Construct an effect operator</dd>
 
         <dt>
 
@@ -155,6 +198,13 @@
 
         </dt>
         <dd>New sample projection</dd>
+
+        <dt>
+
+          <code><a href="effect.html">effect()</a></code>
+
+        </dt>
+        <dd>Extract a named effect from a fitted model</dd>
 
         <dt>
 
@@ -365,6 +415,13 @@
 
         <dt>
 
+          <code><a href="scores.cca.html">scores(<i>&lt;cca&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Extract scores from a CCA fit</dd>
+
+        <dt>
+
           <code><a href="scores.plsc.html">scores(<i>&lt;plsc&gt;</i>)</a></code>
 
         </dt>
@@ -502,6 +559,13 @@
 
         <dt>
 
+          <code><a href="bootstrap.effect_operator.html">bootstrap(<i>&lt;effect_operator&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Bootstrap stability summaries for an effect operator</dd>
+
+        <dt>
+
           <code><a href="bootstrap_pca.html">bootstrap_pca()</a></code>
 
         </dt>
@@ -527,6 +591,13 @@
 
         </dt>
         <dd>Generic Permutation-Based Test</dd>
+
+        <dt>
+
+          <code><a href="perm_test.effect_operator.html">perm_test(<i>&lt;effect_operator&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Permutation test for an effect operator</dd>
 
         <dt>
 
@@ -578,13 +649,6 @@
 
         </dt>
         <dd>Multiblock Bi-Projector Classifier</dd>
-
-        <dt>
-
-          <code><a href="classifier.projector.html">classifier(<i>&lt;projector&gt;</i>)</a></code>
-
-        </dt>
-        <dd>create classifier from a projector</dd>
 
         <dt>
 

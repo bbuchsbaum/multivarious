@@ -8,6 +8,7 @@ articles:
   CrossValidation: CrossValidation.html
   Extending: Extending.html
   Introduction: Introduction.html
+  Mixed_Regress: Mixed_Regress.html
   Multiblock: Multiblock.html
   Nystrom: Nystrom.html
   Partial_Projection: Partial_Projection.html
@@ -16,7 +17,7 @@ articles:
   PreProcessing: PreProcessing.html
   Regress: Regress.html
   SVD_PCA: SVD_PCA.html
-last_built: 2025-11-20T20:48Z
+last_built: 2026-04-17T03:47Z
 urls:
   reference: https://bbuchsbaum.github.io/multivarious/reference
   article: https://bbuchsbaum.github.io/multivarious/articles

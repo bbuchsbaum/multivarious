@@ -22,6 +22,7 @@ articles:
 - title: "Supervised & Inference"
   contents:
   - Regress
+  - Mixed_Regress
   - Classifier
   - PermutationTesting
   - CrossValidation
@@ -33,15 +34,21 @@ reference:
   contents:
   - pca
   - plsc
+  - cca
   - svd_wrapper
   - regress
+  - mixed_regress
   - cPCAplus
   - geneig
+  - identity_basis
+  - shared_pca
+  - supplied_basis
 - title: Model classes for multivariate decompositions and extension
   desc: Generic S3 classes use to represented multivariate model fits
   contents:
   - projector
   - bi_projector
+  - effect_operator
   - bi_projector_union
   - discriminant_projector
   - cross_projector
@@ -51,6 +58,7 @@ reference:
   desc: Functions for fitting models and applying projections.
   contents:
   - project
+  - effect
   - residualize
   - partial_project
   - partial_projector
@@ -85,6 +93,7 @@ reference:
   contents:
   - components
   - scores
+  - scores.cca
   - scores.plsc
   - std_scores
   - sdev
@@ -110,6 +119,7 @@ reference:
   - starts_with("bootstrap")
   - perm_ci
   - perm_test
+  - perm_test.effect_operator
   - perm_test.plsc
   - cv
   - cv_generic

@@ -19,6 +19,8 @@ experimental
 ^figure$
 ^check\.log$
 ^check_output\.log$
+^\.rcmdcheck_result\.rds$
 ^README\.html$
 ^multivarious\.Rcheck$
+^tmp$
 ^\.omc$

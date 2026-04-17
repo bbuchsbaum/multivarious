@@ -212,13 +212,14 @@ perm_test.multiblock_biprojector <- function(
           do.call(cbind, replicate(B, sc, simplify = FALSE))
       } else {                          # re-project if user gave data
           # Project each block in data_list onto component k using original model x
-          lapply(seq_len(B), function(b){
+          block_scores <- lapply(seq_len(B), function(b){
               xb <- data_list[[b]]
               # project block b onto *single* component k
               nd_proc <- transform(x$preproc, xb, blk_ind[[b]])
               v_sub   <- x$v[ blk_ind[[b]] , comp_k , drop = FALSE]
               as.vector(nd_proc %*% v_sub)
-          }) |> do.call(cbind, args = _) # Result is n x B matrix
+          })
+          do.call(cbind, block_scores) # Result is n x B matrix
       }
   }
 

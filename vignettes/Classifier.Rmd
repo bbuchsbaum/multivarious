@@ -103,8 +103,8 @@ print(disc_proj)
 
 ```{r plot_latent_space}
 scores_df <- as_tibble(scores(disc_proj)[, 1:2],
-                       .name_repair = ~ c("LD1","LD2")) |>
-  mutate(Species = iris$Species)
+                       .name_repair = ~ c("LD1","LD2"))
+scores_df <- mutate(scores_df, Species = iris$Species)
 
 ggplot(scores_df, aes(LD1, LD2, colour = Species)) +
   geom_point(size = 2, alpha = .7) +

@@ -90,7 +90,7 @@ reconstruct.bi_projector <- function(x, comp=1:ncomp(x), rowind=1:nrow(scores(x)
   chk::chk_numeric(colind)
   chk::chk_range(comp, c(1,ncomp(x)))
   chk::chk_range(rowind, c(1,nrow(scores(x))))
-  chk::chk_range(colind, c(1,nrow(coef.projector(x))))
+  chk::chk_range(colind, c(1,nrow(stats::coef(x))))
   genreconstruct(x,comp, rowind, colind)
 }
 
@@ -158,12 +158,12 @@ truncate.bi_projector <- function(x, ncomp) {
 reconstruct_new.bi_projector <- function(x,
                                          new_data,
                                          comp = 1:ncomp(x),
-                                         colind = 1:nrow(coef.projector(x)),
+                                         colind = 1:nrow(stats::coef(x)),
                                          ...)
 {
   # Validate inputs
   chk::chk_subset(comp, 1:ncomp(x))
-  chk::chk_subset(colind, 1:nrow(coef.projector(x)))
+  chk::chk_subset(colind, 1:nrow(stats::coef(x)))
 
   # Validate new_data
   if (is.vector(new_data)) {
@@ -176,7 +176,7 @@ reconstruct_new.bi_projector <- function(x,
     return(matrix(0, nrow = nrow(new_data), ncol = length(colind)))
   }
 
-  nvars <- nrow(coef.projector(x))
+  nvars <- nrow(stats::coef(x))
   all_cols <- length(colind) == nvars && all(colind == 1:nvars)
 
   if (all_cols) {

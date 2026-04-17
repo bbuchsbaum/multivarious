@@ -30,6 +30,22 @@ Generic functions for common operations are included:
   representation
 - `residuals` for extracting residuals of a fit with `n` components.
 
+The package now also includes a mixed-model path for operator-valued
+ANOVA. With `mixed_regress()`, each named fixed-effect term in a
+repeated-measures design can be extracted as an `effect_operator`, then
+analyzed with the same core verbs:
+
+- `effect` for named term extraction
+- `components` and `scores` for interpretable effect axes
+- `reconstruct` for effect contributions in original variable space
+- `perm_test` for omnibus and rank inference
+- `bootstrap` for subject-level stability
+
+The broader calibration harness for this path lives at
+`experimental/mixed_effect_operator_calibration.R`, with batch outputs
+saved under `experimental/results/` when you run the simulation grid
+locally.
+
 ## Installation
 
 You can install the development version from
@@ -55,6 +71,48 @@ library(multivarious)
 #> 
 #>     transform, truncate
 ## basic example code
+```
+
+## Mixed effect operators
+
+``` r
+set.seed(1)
+
+design <- expand.grid(
+  subject = factor(seq_len(6)),
+  level = factor(c("low", "mid", "high"), levels = c("low", "mid", "high")),
+  KEEP.OUT.ATTRS = FALSE
+)
+design$group <- factor(rep(c("A", "B"), each = 9))
+
+level_num <- c(low = -1, mid = 0, high = 1)[as.character(design$level)]
+group_num <- ifelse(design$group == "B", 1, 0)
+subj_idx <- as.integer(design$subject)
+b0 <- rnorm(6, sd = 0.5)
+
+Y <- cbind(
+  b0[subj_idx] + level_num + rnorm(nrow(design), sd = 0.15),
+  group_num + rnorm(nrow(design), sd = 0.15),
+  level_num * group_num + rnorm(nrow(design), sd = 0.15),
+  rnorm(nrow(design), sd = 0.15)
+)
+
+fit <- mixed_regress(
+  Y,
+  design = design,
+  fixed = ~ group * level,
+  random = ~ 1 | subject,
+  basis = shared_pca(3),
+  preproc = pass()
+)
+
+E <- effect(fit, "group:level")
+pt <- perm_test(E, nperm = 19, alpha = 0.10)
+
+ncomp(E)
+#> [1] 0
+ncomp(pt)
+#> [1] 0
 ```
 
 ## Albers theme

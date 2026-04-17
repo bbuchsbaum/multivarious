@@ -70,12 +70,12 @@ project.cross_projector <- function(x, new_data, source=c("X", "Y"),...) {
   chk::chk_matrix(new_data)
   
   # Validate dimensions
-  expected_cols <- nrow(coef.cross_projector(x, source=source))
+  expected_cols <- nrow(stats::coef(x, source=source))
   if (ncol(new_data) != expected_cols) {
     stop(paste0("new_data must have ", expected_cols, " columns for source '", source, "'"))
   }
   
-  reprocess(x, new_data, source=source) %*% coef.cross_projector(x, source=source)
+  reprocess(x, new_data, source=source) %*% stats::coef(x, source=source)
 }
 
 #' Extract coefficients from a cross_projector object
@@ -106,11 +106,11 @@ coef.cross_projector <- function(object, source=c("X", "Y"),...) {
 reprocess.cross_projector <- function(x, new_data, colind=NULL, source=c("X", "Y"), ...) {
   source <- match.arg(source)
   if (is.null(colind)) {
-    chk::chk_equal(ncol(new_data), nrow(coef.cross_projector(x, source=source)))
+    chk::chk_equal(ncol(new_data), nrow(stats::coef(x, source=source)))
     colind <- 1:ncol(new_data)
   } else {
     chk::chk_equal(length(colind), ncol(new_data))
-    chk::chk_subset(colind, 1:nrow(coef.cross_projector(x, source=source)))
+    chk::chk_subset(colind, 1:nrow(stats::coef(x, source=source)))
   }
     
   if (source == "X") {
@@ -157,7 +157,7 @@ partial_project.cross_projector <- function(x, new_data, colind,
   nd_proc <- transform(preproc, new_data, colind)
   
   # subset columns in v
-  v_full  <- coef.cross_projector(x, source=source)   # shape (p x d)
+  v_full  <- stats::coef(x, source=source)   # shape (p x d)
   v_sub   <- v_full[colind, , drop=FALSE]     # shape (|colind| x d)
   
   if (least_squares) {
@@ -226,7 +226,7 @@ transfer.cross_projector <- function(x, new_data,
   # ---------- 2. forward projection ----------------------
   # Project the preprocessed data into the latent space
   # Optionally use ridge-regularized LS if opts$ls_rr is TRUE
-  v_from <- coef.cross_projector(x, source = from)
+  v_from <- stats::coef(x, source = from)
   if (isTRUE(opts$ls_rr)) {
       inv_vtv <- robust_inv_vTv(v_from, lambda = opts$lambda)
       scores  <- nd_proc %*% v_from %*% inv_vtv
@@ -304,7 +304,7 @@ inverse_projection.cross_projector <- function(x, domain=c("X","Y"), ...) {
   }
   
   # We'll retrieve the loadings for the target domain.
-  v_mat <- coef.cross_projector(x, source=domain)
+  v_mat <- stats::coef(x, source=domain)
   if (!requireNamespace("MASS", quietly = TRUE)) {
     stop("Package 'MASS' is required for the default pseudoinverse approach.")
   }
@@ -362,7 +362,7 @@ partial_inverse_projection.cross_projector <- function(x, colind, domain=c("X","
   }
   
   # Compute if not cached or cache not available
-  v_mat <- coef.cross_projector(x, source=domain)  # shape = (p_block x d_total)
+  v_mat <- stats::coef(x, source=domain)  # shape = (p_block x d_total)
   chk::chk_range(max(colind, na.rm=TRUE), c(1, ncol(v_mat)))
   chk::chk_range(min(colind, na.rm=TRUE), c(1, ncol(v_mat)))
 
@@ -603,7 +603,7 @@ print.cross_projector <- function(x,...) {
   }
 
   # Compute if not cached or cache not available
-  v <- coef.cross_projector(x, source = domain)
+  v <- stats::coef(x, source = domain)
   
   # Apply colind if provided (subsetting components)
   if (!is.null(colind)) {

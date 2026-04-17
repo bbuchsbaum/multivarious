@@ -591,6 +591,16 @@ apply_rotation <- function(x, rotation_matrix, ...) { UseMethod("apply_rotation"
 feature_importance <- function(x, ...) UseMethod("feature_importance")
 
 
+#' Extract a named effect from a fitted model
+#'
+#' @param x A fitted model object.
+#' @param term A term label or one-sided formula identifying the effect of interest.
+#' @param ... Additional arguments passed to methods.
+#' @return An effect object, typically an `effect_operator`.
+#' @export
+effect <- function(x, term, ...) UseMethod("effect")
+
+
 
 #' Generic Permutation-Based Test
 #'
@@ -794,4 +804,3 @@ variables_used <- function(x, ...) {
 vars_for_component <- function(x, k, ...) {
     UseMethod("vars_for_component")
 }
-

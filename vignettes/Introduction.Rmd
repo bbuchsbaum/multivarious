@@ -36,6 +36,7 @@ Multivariate data analysis often involves reducing dimensionality or transformin
 *   Reconstructing approximations of the original data from the reduced space.
 *   Integrating these steps with pre-processing (like centering or scaling).
 *   Comparing or tuning models using cross-validation.
+*   Extracting named multivariate effects from repeated-measures or mixed designs.
 
 Handling these tasks consistently across different algorithms can lead to repetitive code and complex workflows. The **`multivarious` package aims to simplify this by providing a unified interface** centered around the concept of a **`bi_projector`**. 
 
@@ -49,6 +50,12 @@ The `bi_projector` class is the cornerstone of `multivarious`. It represents a l
 Think of it as encapsulating the core results of a dimensionality reduction technique (like the U, S, V components of an SVD, or the scores and loadings of PCA/PLS) along with any necessary pre-processing information.
 
 Crucially, many functions within `multivarious` (e.g., `pca()`, `pls()`, `cPCAplus()`, `nystrom_approx()`, `regress()`) return objects that inherit from `bi_projector`.
+
+The same grammar now extends to mixed-effect operator analysis:
+
+*   `mixed_regress()` fits the row-side geometry of a repeated-measures or mixed design.
+*   `effect()` extracts a named fixed-effect term as an `effect_operator`.
+*   `effect_operator` inherits from `bi_projector`, so `components()`, `scores()`, `reconstruct()`, `truncate()`, `perm_test()`, and `bootstrap()` all work in the same style.
 
 ## Key Actions with a `bi_projector`
 
@@ -111,6 +118,56 @@ print(head(X)) # Original data for comparison
 ```
 
 This example shows how fitting (`pca`), accessing results (`scores`, `loadings`), and applying the model to new data (`project`) follow a consistent pattern, regardless of whether the underlying method was PCA, PLS, or another technique returning a `bi_projector`.
+
+## Example: Mixed effect operators
+
+The same package grammar applies to repeated-measures multivariate effects.
+
+```{r mixed_effect_example}
+set.seed(99)
+
+design_m <- expand.grid(
+  subject = factor(seq_len(6)),
+  level = factor(c("low", "mid", "high"), levels = c("low", "mid", "high")),
+  KEEP.OUT.ATTRS = FALSE
+)
+design_m$group <- factor(rep(c("A", "B"), each = 9))
+
+level_num <- c(low = -1, mid = 0, high = 1)[as.character(design_m$level)]
+group_num <- ifelse(design_m$group == "B", 1, 0)
+subj_idx <- as.integer(design_m$subject)
+b0 <- rnorm(6, sd = 0.5)
+
+Y_m <- cbind(
+  b0[subj_idx] + level_num + rnorm(nrow(design_m), sd = 0.15),
+  group_num + rnorm(nrow(design_m), sd = 0.15),
+  level_num * group_num + rnorm(nrow(design_m), sd = 0.15),
+  rnorm(nrow(design_m), sd = 0.15)
+)
+
+fit_m <- mixed_regress(
+  Y_m,
+  design = design_m,
+  fixed = ~ group * level,
+  random = ~ 1 | subject,
+  basis = shared_pca(3),
+  preproc = pass()
+)
+
+E_gl <- effect(fit_m, "group:level")
+pt_gl <- perm_test(E_gl, nperm = 19, alpha = 0.10)
+
+print(E_gl)
+pt_gl$component_results
+```
+
+This is the same projector grammar in a different setting:
+
+*   fit once with `mixed_regress()`,
+*   extract a named effect,
+*   decompose it,
+*   test it,
+*   reconstruct it.
 
 ## Beyond Basic Projection: The `multivarious` Ecosystem
 
