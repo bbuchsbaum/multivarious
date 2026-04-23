@@ -383,24 +383,11 @@ perm_test.multiblock_projector <- function(x,
   ## ---------- helpers ----------
   # block-specific preprocessing (reuse x$preproc) ----
   prep_all <- function(Xl) {
-    # Concatenate, apply transform to full matrix, then split back
-    p_all <- sum(p_each)
-    Xall <- matrix(0.0, nrow=N, ncol=p_all) # Pre-allocate
-    cidx <- 1
-    for(b in 1:B) {
-      Xall[, cidx:(cidx+p_each[b]-1)] <- Xl[[b]]
-      cidx <- cidx + p_each[b]
-    }
-  Xproc_all <- transform(x$preproc, Xall)
-    
-    # Split back into list
-    Xp_list <- vector("list", B)
-    cidx <- 1
-    for(b in 1:B) {
-      Xp_list[[b]] <- Xproc_all[, cidx:(cidx+p_each[b]-1), drop=FALSE]
-      cidx <- cidx + p_each[b]
-    }
-    Xp_list
+    # Apply preprocessing blockwise with global column ids. This avoids
+    # materializing a wide temporary matrix for large multiblock data.
+    lapply(seq_len(B), function(b) {
+      transform(x$preproc, Xl[[b]], colind = blk_idx[[b]])
+    })
   }
 
   # compute block scores for first K comps using original model 'x' ----

@@ -140,7 +140,7 @@ apply_transform.pre_processor <- function(x, X, colind=NULL,...) {
     orig_ncol <- x$get_orig_ncol() # May be NULL, that's okay now
     chk::chk_vector(colind)
     if (!is.null(orig_ncol)) { # Only check subset if orig_ncol is known
-        chk::chk_subset(colind, 1:orig_ncol)
+        chk::chk_true(all(!is.na(colind) & colind >= 1 & colind <= orig_ncol))
     }
     # Ensure the provided X matches the dimension implied by colind
     chk::chk_equal(ncol(X), length(colind))
@@ -174,7 +174,7 @@ reverse_transform.pre_processor <- function(x, X, colind=NULL,...) {
     orig_ncol <- x$get_orig_ncol() # May be NULL, that's okay now
     chk::chk_vector(colind)
      if (!is.null(orig_ncol)) { # Only check subset if orig_ncol is known
-        chk::chk_subset(colind, 1:orig_ncol)
+        chk::chk_true(all(!is.na(colind) & colind >= 1 & colind <= orig_ncol))
     }
     # Ensure the provided X matches the dimension implied by colind
     chk::chk_equal(ncol(X), length(colind))
@@ -428,22 +428,35 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
     list(
       forward = function(X) {
         if (is.null(sds)) {
-          sds2 <- matrixStats::colSds(X)
+          sds2 <- matrixStats::colSds(X, na.rm = TRUE)
         } else {
           chk::chk_equal(length(sds), ncol(X))
           sds2 <- sds
         }
         
         if (is.null(cmeans)) {
-          cmeans2 <- colMeans(X)
+          cmeans2 <- colMeans(X, na.rm = TRUE)
         } else {
           chk::chk_equal(length(cmeans), ncol(X))
           cmeans2 <- cmeans
         }
         
-        if (all(sds2 == 0)) {
-          sds2[] <- mean(sds2[sds2>0], na.rm=TRUE)
-          sds2[is.na(sds2)] <- 1 # fallback if all zero
+        bad_means <- !is.finite(cmeans2)
+        if (any(bad_means)) {
+          warning(sprintf(
+            "Columns %s have non-finite means. Setting centering value to 0.",
+            paste(which(bad_means), collapse = ", ")
+          ))
+          cmeans2[bad_means] <- 0
+        }
+
+        bad_sds <- !is.finite(sds2) | sds2 < .Machine$double.eps
+        if (any(bad_sds)) {
+          warning(sprintf(
+            "Columns %s have zero or non-finite standard deviation. Setting scale factor to 1.",
+            paste(which(bad_sds), collapse = ", ")
+          ))
+          sds2[bad_sds] <- 1
         }
         
         env$sds <- sds2
@@ -535,11 +548,16 @@ concat_pre_processors <- function(preprocs, block_indices) {
   # Check for overlaps and completeness more thoroughly?
   if (any(duplicated(unraveled_ids))) stop("Duplicate indices found in block_indices.")
   # Assuming indices cover a contiguous range for simplicity now, but could add checks.
-  max_idx <- max(unraveled_ids)
+  block_lengths <- lengths(block_indices)
+  block_ends <- cumsum(block_lengths)
+  block_starts <- block_ends - block_lengths + 1L
   
-  # Precompute mapping for efficiency and correct ordering
+  # Precompute mapping for efficiency and correct ordering. `orig_indices`
+  # are global column ids; `input_positions` are compact positions in an
+  # already-concatenated input matrix.
   map_list <- lapply(seq_along(block_indices), function(i) {
       list(orig_indices = block_indices[[i]], 
+           input_positions = seq.int(block_starts[[i]], block_ends[[i]]),
            proc = preprocs[[i]])
   })
   names(map_list) <- as.character(seq_along(map_list))
@@ -554,32 +572,28 @@ concat_pre_processors <- function(preprocs, block_indices) {
     # Remove unsupported named arguments x_arg, y_arg
     chk::chk_equal(ncol(X), length(colind))
     
-    results_list <- vector("list", length(colind))
+    result <- NULL
     processed_cols <- logical(length(colind)) # Track which columns are processed
     
     # Find which original blocks are relevant for the given colind
     for (block_num in seq_along(map_list)) {
         block_info <- map_list[[block_num]]
         # Find which of the requested `colind` fall into this block's original indices
-        matched_in_colind_idx <- which(colind %in% block_info$orig_indices)
+        local_indices <- match(colind, block_info$orig_indices, nomatch = 0L)
+        matched_in_colind_idx <- which(local_indices > 0L)
         
         if (length(matched_in_colind_idx) > 0) {
             # Get the subset of X corresponding to these columns
             X_subset <- X[, matched_in_colind_idx, drop = FALSE]
-            # Get the original GLOBAL indices within this block that correspond to X_subset
-            orig_indices_in_block <- colind[matched_in_colind_idx]
-            
-            # Map global indices to the LOCAL indices expected by the block's preprocessor
-            local_indices_for_proc <- match(orig_indices_in_block, block_info$orig_indices)
-            if (any(is.na(local_indices_for_proc))) {
-                stop("Internal error: Mismatch between requested global indices and block's original indices.")
-            }
+            local_indices_for_proc <- local_indices[matched_in_colind_idx]
             
             # Apply the function using the LOCAL indices relative to the block
             res_subset <- func(block_info$proc, X_subset, colind = local_indices_for_proc)
             
-            # Place results back in the correct positions in the output list
-            results_list[matched_in_colind_idx] <- lapply(seq_len(ncol(res_subset)), function(k) res_subset[,k])
+            if (is.null(result)) {
+              result <- matrix(NA_real_, nrow = nrow(res_subset), ncol = length(colind))
+            }
+            result[, matched_in_colind_idx] <- res_subset
             processed_cols[matched_in_colind_idx] <- TRUE
         }
     }
@@ -588,8 +602,8 @@ concat_pre_processors <- function(preprocs, block_indices) {
         stop("Some requested columns in 'colind' did not map to any provided block.")
     }
     
-    # Combine results respecting original colind order
-    do.call(cbind, results_list)
+    # Return results respecting original colind order
+    result
   }
   
   ret <- list(
@@ -602,7 +616,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
         chk::chk_equal(ncol(X), length(unraveled_ids))
         res_list <- lapply(seq_along(map_list), function(i) {
           block_info <- map_list[[i]]
-          transform(block_info$proc, X[, block_info$orig_indices, drop = FALSE])
+          transform(block_info$proc, X[, block_info$input_positions, drop = FALSE])
         })
         do.call(cbind, res_list)
       } else {
@@ -617,7 +631,7 @@ concat_pre_processors <- function(preprocs, block_indices) {
         chk::chk_equal(ncol(X), length(unraveled_ids))
         res_list <- lapply(seq_along(map_list), function(i) {
           block_info <- map_list[[i]]
-          inverse_transform(block_info$proc, X[, block_info$orig_indices, drop = FALSE])
+          inverse_transform(block_info$proc, X[, block_info$input_positions, drop = FALSE])
         })
         do.call(cbind, res_list)
       } else {
@@ -716,18 +730,25 @@ print.concat_pre_processor <- function(x, ...) {
 
 #' @export
 fit.prepper <- function(object, X, ...) {
-  # Build and initialize a pre_processor while suppressing deprecated shim warnings
-  proc <- suppressWarnings(prep(object))
+  # Build and initialize a pre_processor while suppressing deprecated shim
+  # warnings, but keep real preprocessing warnings visible.
+  proc <- suppressWarnings(prep(object), classes = "lifecycle_warning_deprecated")
   fitted_proc <- mark_fitted(proc, TRUE)
-  suppressWarnings(init_transform(fitted_proc, X))
+  suppressWarnings(
+    init_transform(fitted_proc, X),
+    classes = "lifecycle_warning_deprecated"
+  )
   fitted_proc
 }
 
 #' @export
 fit_transform.prepper <- function(object, X, ...) {
-  proc <- suppressWarnings(prep(object))
+  proc <- suppressWarnings(prep(object), classes = "lifecycle_warning_deprecated")
   fitted_proc <- mark_fitted(proc, TRUE)
-  transformed <- suppressWarnings(init_transform(fitted_proc, X))
+  transformed <- suppressWarnings(
+    init_transform(fitted_proc, X),
+    classes = "lifecycle_warning_deprecated"
+  )
   list(preproc = fitted_proc, transformed = transformed)
 }
 

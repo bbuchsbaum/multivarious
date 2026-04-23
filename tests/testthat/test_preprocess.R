@@ -188,6 +188,28 @@ test_that("new API: works with different preprocessing types", {
   expect_true(max(abs(apply(x_std, 2, sd) - 1)) < 1e-14)
 })
 
+test_that("standardize handles missing and zero-variance columns", {
+  mat1 <- matrix(rnorm(10 * 4), 10, 4)
+  mat1[, 2] <- 3
+  mat1[c(2, 5), 3] <- NA
+  mat1[, 4] <- NA
+
+  result <- expect_warning(
+    preprocess(standardize(), mat1),
+    "zero or non-finite standard deviation"
+  )
+  x_std <- result$transformed
+
+  expect_true(all(is.finite(x_std[, 1])))
+  expect_equal(x_std[, 2], rep(0, nrow(mat1)))
+  expect_true(all(is.finite(x_std[!is.na(mat1[, 3]), 3])))
+  expect_true(all(is.na(x_std[is.na(mat1[, 3]), 3])))
+  expect_true(all(is.na(x_std[, 4])))
+
+  x_reconstructed <- multivarious::inverse_transform(result$preproc, x_std)
+  expect_equal(x_reconstructed, mat1, tolerance = 1e-7)
+})
+
 
 
 test_that("can preprocess a matrix with a colind", {
@@ -305,6 +327,31 @@ test_that("concat_pre_processors handles complex colind across different block t
   expect_equal(result_reverse, test_mat_apply, tolerance = 1e-7)
 })
 
+test_that("concat_pre_processors full transform uses compact input positions", {
+  mat1 <- matrix(rnorm(10 * 5), 10, 5)
+  mat2 <- matrix(rnorm(10 * 7), 10, 7)
+
+  p1 <- fit(center(), mat1)
+  p2 <- fit(standardize(), mat2)
+
+  block_indices <- list(100001:100005, 200001:200007)
+  proc_concat <- concat_pre_processors(list(p1, p2), block_indices)
+
+  combined <- cbind(mat1, mat2)
+  result <- multivarious::transform(proc_concat, combined)
+  expected <- cbind(
+    multivarious::transform(p1, mat1),
+    multivarious::transform(p2, mat2)
+  )
+
+  expect_equal(result, expected, tolerance = 1e-7)
+  expect_equal(
+    multivarious::inverse_transform(proc_concat, result),
+    combined,
+    tolerance = 1e-7
+  )
+})
+
 # 
 # test_that("can preprocess a block projector", {
 #   mat1 <- matrix(rnorm(10*15), 10, 15)
@@ -349,6 +396,4 @@ test_that("concat_pre_processors handles complex colind across different block t
 #   
 #   expect_equivalent(project(bm, block_index=2), unclass(pdat))
 # })
-
-
 

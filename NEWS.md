@@ -8,6 +8,7 @@
 ## Bug Fixes
 
 * Fixed `reconstruct_new.bi_projector()` double-preprocessing bug that caused incorrect reconstruction when applied to held-out data.
+* Fixed blockwise preprocessing paths that could allocate very large temporary matrices with multiblock data, and hardened `standardize()` for missing and zero-variance columns.
 
 ## Vignette Improvements
 
