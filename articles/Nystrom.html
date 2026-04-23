@@ -188,14 +188,14 @@ approximation twice, reducing complexity further:</p>
 <span>  <span class="va">ny_standard</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nystrom_approx.html">nystrom_approx</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, nlandmarks <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"standard"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   0.009   0.007   0.005</span></span>
+<span><span class="co">#&gt;   0.010   0.008   0.005</span></span>
 <span></span>
 <span><span class="co"># Double Nyström (faster with intermediate rank l)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
 <span>  <span class="va">ny_double</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nystrom_approx.html">nystrom_approx</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, nlandmarks <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"double"</span>, l <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   0.019   0.022   0.011</span></span></code></pre></div>
+<span><span class="co">#&gt;   0.018   0.024   0.012</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="choosing-parameters">Choosing Parameters<a class="anchor" aria-label="anchor" href="#choosing-parameters"></a>

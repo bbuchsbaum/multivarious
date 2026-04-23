@@ -229,11 +229,11 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.2      multivarious_0.3.1
+#> [1] ggplot2_4.0.3      multivarious_0.3.1
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4         gtable_0.3.6         jsonlite_2.0.0      
-#>  [4] dplyr_1.2.1          compiler_4.5.3       Rcpp_1.1.1          
+#>  [4] dplyr_1.2.1          compiler_4.5.3       Rcpp_1.1.1-1        
 #>  [7] tidyselect_1.2.1     geigen_2.3           jquerylib_0.1.4     
 #> [10] systemfonts_1.3.2    scales_1.4.0         textshaping_1.0.5   
 #> [13] yaml_2.3.12          fastmap_1.2.0        lattice_0.22-9      
@@ -241,12 +241,12 @@ sessionInfo()
 #> [19] knitr_1.51           ggrepel_0.9.8        tibble_3.3.1        
 #> [22] desc_1.4.3           chk_0.10.0           bslib_0.10.0        
 #> [25] pillar_1.11.1        RColorBrewer_1.1-3   rlang_1.2.0         
-#> [28] cachem_1.1.0         xfun_0.57            fs_2.0.1            
-#> [31] sass_0.4.10          S7_0.2.1             cli_3.6.6           
+#> [28] cachem_1.1.0         xfun_0.57            fs_2.1.0            
+#> [31] sass_0.4.10          S7_0.2.2             cli_3.6.6           
 #> [34] pkgdown_2.2.0        withr_3.0.2          magrittr_2.0.5      
 #> [37] digest_0.6.39        grid_4.5.3           irlba_2.3.7         
 #> [40] lifecycle_1.0.5      vctrs_0.7.3          evaluate_1.0.5      
-#> [43] glue_1.8.0           GPArotation_2025.3-1 corpcor_1.6.10      
+#> [43] glue_1.8.1           GPArotation_2025.3-1 corpcor_1.6.10      
 #> [46] farver_2.1.2         ragg_1.5.2           rmarkdown_2.31      
 #> [49] tools_4.5.3          pkgconfig_2.0.3      htmltools_0.5.9
 ```

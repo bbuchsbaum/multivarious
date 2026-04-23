@@ -42,6 +42,7 @@
 <div class="section level3">
 <h3 id="bug-fixes-0-3-1">Bug Fixes<a class="anchor" aria-label="anchor" href="#bug-fixes-0-3-1"></a></h3>
 <ul><li>Fixed <code>reconstruct_new.bi_projector()</code> double-preprocessing bug that caused incorrect reconstruction when applied to held-out data.</li>
+<li>Fixed blockwise preprocessing paths that could allocate very large temporary matrices with multiblock data, and hardened <code><a href="../reference/standardize.html">standardize()</a></code> for missing and zero-variance columns.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="vignette-improvements-0-3-1">Vignette Improvements<a class="anchor" aria-label="anchor" href="#vignette-improvements-0-3-1"></a></h3>

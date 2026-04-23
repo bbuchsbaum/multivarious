@@ -300,7 +300,7 @@ coefficients (excluding the intercept) into a
 <span></span>
 <span><span class="co"># Fit glmnet (LASSO, alpha=1)</span></span>
 <span><span class="co"># Typically use cv.glmnet to find lambda, but using a fixed one for simplicity</span></span>
-<span><span class="va">glm_fit</span> <span class="op">&lt;-</span> <span class="fu">glmnet</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/glmnet/man/glmnet.html" class="external-link">glmnet</a></span><span class="op">(</span><span class="va">X_glm</span>, <span class="va">y_glm</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># alpha=1 is LASSO</span></span>
+<span><span class="va">glm_fit</span> <span class="op">&lt;-</span> <span class="fu">glmnet</span><span class="fu">::</span><span class="fu"><a href="https://glmnet.stanford.edu/reference/glmnet.html" class="external-link">glmnet</a></span><span class="op">(</span><span class="va">X_glm</span>, <span class="va">y_glm</span>, alpha <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="co"># alpha=1 is LASSO</span></span>
 <span></span>
 <span><span class="co"># Choose a lambda (e.g., one near the end of the path)</span></span>
 <span><span class="va">chosen_lambda</span> <span class="op">&lt;-</span> <span class="va">glm_fit</span><span class="op">$</span><span class="va">lambda</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">glm_fit</span><span class="op">$</span><span class="va">lambda</span><span class="op">)</span> <span class="op">*</span> <span class="fl">0.8</span><span class="op">]</span></span>

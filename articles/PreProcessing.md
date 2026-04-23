@@ -265,7 +265,7 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.2      tibble_3.3.1       dplyr_1.2.1        multivarious_0.3.1
+#> [1] ggplot2_4.0.3      tibble_3.3.1       dplyr_1.2.1        multivarious_0.3.1
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-4       gtable_0.3.6       jsonlite_2.0.0     compiler_4.5.3    
@@ -274,10 +274,10 @@ sessionInfo()
 #> [13] lattice_0.22-9     R6_2.6.1           labeling_0.4.3     generics_0.1.4    
 #> [17] knitr_1.51         desc_1.4.3         chk_0.10.0         bslib_0.10.0      
 #> [21] pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0        cachem_1.1.0      
-#> [25] xfun_0.57          fs_2.0.1           sass_0.4.10        S7_0.2.1          
+#> [25] xfun_0.57          fs_2.1.0           sass_0.4.10        S7_0.2.2          
 #> [29] cli_3.6.6          pkgdown_2.2.0      withr_3.0.2        magrittr_2.0.5    
 #> [33] digest_0.6.39      grid_4.5.3         lifecycle_1.0.5    vctrs_0.7.3       
-#> [37] evaluate_1.0.5     glue_1.8.0         farver_2.1.2       ragg_1.5.2        
+#> [37] evaluate_1.0.5     glue_1.8.1         farver_2.1.2       ragg_1.5.2        
 #> [41] rmarkdown_2.31     matrixStats_1.5.0  tools_4.5.3        pkgconfig_2.0.3   
 #> [45] htmltools_0.5.9
 ```
