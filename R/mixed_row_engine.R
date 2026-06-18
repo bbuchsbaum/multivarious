@@ -253,7 +253,7 @@ attach_metric_operators <- function(metric) {
 
 #' @keywords internal
 #' @noRd
-build_row_engine <- function(fixed, design, random_spec, Y_proc) {
+build_row_engine <- function(fixed, design, random_spec, Y_proc, term_scopes = NULL, exchangeability = NULL) {
   Terms <- stats::terms(fixed, data = design)
   X <- stats::model.matrix(Terms, data = design)
   assign_vec <- attr(X, "assign")
@@ -269,6 +269,13 @@ build_row_engine <- function(fixed, design, random_spec, Y_proc) {
   }
 
   X_w <- metric$whiten(X)
+  scope_map <- resolve_term_scopes(term_labels, design, random_spec$grouping_var, term_scopes = term_scopes)
+  exchangeability_map <- resolve_exchangeability(
+    term_labels,
+    term_scopes = scope_map,
+    grouping_var = random_spec$grouping_var,
+    exchangeability = exchangeability
+  )
 
   effects_meta <- lapply(seq_along(term_labels), function(i) {
     effect_cols <- which(assign_vec == i)
@@ -294,7 +301,8 @@ build_row_engine <- function(fixed, design, random_spec, Y_proc) {
       P_nuis = P_nuis,
       P_full = P_full,
       df_term = df_term,
-      term_scope = classify_term_scope(term_labels[[i]], design, random_spec$grouping_var)
+      term_scope = unname(scope_map[[term_labels[[i]]]]),
+      exchangeability = unname(exchangeability_map[[term_labels[[i]]]])
     )
   })
 
@@ -311,6 +319,7 @@ build_row_engine <- function(fixed, design, random_spec, Y_proc) {
       term_labels = term_labels,
       has_intercept = has_intercept,
       intercept_cols = intercept_cols,
+      exchangeability = exchangeability_map,
       effects_meta = effects_meta,
       P_model = P_model,
       metric = metric,

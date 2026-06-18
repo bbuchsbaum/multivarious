@@ -225,7 +225,7 @@ This finds directions that maximize the ratio of foreground to background varian
 The `geneig()` function provides the underlying solver with multiple algorithm options:
 - `"geigen"`: General purpose, handles non-symmetric matrices
 - `"robust"`: Fast for well-conditioned problems
-- `"primme"`: Efficient for very large sparse matrices
+- `"rspectra"`: Efficient for very large sparse matrices
 
 </details>
 

@@ -39,15 +39,27 @@ bootstrap.effect_operator <- function(x,
 
   empty_draw <- list(v = matrix(0, nrow = p, ncol = k), d = numeric(k), ok = FALSE)
 
+  orthogonal_procrustes <- function(A, B) {
+    if (ncol(A) < 1L || ncol(B) < 1L) {
+      return(diag(1, nrow = ncol(A), ncol = ncol(A)))
+    }
+    sv <- svd(crossprod(A, B))
+    sv$u %*% t(sv$v)
+  }
+
   worker <- function(i) {
     use_subject_blocks <- !is.null(fit$subject_blocks) && resample %in% c("auto", "subject")
-    idx <- if (use_subject_blocks) {
-      resample_blocks(fit$subject_blocks, replace = TRUE)
+    block_sample <- if (use_subject_blocks) {
+      resample_blocks_with_labels(fit$subject_blocks, replace = TRUE)
     } else {
-      sample.int(n, size = n, replace = TRUE)
+      NULL
     }
+    idx <- if (use_subject_blocks) block_sample$idx else sample.int(n, size = n, replace = TRUE)
     design_b <- fit$design[idx, , drop = FALSE]
     Y_proc_b <- fit$Y_proc[idx, , drop = FALSE]
+    if (use_subject_blocks) {
+      design_b[[fit$grouping_var]] <- block_sample$block_labels
+    }
 
     tryCatch({
       random_spec_b <- parse_random_spec(fit$random, design_b)
@@ -67,9 +79,14 @@ bootstrap.effect_operator <- function(x,
         cols <- seq_len(sv$rank)
         vb[, cols] <- sv$v
         db[cols] <- sv$sdev
-        signs <- sign(colSums(vb[, cols, drop = FALSE] * ref_v[, cols, drop = FALSE]))
-        signs[signs == 0] <- 1
-        vb[, cols] <- sweep(vb[, cols, drop = FALSE], 2, signs, "*")
+        if (sv$rank == 1L) {
+          signs <- sign(colSums(vb[, cols, drop = FALSE] * ref_v[, cols, drop = FALSE]))
+          signs[signs == 0] <- 1
+          vb[, cols] <- sweep(vb[, cols, drop = FALSE], 2, signs, "*")
+        } else {
+          R_align <- orthogonal_procrustes(vb[, cols, drop = FALSE], ref_v[, cols, drop = FALSE])
+          vb[, cols] <- vb[, cols, drop = FALSE] %*% R_align
+        }
       }
       list(v = vb, d = db, ok = TRUE)
     }, error = function(e) empty_draw)
@@ -121,6 +138,7 @@ bootstrap.effect_operator <- function(x,
     term = term,
     nboot = nboot,
     n_failed = n_failed,
+    seed = seed,
     resample = if (!is.null(fit$subject_blocks) && resample %in% c("auto", "subject")) "subject" else "rows",
     loadings_mean = v_mean,
     loadings_sd = v_sd,

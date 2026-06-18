@@ -12,6 +12,8 @@
   alpha = 0.05,
   stepwise = TRUE,
   alternative = c("greater", "less", "two.sided"),
+  refit_basis = FALSE,
+  seed = NULL,
   ...
 )
 }
@@ -29,7 +31,16 @@
 \item{stepwise}{Logical; if \code{TRUE}, apply sequential rank testing by deflating previously
 selected effect directions before evaluating the next axis.}
 
-\item{alternative}{Alternative hypothesis for empirical p-values.}
+\item{alternative}{Alternative hypothesis for empirical p-values. Only
+\code{"greater"} is supported for effect-operator permutation tests.}
+
+\item{refit_basis}{Logical; if \code{TRUE}, refit the feature basis per permutation
+from that permutation's reduced-model residual (and refit the observed basis
+from the observed reduced-model residual). Uses the full whitened feature
+space. Keeps the same basis rank as the static fit. Experimental; intended
+for evaluating whether static-basis leakage drives miscalibration.}
+
+\item{seed}{Optional integer seed for reproducibility.}
 
 \item{...}{Reserved for future extensions.}
 }

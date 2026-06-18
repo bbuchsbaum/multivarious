@@ -29,7 +29,6 @@
 #'        results if `Rb` is ill-conditioned or singular.
 #' @param method A character string specifying the primary computation method. Options include:
 #'    - `"geigen"` (Default): Use `geneig` from the `geigen` package.
-#'    - `"primme"`: Use `geneig` with the PRIMME library backend (requires special `geigen` build).
 #'    - `"sdiag"`: Use `geneig` with a spectral decomposition method.
 #'    - `"corpcor"`: Use a corpcor-based whitening approach followed by standard PCA.
 #' @param strategy Controls the GEVD approach when `method` is not `"corpcor"`. Options include:
@@ -52,7 +51,7 @@
 #' are centered by subtracting the column means calculated *only* from the background data `X_b`.
 #' This is crucial for isolating variance specific to `X_f`.
 #'  
-#' **Core Algorithm (methods "geigen", "primme", "sdiag", strategy="feature"):**
+#' **Core Algorithm (methods "geigen", "sdiag", strategy="feature"):**
 #' 1. Center `X_f` and `X_b` using the mean of `X_b`.
 #' 2. Compute potentially shrunk \eqn{p \times p} covariance matrices `Rf` (from centered `X_f`) and `Rb` (from centered `X_b`) using `corpcor::cov.shrink`.
 #' 3. Solve the generalized eigenvalue problem `Rf v = lambda Rb v` for the top `ncomp` eigenvectors `v` using `geigen::geneig`. These eigenvectors are the contrastive principal components (loadings).
@@ -142,7 +141,7 @@
 cPCAplus <- function(X_f, X_b, ncomp = NULL,
                      center_background = TRUE,
                      lambda = 0,
-                     method = c("geigen", "primme", "sdiag", "corpcor"),
+                     method = c("geigen", "sdiag", "corpcor"),
                      strategy = c("auto", "feature", "sample"),
                      verbose = getOption("multivarious.verbose", TRUE),
                      sample_rank = NULL,
@@ -257,7 +256,7 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
   } else {
     # --- Methods using geigen --- 
     if (!requireNamespace("geigen", quietly = TRUE)) {
-      stop("Package 'geigen' needed for methods 'geigen', 'primme', 'sdiag'. Please install it.", call. = FALSE)
+      stop("Package 'geigen' needed for methods 'geigen', 'sdiag'. Please install it.", call. = FALSE)
     }
 
     # Determine strategy: feature space (direct covariance) or sample space (large D)
@@ -300,7 +299,6 @@ cPCAplus <- function(X_f, X_b, ncomp = NULL,
 
     geneig_method <- switch(method,
                             geigen = "geigen",
-                            primme = "primme",
                             sdiag  = "sdiag",
                             stop("Unsupported method: ", method))
 

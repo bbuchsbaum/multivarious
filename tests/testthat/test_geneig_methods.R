@@ -47,12 +47,6 @@ test_that("geneig methods agree on symmetric SPD (largest eigenpairs)", {
     expect_equal(sort(gei$values, decreasing = TRUE), sort(base$values, decreasing = TRUE), tolerance = 1e-5)
   }
 
-  # primme backend (if available)
-  if (requireNamespace("PRIMME", quietly = TRUE)) {
-    pri <- geneig(A, B, ncomp = k, method = "primme", which = "LA", preproc = NULL)
-    expect_equal(sort(pri$values, decreasing = TRUE), sort(base$values, decreasing = TRUE), tolerance = 1e-5)
-  }
-
   # rspectra backend (smallest λ via which = "SA")
   if (requireNamespace("RSpectra", quietly = TRUE)) {
     base_full <- geneig(A, B, ncomp = nrow(A), method = "sdiag", preproc = NULL)

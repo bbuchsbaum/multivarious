@@ -43,6 +43,7 @@ effect.mixed_fit <- function(x, term, ...) {
     preproc = x$preproc,
     term = term_label,
     term_scope = meta$term_scope,
+    exchangeability_scheme = meta$exchangeability,
     df_term = meta$df_term,
     basis = x$basis_fit,
     basis_rank = ncol(B),
@@ -64,6 +65,7 @@ print.effect_operator <- function(x, ...) {
   cat("Components: ", ncomp(x), "\n", sep = "")
   cat("Term df: ", x$df_term, "\n", sep = "")
   cat("Scope: ", x$term_scope, "\n", sep = "")
+  cat("Exchangeability: ", x$exchangeability_scheme, "\n", sep = "")
   cat("Basis rank: ", x$basis_rank, "\n", sep = "")
   invisible(x)
 }

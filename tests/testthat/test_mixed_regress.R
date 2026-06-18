@@ -247,3 +247,83 @@ test_that("mixed_regress combines multiple same-group random terms into one row 
   expect_true(all(c("level") %in% fit$random_spec$random_terms))
   expect_equal(fit$row_metric$mode, "grouped_lmm")
 })
+
+test_that("mixed_regress allows explicit term-scope overrides", {
+  set.seed(13)
+
+  design <- expand.grid(
+    subject = factor(seq_len(6)),
+    level = factor(c("low", "mid", "high"), levels = c("low", "mid", "high")),
+    KEEP.OUT.ATTRS = FALSE
+  )
+  design$group <- factor(rep(c("A", "B"), each = 9))
+
+  Y <- cbind(rnorm(nrow(design)), rnorm(nrow(design)))
+
+  fit <- mixed_regress(
+    Y,
+    design = design,
+    fixed = ~ group * level,
+    random = ~ 1 | subject,
+    basis = identity_basis(),
+    preproc = pass(),
+    term_scopes = c(level = "mixed", "group:level" = "between")
+  )
+
+  expect_equal(fit$effects_meta[["level"]]$term_scope, "mixed")
+  expect_equal(fit$effects_meta[["group:level"]]$term_scope, "between")
+})
+
+test_that("mixed_regress allows explicit exchangeability overrides", {
+  set.seed(131)
+
+  design <- expand.grid(
+    subject = factor(seq_len(6)),
+    level = factor(c("low", "mid", "high"), levels = c("low", "mid", "high")),
+    KEEP.OUT.ATTRS = FALSE
+  )
+  design$group <- factor(rep(c("A", "B"), each = 9))
+
+  Y <- cbind(rnorm(nrow(design)), rnorm(nrow(design)))
+
+  fit <- mixed_regress(
+    Y,
+    design = design,
+    fixed = ~ group * level,
+    random = ~ 1 | subject,
+    basis = identity_basis(),
+    preproc = pass(),
+    exchangeability = c(level = "whole_subject", "group:level" = "within_subject")
+  )
+
+  expect_equal(fit$effects_meta[["level"]]$exchangeability, "whole_subject")
+  expect_equal(fit$effects_meta[["group:level"]]$exchangeability, "within_subject")
+  sm <- summary(fit)
+  expect_true("exchangeability" %in% names(sm))
+})
+
+test_that("mixed_regress rejects unsupported random-effect formula structure", {
+  set.seed(14)
+
+  design <- expand.grid(
+    subject = factor(seq_len(6)),
+    level = factor(c("low", "mid", "high"), levels = c("low", "mid", "high")),
+    KEEP.OUT.ATTRS = FALSE
+  )
+  design$time <- rep(seq_len(3), times = 6)
+  design$group <- factor(rep(c("A", "B"), each = 9))
+
+  Y <- cbind(rnorm(nrow(design)), rnorm(nrow(design)))
+
+  expect_error(
+    mixed_regress(
+      Y,
+      design = design,
+      fixed = ~ group * level,
+      random = ~ 1 + poly(time, 2) | subject,
+      basis = identity_basis(),
+      preproc = pass()
+    ),
+    "Unsupported random-effects specification"
+  )
+})

@@ -32,15 +32,6 @@ test_that("sdiag method equivalent test using geigen", {
   # expect_true(all(result$values > 0))
 })
 
-test_that("primme method returns correct results", {
-  skip_if_not_installed("PRIMME")  # Skip if PRIMME is not available
-  # Suppress expected warning about switching to dense backend for full decomposition
-  result <- suppressWarnings(geneig(A = A, B = B, ncomp=2, method="primme", which="LA"))
-  expect_equal(dim(result$vectors), c(2, 2))
-  expect_equal(length(result$values), 2)
-  expect_true(all(result$values > 0))
-})
-
 test_that("non-square matrices are handled", {
   non_square_A <- matrix(1:6, nrow=2)
   non_square_B <- matrix(1:6, nrow=2)

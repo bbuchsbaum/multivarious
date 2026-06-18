@@ -1,53 +1,29 @@
-## Resubmission (0.3.1)
+## Submission summary
 
-This is a patch release to fix issues discovered after submitting version 0.3.0:
+This is a maintenance release (0.3.2) of multivarious.
 
-* **Bug fix**: `reconstruct_new.bi_projector()` had a double-preprocessing bug that caused incorrect results when reconstructing held-out data. This affected cross-validation workflows.
+The most important change addresses an upcoming CRAN dependency archival:
 
-* **Vignette corrections**: Several vignettes contained broken or misleading examples that we discovered after submission. The CrossValidation vignette had non-working code that produced warnings/errors. Other vignettes had excessive commented-out code and unclear explanations. All vignettes have been reviewed and corrected.
+* Removed the optional `PRIMME` backend from `geneig()` and `cPCAplus()`, and
+  dropped `PRIMME` from `Suggests`, because the `PRIMME` package is scheduled
+  for archival on CRAN. The iterative `RSpectra`/`subspace` backends and the
+  dense `geigen`/`robust`/`sdiag` backends cover the same generalized
+  eigenproblems, so no user-facing functionality is lost.
 
-* **Added regression tests** to prevent the `reconstruct_new()` bug from recurring.
+Other changes:
 
-We apologize for the oversight in 0.3.0. The vignettes were not sufficiently tested before submission.
+* Mixed-effect inference fixes: explicit term-scope and exchangeability
+  overrides for `mixed_regress()`, corrected grouped row-metric
+  whitening/unwhitening, and hardened effect-operator permutation and
+  bootstrap behaviour for grouped designs.
+* Added regression tests for the `PRIMME` removal path and the mixed-effect
+  inference behaviour.
 
-## Previous submission (0.3.0)
-
-* Fixed T/F shorthand usage to TRUE/FALSE for CRAN compliance
-* Converted `\dontrun{}` to `\donttest{}` for executable examples
-* Fixed `bootstrap.plsc()` duplicate argument handling
-* Fixed S3 method registration (classifier.projector, inverse_projection.projector, perm_ci.pca)
-* Added missing `importFrom` directives for `coefficients` and `combn`
-* Fixed vignette YAML headers to use standard multi-line format
-* Fixed `requireNamespace()` parameter from `quiet` to `quietly` (R-devel strict checking)
-* Removed escaped underscores from plsc.R documentation
-* Removed albersdown theme references from vignettes
-* Created NEWS.md documenting all changes
+See NEWS.md for the complete list of changes.
 
 ## R CMD check results
 
 0 errors | 0 warnings | 0 notes
-
-## Package dependencies
-
-This package imports from 27 non-default packages. This package provides a comprehensive framework for multivariate analysis methods, and each import is actively used:
-
-- **Matrix**: Sparse matrix operations for efficient computation
-- **RSpectra/irlba/PRIMME/rsvd**: Efficient eigendecomposition for large matrices
-- **pls**: Partial least squares algorithms
-- **glmnet**: Regularized regression methods
-- **corpcor**: Correlation and covariance estimation
-- **future.apply/future**: Parallel processing support
-- **geigen/GPArotation**: Generalized eigenvalue problems and factor rotation
-- **ggplot2/ggrepel**: Visualization methods
-- **matrixStats**: Efficient row/column statistics
-- **proxy**: Distance and similarity computations
-- **dplyr/tibble**: Data manipulation utilities
-- **rlang/chk/assertthat/cli/crayon**: Input validation and messaging
-- **withr**: Safe temporary state management
-- **lifecycle**: Function deprecation support
-- **methods/MASS/svd**: Core statistical methods
-
-Reducing imports would require removing core functionality that users depend on.
 
 ## Reverse dependencies
 

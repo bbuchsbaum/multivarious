@@ -167,14 +167,14 @@ sequential_component_stat <- function(obj) {
   )
 }
 
-#' @keywords internal
-#' @noRd
 #' Pillai-style omnibus pivot: tr(H) / tr(E) where H = M'M is the hypothesis
 #' operator and E is the full-model residual Gram, computed by applying
 #' (I - P_full) to the whitened basis-space response Yw_basis. Applying the
 #' residual projector to M directly is degenerate: since M = P_term * Yw_basis
 #' and P_term = P_full - P_nuis lies inside P_full's column space,
 #' (I - P_full) * M is identically zero.
+#' @keywords internal
+#' @noRd
 omnibus_effect_stat <- function(M, P_full, Yw_basis) {
   raw <- sum(M^2)
   Rproj <- diag(nrow(P_full)) - P_full
@@ -199,12 +199,14 @@ omnibus_effect_stat <- function(M, P_full, Yw_basis) {
 #' @param alpha Sequential significance threshold used to determine selected rank.
 #' @param stepwise Logical; if `TRUE`, apply sequential rank testing by deflating previously
 #'   selected effect directions before evaluating the next axis.
-#' @param alternative Alternative hypothesis for empirical p-values.
+#' @param alternative Alternative hypothesis for empirical p-values. Only
+#'   `"greater"` is supported for effect-operator permutation tests.
 #' @param refit_basis Logical; if `TRUE`, refit the feature basis per permutation
 #'   from that permutation's reduced-model residual (and refit the observed basis
 #'   from the observed reduced-model residual). Uses the full whitened feature
 #'   space. Keeps the same basis rank as the static fit. Experimental; intended
 #'   for evaluating whether static-basis leakage drives miscalibration.
+#' @param seed Optional integer seed for reproducibility.
 #' @param ... Reserved for future extensions.
 #' @return A permutation-test result object for effect operators.
 #' @export
@@ -216,9 +218,16 @@ perm_test.effect_operator <- function(x,
                                       stepwise = TRUE,
                                       alternative = c("greater", "less", "two.sided"),
                                       refit_basis = FALSE,
+                                      seed = NULL,
                                       ...) {
   scheme <- match.arg(scheme)
   alternative <- match.arg(alternative)
+  if (!identical(alternative, "greater")) {
+    stop("effect_operator permutation tests currently support only alternative = 'greater'.")
+  }
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
 
   fit <- x$fit
   wem <- whitened_effect_matrix(fit, x$term)
@@ -250,6 +259,18 @@ perm_test.effect_operator <- function(x,
     effect_full <- wem$M
     fitted0 <- meta$P_nuis %*% Yw_basis_obs
     resid0 <- Yw_basis_obs - fitted0
+  }
+
+  exchangeability_scheme <- x$exchangeability_scheme
+  if (is.null(exchangeability_scheme)) {
+    exchangeability_scheme <- if (!is.null(fit$subject_blocks)) "whole_subject" else "rows"
+  }
+  if (exchangeability_scheme %in% c("between_subject", "within_subject", "whole_subject") &&
+      is.null(fit$subject_blocks)) {
+    stop(
+      "Exchangeability scheme '", exchangeability_scheme, "' requires grouped subject blocks. ",
+      "Supply a grouped `random` specification or use exchangeability = 'rows'."
+    )
   }
 
   obs_omnibus <- omnibus_effect_stat(effect_full, meta$P_full, Yw_basis_obs)
@@ -300,11 +321,11 @@ perm_test.effect_operator <- function(x,
   }
 
   worker <- function(i) {
-    Yb <- if (!is.null(fit$subject_blocks) && identical(x$term_scope, "between")) {
+    Yb <- if (identical(exchangeability_scheme, "between_subject")) {
       fitted0 + permute_between_block_means(resid0, fit$subject_blocks)
-    } else if (!is.null(fit$subject_blocks) && identical(x$term_scope, "within")) {
+    } else if (identical(exchangeability_scheme, "within_subject")) {
       fitted0 + signflip_within_block_contrasts(resid0, fit$subject_blocks)
-    } else if (!is.null(fit$subject_blocks) && identical(x$term_scope, "mixed")) {
+    } else if (identical(exchangeability_scheme, "whole_subject")) {
       fitted0 + resid0[permute_blocks_same_size(fit$subject_blocks), , drop = FALSE]
     } else {
       fitted0 + resid0[sample.int(nrow(resid0)), , drop = FALSE]
@@ -323,7 +344,7 @@ perm_test.effect_operator <- function(x,
 
   args <- list(X = seq_len(nperm), FUN = worker)
   if (parallel) {
-    args$future.seed <- TRUE
+    args$future.seed <- if (is.null(seed)) TRUE else seed
   }
   perm_list <- do.call(apply_fun, args)
 
@@ -336,10 +357,6 @@ perm_test.effect_operator <- function(x,
   rank_perm <- matrix(0L, nrow = nperm, ncol = max(1, n_axes))
   if (n_axes > 0) {
     for (i in seq_len(nperm)) {
-      stat_i <- perm_list[[i]]$observed
-      if (length(stat_i)) {
-        stat_perm[i, seq_along(stat_i)] <- stat_i
-      }
       rel_i <- perm_list[[i]]$rel
       if (length(rel_i)) {
         rel_perm[i, seq_along(rel_i)] <- rel_i
@@ -353,6 +370,19 @@ perm_test.effect_operator <- function(x,
         rank_perm[i, seq_along(rank_i)] <- rank_i
       }
     }
+    for (a in seq_len(n_axes)) {
+      stat_perm[, a] <- if (identical(obs_stat_type[[a]], "relative")) {
+        rel_perm[, a]
+      } else {
+        lead_perm[, a]
+      }
+    }
+  }
+
+  omnibus_perm <- if (identical(obs_omnibus$statistic_type, "trace_ratio")) {
+    ifelse(omnibus_resid_perm > .Machine$double.eps, omnibus_raw_perm / omnibus_resid_perm, NA_real_)
+  } else {
+    omnibus_raw_perm
   }
 
   omnibus_p <- perm_pvalue(omnibus_perm, obs_omnibus$observed, alternative = alternative)
@@ -416,12 +446,13 @@ perm_test.effect_operator <- function(x,
     nperm = nperm,
     n_significant = n_significant,
     alternative = alternative,
+    seed = seed,
     scheme = scheme,
-    exchangeability = if (!is.null(fit$subject_blocks) && identical(x$term_scope, "between")) {
+    exchangeability = if (identical(exchangeability_scheme, "between_subject")) {
       "subject-mean permutation within equal block-size strata"
-    } else if (!is.null(fit$subject_blocks) && identical(x$term_scope, "within")) {
+    } else if (identical(exchangeability_scheme, "within_subject")) {
       "within-subject contrast sign flips"
-    } else if (!is.null(fit$subject_blocks) && identical(x$term_scope, "mixed")) {
+    } else if (identical(exchangeability_scheme, "whole_subject")) {
       "whole-subject trajectory permutation within equal block-size strata"
     } else {
       "row-wise permutation"

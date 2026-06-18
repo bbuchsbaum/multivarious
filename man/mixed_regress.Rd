@@ -11,6 +11,8 @@ mixed_regress(
   random = NULL,
   basis = identity_basis(),
   preproc = center(),
+  term_scopes = NULL,
+  exchangeability = NULL,
   ...
 )
 }
@@ -29,6 +31,16 @@ must share a single grouping variable.}
 \item{basis}{Feature basis specification or projector-like object.}
 
 \item{preproc}{Response preprocessor.}
+
+\item{term_scopes}{Optional named character vector or named list overriding
+automatic effect-scope classification for fixed-effect terms. Allowed values
+are \code{"between"}, \code{"within"}, \code{"mixed"}, and \code{"ungrouped"}.}
+
+\item{exchangeability}{Optional named character vector or named list
+specifying permutation/block-resampling structure for fixed-effect terms.
+Allowed values are \code{"between_subject"}, \code{"within_subject"},
+\code{"whole_subject"}, and \code{"rows"}. When omitted, exchangeability is inferred
+from grouped-design scope.}
 
 \item{...}{Reserved for future extensions.}
 }

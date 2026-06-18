@@ -33,7 +33,7 @@ test_that("cPCAplus basic structure and methods ('geigen' family)", {
   n_components <- 2 # Test fewer components than features/samples
 
   # Test a geigen family method
-  method <- "geigen" # Can also test "primme", "sdiag" if available/desired
+  method <- "geigen" # Can also test "sdiag" if desired
 
   # --- Test with lambda = 0 ---
   result_lambda_0 <- cPCAplus(X_f, X_b, ncomp = n_components, lambda = 0, method = method)

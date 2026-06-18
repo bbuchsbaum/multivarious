@@ -95,6 +95,44 @@ test_that("reordering grouped observations preserves effect singular values", {
                tolerance = 1e-8)
 })
 
+test_that("grouped whitening uses the left Cholesky solve implied by the row metric", {
+  set.seed(2201)
+
+  design <- expand.grid(
+    subject = factor(seq_len(6)),
+    level = factor(c("low", "mid", "high"), levels = c("low", "mid", "high")),
+    KEEP.OUT.ATTRS = FALSE
+  )
+  design$group <- factor(rep(c("A", "B"), each = 9))
+
+  subj_idx <- as.integer(design$subject)
+  level_num <- c(low = -1, mid = 0, high = 1)[as.character(design$level)]
+  b0 <- rnorm(nlevels(design$subject), sd = 0.6)
+  b1 <- rnorm(nlevels(design$subject), sd = 0.2)
+  Y <- cbind(
+    b0[subj_idx] + b1[subj_idx] * level_num + rnorm(nrow(design), sd = 0.1),
+    rnorm(nrow(design), sd = 0.1)
+  )
+
+  fit <- mixed_regress(
+    Y,
+    design = design,
+    fixed = ~ group * level,
+    random = ~ 1 + level | subject,
+    basis = identity_basis(),
+    preproc = pass()
+  )
+
+  blk <- fit$row_metric$blocks[[1]]
+  U <- fit$row_metric$block_chol[[1]]
+  M <- matrix(0, nrow = nrow(design), ncol = 3)
+  M[blk, ] <- matrix(rnorm(length(blk) * 3), nrow = length(blk), ncol = 3)
+  W <- fit$row_metric$whiten(M)
+
+  expect_equal(unname(crossprod(U, W[blk, , drop = FALSE])), unname(M[blk, , drop = FALSE]), tolerance = 1e-8)
+  expect_equal(unname(fit$row_metric$unwhiten(W)), unname(M), tolerance = 1e-8)
+})
+
 test_that("shared_pca fit targets are distinct and residual-based targets stay finite", {
   set.seed(23)
 
@@ -194,6 +232,11 @@ test_that("omnibus permutation result exposes studentized trace metadata", {
   expect_true(all(is.finite(pt$perm_values$omnibus)))
   expect_true(all(is.finite(pt$perm_values$omnibus_residual_energy)))
   expect_true(all(pt$perm_values$omnibus_residual_energy > 0))
+  expect_equal(
+    pt$perm_values$omnibus,
+    pt$perm_values$omnibus_raw / pt$perm_values$omnibus_residual_energy,
+    tolerance = 1e-8
+  )
 })
 
 test_that("near-degenerate grouped designs still return finite effect decompositions", {
@@ -232,4 +275,18 @@ test_that("near-degenerate grouped designs still return finite effect decomposit
   expect_true(all(is.finite(reconstruct(eff, scale = "processed"))))
   expect_true(is.finite(pt$omnibus_statistic))
   expect_true(is.finite(pt$omnibus_p_value))
+})
+
+test_that("subject bootstrap relabels duplicated clusters as distinct bootstrap groups", {
+  set.seed(2202)
+
+  blocks <- list(1:2, 3:5, 6:7)
+  samp <- multivarious:::resample_blocks_with_labels(blocks, replace = TRUE)
+
+  expect_equal(length(samp$idx), sum(vapply(blocks[samp$picked], length, integer(1))))
+  expect_equal(nlevels(samp$block_labels), length(blocks))
+  expect_equal(
+    as.integer(table(samp$block_labels)),
+    vapply(blocks[samp$picked], length, integer(1))
+  )
 })

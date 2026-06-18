@@ -265,8 +265,25 @@ parse_random_spec <- function(random, design) {
     base::attr(stats::terms(stats::as.formula(paste("~", paste(deparse(lhs), collapse = "")))), "intercept") == 1L
   }
 
+  lhs_term_labels <- function(lhs) {
+    attr(stats::terms(stats::as.formula(paste("~", paste(deparse(lhs), collapse = "")))), "term.labels")
+  }
+
+  is_simple_random_term <- function(lbl) {
+    grepl("^[.A-Za-z][.A-Za-z0-9_]*$", lbl)
+  }
+
   has_intercept <- any(vapply(bars, function(bar) lhs_has_intercept(bar[[2]]), logical(1)))
-  random_terms <- unique(unlist(lapply(bars, function(bar) setdiff(all.vars(bar[[2]]), "1")), use.names = FALSE))
+  lhs_labels <- unique(unlist(lapply(bars, function(bar) lhs_term_labels(bar[[2]])), use.names = FALSE))
+  unsupported <- lhs_labels[!vapply(lhs_labels, is_simple_random_term, logical(1))]
+  if (length(unsupported)) {
+    stop(
+      "Unsupported random-effects specification. ",
+      "Milestone 2 currently supports only random intercepts and additive raw-variable slopes. ",
+      "Unsupported terms: ", paste(unique(unsupported), collapse = ", ")
+    )
+  }
+  random_terms <- unique(lhs_labels)
   lhs_tokens <- c(if (has_intercept) "1", random_terms)
   lhs_formula <- if (length(lhs_tokens)) {
     stats::as.formula(paste("~", paste(lhs_tokens, collapse = " + ")))
@@ -330,6 +347,96 @@ classify_term_scope <- function(term_label, design, grouping_var) {
 
 #' @keywords internal
 #' @noRd
+resolve_term_scopes <- function(term_labels, design, grouping_var, term_scopes = NULL) {
+  inferred <- stats::setNames(
+    vapply(term_labels, classify_term_scope, character(1), design = design, grouping_var = grouping_var),
+    term_labels
+  )
+  if (is.null(term_scopes)) {
+    return(inferred)
+  }
+
+  if (is.list(term_scopes) && !is.null(names(term_scopes))) {
+    term_scopes <- unlist(term_scopes, use.names = TRUE)
+  }
+  if (!is.atomic(term_scopes) || is.null(names(term_scopes))) {
+    stop("`term_scopes` must be a named character vector or named list.")
+  }
+  allowed <- c("between", "within", "mixed", "ungrouped")
+  unknown <- setdiff(names(term_scopes), term_labels)
+  if (length(unknown)) {
+    stop("Unknown term scope override(s): ", paste(unknown, collapse = ", "))
+  }
+  bad <- setdiff(unique(unname(term_scopes)), allowed)
+  if (length(bad)) {
+    stop("Unsupported term scope value(s): ", paste(bad, collapse = ", "))
+  }
+  inferred[names(term_scopes)] <- unname(term_scopes)
+  inferred
+}
+
+#' @keywords internal
+#' @noRd
+normalize_exchangeability_value <- function(x) {
+  aliases <- c(
+    between = "between_subject",
+    within = "within_subject",
+    mixed = "whole_subject",
+    ungrouped = "rows",
+    row = "rows",
+    rows = "rows",
+    between_subject = "between_subject",
+    within_subject = "within_subject",
+    whole_subject = "whole_subject"
+  )
+  if (!x %in% names(aliases)) {
+    stop(
+      "Unsupported exchangeability value '", x, "'. ",
+      "Allowed values are 'between_subject', 'within_subject', 'whole_subject', and 'rows'."
+    )
+  }
+  unname(aliases[[x]])
+}
+
+#' @keywords internal
+#' @noRd
+resolve_exchangeability <- function(term_labels, term_scopes, grouping_var, exchangeability = NULL) {
+  inferred <- stats::setNames(vapply(term_scopes, function(scope) {
+    if (is.null(grouping_var)) {
+      "rows"
+    } else if (identical(scope, "between")) {
+      "between_subject"
+    } else if (identical(scope, "within")) {
+      "within_subject"
+    } else if (identical(scope, "mixed")) {
+      "whole_subject"
+    } else {
+      "rows"
+    }
+  }, character(1)), term_labels)
+
+  if (is.null(exchangeability)) {
+    return(inferred)
+  }
+
+  if (is.list(exchangeability) && !is.null(names(exchangeability))) {
+    exchangeability <- unlist(exchangeability, use.names = TRUE)
+  }
+  if (!is.atomic(exchangeability) || is.null(names(exchangeability))) {
+    stop("`exchangeability` must be a named character vector or named list.")
+  }
+  unknown <- setdiff(names(exchangeability), term_labels)
+  if (length(unknown)) {
+    stop("Unknown exchangeability override(s): ", paste(unknown, collapse = ", "))
+  }
+  normalized <- vapply(unname(exchangeability), normalize_exchangeability_value, character(1))
+  names(normalized) <- names(exchangeability)
+  inferred[names(normalized)] <- normalized
+  inferred
+}
+
+#' @keywords internal
+#' @noRd
 permute_blocks_same_size <- function(blocks) {
   sizes <- vapply(blocks, length, integer(1))
   idx_by_size <- split(seq_along(blocks), sizes)
@@ -347,4 +454,18 @@ permute_blocks_same_size <- function(blocks) {
 resample_blocks <- function(blocks, replace = TRUE) {
   picked <- sample.int(length(blocks), size = length(blocks), replace = replace)
   unlist(blocks[picked], use.names = FALSE)
+}
+
+#' @keywords internal
+#' @noRd
+resample_blocks_with_labels <- function(blocks, replace = TRUE) {
+  picked <- sample.int(length(blocks), size = length(blocks), replace = replace)
+  sampled_blocks <- blocks[picked]
+  idx <- unlist(sampled_blocks, use.names = FALSE)
+  block_labels <- rep(seq_along(sampled_blocks), vapply(sampled_blocks, length, integer(1)))
+  list(
+    idx = idx,
+    picked = picked,
+    block_labels = factor(block_labels, levels = seq_along(sampled_blocks))
+  )
 }

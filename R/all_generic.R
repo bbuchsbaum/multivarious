@@ -573,7 +573,7 @@ rotate <- function(x, ncomp, type, ...) UseMethod("rotate")
 #' Apply a specified rotation to the fitted model
 #' 
 #' @param x A model object, possibly created using the `pca()` function.
-#' @param rotation_matrix \code{matrix} reprsenting the rotation.
+#' @param rotation_matrix \code{matrix} representing the rotation.
 #' @param ... extra args
 #' @return A modified object with updated components and scores after applying the specified rotation.
 #' @export

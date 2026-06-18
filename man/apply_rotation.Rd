@@ -9,7 +9,7 @@ apply_rotation(x, rotation_matrix, ...)
 \arguments{
 \item{x}{A model object, possibly created using the \code{pca()} function.}
 
-\item{rotation_matrix}{\code{matrix} reprsenting the rotation.}
+\item{rotation_matrix}{\code{matrix} representing the rotation.}
 
 \item{...}{extra args}
 }

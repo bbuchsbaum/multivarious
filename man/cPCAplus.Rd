@@ -16,7 +16,7 @@ cPCAplus(
   ncomp = NULL,
   center_background = TRUE,
   lambda = 0,
-  method = c("geigen", "primme", "sdiag", "corpcor"),
+  method = c("geigen", "sdiag", "corpcor"),
   strategy = c("auto", "feature", "sample"),
   verbose = getOption("multivarious.verbose", TRUE),
   sample_rank = NULL,
@@ -44,7 +44,6 @@ results if \code{Rb} is ill-conditioned or singular.}
 \item{method}{A character string specifying the primary computation method. Options include:
 \itemize{
 \item \code{"geigen"} (Default): Use \code{geneig} from the \code{geigen} package.
-\item \code{"primme"}: Use \code{geneig} with the PRIMME library backend (requires special \code{geigen} build).
 \item \code{"sdiag"}: Use \code{geneig} with a spectral decomposition method.
 \item \code{"corpcor"}: Use a corpcor-based whitening approach followed by standard PCA.
 }}
@@ -98,7 +97,7 @@ using the \emph{background mean}.
 are centered by subtracting the column means calculated \emph{only} from the background data \code{X_b}.
 This is crucial for isolating variance specific to \code{X_f}.
 
-\strong{Core Algorithm (methods "geigen", "primme", "sdiag", strategy="feature"):}
+\strong{Core Algorithm (methods "geigen", "sdiag", strategy="feature"):}
 \enumerate{
 \item Center \code{X_f} and \code{X_b} using the mean of \code{X_b}.
 \item Compute potentially shrunk \eqn{p \times p} covariance matrices \code{Rf} (from centered \code{X_f}) and \code{Rb} (from centered \code{X_b}) using \code{corpcor::cov.shrink}.

@@ -14,6 +14,14 @@
 #'   must share a single grouping variable.
 #' @param basis Feature basis specification or projector-like object.
 #' @param preproc Response preprocessor.
+#' @param term_scopes Optional named character vector or named list overriding
+#'   automatic effect-scope classification for fixed-effect terms. Allowed values
+#'   are `"between"`, `"within"`, `"mixed"`, and `"ungrouped"`.
+#' @param exchangeability Optional named character vector or named list
+#'   specifying permutation/block-resampling structure for fixed-effect terms.
+#'   Allowed values are `"between_subject"`, `"within_subject"`,
+#'   `"whole_subject"`, and `"rows"`. When omitted, exchangeability is inferred
+#'   from grouped-design scope.
 #' @param ... Reserved for future extensions.
 #' @return A `mixed_fit` object.
 #' @export
@@ -23,6 +31,8 @@ mixed_regress <- function(Y,
                           random = NULL,
                           basis = identity_basis(),
                           preproc = center(),
+                          term_scopes = NULL,
+                          exchangeability = NULL,
                           ...) {
   normalized <- normalize_mixed_response(Y, design = design)
   Y_mat <- normalized$Y
@@ -33,7 +43,11 @@ mixed_regress <- function(Y,
   Y_preproc <- prep_res$preproc
   Y_proc <- prep_res$transformed
 
-  row_engine <- build_row_engine(fixed, design_df, random_spec, Y_proc)
+  row_engine <- build_row_engine(
+    fixed, design_df, random_spec, Y_proc,
+    term_scopes = term_scopes,
+    exchangeability = exchangeability
+  )
   basis_res <- resolve_mixed_basis(basis, Y_proc, row_engine = row_engine)
 
   out <- structure(
@@ -52,6 +66,8 @@ mixed_regress <- function(Y,
       basis_fit = basis_res$basis_fit,
       basis_matrix = basis_res$B,
       preproc = Y_preproc,
+      term_scopes = term_scopes,
+      exchangeability = row_engine$exchangeability,
       row_metric = row_engine$metric,
       effects_meta = row_engine$effects_meta,
       input_type = normalized$input_type,
@@ -84,10 +100,12 @@ print.mixed_fit <- function(x, ...) {
 summary.mixed_fit <- function(object, ...) {
   term_df <- vapply(object$effects_meta, `[[`, numeric(1), "df_term")
   term_scope <- vapply(object$effects_meta, `[[`, character(1), "term_scope")
+  exchangeability <- vapply(object$effects_meta, `[[`, character(1), "exchangeability")
   out <- data.frame(
     term = names(object$effects_meta),
     df_term = term_df,
     scope = term_scope,
+    exchangeability = exchangeability,
     stringsAsFactors = FALSE
   )
   out

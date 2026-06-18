@@ -48,14 +48,12 @@
 #'   - "robust": Uses a stable decomposition via a whitening transform (B must be symmetric PD).
 #'   - "sdiag":  Uses a spectral decomposition of B (must be symmetric PD). Requires A to be symmetric for meaningful results.
 #'   - "geigen": Uses the \pkg{geigen} package for a general solution (A and B can be non-symmetric).
-#'   - "primme": Uses the \pkg{PRIMME} package for large/sparse symmetric problems (A and B must be symmetric).
 #'   - "rspectra": Uses \pkg{RSpectra}; if B is SPD it calls \code{eigs_sym(A, B, ...)} directly, otherwise it applies a reciprocal transform to support all targets.
 #'   - "subspace": Block subspace iteration for symmetric pairs with SPD B (iterative, no external package required).
 #' @param which Which eigenpairs to return. One of
 #'   `"LA"` (largest algebraic), `"SA"` (smallest algebraic), `"LM"` (largest magnitude),
 #'   or `"SM"` (smallest magnitude). Aliases: `"top"`/`"largest"` -> `"LA"`, `"bottom"`/`"smallest"` -> `"SA"`.
-#'   Dense backends select eigenpairs post hoc; `"primme"` supports `"LA"`, `"SA"`, `"SM"` (not `"LM"`);
-#'   `"rspectra"` honors all four options. Default is `"LA"`.
+#'   Dense backends select eigenpairs post hoc; `"rspectra"` honors all four options. Default is `"LA"`.
 #' @param ... Additional arguments to pass to the underlying solver.
 #' @return A `projector` object with generalized eigenvectors and eigenvalues.
 #' @seealso \code{\link{projector}} for the base class structure.
@@ -69,11 +67,7 @@
 #'   Eigenvalue Problems". *SIAM J. Numer. Anal.*, 10 (2): 241-256 --
 #'   the QZ algorithm behind the \code{geigen} backend.
 #'
-#' Stathopoulos, A. & McCombs, J. R. (2010) "PRIMME: PReconditioned
-#'   Iterative Multi-Method Eigensolver". *ACM TOMS* 37 (2): 21:1-21:30 --
-#'   the algorithmic core of the \code{primme} backend.
-#'
-#' See also the \pkg{geigen} (CRAN) and \pkg{PRIMME} documentation.
+#' See also the \pkg{geigen} (CRAN) documentation.
 #'
 #' @importFrom geigen geigen
 #' @importFrom Matrix Cholesky solve forceSymmetric Diagonal t isSymmetric
@@ -95,7 +89,7 @@
                     B = NULL,
                     ncomp = 2,
                     preproc = NULL,
-                    method = c("robust", "sdiag", "geigen", "primme", "rspectra", "subspace"),
+                    method = c("robust", "sdiag", "geigen", "rspectra", "subspace"),
                     which = "LA", ...) {
    method <- match.arg(method)
    which <- .normalize_which(which)
@@ -124,7 +118,7 @@
      if (!is.null(outpb$B)) B <- outpb$B
    }
 
-   if (method %in% c("rspectra", "primme") && ncomp >= nrow(A)) {
+   if (method == "rspectra" && ncomp >= nrow(A)) {
      warning("Iterative backends require k < n; switching to a dense backend for full decomposition.")
      method <- if ((inherits(B, "Matrix") && Matrix::isSymmetric(B)) || isSymmetric(B)) "robust" else "geigen"
    }
@@ -207,47 +201,6 @@
        values <- res$values[keep]
        vectors <- res$vectors[, keep, drop = FALSE]
        list(vectors = vectors, values = values)
-     },
-     primme = {
-       if (!requireNamespace("PRIMME", quietly = TRUE)) {
-         stop("Package 'PRIMME' not installed. Please install it for method='primme'.")
-       }
-       if (!isTRUE(sym_A) || !isTRUE(sym_B)) {
-         stop("For method='primme' using eigs_sym, both A and B must be symmetric.")
-       }
-       which_p <- switch(which,
-         LA = "LA",
-         SA = "SA",
-         SM = "SM",
-         LM = stop("PRIMME does not support which='LM' for generalized problems. Use 'LA', 'SA', or 'SM'.")
-       )
-       user_args <- list(...)
-       if (!is.null(user_args$.primme_method)) {
-         user_args$method <- user_args$.primme_method
-         user_args$.primme_method <- NULL
-       }
-       protected_args <- c("A", "B", "NEig", "which")
-       if (length(user_args)) {
-         drop_names <- intersect(names(user_args), protected_args)
-         if (length(drop_names)) {
-           warning(sprintf(
-             "Ignoring PRIMME arguments conflicting with geneig(): %s",
-             paste(drop_names, collapse = ", "
-           )))
-           user_args <- user_args[setdiff(names(user_args), protected_args)]
-         }
-       }
-       primme_defaults <- list(
-         method = "PRIMME_DEFAULT_MIN_TIME",
-         eps = 1e-6,
-         maxBlockSize = max(1L, min(4L, as.integer(ncomp)))
-       )
-       primme_args <- utils::modifyList(primme_defaults, user_args)
-       res <- do.call(
-         PRIMME::eigs_sym,
-         c(list(A = A, B = B, NEig = ncomp, which = which_p), primme_args)
-       )
-       list(vectors = res$vectors, values = res$values)
      },
      subspace = {
        if (!isTRUE(sym_A) || !isTRUE(sym_B)) {
@@ -332,7 +285,7 @@
 
         tiny <- sqrt(.Machine$double.eps)
         if (any(abs(mu) < tiny)) {
-          warning("Some mu near 0 in the rspectra reciprocal fallback; corresponding lambda may overflow. Consider method='primme' or 'geigen' with a shift.")
+          warning("Some mu near 0 in the rspectra reciprocal fallback; corresponding lambda may overflow. Consider method='geigen' with a shift.")
         }
 
         lam <- 1 / mu

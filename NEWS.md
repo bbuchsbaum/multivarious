@@ -1,3 +1,20 @@
+# multivarious 0.3.2
+
+## Dependencies
+
+* Removed the optional `PRIMME` backend from `geneig()` and `cPCAplus()` (and dropped `PRIMME` from `Suggests`), as the `PRIMME` package is scheduled for archival on CRAN. The iterative `"rspectra"` and `"subspace"` backends and the dense `"geigen"`/`"robust"`/`"sdiag"` backends cover the same generalized eigenproblems.
+
+## Mixed-effect inference
+
+* Added explicit `term_scopes` and `exchangeability` overrides to `mixed_regress()`, with exchangeability metadata now carried through `summary()`, `effect()`, and effect-operator printing.
+* Fixed grouped row-metric whitening/unwhitening for random-effect designs by using the Cholesky orientation implied by the row metric.
+* Hardened `perm_test.effect_operator()` by making the supported one-sided alternative explicit, preserving seed metadata, honoring explicit exchangeability schemes, and using a fixed statistic family for each sequential permutation step.
+* Improved `bootstrap.effect_operator()` for grouped designs by relabeling duplicated bootstrap clusters as distinct resampled groups, aligning multi-component loadings with an orthogonal Procrustes rotation, and preserving seed metadata.
+
+## Tests
+
+* Added regression tests for grouped whitening, explicit term-scope and exchangeability overrides, effect-operator permutation statistic selection, subject bootstrap relabeling, seed metadata, and PRIMME removal.
+
 # multivarious 0.3.1
 
 ## Behavior Changes
