@@ -4,3 +4,7 @@
 .Ruserdata
 docs
 inst/doc
+.omc/
+experimental/*.bak
+experimental/results/*.csv
+experimental/results/*.log
