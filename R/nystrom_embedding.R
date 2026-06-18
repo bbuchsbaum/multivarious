@@ -95,6 +95,9 @@ nystrom_approx <- function(X, kernel_func=NULL, ncomp=NULL,
   
   # Basic checks
   chk::chkor_vld(chk::vld_matrix(X), chk::vld_s4_class(X, "Matrix"))
+  if (any(!is.finite(X))) {
+    stop("`X` must contain only finite values.")
+  }
   N <- nrow(X)
   
   # If no landmarks given, sample them; otherwise validate input

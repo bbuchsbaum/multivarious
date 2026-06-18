@@ -61,6 +61,9 @@ normalize_mixed_response <- function(Y, design = NULL) {
     n_subject <- dims[[1]]
     n_within <- dims[[2]]
     p <- dims[[3]]
+    if (any(!is.finite(Y))) {
+      stop("`Y` must contain only finite values.")
+    }
 
     Y_mat <- do.call(
       rbind,
@@ -88,6 +91,9 @@ normalize_mixed_response <- function(Y, design = NULL) {
   }
 
   Y <- as.matrix(Y)
+  if (any(!is.finite(Y))) {
+    stop("`Y` must contain only finite values.")
+  }
   if (is.null(design)) {
     stop("`design` must be supplied when `Y` is a matrix.")
   }

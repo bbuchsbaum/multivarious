@@ -94,7 +94,7 @@ truncate.effect_operator <- function(x, ncomp) {
 
 #' @export
 reconstruct.effect_operator <- function(x,
-                                        comp = 1:ncomp(x),
+                                        comp = seq_len(ncomp(x)),
                                         rowind = 1:nrow(scores(x)),
                                         colind = 1:nrow(stats::coef(x)),
                                         scale = c("original", "processed", "whitened"),

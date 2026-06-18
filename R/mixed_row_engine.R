@@ -98,7 +98,7 @@ apply_block_solve <- function(block_chol, blocks, M) {
   for (i in seq_along(blocks)) {
     idx <- blocks[[i]]
     U <- block_chol[[i]]
-    out[idx, ] <- backsolve(U, M[idx, , drop = FALSE], transpose = FALSE)
+    out[idx, ] <- forwardsolve(t(U), M[idx, , drop = FALSE], upper.tri = FALSE, transpose = FALSE)
   }
   out
 }
@@ -241,7 +241,7 @@ attach_metric_operators <- function(metric) {
     out <- matrix(0, nrow = nrow(M), ncol = ncol(M))
     for (i in seq_along(metric$blocks)) {
       idx <- metric$blocks[[i]]
-      out[idx, ] <- metric$block_chol[[i]] %*% M[idx, , drop = FALSE]
+      out[idx, ] <- t(metric$block_chol[[i]]) %*% M[idx, , drop = FALSE]
     }
     out
   }
