@@ -130,7 +130,7 @@ function projects test data, reconstructs it, and computes RMSE:</p>
 <span><span class="co">#&gt; 1     1 2.949027e-01</span></span>
 <span><span class="co">#&gt; 2     2 1.603380e-01</span></span>
 <span><span class="co">#&gt; 3     3 7.673558e-02</span></span>
-<span><span class="co">#&gt; 4     4 5.576655e-16</span></span></code></pre></div>
+<span><span class="co">#&gt; 4     4 5.299976e-16</span></span></code></pre></div>
 <p>Two components capture most of the structure; additional components
 yield diminishing returns.</p>
 </div>
@@ -451,11 +451,11 @@ new data.</p>
 <span><span class="va">scores_new</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">fit_std</span>, <span class="va">X</span><span class="op">[</span><span class="va">new_rows</span>, , drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">scores_new</span><span class="op">)</span></span>
 <span><span class="co">#&gt;            [,1]         [,2]        [,3]       [,4]       [,5]</span></span>
-<span><span class="co">#&gt; [1,] -0.5065700 -0.003782324 -0.89690602 -1.2402365 -0.2466715</span></span>
-<span><span class="co">#&gt; [2,] -0.3673067  0.489430969 -1.23213982 -1.5330320  0.7247966</span></span>
-<span><span class="co">#&gt; [3,]  1.9065578 -0.008104080 -0.61654002  1.5191661  1.2188904</span></span>
-<span><span class="co">#&gt; [4,] -1.5843734 -0.908340577 -0.94045424 -2.8897545 -2.0328659</span></span>
-<span><span class="co">#&gt; [5,]  0.5690207  0.002415067  0.09988366 -0.0194067  0.5888599</span></span>
+<span><span class="co">#&gt; [1,]  0.5065700  0.003782324 -0.89690602  1.2402365 -0.2466715</span></span>
+<span><span class="co">#&gt; [2,]  0.3673067 -0.489430969 -1.23213982  1.5330320  0.7247966</span></span>
+<span><span class="co">#&gt; [3,] -1.9065578  0.008104080 -0.61654002 -1.5191661  1.2188904</span></span>
+<span><span class="co">#&gt; [4,]  1.5843734  0.908340577 -0.94045424  2.8897545 -2.0328659</span></span>
+<span><span class="co">#&gt; [5,] -0.5690207 -0.002415067  0.09988366  0.0194067  0.5888599</span></span>
 <span></span>
 <span><span class="co"># Double Nyström collapses to standard when l = m = N</span></span>
 <span><span class="va">fit_dbl</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nystrom_approx.html">nystrom_approx</a></span><span class="op">(</span></span>

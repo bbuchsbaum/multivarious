@@ -246,7 +246,7 @@ res_pca_row <- perm_test(mod_pca, X_iris, nperm=50, comps=3,
 #> Pre-calculating reconstructions for stepwise testing...
 #> Running 50 permutations sequentially for up to 3 PCA components (alpha=0.050, serial)...
 #>   Testing Component 1/3...
-#>   Component 1 p-value (0.4314) > alpha (0.050). Stopping sequential testing.
+#>   Component 1 p-value (0.9608) > alpha (0.050). Stopping sequential testing.
 print(res_pca_row)
 #> 
 #> PCA Permutation Test Results
@@ -256,7 +256,7 @@ print(res_pca_row)
 #> 
 #> Component Results:
 #>   comp  observed      pval  lower_ci  upper_ci
-#> 1    1 0.9246187 0.4313725 0.9246187 0.9246187
+#> 1    1 0.9246187 0.9607843 0.9246187 0.9246187
 #> 
 #> Number of successful permutations per component: 50 
 ```

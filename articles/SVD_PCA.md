@@ -47,7 +47,7 @@ head(scores(sv_fast)) # 35 × 5
 if (!is.null(sv_irlba)) {
   all.equal(scores(sv_fast), scores(sv_irlba))
 }
-#> [1] "Mean relative difference: 0.7895446"
+#> [1] "Mean relative difference: 0.7913532"
 ```
 
 ## 2. A one-liner `pca()`
@@ -253,7 +253,7 @@ sessionInfo()
 #> [34] cli_3.6.6            withr_3.0.2          pkgdown_2.2.0       
 #> [37] magrittr_2.0.5       digest_0.6.39        grid_4.6.0          
 #> [40] irlba_2.3.7          lifecycle_1.0.5      vctrs_0.7.3         
-#> [43] evaluate_1.0.5       glue_1.8.1           GPArotation_2026.4-1
+#> [43] evaluate_1.0.5       glue_1.8.1           GPArotation_2026.6-1
 #> [46] corpcor_1.6.10       farver_2.1.2         ragg_1.5.2          
 #> [49] rmarkdown_2.31       tools_4.6.0          pkgconfig_2.0.3     
 #> [52] htmltools_0.5.9
