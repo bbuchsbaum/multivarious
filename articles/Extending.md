@@ -15,6 +15,7 @@ We use the classic Iris dataset and split its features into two blocks:
 - **Y-block**: Petal.Length, Petal.Width
 
 ``` r
+
 data(iris)
 X <- as.matrix(iris[, 1:2])
 Y <- as.matrix(iris[, 3:4])
@@ -38,6 +39,7 @@ the resulting coefficients (loadings) and preprocessing steps in a
 `cross_projector` object.
 
 ``` r
+
 fit_cca <- function(Xtrain, Ytrain, ncomp = 2, ...) {
   # Step 1: Define and fit preprocessors with training data
   # Use center()+z-score for both blocks (swap to center() only if preferred)
@@ -92,6 +94,7 @@ Let’s predict the Y-block (Petal measurements) using the X-block (Sepal
 measurements).
 
 ``` r
+
 Y_hat <- transfer(cp_cca, X, from = "X", to = "Y")
 head(round(Y_hat, 2))
 #>      [,1] [,2]
@@ -115,6 +118,7 @@ What if we only have Sepal.Length (the first column of X) at prediction
 time? We can still project into the latent space:
 
 ``` r
+
 new_x_partial <- X[, 1, drop = FALSE]
 
 scores_partial <- partial_project(cp_cca, new_x_partial,
@@ -140,6 +144,7 @@ Cross-validation for two-block models requires wrapper functions that
 handle both X and Y blocks. The pattern is:
 
 ``` r
+
 set.seed(1)
 folds <- kfold_split(nrow(X), k = 5)
 
@@ -174,6 +179,7 @@ The default shuffles rows of Y relative to X and measures whether the
 observed transfer error is lower than expected by chance.
 
 ``` r
+
 perm_res <- perm_test(
   cp_cca, X, Y = Y,
   nperm = 199,
@@ -211,6 +217,7 @@ Here, we fit LASSO using `glmnet` and wrap the resulting coefficients
 ### 2.1 Data and Model Fitting
 
 ``` r
+
 # Generate sample data
 set.seed(123)
 n_obs <- 100
@@ -248,6 +255,7 @@ linear predictor. We also include centering and scaling as
 preprocessing, often recommended for `glmnet`.
 
 ``` r
+
 # Define preprocessor
 # Define and fit preprocessor with training data
 preproc_glm <- fit(colscale(center(), type = "z"), X_glm)
@@ -275,6 +283,7 @@ We can now use this `projector` to calculate the LASSO linear predictor
 score for new data.
 
 ``` r
+
 # Generate some new test data
 X_glm_test <- matrix(rnorm(20 * n_pred), 20, n_pred)
 

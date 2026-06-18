@@ -32,6 +32,7 @@ other properties from the input `bi_projector` instances.
 ## Examples
 
 ``` r
+
 X1 <- matrix(rnorm(5*5), 5, 5)
 X2 <- matrix(rnorm(5*5), 5, 5)
 

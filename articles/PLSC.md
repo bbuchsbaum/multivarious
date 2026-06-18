@@ -18,6 +18,7 @@ permutations/bootstraps.
 ## 2. Simulate coupled X/Y blocks
 
 ``` r
+
 n  <- 80   # subjects
 pX <- 8    # brain/features
 pY <- 5    # behavior
@@ -37,6 +38,7 @@ Y <- F_scores %*% t(Vy_true) + noise * matrix(rnorm(n * pY), n, pY)
 ## 3. Fit PLSC
 
 ``` r
+
 fit_plsc <- plsc(X, Y, ncomp = 3,                   # request a few extra comps
                  preproc_x = standardize(),         # correlation-scale
                  preproc_y = standardize())
@@ -50,6 +52,7 @@ fit_plsc$explained_cov
 ## 4. Inspect scores (brain vs behavior)
 
 ``` r
+
 scores_df <- data.frame(
   LV1_x = scores(fit_plsc, "X")[, 1],
   LV1_y = scores(fit_plsc, "Y")[, 1],
@@ -74,6 +77,7 @@ Shuffle rows of `Y` to break the X–Y link and build an empirical null
 for the singular values.
 
 ``` r
+
 set.seed(123)
 pt <- perm_test(fit_plsc, X, Y, nperm = 199, comps = 3, parallel = FALSE)
 pt$component_results
@@ -94,6 +98,7 @@ reports mean/SD (ratio ≈ Z).
 Here we keep it light for the vignette; use ≥500–1000 in practice.
 
 ``` r
+
 set.seed(321)
 boot_plsc <- bootstrap(fit_plsc, nboot = 120, X = X, Y = Y, comps = 2, parallel = FALSE)
 

@@ -35,6 +35,7 @@ a `matrix` of residuals
 ## Examples
 
 ``` r
+
 X <- matrix(rnorm(20*10), 20, 10)
 des <- data.frame(a=rep(letters[1:4], 5), b=factor(rep(1:5, each=4)))
 xresid <- residualize(~ a+b, X, design=des)

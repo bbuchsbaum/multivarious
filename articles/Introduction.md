@@ -94,6 +94,7 @@ Let’s demonstrate a typical workflow using PCA on the classic `iris`
 dataset.
 
 ``` r
+
 # Load iris dataset and select numeric columns
 data(iris)
 X <- as.matrix(iris[, 1:4])
@@ -180,6 +181,7 @@ The same package grammar applies to repeated-measures multivariate
 effects.
 
 ``` r
+
 set.seed(99)
 
 design_m <- expand.grid(
@@ -220,6 +222,7 @@ print(E_gl)
 #> Components: 0
 #> Term df: 0
 #> Scope: within
+#> Exchangeability: within_subject
 #> Basis rank: 3
 pt_gl$component_results
 #> # A tibble: 0 × 7
@@ -263,6 +266,7 @@ the model’s scores (U vectors in SVD terms). This is done using
 [`project_vars()`](https://bbuchsbaum.github.io/multivarious/reference/project_vars.md).
 
 ``` r
+
 # Using the 'fit' object from the PCA example above
 
 # Create a new variable (column) with the same number of samples as original data

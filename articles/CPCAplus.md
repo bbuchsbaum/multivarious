@@ -18,6 +18,7 @@ Let’s start with a practical example to see why contrastive PCA is
 useful:
 
 ``` r
+
 set.seed(123)
 n_samples <- 100
 n_features <- 50
@@ -79,6 +80,7 @@ The
 function makes contrastive PCA easy to use:
 
 ``` r
+
 # Basic usage
 cpca_fit <- cPCAplus(
   X_f = foreground,  # Your group of interest (foreground)
@@ -124,6 +126,7 @@ returns a `bi_projector` object containing:
   variance)
 
 ``` r
+
 # Which features contribute most to the first contrastive component?
 top_features <- order(abs(cpca_fit$v[, 1]), decreasing = TRUE)[1:10]
 print(paste("Top contributing features:", paste(top_features, collapse = ", ")))
@@ -139,6 +142,7 @@ print(paste("Variance ratios:", paste(round(cpca_fit$values[1:3], 2), collapse =
 ### 1. Biomedical Studies
 
 ``` r
+
 # Identify disease-specific patterns
 tumor_cpca <- cPCAplus(
   X_f = tumor_samples,
@@ -150,6 +154,7 @@ tumor_cpca <- cPCAplus(
 ### 2. Technical Variation Removal
 
 ``` r
+
 # Use technical replicates as background to find biological signal
 bio_cpca <- cPCAplus(
   X_f = biological_samples,
@@ -161,6 +166,7 @@ bio_cpca <- cPCAplus(
 ### 3. Time-Based Contrasts
 
 ``` r
+
 # Find patterns specific to treatment timepoint
 treatment_cpca <- cPCAplus(
   X_f = after_treatment,
@@ -177,6 +183,7 @@ When you have more features than samples (p \>\> n), use the efficient
 sample-space strategy:
 
 ``` r
+
 # Create high-dimensional example
 n_f <- 50; n_b <- 80; p <- 1000
 X_background_hd <- matrix(rnorm(n_b * p), n_b, p)
@@ -196,6 +203,7 @@ cpca_hd <- cPCAplus(X_f = X_foreground_hd, X_b = X_background_hd,
 If your background covariance is nearly singular, add regularization:
 
 ``` r
+
 # Small background sample size can lead to instability
 small_background <- matrix(rnorm(20 * 100), 20, 100)
 small_foreground <- matrix(rnorm(30 * 100), 30, 100)
@@ -227,12 +235,14 @@ Click for mathematical details
 
 Contrastive PCA++ solves the generalized eigenvalue problem:
 
-$$\mathbf{R}_{f}\mathbf{v} = \lambda\mathbf{R}_{b}\mathbf{v}$$
+``` math
+\mathbf{R}_f \mathbf{v} = \lambda \mathbf{R}_b \mathbf{v}
+```
 
-where: - $\mathbf{R}_{f}$ is the foreground covariance matrix -
-$\mathbf{R}_{b}$ is the background covariance matrix - $\lambda$
-represents the variance ratio (foreground/background) - $\mathbf{v}$ are
-the contrastive directions
+where: - $`\mathbf{R}_f`$ is the foreground covariance matrix -
+$`\mathbf{R}_b`$ is the background covariance matrix - $`\lambda`$
+represents the variance ratio (foreground/background) - $`\mathbf{v}`$
+are the contrastive directions
 
 This finds directions that maximize the ratio of foreground to
 background variance, effectively highlighting patterns enriched in the
@@ -242,7 +252,7 @@ The
 [`geneig()`](https://bbuchsbaum.github.io/multivarious/reference/geneig.md)
 function provides the underlying solver with multiple algorithm
 options: - `"geigen"`: General purpose, handles non-symmetric matrices -
-`"robust"`: Fast for well-conditioned problems - `"primme"`: Efficient
+`"robust"`: Fast for well-conditioned problems - `"rspectra"`: Efficient
 for very large sparse matrices
 
 ## References

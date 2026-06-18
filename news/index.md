@@ -1,5 +1,48 @@
 # Changelog
 
+## multivarious 0.3.2
+
+CRAN release: 2026-06-05
+
+### Dependencies
+
+- Removed the optional `PRIMME` backend from
+  [`geneig()`](https://bbuchsbaum.github.io/multivarious/reference/geneig.md)
+  and
+  [`cPCAplus()`](https://bbuchsbaum.github.io/multivarious/reference/cPCAplus.md)
+  (and dropped `PRIMME` from `Suggests`), as the `PRIMME` package is
+  scheduled for archival on CRAN. The iterative `"rspectra"` and
+  `"subspace"` backends and the dense `"geigen"`/`"robust"`/`"sdiag"`
+  backends cover the same generalized eigenproblems.
+
+### Mixed-effect inference
+
+- Added explicit `term_scopes` and `exchangeability` overrides to
+  [`mixed_regress()`](https://bbuchsbaum.github.io/multivarious/reference/mixed_regress.md),
+  with exchangeability metadata now carried through
+  [`summary()`](https://rdrr.io/r/base/summary.html),
+  [`effect()`](https://bbuchsbaum.github.io/multivarious/reference/effect.md),
+  and effect-operator printing.
+- Fixed grouped row-metric whitening/unwhitening for random-effect
+  designs by using the Cholesky orientation implied by the row metric.
+- Hardened
+  [`perm_test.effect_operator()`](https://bbuchsbaum.github.io/multivarious/reference/perm_test.effect_operator.md)
+  by making the supported one-sided alternative explicit, preserving
+  seed metadata, honoring explicit exchangeability schemes, and using a
+  fixed statistic family for each sequential permutation step.
+- Improved
+  [`bootstrap.effect_operator()`](https://bbuchsbaum.github.io/multivarious/reference/bootstrap.effect_operator.md)
+  for grouped designs by relabeling duplicated bootstrap clusters as
+  distinct resampled groups, aligning multi-component loadings with an
+  orthogonal Procrustes rotation, and preserving seed metadata.
+
+### Tests
+
+- Added regression tests for grouped whitening, explicit term-scope and
+  exchangeability overrides, effect-operator permutation statistic
+  selection, subject bootstrap relabeling, seed metadata, and PRIMME
+  removal.
+
 ## multivarious 0.3.1
 
 CRAN release: 2026-01-21

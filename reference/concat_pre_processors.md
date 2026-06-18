@@ -28,6 +28,7 @@ blockwise
 ## Examples
 
 ``` r
+
 p1 <- prep(center())
 p2 <- prep(center())
 

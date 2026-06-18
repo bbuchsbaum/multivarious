@@ -38,6 +38,7 @@ basis dictionaries.
 First, let’s define our basis. We’ll use sines and cosines.
 
 ``` r
+
 set.seed(42)
 n  <- 128                       # Number of observations (e.g., signals)
 p  <- 32                        # Original variables per observation (e.g., time points)
@@ -71,10 +72,11 @@ cat(paste("Dimensions: Y is", nrow(Y), "x", ncol(Y),
 
 Now, we use
 [`regress()`](https://bbuchsbaum.github.io/multivarious/reference/regress.md)
-to find the coefficients $C$ that best represent each signal in $Y$
-using the basis $B$.
+to find the coefficients $`C`$ that best represent each signal in $`Y`$
+using the basis $`B`$.
 
 ``` r
+
 library(multivarious)
 
 # Fit using standard linear models (lm)
@@ -113,11 +115,12 @@ the key operations.
 
 ### 3.1 Inspecting the fitted coefficients
 
-The coefficient matrix `fit$v` has dimensions $n \times k$ (signals
-$\times$ basis functions). Each row contains the weights that express
+The coefficient matrix `fit$v` has dimensions $`n \times k`$ (signals
+$`\times`$ basis functions). Each row contains the weights that express
 one signal as a linear combination of basis functions.
 
 ``` r
+
 coef_matrix_first3 <- fit$v[1:3, ]
 cat("Coefficient matrix shape (first 3 signals):",
     nrow(coef_matrix_first3), "x", ncol(coef_matrix_first3), "\n\n")
@@ -137,17 +140,20 @@ print(coef_matrix_first3[1, ])
 ```
 
 Notice that `sin3` and `cos5` have the largest coefficients—this matches
-our generating function $3\sin(2\pi \cdot 3t) + 2\cos(2\pi \cdot 5t)$.
+our generating function $`3\sin(2\pi \cdot 3t) + 2\cos(2\pi \cdot 5t)`$.
 
 ### 3.2 Reconstructing the fitted data
 
 Reconstruction recovers the original data from the basis representation.
-The `bi_projector` stores both the design matrix $B$ (in `fit$s`) and
+The `bi_projector` stores both the design matrix $`B`$ (in `fit$s`) and
 the coefficients (in `fit$v`). Reconstruction is simply their product:
 
-$$\widehat{Y} = B \cdot C^{T} = \texttt{𝚏𝚒𝚝\$𝚜} \times \texttt{𝚝(𝚏𝚒𝚝\$𝚟)}$$
+``` math
+\hat{Y} = B \cdot C^T = \texttt{fit\$s} \times \texttt{t(fit\$v)}
+```
 
 ``` r
+
 Y_hat <- fit$s %*% t(fit$v)
 max_reconstruction_error <- max(abs(Y_hat - Y))
 
@@ -164,14 +170,17 @@ acceptable.
 ### 3.3 Projecting new data onto the basis
 
 A key use case is expressing *new* observations in terms of the same
-basis. For an orthonormal basis $B$, projection is straightforward:
+basis. For an orthonormal basis $`B`$, projection is straightforward:
 
-$$\text{coefficients} = B^{T} \cdot Y_{\text{new}}$$
+``` math
+\text{coefficients} = B^T \cdot Y_{\text{new}}
+```
 
 Let’s create a new signal with the same underlying pattern but different
 noise:
 
 ``` r
+
 Y_new_signal <- 3*sin(2*pi*3*t) + 2*cos(2*pi*5*t) + rnorm(p, sd=0.3)
 Y_new_matrix <- matrix(Y_new_signal, nrow = p, ncol = 1)
 
@@ -198,6 +207,7 @@ Finally, we can reconstruct the new signal from its basis coefficients
 to see how well the basis captures the underlying structure:
 
 ``` r
+
 Y_new_recon <- fit$s %*% coef_new
 reconstruction_error <- sqrt(mean((Y_new_matrix - Y_new_recon)^2))
 
@@ -206,8 +216,9 @@ cat("Reconstruction RMSE for new signal:", format(reconstruction_error, digits=3
 ```
 
 The reconstruction error reflects the noise that the basis cannot
-represent. Because $B$ is orthonormal, projection and reconstruction are
-exact inverses for the signal components that lie within the basis span.
+represent. Because $`B`$ is orthonormal, projection and reconstruction
+are exact inverses for the signal components that lie within the basis
+span.
 
 ------------------------------------------------------------------------
 
@@ -219,6 +230,7 @@ simply change the `method` argument.
 wraps common regularized models.
 
 ``` r
+
 # Ridge regression (requires glmnet)
 fit_ridge <- regress(X = B, Y = Y, method = "mridge", lambda = 0.01, intercept = FALSE)
 
@@ -239,6 +251,7 @@ fit_pls   <- regress(X = B, Y = Y, method = "pls", ncomp = 15, intercept = FALSE
 The `bi_projector` interface allows for flexible manipulation:
 
 ``` r
+
 # Truncate: Keep only the first 5 basis functions (Intercept + 2 sine + 2 cosine)
 fit5   <- truncate(fit, ncomp = 5) 
 cat("Dimensions after truncating to 5 components:", 
@@ -267,25 +280,28 @@ Y_lowHat <- basis_subset %*% coef_subset # p x n reconstruction
 
 ## 6. Under-the-hood: Matrix View
 
-The core idea is to represent the $p \times n$ data matrix $Y$ as a
-product of the $p \times k$ basis matrix (stored in `s`) and the
-$k \times n$ coefficient matrix (stored in `v`):
-$$\underset{p \times n}{\underbrace{Y}} \approx \underset{p \times k}{\underbrace{s}}\underset{k \times n}{\underbrace{v}}$$
+The core idea is to represent the $`p \times n`$ data matrix $`Y`$ as a
+product of the $`p \times k`$ basis matrix (stored in `s`) and the
+$`k \times n`$ coefficient matrix (stored in `v`):
+``` math
+ \underbrace{Y}_{p\times n} \approx \underbrace{s}_{p\times k} \underbrace{v}_{k\times n} 
+```
 
 [`regress()`](https://bbuchsbaum.github.io/multivarious/reference/regress.md)
-estimates $v$ (coefficients) based on the chosen method:
+estimates $`v`$ (coefficients) based on the chosen method:
 
-| `method` | Solver Used (Conceptual)                                         | Regularisation                         | Key Reference        |
-|----------|------------------------------------------------------------------|----------------------------------------|----------------------|
-| “lm”     | QR decomposition (`lm.fit`)                                      | None                                   | Classical OLS        |
-| “mridge” | `glmnet` (alpha=0)                                               | Ridge ($\lambda{||}\beta{||}_{2}^{2}$) | Hoerl & Kennard 1970 |
-| “enet”   | `glmnet`                                                         | Elastic Net ($\alpha$-mix)             | Zou & Hastie 2005    |
-| “pls”    | [`pls::plsr`](https://khliland.github.io/pls/reference/mvr.html) | Latent PLS factors                     | Wold 1984            |
+| `method` | Solver Used (Conceptual) | Regularisation | Key Reference |
+|----|----|----|----|
+| “lm” | QR decomposition (`lm.fit`) | None | Classical OLS |
+| “mridge” | `glmnet` (alpha=0) | Ridge ($`\lambda ||\beta||_2^2`$) | Hoerl & Kennard 1970 |
+| “enet” | `glmnet` | Elastic Net ($`\alpha`$-mix) | Zou & Hastie 2005 |
+| “pls” | [`pls::plsr`](https://khliland.github.io/pls/reference/mvr.html) | Latent PLS factors | Wold 1984 |
 
 The resulting object stores: \* `v`: The estimated coefficient matrix
-($k \times n$). \* `s`: The basis/design matrix $B$ ($p \times k$),
-possibly centered or scaled by the underlying solver. \* `sdev`,
-`center`: Potentially stores scaling/centering info related to $s$.
+($`k \times n`$). \* `s`: The basis/design matrix $`B`$
+($`p \times k`$), possibly centered or scaled by the underlying solver.
+\* `sdev`, `center`: Potentially stores scaling/centering info related
+to $`s`$.
 
 All other `bi_projector` methods (`project`, `reconstruct`,
 `inverse_projection`) are derived from these core matrices.
@@ -301,6 +317,7 @@ The code chunk below only runs if the environment variable
 `_MULTIVARIOUS_DEV_COVERAGE` is set.
 
 ``` r
+
 # This chunk only runs if _MULTIVARIOUS_DEV_COVERAGE is non-empty
 message("Running internal consistency checks for regress()...")
 #> Running internal consistency checks for regress()...
@@ -329,7 +346,7 @@ tryCatch({
 
 - [`regress()`](https://bbuchsbaum.github.io/multivarious/reference/regress.md)
   provides a convenient way to fit multiple linear models simultaneously
-  when expressing data $Y$ in a known basis $B$.
+  when expressing data $`Y`$ in a known basis $`B`$.
 - It returns a `bi_projector`, giving immediate access to projection,
   reconstruction, truncation, and coefficient extraction.
 - Supports standard OLS (`lm`), Ridge (`mridge`), Elastic Net (`enet`),

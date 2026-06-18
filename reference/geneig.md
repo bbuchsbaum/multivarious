@@ -12,7 +12,7 @@ geneig(
   B = NULL,
   ncomp = 2,
   preproc = NULL,
-  method = c("robust", "sdiag", "geigen", "primme", "rspectra", "subspace"),
+  method = c("robust", "sdiag", "geigen", "rspectra", "subspace"),
   which = "LA",
   ...
 )
@@ -50,9 +50,6 @@ geneig(
   - "geigen": Uses the geigen package for a general solution (A and B
     can be non-symmetric).
 
-  - "primme": Uses the PRIMME package for large/sparse symmetric
-    problems (A and B must be symmetric).
-
   - "rspectra": Uses RSpectra; if B is SPD it calls
     `eigs_sym(A, B, ...)` directly, otherwise it applies a reciprocal
     transform to support all targets.
@@ -66,8 +63,7 @@ geneig(
   (smallest algebraic), `"LM"` (largest magnitude), or `"SM"` (smallest
   magnitude). Aliases: `"top"`/`"largest"` -\> `"LA"`,
   `"bottom"`/`"smallest"` -\> `"SA"`. Dense backends select eigenpairs
-  post hoc; `"primme"` supports `"LA"`, `"SA"`, `"SM"` (not `"LM"`);
-  `"rspectra"` honors all four options. Default is `"LA"`.
+  post hoc; `"rspectra"` honors all four options. Default is `"LA"`.
 
 - ...:
 
@@ -87,11 +83,7 @@ Moler, C. & Stewart, G. (1973) "An Algorithm for Generalized Matrix
 Eigenvalue Problems". *SIAM J. Numer. Anal.*, 10 (2): 241-256 – the QZ
 algorithm behind the `geigen` backend.
 
-Stathopoulos, A. & McCombs, J. R. (2010) "PRIMME: PReconditioned
-Iterative Multi-Method Eigensolver". *ACM TOMS* 37 (2): 21:1-21:30 – the
-algorithmic core of the `primme` backend.
-
-See also the geigen (CRAN) and PRIMME documentation.
+See also the geigen (CRAN) documentation.
 
 ## See also
 

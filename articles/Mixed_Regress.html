@@ -7,8 +7,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <title>Mixed Effect Operators with mixed_regress() • multivarious</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
 <script src="../extra.js"></script><meta property="og:title" content="Mixed Effect Operators with mixed_regress()">
@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,7 @@ is:</p>
 verbs.</li>
 </ul>
 <p>For a term <code>H</code>, the effect matrix is</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>M</mi><mi>H</mi></msub><mo>=</mo><msubsup><mi>P</mi><mi>H</mi><mrow><mo stretchy="true" form="prefix">(</mo><mi>Ω</mi><mo stretchy="true" form="postfix">)</mo></mrow></msubsup><mi>Y</mi><mi>B</mi></mrow><annotation encoding="application/x-tex">
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>M</mi><mi>H</mi></msub><mo>=</mo><msubsup><mi>P</mi><mi>H</mi><mrow><mo stretchy="false" form="prefix">(</mo><mi mathvariant="normal">Ω</mi><mo stretchy="false" form="postfix">)</mo></mrow></msubsup><mi>Y</mi><mi>B</mi></mrow><annotation encoding="application/x-tex">
 M_H = P_H^{(\Omega)} Y B
 </annotation></semantics></math></p>
 <p>where:</p>
@@ -168,10 +168,10 @@ multiple bars that collapse to the same grouping variable, such as
 <span><span class="co">#&gt; Row metric: grouped_lmm</span></span>
 <span><span class="co">#&gt; Grouping variable: subject</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
-<span><span class="co">#&gt;                    term df_term   scope</span></span>
-<span><span class="co">#&gt; group             group       1 between</span></span>
-<span><span class="co">#&gt; level             level       2  within</span></span>
-<span><span class="co">#&gt; group:level group:level       2   mixed</span></span></code></pre></div>
+<span><span class="co">#&gt;                    term df_term   scope exchangeability</span></span>
+<span><span class="co">#&gt; group             group       1 between between_subject</span></span>
+<span><span class="co">#&gt; level             level       2  within  within_subject</span></span>
+<span><span class="co">#&gt; group:level group:level       2   mixed   whole_subject</span></span></code></pre></div>
 <p>The fit stores:</p>
 <ul>
 <li>the design matrix,</li>
@@ -196,19 +196,20 @@ object.</p>
 <span><span class="co">#&gt; Components: 2</span></span>
 <span><span class="co">#&gt; Term df: 2</span></span>
 <span><span class="co">#&gt; Scope: mixed</span></span>
+<span><span class="co">#&gt; Exchangeability: whole_subject</span></span>
 <span><span class="co">#&gt; Basis rank: 4</span></span>
 <span><span class="fu"><a href="../reference/ncomp.html">ncomp</a></span><span class="op">(</span><span class="va">E</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 2</span></span>
 <span><span class="fu"><a href="../reference/components.html">components</a></span><span class="op">(</span><span class="va">E</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">8</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt;             [,1]        [,2]</span></span>
-<span><span class="co">#&gt; [1,]  0.06948233 -0.34743733</span></span>
-<span><span class="co">#&gt; [2,] -0.04199342 -0.44344206</span></span>
-<span><span class="co">#&gt; [3,] -0.94008395 -0.11457635</span></span>
-<span><span class="co">#&gt; [4,]  0.19045698  0.43476830</span></span>
-<span><span class="co">#&gt; [5,]  0.26452942 -0.65876000</span></span>
-<span><span class="co">#&gt; [6,]  0.01487796 -0.07191423</span></span>
-<span><span class="co">#&gt; [7,]  0.04325302 -0.06124647</span></span>
-<span><span class="co">#&gt; [8,]  0.03618119 -0.19392706</span></span></code></pre></div>
+<span><span class="co">#&gt; [1,]  0.05109814 -0.06294788</span></span>
+<span><span class="co">#&gt; [2,]  0.05330174  0.30134101</span></span>
+<span><span class="co">#&gt; [3,] -0.97145296 -0.05483448</span></span>
+<span><span class="co">#&gt; [4,]  0.12712397  0.52753035</span></span>
+<span><span class="co">#&gt; [5,]  0.16843403 -0.73658796</span></span>
+<span><span class="co">#&gt; [6,]  0.01281331  0.04287407</span></span>
+<span><span class="co">#&gt; [7,]  0.06526767  0.03733843</span></span>
+<span><span class="co">#&gt; [8,]  0.04327207 -0.27953872</span></span></code></pre></div>
 <p>Because <code>E</code> is an <code>effect_operator</code> and
 inherits from <code>bi_projector</code>, the familiar decomposition
 grammar carries over:</p>
@@ -238,12 +239,12 @@ different scales.</p>
 <span><span class="co">#&gt; [1] 54  8</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/Round.html" class="external-link">round</a></span><span class="op">(</span><span class="va">E_orig</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">6</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span>, <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt;        [,1]   [,2]   [,3]   [,4]</span></span>
-<span><span class="co">#&gt; [1,] -0.054  0.069  0.992 -0.224</span></span>
-<span><span class="co">#&gt; [2,]  0.054 -0.069 -0.992  0.224</span></span>
-<span><span class="co">#&gt; [3,] -0.054  0.069  0.992 -0.224</span></span>
-<span><span class="co">#&gt; [4,]  0.054 -0.069 -0.992  0.224</span></span>
-<span><span class="co">#&gt; [5,] -0.054  0.069  0.992 -0.224</span></span>
-<span><span class="co">#&gt; [6,]  0.054 -0.069 -0.992  0.224</span></span></code></pre></div>
+<span><span class="co">#&gt; [1,] -0.035 -0.046  0.698 -0.105</span></span>
+<span><span class="co">#&gt; [2,]  0.035  0.046 -0.698  0.105</span></span>
+<span><span class="co">#&gt; [3,] -0.035 -0.046  0.698 -0.105</span></span>
+<span><span class="co">#&gt; [4,]  0.035  0.046 -0.698  0.105</span></span>
+<span><span class="co">#&gt; [5,] -0.035 -0.046  0.698 -0.105</span></span>
+<span><span class="co">#&gt; [6,]  0.035  0.046 -0.698  0.105</span></span></code></pre></div>
 <p>Typical choices:</p>
 <ul>
 <li>
@@ -274,19 +275,19 @@ object.</p>
 <span><span class="co">#&gt; Term: group:level</span></span>
 <span><span class="co">#&gt; Method: Reduced-model residual permutation test for effect_operator with sequential deflation</span></span>
 <span><span class="co">#&gt; Exchangeability: whole-subject trajectory permutation within equal block-size strata</span></span>
-<span><span class="co">#&gt; Omnibus statistic (trace_ratio): 0.8238</span></span>
+<span><span class="co">#&gt; Omnibus statistic (trace_ratio): 1.447</span></span>
 <span><span class="co">#&gt; Omnibus p-value: 0.01</span></span>
 <span><span class="co">#&gt; Selected rank: 1</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   comp statistic effective_rank   lead_sv2       rel   observed pval</span></span>
-<span><span class="co">#&gt; 1    1  lead_sv2              2 240.665713 0.9922062 240.665713 0.01</span></span>
-<span><span class="co">#&gt; 2    2  lead_sv2              1   1.890439 1.0000000   1.890439 0.44</span></span>
+<span><span class="co">#&gt; 1    1  lead_sv2              2 344.460785 0.9932418 344.460785 0.01</span></span>
+<span><span class="co">#&gt; 2    2  lead_sv2              1   2.343768 1.0000000   2.343768 0.32</span></span>
 <span><span class="va">pt</span><span class="op">$</span><span class="va">component_results</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 7</span></span></span>
 <span><span class="co">#&gt;    comp statistic effective_rank lead_sv2   rel observed  pval</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 lead_sv2               2   241.   0.992   241.    0.01</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 lead_sv2               1     1.89 1         1.89  0.44</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 lead_sv2               2   344.   0.993   344.    0.01</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 lead_sv2               1     2.34 1         2.34  0.32</span></span></code></pre></div>
 <p>The permutation result provides:</p>
 <ul>
 <li>an omnibus trace test,</li>
@@ -321,9 +322,9 @@ geometry is stable under subject resampling.</p>
 <span><span class="co">#&gt; Term: group:level</span></span>
 <span><span class="co">#&gt; Bootstrap samples: 49</span></span>
 <span><span class="co">#&gt; Resampling unit: subject</span></span>
-<span><span class="co">#&gt; Mean singular values: 38230597.7034, 6303151.8686</span></span>
+<span><span class="co">#&gt; Mean singular values: 19.0326, 2.3598</span></span>
 <span><span class="va">bres</span><span class="op">$</span><span class="va">singular_values_mean</span></span>
-<span><span class="co">#&gt; [1] 38230598  6303152</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 19.03259  2.35981</span></span></code></pre></div>
 <p>The bootstrap result contains means and standard deviations for:</p>
 <ul>
 <li>singular values,</li>

@@ -28,6 +28,7 @@ product; otherwise a ridge-regularised least-squares solve is used.
 ## 2. Walk-through with a toy PCA
 
 ``` r
+
 set.seed(1)
 n  <- 100
 p  <- 8
@@ -52,6 +53,7 @@ pca <- bi_projector(
 ### 2.1 Normal projection (all variables)
 
 ``` r
+
 scores_full <- project(pca, X)        # n × 3
 head(round(scores_full, 2))
 #>       [,1]  [,2]  [,3]
@@ -68,6 +70,7 @@ head(round(scores_full, 2))
 Suppose columns 7 and 8 are unavailable for a new batch.
 
 ``` r
+
 X_miss      <- X[, 1:6]               # keep only first 6 columns
 col_subset  <- 1:6                    # their positions in the **original** X
 
@@ -100,6 +103,7 @@ If you expect many rows with the same subset of features, create a
 specialised projector once and reuse it:
 
 ``` r
+
 # Assuming partial_projector is available
 pca_1to6 <- partial_projector(pca, 1:6)   # keeps a reference + cache
 
@@ -127,6 +131,7 @@ provides a convenient wrapper around
 [`partial_project()`](https://bbuchsbaum.github.io/multivarious/reference/partial_project.md):
 
 ``` r
+
 # Create a multiblock projector from our PCA
 # Suppose columns 1-4 are "Block A" (block 1) and columns 5-8 are "Block B" (block 2)
 block_indices <- list(1:4, 5:8)
@@ -180,6 +185,7 @@ Partial projection is handy even when all measurements exist:
 Assume columns 1–5 (instead of 50 for brevity) of `X` form our ROI.
 
 ``` r
+
 roi_cols   <- 1:5                 # pretend these are the ROI voxels
 X_roi      <- X[, roi_cols]       # same matrix from Section 2
 
@@ -211,6 +217,7 @@ Using the multiblock projector from Section 4, we can see how individual
 observations score when viewed through just one block:
 
 ``` r
+
 # Get scores for observation 1 using only Block 1 variables (columns 1-4)
 subject1_block1 <- project_block(mb, X[1, 1:4, drop = FALSE], block = 1)
 
@@ -234,12 +241,12 @@ different story.
 
 ## 6. Cheat-sheet: why you might call `partial_project()`
 
-| Scenario                              | What you pass                  | Typical call                                                                                                         |
-|---------------------------------------|--------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| Sensor outage / missing features      | matrix with observed cols only | `partial_project(mod, X_obs, colind = idx)`                                                                          |
-| Region of interest (ROI)              | ROI columns of the data        | `partial_project(mod, X[, ROI], ROI)`                                                                                |
-| Block-specific latent scores          | full block matrix              | `project_block(mb, blkData, block = b)`                                                                              |
-| “What-if”: vary a single variable set | varied cols + zeros elsewhere  | [`partial_project()`](https://bbuchsbaum.github.io/multivarious/reference/partial_project.md) with matching `colind` |
+| Scenario | What you pass | Typical call |
+|----|----|----|
+| Sensor outage / missing features | matrix with observed cols only | `partial_project(mod, X_obs, colind = idx)` |
+| Region of interest (ROI) | ROI columns of the data | `partial_project(mod, X[, ROI], ROI)` |
+| Block-specific latent scores | full block matrix | `project_block(mb, blkData, block = b)` |
+| “What-if”: vary a single variable set | varied cols + zeros elsewhere | [`partial_project()`](https://bbuchsbaum.github.io/multivarious/reference/partial_project.md) with matching `colind` |
 
 The component space stays identical throughout, so downstream analytics,
 classifiers, or control charts continue to work with no re-training.
@@ -249,8 +256,9 @@ classifiers, or control charts continue to work with no re-training.
 ## Session info
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.3 (2026-03-11)
+#> R version 4.6.0 (2026-04-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -271,19 +279,19 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3      dplyr_1.2.1        multivarious_0.3.1
+#> [1] ggplot2_4.0.3      dplyr_1.2.1        multivarious_0.3.2
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] Matrix_1.7-4       gtable_0.3.6       jsonlite_2.0.0     compiler_4.5.3    
+#>  [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.0    
 #>  [5] tidyselect_1.2.1   geigen_2.3         jquerylib_0.1.4    systemfonts_1.3.2 
 #>  [9] scales_1.4.0       textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0     
 #> [13] lattice_0.22-9     R6_2.6.1           labeling_0.4.3     generics_0.1.4    
 #> [17] knitr_1.51         tibble_3.3.1       desc_1.4.3         chk_0.10.0        
-#> [21] bslib_0.10.0       pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0       
-#> [25] cachem_1.1.0       xfun_0.57          fs_2.1.0           sass_0.4.10       
-#> [29] S7_0.2.2           cli_3.6.6          pkgdown_2.2.0      withr_3.0.2       
-#> [33] magrittr_2.0.5     digest_0.6.39      grid_4.5.3         lifecycle_1.0.5   
-#> [37] vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1         farver_2.1.2      
-#> [41] ragg_1.5.2         rmarkdown_2.31     tools_4.5.3        pkgconfig_2.0.3   
-#> [45] htmltools_0.5.9
+#> [21] bslib_0.11.0       pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0       
+#> [25] cachem_1.1.0       xfun_0.58          S7_0.2.2           fs_2.1.0          
+#> [29] sass_0.4.10        otel_0.2.0         cli_3.6.6          withr_3.0.2       
+#> [33] pkgdown_2.2.0      magrittr_2.0.5     digest_0.6.39      grid_4.6.0        
+#> [37] lifecycle_1.0.5    vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1        
+#> [41] farver_2.1.2       ragg_1.5.2         rmarkdown_2.31     tools_4.6.0       
+#> [45] pkgconfig_2.0.3    htmltools_0.5.9
 ```

@@ -12,7 +12,9 @@ a scalar test. The package-level idea is:
 
 For a term `H`, the effect matrix is
 
-$$M_{H} = P_{H}^{(\Omega)}YB$$
+``` math
+M_H = P_H^{(\Omega)} Y B
+```
 
 where:
 
@@ -40,6 +42,7 @@ between-subject group factor, a random intercept, and a random slope on
 the ordered within-subject effect.
 
 ``` r
+
 set.seed(1)
 
 n_subject <- 18
@@ -90,6 +93,7 @@ collapse to the same grouping variable, such as
 `~ (1 | subject) + (0 + level | subject)`.
 
 ``` r
+
 fit <- mixed_regress(
   Y,
   design = design,
@@ -109,10 +113,10 @@ print(fit)
 #> Row metric: grouped_lmm
 #> Grouping variable: subject
 summary(fit)
-#>                    term df_term   scope
-#> group             group       1 between
-#> level             level       2  within
-#> group:level group:level       2   mixed
+#>                    term df_term   scope exchangeability
+#> group             group       1 between between_subject
+#> level             level       2  within  within_subject
+#> group:level group:level       2   mixed   whole_subject
 ```
 
 The fit stores:
@@ -129,6 +133,7 @@ The fit stores:
 Now extract the interaction effect as a first-class multivariate object.
 
 ``` r
+
 E <- effect(fit, "group:level")
 
 print(E)
@@ -138,19 +143,20 @@ print(E)
 #> Components: 2
 #> Term df: 2
 #> Scope: mixed
+#> Exchangeability: whole_subject
 #> Basis rank: 4
 ncomp(E)
 #> [1] 2
 components(E)[1:8, ]
 #>             [,1]        [,2]
-#> [1,]  0.06948233 -0.34743733
-#> [2,] -0.04199342 -0.44344206
-#> [3,] -0.94008395 -0.11457635
-#> [4,]  0.19045698  0.43476830
-#> [5,]  0.26452942 -0.65876000
-#> [6,]  0.01487796 -0.07191423
-#> [7,]  0.04325302 -0.06124647
-#> [8,]  0.03618119 -0.19392706
+#> [1,]  0.05109814 -0.06294788
+#> [2,]  0.05330174  0.30134101
+#> [3,] -0.97145296 -0.05483448
+#> [4,]  0.12712397  0.52753035
+#> [5,]  0.16843403 -0.73658796
+#> [6,]  0.01281331  0.04287407
+#> [7,]  0.06526767  0.03733843
+#> [8,]  0.04327207 -0.27953872
 ```
 
 Because `E` is an `effect_operator` and inherits from `bi_projector`,
@@ -168,6 +174,7 @@ You can reconstruct the fitted contribution of the effect on different
 scales.
 
 ``` r
+
 E_proc <- reconstruct(E, scale = "processed")
 E_orig <- reconstruct(E, scale = "original")
 
@@ -177,12 +184,12 @@ dim(E_orig)
 #> [1] 54  8
 round(E_orig[1:6, 1:4], 3)
 #>        [,1]   [,2]   [,3]   [,4]
-#> [1,] -0.054  0.069  0.992 -0.224
-#> [2,]  0.054 -0.069 -0.992  0.224
-#> [3,] -0.054  0.069  0.992 -0.224
-#> [4,]  0.054 -0.069 -0.992  0.224
-#> [5,] -0.054  0.069  0.992 -0.224
-#> [6,]  0.054 -0.069 -0.992  0.224
+#> [1,] -0.035 -0.046  0.698 -0.105
+#> [2,]  0.035  0.046 -0.698  0.105
+#> [3,] -0.035 -0.046  0.698 -0.105
+#> [4,]  0.035  0.046 -0.698  0.105
+#> [5,] -0.035 -0.046  0.698 -0.105
+#> [6,]  0.035  0.046 -0.698  0.105
 ```
 
 Typical choices:
@@ -200,6 +207,7 @@ Typical choices:
 works directly on the extracted effect object.
 
 ``` r
+
 set.seed(2)
 pt <- perm_test(E, nperm = 99, alpha = 0.10)
 
@@ -210,19 +218,19 @@ print(pt)
 #> Term: group:level
 #> Method: Reduced-model residual permutation test for effect_operator with sequential deflation
 #> Exchangeability: whole-subject trajectory permutation within equal block-size strata
-#> Omnibus statistic (trace_ratio): 0.8238
+#> Omnibus statistic (trace_ratio): 1.447
 #> Omnibus p-value: 0.01
 #> Selected rank: 1
 #> 
 #>   comp statistic effective_rank   lead_sv2       rel   observed pval
-#> 1    1  lead_sv2              2 240.665713 0.9922062 240.665713 0.01
-#> 2    2  lead_sv2              1   1.890439 1.0000000   1.890439 0.44
+#> 1    1  lead_sv2              2 344.460785 0.9932418 344.460785 0.01
+#> 2    2  lead_sv2              1   2.343768 1.0000000   2.343768 0.32
 pt$component_results
 #> # A tibble: 2 × 7
 #>    comp statistic effective_rank lead_sv2   rel observed  pval
 #>   <int> <chr>              <int>    <dbl> <dbl>    <dbl> <dbl>
-#> 1     1 lead_sv2               2   241.   0.992   241.    0.01
-#> 2     2 lead_sv2               1     1.89 1         1.89  0.44
+#> 1     1 lead_sv2               2   344.   0.993   344.    0.01
+#> 2     2 lead_sv2               1     2.34 1         2.34  0.32
 ```
 
 The permutation result provides:
@@ -232,6 +240,7 @@ The permutation result provides:
 - `ncomp(pt)` as the selected number of significant effect axes.
 
 ``` r
+
 k <- ncomp(pt)
 E_sig <- truncate(E, k)
 
@@ -249,6 +258,7 @@ Permutation asks whether an effect exists. Bootstrap asks whether the
 geometry is stable under subject resampling.
 
 ``` r
+
 set.seed(3)
 bres <- bootstrap(E, nboot = 49, resample = "subject")
 
@@ -258,9 +268,9 @@ print(bres)
 #> Term: group:level
 #> Bootstrap samples: 49
 #> Resampling unit: subject
-#> Mean singular values: 38230597.7034, 6303151.8686
+#> Mean singular values: 19.0326, 2.3598
 bres$singular_values_mean
-#> [1] 38230598  6303152
+#> [1] 19.03259  2.35981
 ```
 
 The bootstrap result contains means and standard deviations for:
@@ -277,6 +287,7 @@ Repeated-measures arrays can be supplied directly. Internally they are
 normalized to the same stacked representation.
 
 ``` r
+
 Y_array <- array(NA_real_, dim = c(n_subject, length(levels_within), p))
 idx <- 1
 for (i in seq_len(n_subject)) {

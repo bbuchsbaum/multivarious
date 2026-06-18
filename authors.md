@@ -8,13 +8,13 @@
 ## Citation
 
 Buchsbaum B (2026). *multivarious: Extensible Data Structures for
-Multivariate Analysis*. R package version 0.3.1,
+Multivariate Analysis*. R package version 0.3.2,
 <https://bbuchsbaum.github.io/multivarious/>.
 
     @Manual{,
       title = {multivarious: Extensible Data Structures for Multivariate Analysis},
       author = {Bradley Buchsbaum},
       year = {2026},
-      note = {R package version 0.3.1},
+      note = {R package version 0.3.2},
       url = {https://bbuchsbaum.github.io/multivarious/},
     }

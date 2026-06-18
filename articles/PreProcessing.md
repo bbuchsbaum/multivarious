@@ -20,13 +20,13 @@ script but dangerous inside reusable functions:
 
 The grammar is tiny:
 
-| Verb                                                                                  | Role                          | Typical Call                  |
-|---------------------------------------------------------------------------------------|-------------------------------|-------------------------------|
-| [`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md)               | do nothing (placeholder)      | `fit(pass(), X)`              |
-| [`center()`](https://bbuchsbaum.github.io/multivarious/reference/center.md)           | subtract column means         | `fit(center(), X)`            |
-| [`standardize()`](https://bbuchsbaum.github.io/multivarious/reference/standardize.md) | centre and scale to unit SD   | `fit(standardize(), X)`       |
-| [`colscale()`](https://bbuchsbaum.github.io/multivarious/reference/colscale.md)       | user-supplied weights/scaling | `fit(colscale(type="z"), X)`  |
-| `...`                                                                                 | (write your own)              | any function returning a node |
+| Verb | Role | Typical Call |
+|----|----|----|
+| [`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md) | do nothing (placeholder) | `fit(pass(), X)` |
+| [`center()`](https://bbuchsbaum.github.io/multivarious/reference/center.md) | subtract column means | `fit(center(), X)` |
+| [`standardize()`](https://bbuchsbaum.github.io/multivarious/reference/standardize.md) | centre and scale to unit SD | `fit(standardize(), X)` |
+| [`colscale()`](https://bbuchsbaum.github.io/multivarious/reference/colscale.md) | user-supplied weights/scaling | `fit(colscale(type="z"), X)` |
+| `...` | (write your own) | any function returning a node |
 
 The
 [`fit()`](https://bbuchsbaum.github.io/multivarious/reference/fit.md)
@@ -42,17 +42,18 @@ object.
 Once you have a fitted preprocessor object, it exposes three key
 methods:
 
-| Method                     | Role                                         | Typical Use Case           |
-|----------------------------|----------------------------------------------|----------------------------|
-| `fit_transform(prep, X)`   | fits parameters *and* transforms `X`         | Training set (convenience) |
-| `transform(pp, Xnew)`      | applies stored parameters to new data        | Test/new data              |
-| `inverse_transform(pp, Y)` | back-transforms data using stored parameters | Interpreting results       |
+| Method | Role | Typical Use Case |
+|----|----|----|
+| `fit_transform(prep, X)` | fits parameters *and* transforms `X` | Training set (convenience) |
+| `transform(pp, Xnew)` | applies stored parameters to new data | Test/new data |
+| `inverse_transform(pp, Y)` | back-transforms data using stored parameters | Interpreting results |
 
 ## 2. The 60-second tour
 
 ### 2.1 No-op and sanity check
 
 ``` r
+
 set.seed(0)
 X <- matrix(rnorm(10*4), 10, 4)
 
@@ -65,6 +66,7 @@ all.equal(Xp_pass, X)            # TRUE
 ### 2.2 Centre → standardise
 
 ``` r
+
 # Fit the preprocessor (calculates means & SDs from X) and transform
 pp_std <- fit(standardize(), X)
 Xs     <- transform(pp_std, X)
@@ -85,6 +87,7 @@ all.equal(inverse_transform(pp_std, Xs), X) # TRUE
 Imagine a sensor fails and you only observe columns 2 and 4:
 
 ``` r
+
 X_cols24 <- X[, c(2,4), drop=FALSE] # Keep as matrix
 
 # Apply the *already fitted* standardizer using only columns 2 & 4
@@ -112,6 +115,7 @@ Because preprocessing steps nest, you can build pipelines by composing
 them:
 
 ``` r
+
 # Define a pipeline: center, then scale to unit variance
 # Fit the pipeline to the data
 pp_pipe <- fit(standardize(), X)
@@ -123,6 +127,7 @@ Xp_pipe <- transform(pp_pipe, X)
 ### 3.1 Quick visual
 
 ``` r
+
 # Compare first column before and after pipeline
 df_pipe <- tibble(raw = X[,1],   processed = Xp_pipe[,1])
 
@@ -143,6 +148,7 @@ glues several *already fitted* pipelines into one wide transformer that
 understands global column indices.
 
 ``` r
+
 # Two fake blocks with distinct scales
 X1 <- matrix(rnorm(10*5 , 10 , 5), 10, 5)   # block 1: high mean
 X2 <- matrix(rnorm(10*7 ,  2 , 7), 10, 7)   # block 2: low mean
@@ -184,6 +190,7 @@ all.equal(X2_later_p, X2p) # TRUE
 #### Check reversibility of concatenated pipeline
 
 ``` r
+
 back_combined <- inverse_transform(pp_concat, X_combined_p)
 
 # Compare first few rows/cols of original vs round-trip
@@ -200,9 +207,10 @@ knitr::kable(
 | 12.80 |  8.12 |  9.94 | 11.29 | 16.27 | -4.11 | 12.80 |  8.12 |  9.94 | 11.29 | 16.27 | -4.11 |
 |  7.74 | 22.21 |  5.30 |  6.75 | 13.86 |  2.06 |  7.74 | 22.21 |  5.30 |  6.75 | 13.86 |  2.06 |
 
-First 3 rows, columns 1-6: Original vs Reconstructed
+First 3 rows, columns 1-6: Original vs Reconstructed {.table}
 
 ``` r
+
 
 all.equal(X_combined, back_combined) # TRUE
 #> [1] TRUE
@@ -210,12 +218,12 @@ all.equal(X_combined, back_combined) # TRUE
 
 ## 5. Inside the weeds (for authors & power users)
 
-| Helper                                                                                                    | Purpose                                                                                                                                                                                                                                                                                                    |
-|-----------------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `fresh(pp)`                                                                                               | return the un-fitted recipe skeleton. **Crucial for tasks like cross-validation (CV)**, as it allows you to re-[`fit()`](https://bbuchsbaum.github.io/multivarious/reference/fit.md) the pipeline using *only* the current training fold’s data, preventing data leakage from other folds or the test set. |
-| [`concat_pre_processors()`](https://bbuchsbaum.github.io/multivarious/reference/concat_pre_processors.md) | build one big transformer out of already-fitted pieces.                                                                                                                                                                                                                                                    |
-| [`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md) vs `fit(pass(), X)`               | [`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md) is a recipe; `fit(pass(), X)` is a fitted identity transformer.                                                                                                                                                                    |
-| caching                                                                                                   | Fitted preprocessor objects store parameters (means, SDs) for fast re-application.                                                                                                                                                                                                                         |
+| Helper | Purpose |
+|----|----|
+| `fresh(pp)` | return the un-fitted recipe skeleton. **Crucial for tasks like cross-validation (CV)**, as it allows you to re-[`fit()`](https://bbuchsbaum.github.io/multivarious/reference/fit.md) the pipeline using *only* the current training fold’s data, preventing data leakage from other folds or the test set. |
+| [`concat_pre_processors()`](https://bbuchsbaum.github.io/multivarious/reference/concat_pre_processors.md) | build one big transformer out of already-fitted pieces. |
+| [`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md) vs `fit(pass(), X)` | [`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md) is a recipe; `fit(pass(), X)` is a fitted identity transformer. |
+| caching | Fitted preprocessor objects store parameters (means, SDs) for fast re-application. |
 
 You rarely need to interact with these helpers directly; they exist so
 model-writers (e.g. new PCA flavours) can avoid boiler-plate.
@@ -243,8 +251,9 @@ Happy projecting!
 ## Session info
 
 ``` r
+
 sessionInfo()
-#> R version 4.5.3 (2026-03-11)
+#> R version 4.6.0 (2026-04-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -265,19 +274,19 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3      tibble_3.3.1       dplyr_1.2.1        multivarious_0.3.1
+#> [1] ggplot2_4.0.3      tibble_3.3.1       dplyr_1.2.1        multivarious_0.3.2
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] Matrix_1.7-4       gtable_0.3.6       jsonlite_2.0.0     compiler_4.5.3    
+#>  [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.0    
 #>  [5] tidyselect_1.2.1   geigen_2.3         jquerylib_0.1.4    systemfonts_1.3.2 
 #>  [9] scales_1.4.0       textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0     
 #> [13] lattice_0.22-9     R6_2.6.1           labeling_0.4.3     generics_0.1.4    
-#> [17] knitr_1.51         desc_1.4.3         chk_0.10.0         bslib_0.10.0      
+#> [17] knitr_1.51         desc_1.4.3         chk_0.10.0         bslib_0.11.0      
 #> [21] pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0        cachem_1.1.0      
-#> [25] xfun_0.57          fs_2.1.0           sass_0.4.10        S7_0.2.2          
-#> [29] cli_3.6.6          pkgdown_2.2.0      withr_3.0.2        magrittr_2.0.5    
-#> [33] digest_0.6.39      grid_4.5.3         lifecycle_1.0.5    vctrs_0.7.3       
-#> [37] evaluate_1.0.5     glue_1.8.1         farver_2.1.2       ragg_1.5.2        
-#> [41] rmarkdown_2.31     matrixStats_1.5.0  tools_4.5.3        pkgconfig_2.0.3   
-#> [45] htmltools_0.5.9
+#> [25] xfun_0.58          S7_0.2.2           fs_2.1.0           sass_0.4.10       
+#> [29] otel_0.2.0         cli_3.6.6          withr_3.0.2        pkgdown_2.2.0     
+#> [33] magrittr_2.0.5     digest_0.6.39      grid_4.6.0         lifecycle_1.0.5   
+#> [37] vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1         farver_2.1.2      
+#> [41] ragg_1.5.2         rmarkdown_2.31     matrixStats_1.5.0  tools_4.6.0       
+#> [45] pkgconfig_2.0.3    htmltools_0.5.9
 ```

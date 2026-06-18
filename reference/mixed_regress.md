@@ -15,6 +15,8 @@ mixed_regress(
   random = NULL,
   basis = identity_basis(),
   preproc = center(),
+  term_scopes = NULL,
+  exchangeability = NULL,
   ...
 )
 ```
@@ -49,6 +51,20 @@ mixed_regress(
 - preproc:
 
   Response preprocessor.
+
+- term_scopes:
+
+  Optional named character vector or named list overriding automatic
+  effect-scope classification for fixed-effect terms. Allowed values are
+  `"between"`, `"within"`, `"mixed"`, and `"ungrouped"`.
+
+- exchangeability:
+
+  Optional named character vector or named list specifying
+  permutation/block-resampling structure for fixed-effect terms. Allowed
+  values are `"between_subject"`, `"within_subject"`, `"whole_subject"`,
+  and `"rows"`. When omitted, exchangeability is inferred from
+  grouped-design scope.
 
 - ...:
 

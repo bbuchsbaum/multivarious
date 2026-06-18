@@ -16,7 +16,7 @@ cPCAplus(
   ncomp = NULL,
   center_background = TRUE,
   lambda = 0,
-  method = c("geigen", "primme", "sdiag", "corpcor"),
+  method = c("geigen", "sdiag", "corpcor"),
   strategy = c("auto", "feature", "sample"),
   verbose = getOption("multivarious.verbose", TRUE),
   sample_rank = NULL,
@@ -64,9 +64,6 @@ cPCAplus(
   include:
 
   - `"geigen"` (Default): Use `geneig` from the `geigen` package.
-
-  - `"primme"`: Use `geneig` with the PRIMME library backend (requires
-    special `geigen` build).
 
   - `"sdiag"`: Use `geneig` with a spectral decomposition method.
 
@@ -164,8 +161,7 @@ A `bi_projector`-like object with classes
 subtracting the column means calculated *only* from the background data
 `X_b`. This is crucial for isolating variance specific to `X_f`.
 
-**Core Algorithm (methods "geigen", "primme", "sdiag",
-strategy="feature"):**
+**Core Algorithm (methods "geigen", "sdiag", strategy="feature"):**
 
 1.  Center `X_f` and `X_b` using the mean of `X_b`.
 

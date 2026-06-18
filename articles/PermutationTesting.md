@@ -20,7 +20,7 @@ on the shuffled data. 4. Repeat steps 2–3 many times to build a **null
 distribution**. 5. Compare the original statistic to this distribution.
 
 If the observed value is more extreme than (say) 95% of the permuted
-values, we reject the null hypothesis at $\alpha = 0.05$.
+values, we reject the null hypothesis at $`\alpha = 0.05`$.
 
 The critical design choice is *how* to shuffle. Different analyses
 require different permutation schemes—shuffling columns for PCA,
@@ -38,6 +38,7 @@ call
 [`perm_test()`](https://bbuchsbaum.github.io/multivarious/reference/perm_test.md).
 
 ``` r
+
 data(iris)
 X_iris <- as.matrix(iris[, 1:4])
 
@@ -48,6 +49,7 @@ Now test whether each principal component captures more variance than
 expected by chance:
 
 ``` r
+
 set.seed(1)
 pt_pca <- perm_test(mod_pca,
                     X = X_iris,
@@ -76,6 +78,7 @@ The result object contains a `component_results` table with p-values and
 confidence intervals:
 
 ``` r
+
 print(pt_pca$component_results)
 #> # A tibble: 3 × 5
 #>    comp observed  pval lower_ci upper_ci
@@ -86,7 +89,7 @@ print(pt_pca$component_results)
 ```
 
 Components are tested sequentially. By default, testing stops when a
-component is non-significant ($p > 0.05$), since later components are
+component is non-significant ($`p > 0.05`$), since later components are
 unlikely to be meaningful if an earlier one fails. Set `alpha = 1` to
 force testing all components.
 
@@ -107,9 +110,12 @@ independently, destroying any covariance while preserving marginal
 distributions.
 
 **Statistic:** Fraction of remaining variance explained by component
-$a$: $$F_{a} = \frac{\lambda_{a}}{\sum\limits_{j \geq a}\lambda_{j}}$$
+$`a`$:
+``` math
+F_a = \frac{\lambda_a}{\sum_{j \ge a}\lambda_j}
+```
 
-This tests whether component $a$ explains more variance than expected
+This tests whether component $`a`$ explains more variance than expected
 given the remaining variance pool. See Vitale et al. (2017) for
 theoretical background.
 
@@ -155,6 +161,7 @@ model. The shuffle scheme depends on the term:
 The workflow is:
 
 ``` r
+
 set.seed(11)
 
 design <- expand.grid(
@@ -221,6 +228,7 @@ Suppose you want to test whether the *first two* PCs jointly explain
 more variance than chance. You can supply a custom `measure_fun`:
 
 ``` r
+
 my_pca_stat <- function(model_perm, comp_idx, ...) {
   # Only compute the joint statistic when testing component 2
 
@@ -263,6 +271,7 @@ methods use the `future` framework, so you control parallelism through
 your plan:
 
 ``` r
+
 library(future)
 plan(multisession, workers = 4)
 
@@ -283,7 +292,7 @@ permutations concurrently.
 
 ### High-dimensional data
 
-When $p \gg n$, computing full eigendecompositions repeatedly can be
+When $`p \gg n`$, computing full eigendecompositions repeatedly can be
 slow. Keep `comps` small (you rarely need to test more than 10–20
 components), and consider faster SVD backends if available.
 

@@ -18,6 +18,7 @@ Let’s use the iris dataset to find the optimal number of PCA components
 via reconstruction error.
 
 ``` r
+
 set.seed(123)
 X <- as.matrix(iris[, 1:4])  # 150 samples x 4 features
 
@@ -34,6 +35,7 @@ Define the fitting and measurement functions. The measurement function
 projects test data, reconstructs it, and computes RMSE:
 
 ``` r
+
 fit_pca <- function(train_data, ncomp) {
   pca(train_data, ncomp = ncomp, preproc = center())
 }
@@ -55,6 +57,7 @@ measure_reconstruction <- function(model, test_data) {
 Now run cross-validation for 1–4 components:
 
 ``` r
+
 results_list <- lapply(1:4, function(nc) {
   cv_res <- cv_generic(
     data = X,
@@ -93,6 +96,7 @@ function returns a tibble with three columns:
   tibbles)
 
 ``` r
+
 # Run CV once to inspect the structure
 cv_example <- cv_generic(
   X, folds,
@@ -127,6 +131,7 @@ Use
 to compare centering alone versus z-scoring:
 
 ``` r
+
 prep_center <- center()
 prep_zscore <- colscale(center(), type = "z")
 
@@ -166,6 +171,7 @@ are already on similar scales.
 For larger datasets, run folds in parallel:
 
 ``` r
+
 # Setup parallel backend
 library(future)
 plan(multisession, workers = 4)
@@ -189,6 +195,7 @@ plan(sequential)
 You can return multiple metrics from the measurement function:
 
 ``` r
+
 measure_multi <- function(model, test_data) {
   scores <- project(model, test_data)
   recon <- scores %*% t(model$v)
@@ -234,11 +241,11 @@ cat("R2:  ", round(mean(all_metrics$r2), 4), "\n")
 #> R2:   0.9984
 ```
 
-| Metric | Description                  | Interpretation                                 |
-|--------|------------------------------|------------------------------------------------|
-| RMSE   | Root mean squared error      | Lower is better; in original units             |
-| MAE    | Mean absolute error          | Less sensitive to outliers than RMSE           |
-| R²     | Coefficient of determination | Proportion of variance explained (1 = perfect) |
+| Metric | Description | Interpretation |
+|----|----|----|
+| RMSE | Root mean squared error | Lower is better; in original units |
+| MAE | Mean absolute error | Less sensitive to outliers than RMSE |
+| R² | Coefficient of determination | Proportion of variance explained (1 = perfect) |
 
 ## Tips for Effective Cross-validation
 
@@ -247,6 +254,7 @@ cat("R2:  ", round(mean(all_metrics$r2), 4), "\n")
 Always fit preprocessing parameters inside the CV loop:
 
 ``` r
+
 # WRONG: Preprocessing outside CV leaks information
 X_scaled <- scale(X)  # Uses mean/sd from ALL samples including test!
 cv_wrong <- cv_generic(X_scaled, folds, ...)
@@ -276,6 +284,7 @@ The CV framework works with any projector type. The key is writing
 appropriate fit and measure functions.
 
 ``` r
+
 # Nyström approximation for kernel PCA
 fit_nystrom <- function(train_data, ncomp) {
   nystrom_approx(train_data, ncomp = ncomp, nlandmarks = 50, preproc = center())
@@ -315,6 +324,7 @@ kernel matrix `K = X_c X_c^T`. Below is a reproducible snippet that
 demonstrates this and shows how to project new data.
 
 ``` r
+
 set.seed(123)
 X <- matrix(rnorm(80 * 10), 80, 10)
 ncomp <- 5
@@ -381,6 +391,7 @@ a modest intermediate rank `l` to reduce the small problem size. Provide
 a custom `kernel_func` if you need a non-linear kernel (e.g., RBF).
 
 ``` r
+
 # Example RBF kernel
 gaussian_kernel <- function(A, B, sigma = 1) {
   # ||a-b||^2 = ||a||^2 + ||b||^2 - 2 a·b
@@ -421,6 +432,7 @@ the component scores returned by
 [`project()`](https://bbuchsbaum.github.io/multivarious/reference/project.md).
 
 ``` r
+
 set.seed(202)
 
 # PCA fit function (reuses earlier fit_pca)

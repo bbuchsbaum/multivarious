@@ -45,6 +45,7 @@ You can install the development version from
 [GitHub](https://github.com/) with:
 
 ``` r
+
 # install.packages("devtools")
 devtools::install_github("bbuchsbaum/multivarious")
 ```
@@ -54,6 +55,7 @@ devtools::install_github("bbuchsbaum/multivarious")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
+
 library(multivarious)
 #> 
 #> Attaching package: 'multivarious'
@@ -69,6 +71,7 @@ library(multivarious)
 ## Mixed effect operators
 
 ``` r
+
 set.seed(1)
 
 design <- expand.grid(

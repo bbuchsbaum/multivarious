@@ -22,6 +22,7 @@ plus class labels → it returns a ready predictor object.
 ## 2. Iris demo – LDA → `discriminant_projector` → k-NN
 
 ``` r
+
 data(iris)
 X   <- as.matrix(iris[, 1:4])
 grp <- iris$Species
@@ -63,6 +64,7 @@ print(disc_proj)
 ### 2.1 Visualise the latent space
 
 ``` r
+
 scores_df <- as_tibble(scores(disc_proj)[, 1:2],
                        .name_repair = ~ c("LD1","LD2"))
 scores_df <- mutate(scores_df, Species = iris$Species)
@@ -79,6 +81,7 @@ ggplot(scores_df, aes(LD1, LD2, colour = Species)) +
 ### 2.2 Build a k-NN classifier on the latent scores
 
 ``` r
+
 set.seed(42)
 train_id <- sample(seq_len(nrow(X)), size = 0.7*nrow(X))
 test_id  <- setdiff(seq_len(nrow(X)), train_id)
@@ -110,6 +113,7 @@ print(clf_knn)
 ### 2.3 Predict and evaluate
 
 ``` r
+
 pred_knn <- predict(clf_knn, new_data = X[test_id, ],
                     metric = "cosine", prob_type = "knn_proportion")
 
@@ -138,6 +142,7 @@ tibble(
 ### 2.4 Confusion-matrix on the test set
 
 ``` r
+
 cm <- table(
   Truth     = grp[test_id],
   Predicted = pred_knn$class
@@ -160,6 +165,7 @@ ggplot(cm_df, aes(Truth, Predicted, fill = Freq)) +
 ``` r
 
 
+
 # Pretty table as well
 knitr::kable(cm, caption = "Confusion matrix (counts)")
 ```
@@ -170,11 +176,12 @@ knitr::kable(cm, caption = "Confusion matrix (counts)")
 | versicolor |      0 |         10 |         5 |
 | virginica  |      0 |          0 |        18 |
 
-Confusion matrix (counts)
+Confusion matrix (counts) {.table}
 
 ## 3. Random-Forest on the same latent space
 
 ``` r
+
 # Check if randomForest is installed
 if (requireNamespace("randomForest", quietly = TRUE)) {
 
@@ -203,6 +210,7 @@ Assume that in deployment we measure only Sepal variables (cols 1–2). A
 partial projection keeps the classifier happy:
 
 ``` r
+
 sepal_cols <- 1:2
 
 # Create a classifier using reference scores from Sepal columns only
@@ -233,6 +241,7 @@ Accuracy drops a bit – as expected when using fewer features.
 can rank variable groups via a simple “leave-block-out” score drop.
 
 ``` r
+
 blocks <- list(
   Sepal = 1:2,
   Petal = 3:4

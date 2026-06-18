@@ -5,15 +5,17 @@ snap together any number of ordinary projector objects (PCA, PLS,
 cPCA++, block projectors, …) and treat the whole chain as if it were a
 single map from the original input space to the final output space:
 
-$$\left. {\mathbb{R}}^{p_{\text{orig}}}\rightarrow{\mathbb{R}}^{q_{\text{final}}} \right.$$
+``` math
+ \mathbb R^{p_{\text{orig}}} \longrightarrow \mathbb R^{q_{\text{final}}} 
+```
 
 **Typical Motives:**
 
-| Why compose?                                                             | What you get                                                             |
-|--------------------------------------------------------------------------|--------------------------------------------------------------------------|
-| Pre-whitening, centring or wavelet-decomposition before the “real” model | Keep the preparation and the model in one tidy object.                   |
-| Block-wise modelling (e.g. one PCA per sensor block)                     | Treat the concatenation of block-specific results as a single projector. |
-| Dimensionality milk-run – reduce \> filter \> reduce again               | A single set of scores from the final stage to feed to a classifier.     |
+| Why compose? | What you get |
+|----|----|
+| Pre-whitening, centring or wavelet-decomposition before the “real” model | Keep the preparation and the model in one tidy object. |
+| Block-wise modelling (e.g. one PCA per sensor block) | Treat the concatenation of block-specific results as a single projector. |
+| Dimensionality milk-run – reduce \> filter \> reduce again | A single set of scores from the final stage to feed to a classifier. |
 
 ------------------------------------------------------------------------
 
@@ -22,6 +24,7 @@ $$\left. {\mathbb{R}}^{p_{\text{orig}}}\rightarrow{\mathbb{R}}^{q_{\text{final}}
 Let’s compose two PCA steps:
 
 ``` r
+
 set.seed(1)
 
 X  <- matrix(rnorm(30*15), 30, 15)   # raw data, 30 samples, 15 variables
@@ -74,6 +77,7 @@ You supply the `colind` argument as either:
   receive the full input from the previous stage.
 
 ``` r
+
 # Example 1: Use only variables 1:5 for the *first* PCA stage.
 # The second PCA stage receives the full 8 components from the (partial) first stage.
 S15 <- partial_project(pipe, X[, 1:5, drop=FALSE], colind = 1:5)
@@ -106,6 +110,7 @@ the composed projector can also reconstruct the original data from the
 final scores.
 
 ``` r
+
 # Reconstruct original data from the final scores 'S'
 X_hat <- reconstruct(pipe, S)
 cat("Dimensions of reconstructed data:", dim(X_hat), "\n")
@@ -144,6 +149,7 @@ Some useful helper functions:
   preserves stage names if the projectors are named.
 
   ``` r
+
   # pipe3 <- pca1 %>>% pca2 %>>% pca3
   ```
 

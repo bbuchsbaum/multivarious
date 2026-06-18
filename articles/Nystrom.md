@@ -27,6 +27,7 @@ is small.
 ## Quick Start
 
 ``` r
+
 set.seed(42)
 N <- 1000
 p <- 50
@@ -83,6 +84,7 @@ By default,
 uses a linear kernel. You can provide any kernel function:
 
 ``` r
+
 # RBF (Gaussian) kernel
 rbf_kernel <- function(X, Y = NULL, sigma = 1) {
   if (is.null(Y)) Y <- X
@@ -108,6 +110,7 @@ ny_rbf <- nystrom_approx(
 The result is a `bi_projector`, so you can project new observations:
 
 ``` r
+
 X_new <- matrix(rnorm(50 * p), 50, p)
 new_scores <- project(ny_fit, X_new)
 dim(new_scores)
@@ -120,20 +123,21 @@ For very large datasets, the “double” method applies the approximation
 twice, reducing complexity further:
 
 ``` r
+
 # Standard method
 system.time(
 
   ny_standard <- nystrom_approx(X, ncomp = 5, nlandmarks = 200, method = "standard")
 )
 #>    user  system elapsed 
-#>   0.010   0.008   0.005
+#>   0.007   0.011   0.005
 
 # Double Nyström (faster with intermediate rank l)
 system.time(
   ny_double <- nystrom_approx(X, ncomp = 5, nlandmarks = 200, method = "double", l = 50)
 )
 #>    user  system elapsed 
-#>   0.018   0.024   0.012
+#>   0.015   0.026   0.012
 ```
 
 ## Choosing Parameters
@@ -159,15 +163,17 @@ Click for mathematical details
 The Nyström approximation uses the fact that a positive semi-definite
 matrix K can be approximated as:
 
-$$K \approx K_{nm}K_{mm}^{- 1}K_{mn}$$
+``` math
+K \approx K_{nm} K_{mm}^{-1} K_{mn}
+```
 
-where: - $K_{mm}$ is the m × m matrix between landmarks - $K_{nm}$ is
-the N × m matrix between all points and landmarks
+where: - $`K_{mm}`$ is the m × m matrix between landmarks - $`K_{nm}`$
+is the N × m matrix between all points and landmarks
 
 The eigendecomposition of this approximation can be computed
 efficiently: 1. Compute eigendecomposition of
-$K_{mm} = U_{m}\Lambda_{m}U_{m}^{T}$ 2. Approximate eigenvectors of K
-as: $U \approx K_{nm}U_{m}\Lambda_{m}^{- 1/2}$
+$`K_{mm} = U_m \Lambda_m U_m^T`$ 2. Approximate eigenvectors of K as:
+$`U \approx K_{nm} U_m \Lambda_m^{-1/2}`$
 
 Double Nyström applies this approximation recursively, reducing
 complexity from O(Nm² + m³) to O(Nml + l³) where l \<\< m.

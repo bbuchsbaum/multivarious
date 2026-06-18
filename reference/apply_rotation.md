@@ -18,7 +18,7 @@ apply_rotation(x, rotation_matrix, ...)
 
 - rotation_matrix:
 
-  `matrix` reprsenting the rotation.
+  `matrix` representing the rotation.
 
 - ...:
 
