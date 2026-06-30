@@ -7,19 +7,19 @@ code:
 development:
   mode: auto
 articles:
-- title: "Getting Started"
+- title: Getting Started
   contents:
   - Introduction
   - PreProcessing
   - SVD_PCA
-- title: "Unsupervised & Cross-Block Models"
+- title: Unsupervised & Cross-Block Models
   contents:
   - CPCAplus
   - Multiblock
   - Nystrom
   - Partial_Projection
   - PLSC
-- title: "Supervised & Inference"
+- title: Supervised & Inference
   contents:
   - Regress
   - Mixed_Regress
