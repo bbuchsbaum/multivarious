@@ -244,7 +244,7 @@ is consistent across blocks, or whether one block tells a different story.
 | Scenario                            | What you pass                     | Typical call                                |
 |-------------------------------------|-----------------------------------|---------------------------------------------|
 | Sensor outage / missing features    | matrix with observed cols only    | `partial_project(mod, X_obs, colind = idx)` |
-| Region of interest (ROI)            | ROI columns of the data           | `partial_project(mod, X[, ROI], ROI)`       |
+| Region of interest (ROI)            | ROI columns of the data           | `partial_project(mod, X[, ROI], colind = ROI)` |
 | Block-specific latent scores        | full block matrix                 | `project_block(mb, blkData, block = b)`     |
 | "What-if": vary a single variable set | varied cols + zeros elsewhere     | `partial_project()` with matching `colind`    |
 

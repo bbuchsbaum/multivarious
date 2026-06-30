@@ -49,7 +49,7 @@ set.seed(1)
 
 X  <- matrix(rnorm(30*15), 30, 15)   # raw data, 30 samples, 15 variables
 p1 <- pca(X, ncomp = 8)              # first reduction: 15 -> 8 components
-p2 <- pca(scores(p1), ncomp = 7)     # second reduction: 8 -> 4 components
+p2 <- pca(scores(p1), ncomp = 7)     # second reduction: 8 -> 7 components
 
 # Compose the two projectors
 pipe <- compose_partial_projector(
@@ -111,7 +111,7 @@ X_hat <- reconstruct(pipe, S)
 cat("Dimensions of reconstructed data:", dim(X_hat), "\n")
 
 # Check reconstruction accuracy
-# Note: Since the pipeline involves dimensionality reduction (15 -> 8 -> 4),
+# Note: Since the pipeline involves dimensionality reduction (15 -> 8 -> 7),
 # reconstruction will not be exact. The error reflects the information lost.
 max_reconstruction_error <- max(abs(X - X_hat))
 cat("Maximum absolute reconstruction error:", format(max_reconstruction_error, digits=3), "\n")

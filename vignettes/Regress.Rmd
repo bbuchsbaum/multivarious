@@ -124,9 +124,9 @@ Notice that `sin3` and `cos5` have the largest coefficients---this matches our g
 
 ## 3.2 Reconstructing the fitted data
 
-Reconstruction recovers the original data from the basis representation. The `bi_projector` stores both the design matrix $B$ (in `fit$s`) and the coefficients (in `fit$v`). Reconstruction is simply their product:
+Reconstruction recovers the original data from the basis representation. The `bi_projector` stores the design matrix $B$ (in `fit$s`) and the coefficients in transposed form (`fit$v` is $C^T$, i.e. $n \times k$). Recovering $C$ with `t(fit$v)`, reconstruction is simply $B \cdot C$:
 
-$$\hat{Y} = B \cdot C^T = \texttt{fit\$s} \times \texttt{t(fit\$v)}$$
+$$\hat{Y} = B \cdot C = \texttt{fit\$s} \times \texttt{t(fit\$v)}$$
 
 ```{r reconstruct_fitted}
 Y_hat <- fit$s %*% t(fit$v)
@@ -211,9 +211,9 @@ Y_hat5 <- fit5$s %*% t(fit5$v)
 # Note: partial_inverse_projection is not a standard bi_projector method, 
 # this might require manual slicing of the basis matrix B (fit$s) or coefs (fit$v).
 # Manual reconstruction example for components 2:6
-coef_subset <- fit$v[2:6, , drop=FALSE] # k_sub x n
-basis_subset <- fit$s[, 2:6, drop=FALSE] # p x k_sub
-Y_lowHat <- basis_subset %*% coef_subset # p x n reconstruction
+coef_subset <- fit$v[, 2:6, drop=FALSE]  # n x k_sub: all signals, basis functions 2:6
+basis_subset <- fit$s[, 2:6, drop=FALSE] # p x k_sub: design columns 2:6
+Y_lowHat <- basis_subset %*% t(coef_subset) # (p x k_sub) %*% (k_sub x n) = p x n
 
 # Variable usage helpers (Conceptual - actual functions might differ)
 # `variables_used(fit)` could show which basis functions have non-zero coefficients (esp. for 'enet').
