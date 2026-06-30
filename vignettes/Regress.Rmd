@@ -1,29 +1,49 @@
 ---
 title: Linear Re-representation with regress()
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Linear Re-representation with regress()}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+output:
+  rmarkdown::html_vignette:
+    toc: yes
+    toc_depth: 2.0
+    css: albers.css
+    includes:
+      in_header: albers-header.html
 params:
   family: red
-css: albers.css
+  preset: homage
 resource_files:
 - albers.css
 - albers.js
-includes:
-  in_header: |-
-    <script src="albers.js"></script>
-    <script>document.addEventListener('DOMContentLoaded',()=>document.body.classList.add('palette-red'));</script>
+- albers-header.html
+- fonts
 
+vignette: |
+  %\VignetteIndexEntry{Linear Re-representation with regress()}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
+if (requireNamespace("ragg", quietly = TRUE)) knitr::opts_chunk$set(dev = "ragg_png")
+if (requireNamespace("systemfonts", quietly = TRUE)) albersdown::albers_register_fonts()
+if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width=6, fig.height=4)
 # Assuming necessary multivarious functions are loaded
 # e.g., via devtools::load_all() or library(multivarious)
 library(multivarious)
 # Implicit dependencies like glmnet or pls might be needed depending on method used.
+```
+
+```{r albers-classes, echo=FALSE, results='asis'}
+cat(sprintf(
+  paste0(
+    '<script>document.addEventListener("DOMContentLoaded",function(){',
+    'document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");',
+    'document.body.classList.add("palette-%s","preset-%s");',
+    '});</script>'
+  ),
+  params$family,
+  params$preset
+))
 ```
 
 When you already have a known set of basis functions—such as Fourier components, wavelets, splines, or principal components from a reference dataset—the goal isn't to discover a latent space, but rather to express new data in terms of that existing basis. The `regress()` function facilitates this by wrapping several multi-output linear models within the `bi_projector` API.
