@@ -31,7 +31,6 @@ knitr::opts_chunk$set(
 )
 library(dplyr)
 library(multivarious)
-# Assuming necessary multiblock functions are loaded, e.g., via devtools::load_all()
 ```
 
 ```{r albers-classes, echo=FALSE, results='asis'}
@@ -59,7 +58,7 @@ original columns belong to which block, so you can
 *   still know "these five loadings belong to block A, those three to block B"
 *   project or reconstruct per block effortlessly.
 
-We demonstrate with a minimal two-block toy-set.
+We demonstrate with a minimal simulated two-block data set.
 
 ```{r data_multiblock}
 set.seed(1)
@@ -103,12 +102,13 @@ scores_A <- project_block(mb, XA, block = 1)
 # Project using only data from block B
 scores_B <- project_block(mb, XB, block = 2)       
 
-cor(scores_all[,1], scores_A[,1])                  # high (they coincide)
+cor(scores_all[,1], scores_A[,1])
 ```
 
-Because the global PCA treats all columns jointly, projecting only block A
-gives exactly the same latent coordinates as when the whole matrix is
-available – useful when a block is missing at prediction time.
+Because the global PCA treats all columns jointly, projecting only block A gives
+an approximation to the full-data scores using the same component axes. The
+correlation above quantifies how much of the first component is recoverable from
+block A alone in this simulated example.
 
 ## 2.3  Partial feature projection
 
@@ -160,8 +160,8 @@ statistic to assess whether blocks share more variance than expected by chance.
 *   Any decomposition that delivers a loading matrix `v` (and
     optionally scores `s`) can become multiblock-aware by supplying
     `block_indices`.
-*   The wrapper introduces zero new maths – it only remembers the column
-    grouping and plugs into the common verbs:
+*   The wrapper keeps the column grouping attached to the decomposition and
+    plugs that information into the common verbs:
 
 | Verb                  | What it does in multiblock context                     |
 |-----------------------|--------------------------------------------------------|
@@ -171,10 +171,9 @@ statistic to assess whether blocks share more variance than expected by chance.
 | `coef(..., block=)` | retrieve loadings for a specific block               |
 | `perm_test()`         | permutation test for block consensus (biprojector)   |
 
-This light infrastructure lets you prototype block-aware analyses
-quickly, while still tapping into the entire `multiblock` toolkit
-(cross-validation, reconstruction metrics, composition with
-`compose_projector`, etc.).
+This light infrastructure lets you prototype block-aware analyses while still
+using the `multivarious` verbs for cross-validation, reconstruction metrics,
+and composition with `compose_projector()`.
 
 ```{r sessionInfo}
 sessionInfo()

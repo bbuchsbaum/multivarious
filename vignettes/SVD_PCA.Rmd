@@ -24,8 +24,8 @@ vignette: |
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width = 6, fig.height = 4)
-library(multivarious)  # Ensure pca(), svd_wrapper(), bi_projector, etc. are available
-library(ggplot2)       # for plots below
+library(multivarious)
+library(ggplot2)
 ```
 
 ```{r albers-classes, echo=FALSE, results='asis'}
@@ -65,17 +65,7 @@ X <- matrix(rnorm(35*10), 35, 10)   # 35 obs × 10 vars
 
 sv_fast <- svd_wrapper(X, ncomp = 5, preproc = center(), method = "fast")
 
-# irlba backend (if installed) gives identical results
-sv_irlba <- if (requireNamespace("irlba", quietly = TRUE)) {
-  suppressWarnings(svd_wrapper(X, ncomp = 5, preproc = center(), method = "irlba"))
-}
-
-# Same downstream code works for both objects:
 head(scores(sv_fast)) # 35 × 5
-
-if (!is.null(sv_irlba)) {
-  all.equal(scores(sv_fast), scores(sv_irlba))
-}
 ```
 
 # 2. A one-liner `pca()`
@@ -140,31 +130,22 @@ pca2 <- truncate(pca_fit, 2)
 shape(pca2)            # 4 vars × 2 comps
 ```
 
-# 4. Fast code-coverage cameo
+# 4. Related PCA operations
 
-The next chunk quietly touches a few more branches used in the unit tests
-(`std_scores()`, `perm_test()`, `rotate()`), but keeps printing to a minimum:
+The same `bi_projector` object supports standardized scores, permutation
+testing, and component rotation:
 
-```{r code_coverage}
+```{r related_pca_operations}
 # std scores
 head(std_scores(svd_wrapper(X, ncomp = 3))) # Use the earlier X data
 
-# tiny permutation test (10 perms; obviously too few for science)
-# This requires perm_test.pca method
-# Make sure X_iris is centered if perm_test needs centered data
-perm_res <- perm_test(pca_fit, X_iris, nperm = 10, comps = 2)
+# Small permutation count keeps the vignette quick; use larger values for analysis.
+perm_res <- perm_test(pca_fit, X_iris, nperm = 19, comps = 2)
 print(perm_res$component_results)
 
-# quick varimax rotation
-if (requireNamespace("GPArotation", quietly = TRUE)) {
-  pca_rotated <- rotate(pca_fit, ncomp = 3, type = "varimax")
-  print(pca_rotated)
-} else {
-  cat("GPArotation not installed, skipping rotation example.\n")
-}
+pca_rotated <- rotate(pca_fit, ncomp = 3, type = "varimax")
+print(pca_rotated)
 ```
-
-(Running these once in the vignette means they are also executed by `R CMD check`, bumping test-coverage without extra scaffolding.)
 
 # 5. Take-aways
 

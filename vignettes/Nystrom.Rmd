@@ -59,7 +59,8 @@ The Nyström method provides a fast approximation by using only a subset of "lan
 3. Compute the N × m matrix between all points and landmarks
 4. Use these to approximate the full eigendecomposition
 
-This reduces complexity from O(N³) to O(Nm²) — a massive speedup when m is small.
+This reduces complexity from O(N³) to O(Nm²), a substantial reduction when
+`m` is much smaller than `N`.
 
 ## Quick Start
 

@@ -1,5 +1,5 @@
 ---
-title: Pre-processing pipelines in multiblock
+title: Pre-processing pipelines in multivarious
 output:
   rmarkdown::html_vignette:
     toc: yes
@@ -17,7 +17,7 @@ resource_files:
 - fonts
 
 vignette: |
-  %\VignetteIndexEntry{Pre-processing pipelines in multiblock}
+  %\VignetteIndexEntry{Pre-processing pipelines in multivarious}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,7 +25,6 @@ vignette: |
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width=6, fig.height=4)
 library(multivarious)
-library(dplyr) # Needed for %>% and tibble manipulation
 library(tibble)
 library(ggplot2)
 ```
@@ -51,17 +50,16 @@ but dangerous inside reusable functions:
 *   **Data-leak avoidance**: Fitted means/SDs live inside the pre-processor object, calculated only once (typically on training data).
 *   **Reversibility**: `inverse_transform()` gives you proper back-transforms (handy for reconstruction error or publication plots).
 *   **Composability**: You can nest simple steps together (e.g., `colscale(center())`).
-*   **Partial input**: The same pipeline can process just the columns you pass (`transform(..., colind = 1:3)`), perfect for region-of-interest or block workflows.
+*   **Partial input**: The same pipeline can process just the columns you pass (`transform(..., colind = 1:3)`), which is useful for region-of-interest or block workflows.
 
 The grammar is tiny:
 
 | Verb          | Role                           | Typical Call                       |
 |---------------|--------------------------------|------------------------------------|
-| `pass()`      | do nothing (placeholder)       | `fit(pass(), X)`                   |
+| `pass()`      | identity transform             | `fit(pass(), X)`                   |
 | `center()`    | subtract column means          | `fit(center(), X)`                 |
 | `standardize()` | centre and scale to unit SD    | `fit(standardize(), X)`            |
 | `colscale()`  | user-supplied weights/scaling  | `fit(colscale(type="z"), X)`       |
-| `...`         | (write your own)               | any function returning a node      |
 
 The `fit()` verb is the bridge between defining your preprocessing steps (the *recipe*) and actually applying them. You call `fit()` on your recipe, providing your training dataset. `fit()` calculates and stores the necessary parameters (e.g., column means, standard deviations) from this data, returning a *fitted pre-processor* object.
 
@@ -264,9 +262,8 @@ model-writers (e.g. new PCA flavours) can avoid boiler-plate.
 *   **No data leakage**: Parameters live inside the fitted preprocessor object, calculated only from training data.
 *   **Composable & reversible**: Nest preprocessing steps, extract the original recipe with `fresh()`, and back-transform whenever you need results in original units using `inverse_transform()`.
 *   **Sparse-aware**: Sparse inputs can stay sparse or lazy through centering and standardisation, with explicit control over when dense materialization is allowed.
-*   **Block-aware**: The same mechanism powers multiblock PCA, CCA, ComDim…
+*   **Block-aware**: The same mechanism powers multiblock PCA, CCA, ComDim, and related workflows.
 
-Happy projecting!
 
 ---
 

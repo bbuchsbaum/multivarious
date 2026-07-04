@@ -6,7 +6,7 @@
 \usage{
 \method{reconstruct}{regress}(
   x,
-  comp = 1:ncol(x$coefficients),
+  comp = seq_len(ncomp(x)),
   rowind = 1:nrow(scores(x)),
   colind = 1:nrow(x$coefficients),
   ...

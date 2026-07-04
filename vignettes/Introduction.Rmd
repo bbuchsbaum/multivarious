@@ -66,7 +66,7 @@ The `bi_projector` class is the cornerstone of `multivarious`. It represents a l
 
 Think of it as encapsulating the core results of a dimensionality reduction technique (like the U, S, V components of an SVD, or the scores and loadings of PCA/PLS) along with any necessary pre-processing information.
 
-Crucially, many functions within `multivarious` (e.g., `pca()`, `pls()`, `cPCAplus()`, `nystrom_approx()`, `regress()`) return objects that inherit from `bi_projector`.
+Crucially, many functions within `multivarious` (e.g., `pca()`, `plsc()`, `cPCAplus()`, `nystrom_approx()`, `regress()`) return objects that inherit from `bi_projector`.
 
 The same grammar now extends to mixed-effect operator analysis:
 
@@ -185,7 +185,7 @@ This is the same projector grammar in a different setting:
 The unified `bi_projector` interface enables several powerful features within the package:
 
 *   **Pre-processing Pipelines:** Define reusable pre-processing steps (see `vignette("PreProcessing")`).
-*   **Model Composition:** Chain multiple `bi_projector` steps together (e.g., pre-processing → PCA → rotation) into a single composite projector (see `vignette("Composing_Projectors")`).
+*   **Model Composition:** Chain one fitted projector followed by another compatible fitted projector into a single composite projector (see `vignette("Composing_Projectors")`).
 *   **Cross-Validation:** Easily perform cross-validation to select hyperparameters (like the number of components) using helpers that understand the `bi_projector` structure (see `vignette("CrossValidation")`).
 
 ## Projecting Variables (`project_vars`)

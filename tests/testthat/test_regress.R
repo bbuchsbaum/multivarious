@@ -58,3 +58,17 @@ test_that("ridge and enet handle intercept correctly", {
   expect_equal(ncol(r_ridge$v), ncol(mat1) + 1)
   expect_equal(ncol(r_enet$v), ncol(mat1) + 1)
 })
+
+test_that("truncated regress objects reconstruct from retained components", {
+  mat1 <- matrix(rnorm(100 * 8), 100, 8)
+  y <- cbind(rnorm(100), rnorm(100), rnorm(100))
+  reg <- regress(mat1, y, preproc = pass(), method = "lm")
+
+  reg3 <- truncate(reg, 3)
+  recon <- reconstruct(reg3)
+
+  expect_equal(ncol(reg3$v), 3)
+  expect_equal(ncol(reg3$coefficients), 3)
+  expect_equal(dim(recon), c(nrow(mat1), ncol(y)))
+  expect_equal(recon, reg3$s %*% t(reg3$v))
+})

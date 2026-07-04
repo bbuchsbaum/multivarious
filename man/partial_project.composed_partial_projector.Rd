@@ -11,14 +11,10 @@
 
 \item{new_data}{The input data matrix or vector.}
 
-\item{colind}{A numeric vector or a list of numeric vectors/NULLs.
-If a single vector, applies to the first projector only.
-If a list, its length should ideally match the number of projectors.
-\code{colind[[i]]} specifies the column indices (relative to the \emph{input} of stage \code{i})
-to use for the partial projection at stage \code{i}. A \code{NULL} entry means use full projection
-for that stage. If the list is shorter than the number of stages, \code{NULL} (full projection)
-is assumed for remaining stages. If a single numeric vector is provided, it is treated
-as \code{list(colind, NULL, NULL, ...)} for backward compatibility (partial only at first stage).}
+\item{colind}{A numeric vector or a list of numeric vectors/NULLs. A single
+vector applies to the first projector only. If a list is supplied, only
+\code{colind[[1]]} is used; non-\code{NULL} entries after the first warn and are
+ignored. Later stages receive the full output from the preceding stage.}
 
 \item{...}{Additional arguments passed to \code{partial_project()} or \code{project()} methods.}
 }
@@ -27,6 +23,8 @@ The partially projected data after all projectors are applied.
 }
 \description{
 Applies \code{partial_project()} through each projector in the composition.
-If \code{colind} is a single vector, it applies to the first projector only. Subsequent projectors apply full columns.
-If \code{colind} is a list, each element specifies the \code{colind} for the corresponding projector in the chain.
+If \code{colind} is a single vector, it applies to the first projector only.
+Subsequent projectors apply full columns. If \code{colind} is a list, only the
+first entry is used; non-\code{NULL} entries after the first currently warn and
+are ignored.
 }

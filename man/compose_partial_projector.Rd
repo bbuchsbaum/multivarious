@@ -22,8 +22,9 @@ A \code{composed_partial_projector} object.
 A \code{composed_partial_projector} object representing the combined sequence.
 }
 \description{
-Creates a \code{composed_partial_projector} object that applies partial projections sequentially.
-If multiple projectors are composed, the column indices (colind) used at each stage must be considered.
+Creates a \code{composed_partial_projector} object that applies projectors sequentially.
+For partial projection, \code{colind} is applied to the first stage only; later
+stages receive the full output from the preceding stage.
 
 This infix operator provides syntactic sugar for composing projectors sequentially.
 It is an alias for \code{\link{compose_partial_projector}}.

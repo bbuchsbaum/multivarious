@@ -25,8 +25,6 @@ vignette: |
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
 library(multivarious)
-# library(future) # Load if using parallel = TRUE
-# library(MASS) # Load if using default fit_fun for discriminant_projector
 ```
 
 ```{r albers-classes, echo=FALSE, results='asis'}
@@ -218,8 +216,8 @@ my_pca_stat <- function(model_perm, comp_idx, ...) {
   }
 }
 
-# Illustrative call (using default measure here for simplicity)
 pt_pca_custom <- perm_test(mod_pca, X = X_iris, nperm = 50, comps = 2,
+                           measure_fun = my_pca_stat,
                            parallel = FALSE)
 print(pt_pca_custom$component_results)
 ```

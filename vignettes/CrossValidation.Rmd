@@ -77,10 +77,10 @@ fit_pca <- function(train_data, ncomp) {
 
 measure_reconstruction <- function(model, test_data) {
   # Project test data to score space
- scores <- project(model, test_data)
+  scores <- project(model, test_data)
 
   # Reconstruct: scores %*% t(loadings), then reverse centering
- recon <- scores %*% t(model$v)
+  recon <- scores %*% t(model$v)
   recon <- inverse_transform(model$preproc, recon)
 
   # Compute RMSE
@@ -188,7 +188,7 @@ cv_parallel <- cv_generic(
   X,
   folds = folds,
   .fit_fun = fit_pca,
-  .measure_fun = measure_pca,
+  .measure_fun = measure_reconstruction,
   fit_args = list(ncomp = 4),
   backend = "future"  # Use parallel backend
 )
@@ -248,7 +248,13 @@ Always fit preprocessing parameters inside the CV loop:
 ```{r preprocessing_tip, eval=FALSE}
 # WRONG: Preprocessing outside CV leaks information
 X_scaled <- scale(X)  # Uses mean/sd from ALL samples including test!
-cv_wrong <- cv_generic(X_scaled, folds, ...)
+cv_wrong <- cv_generic(
+  X_scaled,
+  folds,
+  .fit_fun = fit_pca,
+  .measure_fun = measure_reconstruction,
+  fit_args = list(ncomp = 2)
+)
 
 # RIGHT: Let the model handle preprocessing internally
 # Each fold fits centering/scaling on training data only
@@ -370,15 +376,11 @@ fit_rbf <- nystrom_approx(
 scores_rbf <- project(fit_rbf, X[1:10, ])
 ```
 
-### Test coverage for Nyström
+### Numerical checks for Nyström
 
-This package includes unit tests that validate Nyström correctness:
-
-- Standard Nyström recovers the exact kernel eigenpairs when `m = N` (centered linear kernel)
-- Double Nyström matches standard when `l = m = N`
-- `project()` reproduces training scores and matches manual formulas for both methods
-
-See `tests/testthat/test_nystrom.R` in the source for details.
+The exact-landmark examples above are useful sanity checks. Standard Nyström
+recovers the exact centered linear kernel eigensystem when all rows are
+landmarks, and double Nyström matches standard when `l = m = N`.
 
 ### Cross‑validated kernel RMSE: Nyström vs PCA
 
@@ -457,9 +459,9 @@ ggplot(cv_summary, aes(x = method, y = kernel_rmse, fill = method)) +
 ## Summary
 
 The `multivarious` CV framework provides:
-- Easy cross-validation for any dimensionality reduction method
-- Flexible metric calculation
-- Parallel execution support
-- Tidy output format for easy analysis
+- cross-validation for projector-like dimensionality reduction methods,
+- flexible metric calculation,
+- parallel execution support,
+- tidy output for downstream summaries.
 
 Use it to make informed decisions about model complexity and ensure your dimensionality reduction generalizes well to new data.

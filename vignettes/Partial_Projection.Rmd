@@ -49,17 +49,17 @@ cat(sprintf(
 
 # 1. Why partial projection?
 
-Assume you trained a dimensionality-reduction model (PCA, PLS ...)
+Assume you trained a dimensionality-reduction model (PCA, PLS, or another projector)
 on p variables but, at prediction time,
 
 *   one sensor is broken,
 *   a block of variables is too expensive to measure,
 *   you need a quick first pass while the "heavy" data arrive later.
 
-You still want the latent scores in the same component space,
-so downstream models, dashboards, alarms, ... keep running.
+You still want latent scores in the same component space so downstream
+summaries, classifiers, or monitoring rules can use the same columns.
 
-That's exactly what
+This is the role of
 
 ```
 partial_project(model, new_data_subset, colind = which.columns)
@@ -75,7 +75,7 @@ otherwise a ridge-regularised least-squares solve is used.
 
 ---
 
-# 2. Walk-through with a toy PCA
+# 2. Walk-through with a small PCA
 
 ```{r data_partial_proj}
 set.seed(1)
@@ -128,10 +128,12 @@ ggplot(plot_df, aes(full, part)) +
   coord_equal() +
   labs(title = "Component 1: full vs. partial projection") +
   theme_minimal()
+
+cor(plot_df$full, plot_df$part)
 ```
 
-Even with two variables missing, the
-ridge LS step recovers latent scores that lie almost on the 1:1 line.
+The correlation reports how closely the partial scores agree with the full-data
+scores for this component.
 
 ---
 
@@ -141,7 +143,6 @@ If you expect many rows with the same subset of features, create a
 specialised projector once and reuse it:
 
 ```{r partial_projector_cache}
-# Assuming partial_projector is available
 pca_1to6 <- partial_projector(pca, 1:6)   # keeps a reference + cache
 
 # project 1000 new observations that only have the first 6 vars
@@ -197,7 +198,7 @@ Partial projection is handy even when all measurements exist:
 2.  **Nested / multi-subject studies.**
     For multi-block PCA (e.g. "participant × sensor"), you can ask
     "where would subject i lie if I looked at block B only?"
-    Simply supply that block to `project_block()`.
+    Supply that block to `project_block()`.
 3.  **Feature probes or "what-if" analysis.**
     Engineers often ask "What is the latent position if I vary only
     temperature and hold everything else blank?" Pass a matrix that
@@ -266,8 +267,8 @@ is consistent across blocks, or whether one block tells a different story.
 | "What-if": vary a single variable set | varied cols + zeros elsewhere     | `partial_project()` with matching `colind`    |
 
 The component space stays identical throughout, so downstream
-analytics, classifiers, or control charts continue to work with no
-re-training.
+analytics, classifiers, or control charts can continue to use the same score
+columns without retraining the projector.
 
 ---
 

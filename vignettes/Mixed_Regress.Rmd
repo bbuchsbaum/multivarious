@@ -263,13 +263,8 @@ The present implementation is intentionally narrow:
 - grouped permutation and subject bootstrap,
 - shared feature basis or identity basis.
 
-The calibration harness used for the empirical checks in this vignette lives in `experimental/mixed_effect_operator_calibration.R`. Batch outputs can be written to `experimental/results/` for larger Monte Carlo runs outside the package test suite.
-
-Still to come:
-
-- richer exchangeability schemes for repeated-measures contrasts,
-- broader support beyond one grouping variable,
-- more extensive mixed-model examples across design families.
+Larger Monte Carlo calibration runs should be treated as source-repository
+diagnostics rather than part of the installed vignette workflow.
 
 ---
 

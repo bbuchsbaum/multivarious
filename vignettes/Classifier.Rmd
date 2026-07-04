@@ -32,8 +32,8 @@ knitr::opts_chunk$set(
 library(multivarious)
 library(dplyr)
 library(tibble)
-library(ggplot2) # Needed for plots
-library(knitr)   # Needed for kable
+library(ggplot2)
+library(knitr)
 
 ```
 
@@ -52,18 +52,17 @@ cat(sprintf(
 
 ```{css, echo=FALSE}
 h1 {
-  font-size: 1.8em; /* Adjust as needed */
+  font-size: 1.8em;
   margin-top: 1.5em;
   margin-bottom: 0.8em;
-  border-bottom: 1px solid #dee2e6; /* Optional: add a subtle separator */
+  border-bottom: 1px solid #dee2e6;
   padding-bottom: 0.3em;
 }
 h2 {
-  font-size: 1.4em; /* Adjust as needed */
+  font-size: 1.4em;
   margin-top: 1.2em;
   margin-bottom: 0.6em;
 }
-/* Add rules for h3, h4 etc. if they are used and need adjustment */
 ```
 
 # 1. Why classify after projection?
@@ -90,10 +89,6 @@ predictor object.
 data(iris)
 X   <- as.matrix(iris[, 1:4])
 grp <- iris$Species
-
-if (!requireNamespace("MASS", quietly = TRUE)) {
-  stop("MASS package required for LDA example")
-}
 
 # Hold out a test set up front and fit everything that follows on the
 # training rows only, so the held-out accuracy reported later is honest.
@@ -154,7 +149,6 @@ pred_knn <- predict(clf_knn, new_data = X[test_id, ],
 head(pred_knn$prob, 3)
 print(paste("Overall Accuracy:", mean(pred_knn$class == grp[test_id])))
 
-# Assuming rank_score and topk are available
 rk  <- rank_score(pred_knn$prob, grp[test_id])
 tk2 <- topk      (pred_knn$prob, grp[test_id], k = 2)
 
@@ -191,21 +185,16 @@ knitr::kable(cm, caption = "Confusion matrix (counts)")
 # 3. Random-Forest on the same latent space
 
 ```{r build_rf_classifier}
-if (requireNamespace("randomForest", quietly = TRUE)) {
+# rf_classifier() dispatches to the projector method, which takes the
+# reference labels and scores explicitly (here, the training scores).
+rf_clf <- rf_classifier(
+  x      = disc_proj,
+  labels = grp_train,
+  scores = scores(disc_proj)
+)
 
-  # rf_classifier() dispatches to the projector method, which takes the
-  # reference labels and scores explicitly (here, the training scores).
-  rf_clf <- rf_classifier(
-    x      = disc_proj,
-    labels = grp_train,
-    scores = scores(disc_proj)
-  )
-
-  pred_rf <- predict(rf_clf, new_data = X[test_id, ])
-  print(paste("RF Accuracy:", mean(pred_rf$class == grp[test_id])))
-} else {
-  cat("randomForest package not installed. Skipping RF example.\n")
-}
+pred_rf <- predict(rf_clf, new_data = X[test_id, ])
+print(paste("RF Accuracy:", mean(pred_rf$class == grp[test_id])))
 ```
 
 The RF sees only two input variables (the LDA components) – that
@@ -214,7 +203,7 @@ keeps trees shallow and speeds-up training.
 # 4. Partial-feature prediction: sepal block only
 
 Assume that in deployment we measure only Sepal variables
-(cols 1–2). A partial projection keeps the classifier happy:
+(cols 1–2). A partial projection keeps the classifier interface unchanged:
 
 ```{r predict_partial}
 sepal_cols <- 1:2
@@ -237,7 +226,8 @@ pred_sepal <- predict(
 
 print(paste("Accuracy (Sepal only):", mean(pred_sepal$class == grp[test_id])))
 ```
-Accuracy drops a bit – as expected when using fewer features.
+Accuracy is lower in this deliberately restricted feature setting, as expected
+when the strongest Petal measurements are unavailable.
 
 # 5. Which component block matters most?
 
@@ -250,7 +240,6 @@ blocks <- list(
   Petal = 3:4
 )
 
-# Assuming feature_importance is available
 fi <- feature_importance(
   clf_knn,
   new_data  = X[test_id, ],
