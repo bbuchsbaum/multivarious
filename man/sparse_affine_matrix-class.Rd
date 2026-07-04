@@ -102,4 +102,5 @@ matrix results matching the corresponding dense affine calculation.
 \code{\link[=transform]{transform()}}
 }
 \keyword{classes}
+\keyword{internal}
 \keyword{methods}
