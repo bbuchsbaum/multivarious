@@ -12,10 +12,10 @@ groups.
 **Contrastive PCA (cPCA++) finds patterns that are enriched in one group
 (foreground) compared to another (background).**
 
-## A Simple Example
+## A Worked Example
 
-Let’s start with a practical example to see why contrastive PCA is
-useful:
+The simulation below separates variation that is common to both groups
+from variation that is added only to the foreground group.
 
 ``` r
 
@@ -69,15 +69,15 @@ ggplot(loadings_df, aes(x = feature, y = value)) +
 
 ![](CPCAplus_files/figure-html/motivation_example-1.png)
 
-Notice how standard PCA focuses on features 1-10 (the common variation),
-while contrastive PCA correctly identifies features 20-25 (the
-group-specific signal).
+In this draw, standard PCA concentrates on the shared high-variance
+features near 1-10. The contrastive solution shifts its largest loadings
+toward the foreground-specific block around 20-25, although individual
+top-ranked features can vary because the signal is noisy.
 
 ## Using cPCAplus()
 
-The
-[`cPCAplus()`](https://bbuchsbaum.github.io/multivarious/reference/cPCAplus.md)
-function makes contrastive PCA easy to use:
+The standard call supplies foreground data, background data, and the
+number of contrastive components to estimate:
 
 ``` r
 
@@ -139,41 +139,12 @@ print(paste("Variance ratios:", paste(round(cpca_fit$values[1:3], 2), collapse =
 
 ## Common Applications
 
-### 1. Biomedical Studies
-
-``` r
-
-# Identify disease-specific patterns
-tumor_cpca <- cPCAplus(
-  X_f = tumor_samples,
-  X_b = healthy_tissue,
-  ncomp = 10
-)
-```
-
-### 2. Technical Variation Removal
-
-``` r
-
-# Use technical replicates as background to find biological signal
-bio_cpca <- cPCAplus(
-  X_f = biological_samples,
-  X_b = technical_replicates,
-  ncomp = 5
-)
-```
-
-### 3. Time-Based Contrasts
-
-``` r
-
-# Find patterns specific to treatment timepoint
-treatment_cpca <- cPCAplus(
-  X_f = after_treatment,
-  X_b = before_treatment,
-  ncomp = 5
-)
-```
+Use contrastive PCA when the foreground and background matrices have the
+same columns and the scientific question is about variance enriched in
+the foreground. Common examples include disease versus control samples,
+biological replicates versus technical replicates, or post-treatment
+versus pre-treatment measurements. In each case, put the group of
+interest in `X_f` and the reference or nuisance group in `X_b`.
 
 ## Advanced Options
 

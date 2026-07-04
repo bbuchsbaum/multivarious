@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
 
     
     
-<div class="section level2">
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><div class="section level2">
 <h2 id="what-is-contrastive-pca">What is Contrastive PCA?<a class="anchor" aria-label="anchor" href="#what-is-contrastive-pca"></a>
 </h2>
 <p>Imagine you’re studying two groups: patients with a disease and
@@ -73,10 +73,10 @@ other factors common to both groups.</p>
 one group (foreground) compared to another (background).</strong></p>
 </div>
 <div class="section level2">
-<h2 id="a-simple-example">A Simple Example<a class="anchor" aria-label="anchor" href="#a-simple-example"></a>
+<h2 id="a-worked-example">A Worked Example<a class="anchor" aria-label="anchor" href="#a-worked-example"></a>
 </h2>
-<p>Let’s start with a practical example to see why contrastive PCA is
-useful:</p>
+<p>The simulation below separates variation that is common to both
+groups from variation that is added only to the foreground group.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span>
 <span><span class="va">n_samples</span> <span class="op">&lt;-</span> <span class="fl">100</span></span>
@@ -125,15 +125,16 @@ useful:</p>
 <span>    title <span class="op">=</span> <span class="st">"Top loading coefficients for PC1"</span></span>
 <span>  <span class="op">)</span></span></code></pre></div>
 <p><img src="CPCAplus_files/figure-html/motivation_example-1.png" class="r-plt" alt="" width="576"></p>
-<p>Notice how standard PCA focuses on features 1-10 (the common
-variation), while contrastive PCA correctly identifies features 20-25
-(the group-specific signal).</p>
+<p>In this draw, standard PCA concentrates on the shared high-variance
+features near 1-10. The contrastive solution shifts its largest loadings
+toward the foreground-specific block around 20-25, although individual
+top-ranked features can vary because the signal is noisy.</p>
 </div>
 <div class="section level2">
 <h2 id="using-cpcaplus">Using cPCAplus()<a class="anchor" aria-label="anchor" href="#using-cpcaplus"></a>
 </h2>
-<p>The <code><a href="../reference/cPCAplus.html">cPCAplus()</a></code> function makes contrastive PCA easy to
-use:</p>
+<p>The standard call supplies foreground data, background data, and the
+number of contrastive components to estimate:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Basic usage</span></span>
 <span><span class="va">cpca_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cPCAplus.html">cPCAplus</a></span><span class="op">(</span></span>
@@ -199,39 +200,13 @@ the “contrastive variance”</li>
 <div class="section level2">
 <h2 id="common-applications">Common Applications<a class="anchor" aria-label="anchor" href="#common-applications"></a>
 </h2>
-<div class="section level3">
-<h3 id="biomedical-studies">1. Biomedical Studies<a class="anchor" aria-label="anchor" href="#biomedical-studies"></a>
-</h3>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Identify disease-specific patterns</span></span>
-<span><span class="va">tumor_cpca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cPCAplus.html">cPCAplus</a></span><span class="op">(</span></span>
-<span>  X_f <span class="op">=</span> <span class="va">tumor_samples</span>,</span>
-<span>  X_b <span class="op">=</span> <span class="va">healthy_tissue</span>,</span>
-<span>  ncomp <span class="op">=</span> <span class="fl">10</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="technical-variation-removal">2. Technical Variation Removal<a class="anchor" aria-label="anchor" href="#technical-variation-removal"></a>
-</h3>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Use technical replicates as background to find biological signal</span></span>
-<span><span class="va">bio_cpca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cPCAplus.html">cPCAplus</a></span><span class="op">(</span></span>
-<span>  X_f <span class="op">=</span> <span class="va">biological_samples</span>,</span>
-<span>  X_b <span class="op">=</span> <span class="va">technical_replicates</span>,</span>
-<span>  ncomp <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="time-based-contrasts">3. Time-Based Contrasts<a class="anchor" aria-label="anchor" href="#time-based-contrasts"></a>
-</h3>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Find patterns specific to treatment timepoint</span></span>
-<span><span class="va">treatment_cpca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cPCAplus.html">cPCAplus</a></span><span class="op">(</span></span>
-<span>  X_f <span class="op">=</span> <span class="va">after_treatment</span>,</span>
-<span>  X_b <span class="op">=</span> <span class="va">before_treatment</span>,</span>
-<span>  ncomp <span class="op">=</span> <span class="fl">5</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-</div>
+<p>Use contrastive PCA when the foreground and background matrices have
+the same columns and the scientific question is about variance enriched
+in the foreground. Common examples include disease versus control
+samples, biological replicates versus technical replicates, or
+post-treatment versus pre-treatment measurements. In each case, put the
+group of interest in <code>X_f</code> and the reference or nuisance
+group in <code>X_b</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="advanced-options">Advanced Options<a class="anchor" aria-label="anchor" href="#advanced-options"></a>
@@ -241,7 +216,7 @@ the “contrastive variance”</li>
 </h3>
 <p>When you have more features than samples (p &gt;&gt; n), use the
 efficient sample-space strategy:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create high-dimensional example</span></span>
 <span><span class="va">n_f</span> <span class="op">&lt;-</span> <span class="fl">50</span>; <span class="va">n_b</span> <span class="op">&lt;-</span> <span class="fl">80</span>; <span class="va">p</span> <span class="op">&lt;-</span> <span class="fl">1000</span></span>
 <span><span class="va">X_background_hd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n_b</span> <span class="op">*</span> <span class="va">p</span><span class="op">)</span>, <span class="va">n_b</span>, <span class="va">p</span><span class="op">)</span></span>
@@ -260,7 +235,7 @@ efficient sample-space strategy:</p>
 </h3>
 <p>If your background covariance is nearly singular, add
 regularization:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Small background sample size can lead to instability</span></span>
 <span><span class="va">small_background</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">20</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>, <span class="fl">20</span>, <span class="fl">100</span><span class="op">)</span></span>
 <span><span class="va">small_foreground</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span> <span class="op">*</span> <span class="fl">100</span><span class="op">)</span>, <span class="fl">30</span>, <span class="fl">100</span><span class="op">)</span></span>

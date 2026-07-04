@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,24 +60,20 @@
 
     
     
-<div class="section level2">
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><div class="section level2">
 <h2 id="what-this-vignette-covers">1. What this vignette covers<a class="anchor" aria-label="anchor" href="#what-this-vignette-covers"></a>
 </h2>
 <p>This walk-through shows how to:</p>
 <ol style="list-style-type: decimal">
-<li>Fit a Behavior-style PLSC model (<code><a href="../reference/plsc.html">plsc()</a></code>),<br>
-</li>
-<li>Inspect latent variables (LVs) and scores,<br>
-</li>
-<li>Run a permutation test to decide how many LVs are significant,
-and<br>
-</li>
+<li>Fit a Behavior-style PLSC model (<code><a href="../reference/plsc.html">plsc()</a></code>).</li>
+<li>Inspect latent variables (LVs) and scores.</li>
+<li>Run a permutation test to decide how many LVs are significant.</li>
 <li>Use bootstrap ratios to identify stable loadings, with simple
 visualizations.</li>
 </ol>
-<p>The workflow is intentionally small and fast so the vignette runs
-quickly; for real analyses, increase the number of
-permutations/bootstraps.</p>
+<p>The workflow is intentionally small so the vignette runs quickly; for
+applied analyses, increase the number of permutations and
+bootstraps.</p>
 </div>
 <div class="section level2">
 <h2 id="simulate-coupled-xy-blocks">2. Simulate coupled X/Y blocks<a class="anchor" aria-label="anchor" href="#simulate-coupled-xy-blocks"></a>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -32,6 +32,26 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.4.0" id="multivarious-040">multivarious 0.4.0<a class="anchor" aria-label="anchor" href="#multivarious-040"></a></h2>
+<div class="section level3">
+<h3 id="sparse-preprocessing-0-4-0">Sparse preprocessing<a class="anchor" aria-label="anchor" href="#sparse-preprocessing-0-4-0"></a></h3>
+<ul><li>Added sparse-aware preprocessing for <code>Matrix</code> inputs. <code><a href="../reference/pass.html">pass()</a></code> and sparse-safe <code><a href="../reference/colscale.html">colscale()</a></code> transformations preserve sparse storage, while <code><a href="../reference/center.html">center()</a></code> and <code><a href="../reference/standardize.html">standardize()</a></code> now use a lazy affine representation instead of materializing dense centered matrices by default.</li>
+<li>Added explicit sparse preprocessing policies: <code>sparse = "operator"</code> uses the lazy representation, <code>sparse = "preserve"</code> errors before a densifying transform, and <code>sparse = "allow_dense"</code> opts into dense materialization.</li>
+<li>Added matrix-like S4 classes for lazy sparse affine data and its transpose, with methods for <code>%*%</code>, <code><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">crossprod()</a></code>, <code><a href="https://rdrr.io/r/base/crossprod.html" class="external-link">tcrossprod()</a></code>, <code><a href="https://rdrr.io/r/base/t.html" class="external-link">t()</a></code>, subsetting, dimensions, and <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code>. Downstream code can now multiply or form cross-products from transformed sparse data without first densifying it.</li>
+<li>Updated <code><a href="../reference/svd_wrapper.html">svd_wrapper()</a></code> and <code><a href="../reference/pca.html">pca()</a></code> sparse/lazy paths to use implicit sparse SVD backends where possible, avoiding dense centered intermediates for common sparse PCA workflows.</li>
+<li>Updated projector and partial-projection paths to multiply through lazy sparse preprocessing views directly.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="behavior-changes-0-4-0">Behavior changes<a class="anchor" aria-label="anchor" href="#behavior-changes-0-4-0"></a></h3>
+<ul><li>
+<code><a href="../reference/transform.html">transform()</a></code> on a sparse input with centering or standardization may now return a <code>sparse_affine_matrix</code> object. Use regular matrix algebra methods on that object to stay lazy, or call <code><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix()</a></code> when explicit dense materialization is desired.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="tests-0-4-0">Tests<a class="anchor" aria-label="anchor" href="#tests-0-4-0"></a></h3>
+<ul><li>Added regression coverage for sparse preprocessing policies, sparse-safe scaling, lazy centered and standardized sparse transforms, implicit sparse PCA, projector multiplication, and public algebra methods on the lazy sparse affine classes.</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.3.2" id="multivarious-032">multivarious 0.3.2<a class="anchor" aria-label="anchor" href="#multivarious-032"></a></h2><p class="text-muted">CRAN release: 2026-06-05</p>
 <div class="section level3">

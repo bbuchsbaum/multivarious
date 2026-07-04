@@ -241,8 +241,8 @@ my_pca_stat <- function(model_perm, comp_idx, ...) {
   }
 }
 
-# Illustrative call (using default measure here for simplicity)
 pt_pca_custom <- perm_test(mod_pca, X = X_iris, nperm = 50, comps = 2,
+                           measure_fun = my_pca_stat,
                            parallel = FALSE)
 #> Pre-calculating reconstructions for stepwise testing...
 #> Running 50 permutations sequentially for up to 2 PCA components (alpha=0.050, serial)...
@@ -253,7 +253,7 @@ print(pt_pca_custom$component_results)
 #>    comp observed   pval lower_ci upper_ci
 #>   <int>    <dbl>  <dbl>    <dbl>    <dbl>
 #> 1     1    0.925 0.0196    0.682    0.692
-#> 2     2    0.704 0.0392    0.607    0.697
+#> 2     2    0.978 0.0196    0.842    0.884
 ```
 
 For testing a single combined statistic rather than sequential

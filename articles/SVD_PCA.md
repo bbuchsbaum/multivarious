@@ -29,12 +29,6 @@ X <- matrix(rnorm(35*10), 35, 10)   # 35 obs × 10 vars
 
 sv_fast <- svd_wrapper(X, ncomp = 5, preproc = center(), method = "fast")
 
-# irlba backend (if installed) gives identical results
-sv_irlba <- if (requireNamespace("irlba", quietly = TRUE)) {
-  suppressWarnings(svd_wrapper(X, ncomp = 5, preproc = center(), method = "irlba"))
-}
-
-# Same downstream code works for both objects:
 head(scores(sv_fast)) # 35 × 5
 #>            [,1]       [,2]       [,3]        [,4]        [,5]
 #> [1,] -2.9415181 -1.6140167  0.2117456  0.12109736 -0.46419317
@@ -43,11 +37,6 @@ head(scores(sv_fast)) # 35 × 5
 #> [4,]  0.1131790  0.7789166 -0.7394153  0.43625966  2.24260205
 #> [5,]  0.8437314 -1.7600608 -0.8939140  0.77861595  0.81936957
 #> [6,]  0.6063990 -1.8810077  1.2246519  0.03652504 -1.40433408
-
-if (!is.null(sv_irlba)) {
-  all.equal(scores(sv_fast), scores(sv_irlba))
-}
-#> [1] "Mean relative difference: 0.7913532"
 ```
 
 ## 2. A one-liner `pca()`
@@ -135,14 +124,10 @@ shape(pca2)            # 4 vars × 2 comps
 #> [1] 4 2
 ```
 
-## 4. Fast code-coverage cameo
+## 4. Related PCA operations
 
-The next chunk quietly touches a few more branches used in the unit
-tests
-([`std_scores()`](https://bbuchsbaum.github.io/multivarious/reference/std_scores.md),
-[`perm_test()`](https://bbuchsbaum.github.io/multivarious/reference/perm_test.md),
-[`rotate()`](https://bbuchsbaum.github.io/multivarious/reference/rotate.md)),
-but keeps printing to a minimum:
+The same `bi_projector` object supports standardized scores, permutation
+testing, and component rotation:
 
 ``` r
 
@@ -156,27 +141,21 @@ head(std_scores(svd_wrapper(X, ncomp = 3))) # Use the earlier X data
 #> [5,]  0.5035052 -1.2105838 -1.291893170
 #> [6,]  0.4441909 -1.5304768  0.866038002
 
-# tiny permutation test (10 perms; obviously too few for science)
-# This requires perm_test.pca method
-# Make sure X_iris is centered if perm_test needs centered data
-perm_res <- perm_test(pca_fit, X_iris, nperm = 10, comps = 2)
+# Small permutation count keeps the vignette quick; use larger values for analysis.
+perm_res <- perm_test(pca_fit, X_iris, nperm = 19, comps = 2)
 #> Pre-calculating reconstructions for stepwise testing...
-#> Running 10 permutations sequentially for up to 2 PCA components (alpha=0.050, serial)...
+#> Running 19 permutations sequentially for up to 2 PCA components (alpha=0.050, serial)...
 #>   Testing Component 1/2...
-#>   Component 1 p-value (0.09091) > alpha (0.050). Stopping sequential testing.
+#>   Testing Component 2/2...
 print(perm_res$component_results)
-#> # A tibble: 1 × 5
-#>    comp observed   pval lower_ci upper_ci
-#>   <int>    <dbl>  <dbl>    <dbl>    <dbl>
-#> 1     1    0.925 0.0909    0.682    0.689
+#> # A tibble: 2 × 5
+#>    comp observed  pval lower_ci upper_ci
+#>   <int>    <dbl> <dbl>    <dbl>    <dbl>
+#> 1     1    0.925  0.05    0.682    0.691
+#> 2     2    0.704  0.05    0.616    0.691
 
-# quick varimax rotation
-if (requireNamespace("GPArotation", quietly = TRUE)) {
-  pca_rotated <- rotate(pca_fit, ncomp = 3, type = "varimax")
-  print(pca_rotated)
-} else {
-  cat("GPArotation not installed, skipping rotation example.\n")
-}
+pca_rotated <- rotate(pca_fit, ncomp = 3, type = "varimax")
+print(pca_rotated)
 #> PCA object  -- derived from SVD
 #> 
 #> Data: 150 observations x 4 variables
@@ -196,9 +175,6 @@ if (requireNamespace("GPArotation", quietly = TRUE)) {
 #>   Loadings type: N/A (orthogonal)
 ```
 
-(Running these once in the vignette means they are also executed by
-`R CMD check`, bumping test-coverage without extra scaffolding.)
-
 ## 5. Take-aways
 
 - [`svd_wrapper()`](https://bbuchsbaum.github.io/multivarious/reference/svd_wrapper.md)
@@ -215,7 +191,7 @@ if (requireNamespace("GPArotation", quietly = TRUE)) {
 ``` r
 
 sessionInfo()
-#> R version 4.6.0 (2026-04-24)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -236,11 +212,11 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3      multivarious_0.3.2
+#> [1] ggplot2_4.0.3      multivarious_0.4.0
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] Matrix_1.7-5         gtable_0.3.6         jsonlite_2.0.0      
-#>  [4] dplyr_1.2.1          compiler_4.6.0       Rcpp_1.1.1-1.1      
+#>  [4] dplyr_1.2.1          compiler_4.6.1       Rcpp_1.1.1-1.1      
 #>  [7] tidyselect_1.2.1     geigen_2.3           jquerylib_0.1.4     
 #> [10] systemfonts_1.3.2    scales_1.4.0         textshaping_1.0.5   
 #> [13] yaml_2.3.12          fastmap_1.2.0        lattice_0.22-9      
@@ -248,13 +224,12 @@ sessionInfo()
 #> [19] knitr_1.51           ggrepel_0.9.8        tibble_3.3.1        
 #> [22] desc_1.4.3           chk_0.10.0           bslib_0.11.0        
 #> [25] pillar_1.11.1        RColorBrewer_1.1-3   rlang_1.2.0         
-#> [28] cachem_1.1.0         xfun_0.58            fs_2.1.0            
+#> [28] cachem_1.1.0         xfun_0.59            fs_2.1.0            
 #> [31] sass_0.4.10          S7_0.2.2             otel_0.2.0          
-#> [34] cli_3.6.6            withr_3.0.2          pkgdown_2.2.0       
-#> [37] magrittr_2.0.5       digest_0.6.39        grid_4.6.0          
-#> [40] irlba_2.3.7          lifecycle_1.0.5      vctrs_0.7.3         
-#> [43] evaluate_1.0.5       glue_1.8.1           GPArotation_2026.6-1
-#> [46] corpcor_1.6.10       farver_2.1.2         ragg_1.5.2          
-#> [49] rmarkdown_2.31       tools_4.6.0          pkgconfig_2.0.3     
-#> [52] htmltools_0.5.9
+#> [34] cli_3.6.6            withr_3.0.3          pkgdown_2.2.0       
+#> [37] magrittr_2.0.5       digest_0.6.39        grid_4.6.1          
+#> [40] lifecycle_1.0.5      vctrs_0.7.3          evaluate_1.0.5      
+#> [43] glue_1.8.1           GPArotation_2026.6-1 corpcor_1.6.10      
+#> [46] farver_2.1.2         ragg_1.5.2           rmarkdown_2.31      
+#> [49] tools_4.6.1          pkgconfig_2.0.3      htmltools_0.5.9
 ```

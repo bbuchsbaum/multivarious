@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
 
     
     
-<div class="section level2">
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><div class="section level2">
 <h2 id="why-cross-validate-dimensionality-reduction">Why Cross-validate Dimensionality Reduction?<a class="anchor" aria-label="anchor" href="#why-cross-validate-dimensionality-reduction"></a>
 </h2>
 <p>When using PCA or other dimensionality reduction methods, we often
@@ -98,10 +98,10 @@ function projects test data, reconstructs it, and computes RMSE:</p>
 <span></span>
 <span><span class="va">measure_reconstruction</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span> <span class="op">{</span></span>
 <span>  <span class="co"># Project test data to score space</span></span>
-<span> <span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
+<span>  <span class="va">scores</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">test_data</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="co"># Reconstruct: scores %*% t(loadings), then reverse centering</span></span>
-<span> <span class="va">recon</span> <span class="op">&lt;-</span> <span class="va">scores</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">v</span><span class="op">)</span></span>
+<span>  <span class="va">recon</span> <span class="op">&lt;-</span> <span class="va">scores</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">v</span><span class="op">)</span></span>
 <span>  <span class="va">recon</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/inverse_transform.html">inverse_transform</a></span><span class="op">(</span><span class="va">model</span><span class="op">$</span><span class="va">preproc</span>, <span class="va">recon</span><span class="op">)</span></span>
 <span></span>
 <span>  <span class="co"># Compute RMSE</span></span>
@@ -229,7 +229,7 @@ variables are already on similar scales.</p>
 <span>  <span class="va">X</span>,</span>
 <span>  folds <span class="op">=</span> <span class="va">folds</span>,</span>
 <span>  .fit_fun <span class="op">=</span> <span class="va">fit_pca</span>,</span>
-<span>  .measure_fun <span class="op">=</span> <span class="va">measure_pca</span>,</span>
+<span>  .measure_fun <span class="op">=</span> <span class="va">measure_reconstruction</span>,</span>
 <span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">4</span><span class="op">)</span>,</span>
 <span>  backend <span class="op">=</span> <span class="st">"future"</span>  <span class="co"># Use parallel backend</span></span>
 <span><span class="op">)</span></span>
@@ -326,7 +326,13 @@ variables are already on similar scales.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># WRONG: Preprocessing outside CV leaks information</span></span>
 <span><span class="va">X_scaled</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/scale.html" class="external-link">scale</a></span><span class="op">(</span><span class="va">X</span><span class="op">)</span>  <span class="co"># Uses mean/sd from ALL samples including test!</span></span>
-<span><span class="va">cv_wrong</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span><span class="va">X_scaled</span>, <span class="va">folds</span>, <span class="va">...</span><span class="op">)</span></span>
+<span><span class="va">cv_wrong</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/cv_generic.html">cv_generic</a></span><span class="op">(</span></span>
+<span>  <span class="va">X_scaled</span>,</span>
+<span>  <span class="va">folds</span>,</span>
+<span>  .fit_fun <span class="op">=</span> <span class="va">fit_pca</span>,</span>
+<span>  .measure_fun <span class="op">=</span> <span class="va">measure_reconstruction</span>,</span>
+<span>  fit_args <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>ncomp <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># RIGHT: Let the model handle preprocessing internally</span></span>
 <span><span class="co"># Each fold fits centering/scaling on training data only</span></span>
@@ -485,21 +491,12 @@ RBF).</p>
 <span><span class="op">)</span></span>
 <span><span class="va">scores_rbf</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">fit_rbf</span>, <span class="va">X</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>, <span class="op">]</span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
-<h3 id="test-coverage-for-nyström">Test coverage for Nyström<a class="anchor" aria-label="anchor" href="#test-coverage-for-nystr%C3%B6m"></a>
+<h3 id="numerical-checks-for-nyström">Numerical checks for Nyström<a class="anchor" aria-label="anchor" href="#numerical-checks-for-nystr%C3%B6m"></a>
 </h3>
-<p>This package includes unit tests that validate Nyström
-correctness:</p>
-<ul>
-<li>Standard Nyström recovers the exact kernel eigenpairs when
-<code>m = N</code> (centered linear kernel)</li>
-<li>Double Nyström matches standard when <code>l = m = N</code>
-</li>
-<li>
-<code><a href="../reference/project.html">project()</a></code> reproduces training scores and matches manual
-formulas for both methods</li>
-</ul>
-<p>See <code>tests/testthat/test_nystrom.R</code> in the source for
-details.</p>
+<p>The exact-landmark examples above are useful sanity checks. Standard
+Nyström recovers the exact centered linear kernel eigensystem when all
+rows are landmarks, and double Nyström matches standard when
+<code>l = m = N</code>.</p>
 </div>
 <div class="section level3">
 <h3 id="crossvalidated-kernel-rmse-nyström-vs-pca">Cross‑validated kernel RMSE: Nyström vs PCA<a class="anchor" aria-label="anchor" href="#crossvalidated-kernel-rmse-nystr%C3%B6m-vs-pca"></a>
@@ -584,10 +581,10 @@ scores returned by <code><a href="../reference/project.html">project()</a></code
 <div class="section level2">
 <h2 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h2>
-<p>The <code>multivarious</code> CV framework provides: - Easy
-cross-validation for any dimensionality reduction method - Flexible
-metric calculation - Parallel execution support - Tidy output format for
-easy analysis</p>
+<p>The <code>multivarious</code> CV framework provides: -
+cross-validation for projector-like dimensionality reduction methods, -
+flexible metric calculation, - parallel execution support, - tidy output
+for downstream summaries.</p>
 <p>Use it to make informed decisions about model complexity and ensure
 your dimensionality reduction generalizes well to new data.</p>
 </div>

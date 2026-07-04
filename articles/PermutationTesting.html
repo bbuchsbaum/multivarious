@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
 
     
     
-<div class="section level2">
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><div class="section level2">
 <h2 id="why-permutation-tests">1. Why Permutation Tests?<a class="anchor" aria-label="anchor" href="#why-permutation-tests"></a>
 </h2>
 <p>Dimensionality reduction raises a fundamental question: <strong>how
@@ -295,8 +295,8 @@ explain more variance than chance. You can supply a custom
 <span>  <span class="op">}</span></span>
 <span><span class="op">}</span></span>
 <span></span>
-<span><span class="co"># Illustrative call (using default measure here for simplicity)</span></span>
 <span><span class="va">pt_pca_custom</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/perm_test.html">perm_test</a></span><span class="op">(</span><span class="va">mod_pca</span>, X <span class="op">=</span> <span class="va">X_iris</span>, nperm <span class="op">=</span> <span class="fl">50</span>, comps <span class="op">=</span> <span class="fl">2</span>,</span>
+<span>                           measure_fun <span class="op">=</span> <span class="va">my_pca_stat</span>,</span>
 <span>                           parallel <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Pre-calculating reconstructions for stepwise testing...</span></span>
 <span><span class="co">#&gt; Running 50 permutations sequentially for up to 2 PCA components (alpha=0.050, serial)...</span></span>
@@ -307,7 +307,7 @@ explain more variance than chance. You can supply a custom
 <span><span class="co">#&gt;    comp observed   pval lower_ci upper_ci</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1    0.925 0.019<span style="text-decoration: underline;">6</span>    0.682    0.692</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2    0.704 0.039<span style="text-decoration: underline;">2</span>    0.607    0.697</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2    0.978 0.019<span style="text-decoration: underline;">6</span>    0.842    0.884</span></span></code></pre></div>
 <p>For testing a single combined statistic rather than sequential
 components, set <code>comps = 1</code> and have your
 <code>measure_fun</code> compute the combined value directly.</p>

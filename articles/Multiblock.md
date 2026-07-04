@@ -13,7 +13,7 @@ original columns belong to which block, so you can
   block B”
 - project or reconstruct per block effortlessly.
 
-We demonstrate with a minimal two-block toy-set.
+We demonstrate with a minimal simulated two-block data set.
 
 ``` r
 
@@ -74,13 +74,14 @@ scores_A <- project_block(mb, XA, block = 1)
 # Project using only data from block B
 scores_B <- project_block(mb, XB, block = 2)       
 
-cor(scores_all[,1], scores_A[,1])                  # high (they coincide)
+cor(scores_all[,1], scores_A[,1])
 #> [1] 0.7971026
 ```
 
 Because the global PCA treats all columns jointly, projecting only block
-A gives exactly the same latent coordinates as when the whole matrix is
-available – useful when a block is missing at prediction time.
+A gives an approximation to the full-data scores using the same
+component axes. The correlation above quantifies how much of the first
+component is recoverable from block A alone in this simulated example.
 
 ### 2.3 Partial feature projection
 
@@ -149,8 +150,8 @@ than expected by chance.
 
 - Any decomposition that delivers a loading matrix `v` (and optionally
   scores `s`) can become multiblock-aware by supplying `block_indices`.
-- The wrapper introduces zero new maths – it only remembers the column
-  grouping and plugs into the common verbs:
+- The wrapper keeps the column grouping attached to the decomposition
+  and plugs that information into the common verbs:
 
 | Verb | What it does in multiblock context |
 |----|----|
@@ -160,15 +161,15 @@ than expected by chance.
 | `coef(..., block=)` | retrieve loadings for a specific block |
 | [`perm_test()`](https://bbuchsbaum.github.io/multivarious/reference/perm_test.md) | permutation test for block consensus (biprojector) |
 
-This light infrastructure lets you prototype block-aware analyses
-quickly, while still tapping into the entire `multiblock` toolkit
-(cross-validation, reconstruction metrics, composition with
-`compose_projector`, etc.).
+This light infrastructure lets you prototype block-aware analyses while
+still using the `multivarious` verbs for cross-validation,
+reconstruction metrics, and composition with
+[`compose_projector()`](https://bbuchsbaum.github.io/multivarious/reference/compose_projector.md).
 
 ``` r
 
 sessionInfo()
-#> R version 4.6.0 (2026-04-24)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -189,17 +190,17 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] multivarious_0.3.2 dplyr_1.2.1       
+#> [1] multivarious_0.4.0 dplyr_1.2.1       
 #> 
 #> loaded via a namespace (and not attached):
 #>  [1] vctrs_0.7.3       cli_3.6.6         knitr_1.51        rlang_1.2.0      
-#>  [5] xfun_0.58         otel_0.2.0        generics_0.1.4    textshaping_1.0.5
+#>  [5] xfun_0.59         otel_0.2.0        generics_0.1.4    textshaping_1.0.5
 #>  [9] jsonlite_2.0.0    glue_1.8.1        htmltools_0.5.9   ragg_1.5.2       
-#> [13] sass_0.4.10       rmarkdown_2.31    grid_4.6.0        tibble_3.3.1     
+#> [13] sass_0.4.10       rmarkdown_2.31    grid_4.6.1        tibble_3.3.1     
 #> [17] evaluate_1.0.5    jquerylib_0.1.4   fastmap_1.2.0     yaml_2.3.12      
-#> [21] lifecycle_1.0.5   chk_0.10.0        compiler_4.6.0    fs_2.1.0         
+#> [21] lifecycle_1.0.5   chk_0.10.0        compiler_4.6.1    fs_2.1.0         
 #> [25] pkgconfig_2.0.3   lattice_0.22-9    systemfonts_1.3.2 digest_0.6.39    
 #> [29] R6_2.6.1          tidyselect_1.2.1  pillar_1.11.1     magrittr_2.0.5   
-#> [33] Matrix_1.7-5      bslib_0.11.0      tools_4.6.0       geigen_2.3       
+#> [33] Matrix_1.7-5      bslib_0.11.0      tools_4.6.1       geigen_2.3       
 #> [37] pkgdown_2.2.0     cachem_1.1.0      desc_1.4.3
 ```

@@ -1,9 +1,9 @@
-# Extending multiblock: CCA and glmnet Examples
+# Extending multivarious: CCA and glmnet Examples
 
 This vignette demonstrates how to wrap existing statistical models
-within the `multiblock` framework, specifically using `cross_projector`
-for Canonical Correlation Analysis (CCA) and `projector` for `glmnet`
-(penalized regression).
+within the `multivarious` projector framework, specifically using
+`cross_projector` for Canonical Correlation Analysis (CCA) and
+`projector` for `glmnet` (penalized regression).
 
 ## 1. Canonical Correlation Analysis with `cross_projector`
 
@@ -85,8 +85,8 @@ attr(cp_cca, "can_cor") # Show canonical correlations
   vice-versa (`transfer(cp_cca, newX, from = "X", to = "Y")`).
 - **Partial Features:** Project or transfer using only a subset of
   features from X or Y (`partial_project`).
-- **Integration:** Use standardized `multiblock` tools like
-  cross-validation (`cv`) and permutation testing (`perm_test`).
+- **Integration:** Use standardized `multivarious` tools such as
+  cross-validation (`cv_generic`) and permutation testing (`perm_test`).
 
 ### 1.3 Bidirectional Prediction (Transfer)
 
@@ -196,8 +196,8 @@ relationship is unlikely due to chance.
 
 - `cross_projector` provides a convenient wrapper for two-block methods
   like CCA.
-- It enables using standard `multiblock` verbs (`project`, `transfer`,
-  `partial_project`, `cv`, `perm_test`) with the wrapped model.
+- It enables using standard `multivarious` verbs (`project`, `transfer`,
+  `partial_project`, `cv_generic`, `perm_test`) with the wrapped model.
 - Preprocessing is handled internally, reducing risk of data leakage.
 - Other methods (PLS, O2PLS) can be integrated by providing a different
   `fit_fun`.

@@ -5,15 +5,14 @@
 This walk-through shows how to:
 
 1.  Fit a Behavior-style PLSC model
-    ([`plsc()`](https://bbuchsbaum.github.io/multivarious/reference/plsc.md)),  
-2.  Inspect latent variables (LVs) and scores,  
-3.  Run a permutation test to decide how many LVs are significant, and  
+    ([`plsc()`](https://bbuchsbaum.github.io/multivarious/reference/plsc.md)).
+2.  Inspect latent variables (LVs) and scores.
+3.  Run a permutation test to decide how many LVs are significant.
 4.  Use bootstrap ratios to identify stable loadings, with simple
     visualizations.
 
-The workflow is intentionally small and fast so the vignette runs
-quickly; for real analyses, increase the number of
-permutations/bootstraps.
+The workflow is intentionally small so the vignette runs quickly; for
+applied analyses, increase the number of permutations and bootstraps.
 
 ## 2. Simulate coupled X/Y blocks
 

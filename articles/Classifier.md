@@ -15,7 +15,7 @@ variables – yields
 
 The
 [`classifier()`](https://bbuchsbaum.github.io/multivarious/reference/classifier.md)
-S3 family supplied by `multiblock` provides that glue: you hand it any
+S3 family supplied by `multivarious` provides that glue: you hand it any
 projector (or `multiblock_biprojector`, `discriminant_projector`, …)
 plus class labels → it returns a ready predictor object.
 
@@ -27,27 +27,27 @@ data(iris)
 X   <- as.matrix(iris[, 1:4])
 grp <- iris$Species
 
-# Fit classical Linear DA and wrap it
-if (!requireNamespace("MASS", quietly = TRUE)) {
-  stop("MASS package required for LDA example")
-}
+# Hold out a test set up front and fit everything that follows on the
+# training rows only, so the held-out accuracy reported later is honest.
+set.seed(42)
+train_id <- sample(seq_len(nrow(X)), size = 0.7 * nrow(X))
+test_id  <- setdiff(seq_len(nrow(X)), train_id)
 
+X_train   <- X[train_id, ]
+grp_train <- grp[train_id]
 
-# 1. Define and fit the pre-processing step using the training data
-preproc_fitted <- fit(center(), X)
-# 2. Transform the data
-Xp <- transform(preproc_fitted, X)
+# Fit the centering pre-processor and the LDA on the training data
+preproc_fitted <- fit(center(), X_train)
+Xp_train       <- transform(preproc_fitted, X_train)
+lda_fit        <- MASS::lda(X_train, grouping = grp_train)
 
-# Assuming discriminant_projector, prep, center, scores are available
-lda_fit <- MASS::lda(X, grouping = grp)
-
-
+# Wrap the LDA result as a discriminant_projector (a bi_projector)
 disc_proj <- multivarious::discriminant_projector(
-  v      = lda_fit$scaling,                 # loadings (p × d)
-  s      = Xp %*% lda_fit$scaling,           # scores   (n × d)
-  sdev   = lda_fit$svd,                     # singular values
-  labels = grp,
-  preproc = preproc_fitted            # Pass the fitted pre-processor
+  v       = lda_fit$scaling,              # loadings (p × d)
+  s       = Xp_train %*% lda_fit$scaling, # training scores (n_train × d)
+  sdev    = lda_fit$svd,                  # singular values
+  labels  = grp_train,
+  preproc = preproc_fitted                # fitted pre-processor (training means)
 )
 print(disc_proj)
 #> Projector object:
@@ -58,7 +58,7 @@ print(disc_proj)
 #>  Step 1: center
 #> Label counts: 
 #>     setosa versicolor  virginica 
-#>         50         50         50
+#>         38         35         32
 ```
 
 ### 2.1 Visualise the latent space
@@ -67,36 +67,31 @@ print(disc_proj)
 
 scores_df <- as_tibble(scores(disc_proj)[, 1:2],
                        .name_repair = ~ c("LD1","LD2"))
-scores_df <- mutate(scores_df, Species = iris$Species)
+scores_df <- mutate(scores_df, Species = grp_train)
 
 ggplot(scores_df, aes(LD1, LD2, colour = Species)) +
   geom_point(size = 2, alpha = .7) +
   stat_ellipse(level = .9, linewidth = .3) +
   theme_minimal() +
-  ggtitle("Iris – first two LDA components")
+  ggtitle("Iris training set – first two LDA components")
 ```
 
 ![](Classifier_files/figure-html/plot_latent_space-1.png)
 
 ### 2.2 Build a k-NN classifier on the latent scores
 
+[`classifier()`](https://bbuchsbaum.github.io/multivarious/reference/classifier.md)
+on a `discriminant_projector` uses the projector’s own scores and labels
+as the reference set. Because we fitted `disc_proj` on the training
+rows, those *are* the training scores — no extra arguments are needed.
+
 ``` r
 
-set.seed(42)
-train_id <- sample(seq_len(nrow(X)), size = 0.7*nrow(X))
-test_id  <- setdiff(seq_len(nrow(X)), train_id)
-
-# Assuming classifier function is available
-clf_knn <- multivarious::classifier(
-  x       = disc_proj,
-  labels  = grp[train_id],
-  new_data= X[train_id, ],  # Use training data to get reference scores
-  knn     = 3
-)
+clf_knn <- multivarious::classifier(disc_proj, knn = 3)
 print(clf_knn)
 #> k-NN Classifier object:
 #>   k-NN Neighbors (k): 3 
-#>   Number of Training Samples: 150 
+#>   Number of Training Samples: 105 
 #>   Number of Classes: 3 
 #>   Underlying Projector Details: 
 #>      Projector object:
@@ -107,7 +102,7 @@ print(clf_knn)
 #>       Step 1: center
 #>      Label counts: 
 #>          setosa versicolor  virginica 
-#>              50         50         50
+#>              38         35         32
 ```
 
 ### 2.3 Predict and evaluate
@@ -115,7 +110,7 @@ print(clf_knn)
 ``` r
 
 pred_knn <- predict(clf_knn, new_data = X[test_id, ],
-                    metric = "cosine", prob_type = "knn_proportion")
+                    metric = "euclidean", prob_type = "knn_proportion")
 
 head(pred_knn$prob, 3)
 #>      setosa versicolor virginica
@@ -123,9 +118,8 @@ head(pred_knn$prob, 3)
 #> [2,]      1          0         0
 #> [3,]      1          0         0
 print(paste("Overall Accuracy:", mean(pred_knn$class == grp[test_id])))
-#> [1] "Overall Accuracy: 0.888888888888889"
+#> [1] "Overall Accuracy: 0.955555555555556"
 
-# Assuming rank_score and topk are available
 rk  <- rank_score(pred_knn$prob, grp[test_id])
 tk2 <- topk      (pred_knn$prob, grp[test_id], k = 2)
 
@@ -136,7 +130,7 @@ tibble(
 #> # A tibble: 1 × 2
 #>   prank_mean top2_acc
 #>        <dbl>    <dbl>
-#> 1      0.278        1
+#> 1      0.261        1
 ```
 
 ### 2.4 Confusion-matrix on the test set
@@ -173,8 +167,8 @@ knitr::kable(cm, caption = "Confusion matrix (counts)")
 |            | setosa | versicolor | virginica |
 |:-----------|-------:|-----------:|----------:|
 | setosa     |     12 |          0 |         0 |
-| versicolor |      0 |         10 |         5 |
-| virginica  |      0 |          0 |        18 |
+| versicolor |      0 |         14 |         1 |
+| virginica  |      0 |          1 |        17 |
 
 Confusion matrix (counts) {.table}
 
@@ -182,32 +176,26 @@ Confusion matrix (counts) {.table}
 
 ``` r
 
-# Check if randomForest is installed
-if (requireNamespace("randomForest", quietly = TRUE)) {
+# rf_classifier() dispatches to the projector method, which takes the
+# reference labels and scores explicitly (here, the training scores).
+rf_clf <- rf_classifier(
+  x      = disc_proj,
+  labels = grp_train,
+  scores = scores(disc_proj)
+)
 
-  # Assuming rf_classifier.projector method is available
-  rf_clf <- rf_classifier( # Using the generic here
-    x       = disc_proj,
-    labels  = grp[train_id],
-    # Pass scores directly if method requires it, or let it call scores(x)
-    scores  = scores(disc_proj)[train_id, ]
-  )
-
-  pred_rf <- predict(rf_clf, new_data = X[test_id, ])
-  print(paste("RF Accuracy:", mean(pred_rf$class == grp[test_id])))
-} else {
-  cat("randomForest package not installed. Skipping RF example.\n")
-}
+pred_rf <- predict(rf_clf, new_data = X[test_id, ])
+print(paste("RF Accuracy:", mean(pred_rf$class == grp[test_id])))
 #> [1] "RF Accuracy: 0.977777777777778"
 ```
 
-The RF sees exactly three input variables (the LDA components) – that
-keeps trees shallow and speeds-up training.
+The RF sees only two input variables (the LDA components) – that keeps
+trees shallow and speeds-up training.
 
 ## 4. Partial-feature prediction: sepal block only
 
 Assume that in deployment we measure only Sepal variables (cols 1–2). A
-partial projection keeps the classifier happy:
+partial projection keeps the classifier interface unchanged:
 
 ``` r
 
@@ -233,7 +221,8 @@ print(paste("Accuracy (Sepal only):", mean(pred_sepal$class == grp[test_id])))
 #> [1] "Accuracy (Sepal only): 0.333333333333333"
 ```
 
-Accuracy drops a bit – as expected when using fewer features.
+Accuracy is lower in this deliberately restricted feature setting, as
+expected when the strongest Petal measurements are unavailable.
 
 ## 5. Which component block matters most?
 
@@ -247,7 +236,6 @@ blocks <- list(
   Petal = 3:4
 )
 
-# Assuming feature_importance is available
 fi <- feature_importance(
   clf_knn,
   new_data  = X[test_id, ],
@@ -258,7 +246,7 @@ fi <- feature_importance(
   approach  = "marginal" # Calculate marginal drop when block is removed
 )
 print(fi)
-#>   block importance
-#> 2   3,4 0.25555556
-#> 1   1,2 0.06111111
+#>   block  importance
+#> 2   3,4 0.188888889
+#> 1   1,2 0.005555556
 ```

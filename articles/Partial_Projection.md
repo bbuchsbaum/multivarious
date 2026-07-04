@@ -2,17 +2,17 @@
 
 ## 1. Why partial projection?
 
-Assume you trained a dimensionality-reduction model (PCA, PLS …) on p
-variables but, at prediction time,
+Assume you trained a dimensionality-reduction model (PCA, PLS, or
+another projector) on p variables but, at prediction time,
 
 - one sensor is broken,
 - a block of variables is too expensive to measure,
 - you need a quick first pass while the “heavy” data arrive later.
 
-You still want the latent scores in the same component space, so
-downstream models, dashboards, alarms, … keep running.
+You still want latent scores in the same component space so downstream
+summaries, classifiers, or monitoring rules can use the same columns.
 
-That’s exactly what
+This is the role of
 
     partial_project(model, new_data_subset, colind = which.columns)
 
@@ -25,7 +25,7 @@ product; otherwise a ridge-regularised least-squares solve is used.
 
 ------------------------------------------------------------------------
 
-## 2. Walk-through with a toy PCA
+## 2. Walk-through with a small PCA
 
 ``` r
 
@@ -92,8 +92,15 @@ ggplot(plot_df, aes(full, part)) +
 
 ![](Partial_Projection_files/figure-html/project_partial-1.png)
 
-Even with two variables missing, the ridge LS step recovers latent
-scores that lie almost on the 1:1 line.
+``` r
+
+
+cor(plot_df$full, plot_df$part)
+#> [1] 0.8573874
+```
+
+The correlation reports how closely the partial scores agree with the
+full-data scores for this component.
 
 ------------------------------------------------------------------------
 
@@ -104,7 +111,6 @@ specialised projector once and reuse it:
 
 ``` r
 
-# Assuming partial_projector is available
 pca_1to6 <- partial_projector(pca, 1:6)   # keeps a reference + cache
 
 # project 1000 new observations that only have the first 6 vars
@@ -173,7 +179,7 @@ Partial projection is handy even when all measurements exist:
     without refitting the whole PCA/PLS.
 2.  **Nested / multi-subject studies.** For multi-block PCA
     (e.g. “participant × sensor”), you can ask “where would subject i
-    lie if I looked at block B only?” Simply supply that block to
+    lie if I looked at block B only?” Supply that block to
     [`project_block()`](https://bbuchsbaum.github.io/multivarious/reference/project_block.md).
 3.  **Feature probes or “what-if” analysis.** Engineers often ask “What
     is the latent position if I vary only temperature and hold
@@ -244,12 +250,13 @@ different story.
 | Scenario | What you pass | Typical call |
 |----|----|----|
 | Sensor outage / missing features | matrix with observed cols only | `partial_project(mod, X_obs, colind = idx)` |
-| Region of interest (ROI) | ROI columns of the data | `partial_project(mod, X[, ROI], ROI)` |
+| Region of interest (ROI) | ROI columns of the data | `partial_project(mod, X[, ROI], colind = ROI)` |
 | Block-specific latent scores | full block matrix | `project_block(mb, blkData, block = b)` |
 | “What-if”: vary a single variable set | varied cols + zeros elsewhere | [`partial_project()`](https://bbuchsbaum.github.io/multivarious/reference/partial_project.md) with matching `colind` |
 
 The component space stays identical throughout, so downstream analytics,
-classifiers, or control charts continue to work with no re-training.
+classifiers, or control charts can continue to use the same score
+columns without retraining the projector.
 
 ------------------------------------------------------------------------
 
@@ -258,7 +265,7 @@ classifiers, or control charts continue to work with no re-training.
 ``` r
 
 sessionInfo()
-#> R version 4.6.0 (2026-04-24)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -279,19 +286,19 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3      dplyr_1.2.1        multivarious_0.3.2
+#> [1] ggplot2_4.0.3      dplyr_1.2.1        multivarious_0.4.0
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.0    
+#>  [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.1    
 #>  [5] tidyselect_1.2.1   geigen_2.3         jquerylib_0.1.4    systemfonts_1.3.2 
 #>  [9] scales_1.4.0       textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0     
 #> [13] lattice_0.22-9     R6_2.6.1           labeling_0.4.3     generics_0.1.4    
 #> [17] knitr_1.51         tibble_3.3.1       desc_1.4.3         chk_0.10.0        
 #> [21] bslib_0.11.0       pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0       
-#> [25] cachem_1.1.0       xfun_0.58          S7_0.2.2           fs_2.1.0          
-#> [29] sass_0.4.10        otel_0.2.0         cli_3.6.6          withr_3.0.2       
-#> [33] pkgdown_2.2.0      magrittr_2.0.5     digest_0.6.39      grid_4.6.0        
+#> [25] cachem_1.1.0       xfun_0.59          S7_0.2.2           fs_2.1.0          
+#> [29] sass_0.4.10        otel_0.2.0         cli_3.6.6          withr_3.0.3       
+#> [33] pkgdown_2.2.0      magrittr_2.0.5     digest_0.6.39      grid_4.6.1        
 #> [37] lifecycle_1.0.5    vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1        
-#> [41] farver_2.1.2       ragg_1.5.2         rmarkdown_2.31     tools_4.6.0       
+#> [41] farver_2.1.2       ragg_1.5.2         rmarkdown_2.31     tools_4.6.1       
 #> [45] pkgconfig_2.0.3    htmltools_0.5.9
 ```

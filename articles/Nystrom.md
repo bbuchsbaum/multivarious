@@ -21,8 +21,8 @@ of “landmark” points:
 3.  Compute the N × m matrix between all points and landmarks
 4.  Use these to approximate the full eigendecomposition
 
-This reduces complexity from O(N³) to O(Nm²) — a massive speedup when m
-is small.
+This reduces complexity from O(N³) to O(Nm²), a substantial reduction
+when `m` is much smaller than `N`.
 
 ## Quick Start
 
@@ -36,7 +36,6 @@ X <- matrix(rnorm(N * p), N, p)
 # Nyström approximation with linear kernel (default)
 # Uses only 100 landmarks instead of all 1000 points
 ny_fit <- nystrom_approx(
-
   X,
   ncomp = 10,
   nlandmarks = 100,
@@ -126,18 +125,17 @@ twice, reducing complexity further:
 
 # Standard method
 system.time(
-
   ny_standard <- nystrom_approx(X, ncomp = 5, nlandmarks = 200, method = "standard")
 )
 #>    user  system elapsed 
-#>   0.010   0.007   0.005
+#>   0.009   0.010   0.007
 
 # Double Nyström (faster with intermediate rank l)
 system.time(
   ny_double <- nystrom_approx(X, ncomp = 5, nlandmarks = 200, method = "double", l = 50)
 )
 #>    user  system elapsed 
-#>   0.021   0.024   0.012
+#>   0.021   0.024   0.013
 ```
 
 ## Choosing Parameters

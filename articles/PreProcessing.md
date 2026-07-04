@@ -1,4 +1,4 @@
-# Pre-processing pipelines in multiblock
+# Pre-processing pipelines in multivarious
 
 ## 1. Why a pipeline at all?
 
@@ -15,18 +15,17 @@ script but dangerous inside reusable functions:
 - **Composability**: You can nest simple steps together (e.g.,
   `colscale(center())`).
 - **Partial input**: The same pipeline can process just the columns you
-  pass (`transform(..., colind = 1:3)`), perfect for region-of-interest
-  or block workflows.
+  pass (`transform(..., colind = 1:3)`), which is useful for
+  region-of-interest or block workflows.
 
 The grammar is tiny:
 
 | Verb | Role | Typical Call |
 |----|----|----|
-| [`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md) | do nothing (placeholder) | `fit(pass(), X)` |
+| [`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md) | identity transform | `fit(pass(), X)` |
 | [`center()`](https://bbuchsbaum.github.io/multivarious/reference/center.md) | subtract column means | `fit(center(), X)` |
 | [`standardize()`](https://bbuchsbaum.github.io/multivarious/reference/standardize.md) | centre and scale to unit SD | `fit(standardize(), X)` |
 | [`colscale()`](https://bbuchsbaum.github.io/multivarious/reference/colscale.md) | user-supplied weights/scaling | `fit(colscale(type="z"), X)` |
-| `...` | (write your own) | any function returning a node |
 
 The
 [`fit()`](https://bbuchsbaum.github.io/multivarious/reference/fit.md)
@@ -109,7 +108,58 @@ all.equal(X_rev_cols24, X_cols24) # TRUE
 #> [1] TRUE
 ```
 
-## 3. Composing preprocessing steps
+## 3. Sparse matrix inputs
+
+Preprocessing also accepts sparse matrices from the `Matrix` package.
+Sparse-safe steps such as
+[`pass()`](https://bbuchsbaum.github.io/multivarious/reference/pass.md)
+and column scaling preserve sparse storage. Centering and
+standardisation are different: subtracting a non-zero column mean would
+make the implicit zero entries non-zero. Instead of silently densifying,
+`multivarious` uses a lazy affine matrix view by default.
+
+``` r
+
+X_sparse <- Matrix::Matrix(X, sparse = TRUE)
+
+pp_sparse <- fit(center(), X_sparse)
+Xs_sparse <- transform(pp_sparse, X_sparse)
+
+methods::is(Xs_sparse, "sparse_affine_matrix")
+#> [1] TRUE
+```
+
+The transformed object behaves like a matrix for the common algebra you
+need downstream. Matrix multiplication and cross-products use the sparse
+input plus the stored affine shift, without first forming a dense
+centered matrix.
+
+``` r
+
+v <- matrix(c(1, -1, 0, 0), ncol = 1)
+
+head(Xs_sparse %*% v, 4)
+#>            [,1]
+#> [1,] -0.2220445
+#> [2,] -0.2486294
+#> [3,]  1.7560510
+#> [4,]  0.8404856
+crossprod(Xs_sparse)[1:2, 1:2]
+#>           [,1]      [,2]
+#> [1,] 13.075522 -1.808457
+#> [2,] -1.808457  4.147800
+```
+
+You can make the densification policy explicit when fitting:
+
+``` r
+
+fit(center(), X_sparse, sparse = "operator")    # default: lazy affine view
+fit(center(), X_sparse, sparse = "preserve")    # error if a step would densify
+fit(center(), X_sparse, sparse = "allow_dense") # explicitly materialize dense output
+```
+
+## 4. Composing preprocessing steps
 
 Because preprocessing steps nest, you can build pipelines by composing
 them:
@@ -124,7 +174,7 @@ pp_pipe <- fit(standardize(), X)
 Xp_pipe <- transform(pp_pipe, X)
 ```
 
-### 3.1 Quick visual
+### 4.1 Quick visual
 
 ``` r
 
@@ -140,7 +190,7 @@ ggplot(df_pipe) +
 
 ![](PreProcessing_files/figure-html/plot_pipeline-1.png)
 
-## 4. Block-wise concatenation
+## 5. Block-wise concatenation
 
 Large multiblock models often want different preprocessing per block.
 [`concat_pre_processors()`](https://bbuchsbaum.github.io/multivarious/reference/concat_pre_processors.md)
@@ -216,7 +266,7 @@ all.equal(X_combined, back_combined) # TRUE
 #> [1] TRUE
 ```
 
-## 5. Inside the weeds (for authors & power users)
+## 6. Inside the weeds (for authors & power users)
 
 | Helper | Purpose |
 |----|----|
@@ -228,7 +278,7 @@ all.equal(X_combined, back_combined) # TRUE
 You rarely need to interact with these helpers directly; they exist so
 model-writers (e.g. new PCA flavours) can avoid boiler-plate.
 
-## 6. Key take-aways
+## 7. Key take-aways
 
 - **Write once**: Define a preprocessing recipe (e.g.,
   `colscale(center())`) and reuse it safely across CV folds using
@@ -241,10 +291,11 @@ model-writers (e.g. new PCA flavours) can avoid boiler-plate.
   [`fresh()`](https://bbuchsbaum.github.io/multivarious/reference/fresh.md),
   and back-transform whenever you need results in original units using
   [`inverse_transform()`](https://bbuchsbaum.github.io/multivarious/reference/inverse_transform.md).
+- **Sparse-aware**: Sparse inputs can stay sparse or lazy through
+  centering and standardisation, with explicit control over when dense
+  materialization is allowed.
 - **Block-aware**: The same mechanism powers multiblock PCA, CCA,
-  ComDim…
-
-Happy projecting!
+  ComDim, and related workflows.
 
 ------------------------------------------------------------------------
 
@@ -253,7 +304,7 @@ Happy projecting!
 ``` r
 
 sessionInfo()
-#> R version 4.6.0 (2026-04-24)
+#> R version 4.6.1 (2026-06-24)
 #> Platform: x86_64-pc-linux-gnu
 #> Running under: Ubuntu 24.04.4 LTS
 #> 
@@ -274,19 +325,19 @@ sessionInfo()
 #> [1] stats     graphics  grDevices utils     datasets  methods   base     
 #> 
 #> other attached packages:
-#> [1] ggplot2_4.0.3      tibble_3.3.1       dplyr_1.2.1        multivarious_0.3.2
+#> [1] ggplot2_4.0.3      tibble_3.3.1       multivarious_0.4.0
 #> 
 #> loaded via a namespace (and not attached):
-#>  [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.0    
-#>  [5] tidyselect_1.2.1   geigen_2.3         jquerylib_0.1.4    systemfonts_1.3.2 
-#>  [9] scales_1.4.0       textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0     
-#> [13] lattice_0.22-9     R6_2.6.1           labeling_0.4.3     generics_0.1.4    
-#> [17] knitr_1.51         desc_1.4.3         chk_0.10.0         bslib_0.11.0      
-#> [21] pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0        cachem_1.1.0      
-#> [25] xfun_0.58          S7_0.2.2           fs_2.1.0           sass_0.4.10       
-#> [29] otel_0.2.0         cli_3.6.6          withr_3.0.2        pkgdown_2.2.0     
-#> [33] magrittr_2.0.5     digest_0.6.39      grid_4.6.0         lifecycle_1.0.5   
-#> [37] vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1         farver_2.1.2      
-#> [41] ragg_1.5.2         rmarkdown_2.31     matrixStats_1.5.0  tools_4.6.0       
-#> [45] pkgconfig_2.0.3    htmltools_0.5.9
+#>  [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     dplyr_1.2.1       
+#>  [5] compiler_4.6.1     tidyselect_1.2.1   geigen_2.3         jquerylib_0.1.4   
+#>  [9] systemfonts_1.3.2  scales_1.4.0       textshaping_1.0.5  yaml_2.3.12       
+#> [13] fastmap_1.2.0      lattice_0.22-9     R6_2.6.1           labeling_0.4.3    
+#> [17] generics_0.1.4     knitr_1.51         desc_1.4.3         chk_0.10.0        
+#> [21] bslib_0.11.0       pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0       
+#> [25] cachem_1.1.0       xfun_0.59          fs_2.1.0           sass_0.4.10       
+#> [29] S7_0.2.2           otel_0.2.0         cli_3.6.6          withr_3.0.3       
+#> [33] pkgdown_2.2.0      magrittr_2.0.5     digest_0.6.39      grid_4.6.1        
+#> [37] lifecycle_1.0.5    vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1        
+#> [41] farver_2.1.2       ragg_1.5.2         rmarkdown_2.31     matrixStats_1.5.0 
+#> [45] tools_4.6.1        pkgconfig_2.0.3    htmltools_0.5.9
 ```

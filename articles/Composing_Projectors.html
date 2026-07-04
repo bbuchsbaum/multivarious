@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,185 +60,150 @@
 
     
     
-<p>The composed partial projector
-(<code>compose_partial_projector</code>) lets you snap together any
-number of ordinary projector objects (PCA, PLS, cPCA++, block
-projectors, …) and treat the whole chain as if it were a single map from
-the original input space to the final output space:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msup><mi>ℝ</mi><msub><mi>p</mi><mtext mathvariant="normal">orig</mtext></msub></msup><mo>→</mo><msup><mi>ℝ</mi><msub><mi>q</mi><mtext mathvariant="normal">final</mtext></msub></msup></mrow><annotation encoding="application/x-tex"> \mathbb R^{p_{\text{orig}}} \longrightarrow \mathbb R^{q_{\text{final}}} </annotation></semantics></math></p>
-<p><strong>Typical Motives:</strong></p>
-<table class="table">
-<colgroup>
-<col width="49%">
-<col width="50%">
-</colgroup>
-<thead><tr class="header">
-<th>Why compose?</th>
-<th>What you get</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td>Pre-whitening, centring or wavelet-decomposition before the “real”
-model</td>
-<td>Keep the preparation and the model in one tidy object.</td>
-</tr>
-<tr class="even">
-<td>Block-wise modelling (e.g. one PCA per sensor block)</td>
-<td>Treat the concatenation of block-specific results as a single
-projector.</td>
-</tr>
-<tr class="odd">
-<td>Dimensionality milk-run – reduce &gt; filter &gt; reduce again</td>
-<td>A single set of scores from the final stage to feed to a
-classifier.</td>
-</tr>
-</tbody>
-</table>
-<hr>
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><p><code><a href="../reference/compose_partial_projector.html">compose_partial_projector()</a></code> chains fitted projector
+objects whose dimensions line up. The output scores from one stage
+become the input data for the next stage, and the composed object can
+then be used with the same core verbs as a single projector:
+<code><a href="../reference/project.html">project()</a></code>, <code><a href="../reference/partial_project.html">partial_project()</a></code>,
+<code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, <code><a href="../reference/inverse_projection.html">inverse_projection()</a></code>, and
+<code><a href="../reference/reconstruct.html">reconstruct()</a></code>.</p>
+<p>Composition is for fitted projectors, not for standalone
+preprocessing steps. Use a model’s <code>preproc</code> argument for
+centering, scaling, or other preprocessing that should happen inside a
+stage. Use composition when one fitted projection is itself the training
+data for a later fitted projection.</p>
 <div class="section level2">
-<h2 id="quick-start-two-pcas-in-series">1. Quick start – two PCAs in series<a class="anchor" aria-label="anchor" href="#quick-start-two-pcas-in-series"></a>
+<h2 id="fit-compatible-stages">1. Fit compatible stages<a class="anchor" aria-label="anchor" href="#fit-compatible-stages"></a>
 </h2>
-<p>Let’s compose two PCA steps:</p>
+<p>This example fits a PCA on the original variables, then fits a second
+PCA on the scores from the first PCA. The first stage maps 15 variables
+to 8 scores. The second stage maps those 8 scores to 7 final scores.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">X</span>  <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span><span class="op">*</span><span class="fl">15</span><span class="op">)</span>, <span class="fl">30</span>, <span class="fl">15</span><span class="op">)</span>   <span class="co"># raw data, 30 samples, 15 variables</span></span>
-<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">8</span><span class="op">)</span>              <span class="co"># first reduction: 15 -&gt; 8 components</span></span>
-<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="fu"><a href="../reference/scores.html">scores</a></span><span class="op">(</span><span class="va">p1</span><span class="op">)</span>, ncomp <span class="op">=</span> <span class="fl">7</span><span class="op">)</span>     <span class="co"># second reduction: 8 -&gt; 4 components</span></span>
+<span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">30</span> <span class="op">*</span> <span class="fl">15</span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">30</span>, ncol <span class="op">=</span> <span class="fl">15</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Compose the two projectors</span></span>
+<span><span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">8</span><span class="op">)</span></span>
+<span><span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/pca.html">pca</a></span><span class="op">(</span><span class="fu"><a href="../reference/scores.html">scores</a></span><span class="op">(</span><span class="va">p1</span><span class="op">)</span>, ncomp <span class="op">=</span> <span class="fl">7</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">pipe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/compose_partial_projector.html">compose_partial_projector</a></span><span class="op">(</span></span>
-<span>           first  <span class="op">=</span> <span class="va">p1</span>,</span>
-<span>           second <span class="op">=</span> <span class="va">p2</span><span class="op">)</span></span>
+<span>  first <span class="op">=</span> <span class="va">p1</span>,</span>
+<span>  second <span class="op">=</span> <span class="va">p2</span></span>
+<span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">pipe</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Composed projector object:</span></span>
-<span><span class="co">#&gt;   Number of projectors:  2 </span></span>
-<span><span class="co">#&gt;  Pipeline:</span></span>
-<span><span class="co">#&gt;    1. first  :   15 -&gt;    8</span></span>
-<span><span class="co">#&gt;    2. second :    8 -&gt;    7</span></span>
-<span></span>
-<span><span class="co"># Project original data through the entire pipeline</span></span>
-<span><span class="va">S</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">pipe</span>, <span class="va">X</span><span class="op">)</span>          <span class="co"># 30 × 4 scores – as if the two steps were one</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">S</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 30  7</span></span>
-<span></span>
-<span><span class="co"># Get a summary of the pipeline stages</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pipe</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
 <span><span class="co">#&gt;   stage name   in_dim out_dim class</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 first      15       8 pca  </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 second      8       7 pca</span></span></code></pre></div>
-<p>The <code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> output provides a clear overview of the
-stages, their names, input/output dimensions, and underlying class.</p>
-<hr>
+<p>The summary is the first check to make: adjacent stages must have
+matching output and input dimensions.</p>
 </div>
 <div class="section level2">
-<h2 id="partial-projections-zoom-in-on-selected-variables">2. Partial projections – “zoom in” on selected variables<a class="anchor" aria-label="anchor" href="#partial-projections-zoom-in-on-selected-variables"></a>
+<h2 id="project-through-the-whole-chain">2. Project through the whole chain<a class="anchor" aria-label="anchor" href="#project-through-the-whole-chain"></a>
 </h2>
-<p><code><a href="../reference/partial_project.html">partial_project()</a></code> works on composed projectors, allowing
-you to apply projections using only a subset of variables at specific
-stages.</p>
-<p>You supply the <code>colind</code> argument as either:</p>
-<ul>
-<li>A <strong>vector</strong>: Applies only to the <em>first</em> stage.
-Subsequent stages receive the full output from the preceding stage.</li>
-<li>A <strong>list</strong>: One entry per stage. Use <code>NULL</code>
-for a stage that should receive the full input from the previous
-stage.</li>
-</ul>
+<p>Projecting with the composed object is equivalent to applying each
+stage in sequence.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Example 1: Use only variables 1:5 for the *first* PCA stage.</span></span>
-<span><span class="co"># The second PCA stage receives the full 8 components from the (partial) first stage.</span></span>
-<span><span class="va">S15</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial_project.html">partial_project</a></span><span class="op">(</span><span class="va">pipe</span>, <span class="va">X</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>, drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span>, colind <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions after partial projection (cols 1:5 in first stage):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">S15</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Dimensions after partial projection (cols 1:5 in first stage): 30 7</span></span>
-<span></span>
-<span><span class="co"># Example 2: Multi-stage pipeline (conceptual)</span></span>
-<span><span class="co"># Imagine a 3-stage pipeline: wavelets -&gt; PCA (block1) -&gt; PCA (global)</span></span>
-<span><span class="co"># pipe2 &lt;- wavelet_projector(...) %&gt;&gt;% </span></span>
-<span><span class="co">#          pca(..., ncomp = 10)   %&gt;&gt;% </span></span>
-<span><span class="co">#          pca(..., ncomp = 3)</span></span>
-<span></span>
-<span><span class="co"># To focus on coefficients 12:20 *after* the wavelet step (i.e., input to stage 2):</span></span>
-<span><span class="co"># S_sel &lt;- partial_project(pipe2, X, # Assuming X is appropriate input for wavelets</span></span>
-<span><span class="co">#                          colind = list(NULL, 12:20, NULL))</span></span>
-<span><span class="co"># Note: The indices in the list always refer to the dimensions *entering* that specific stage.</span></span></code></pre></div>
-<p>Behind the scenes, the composed projector manages the mapping of
-indices through the pipeline.</p>
-<hr>
-</div>
-<div class="section level2">
-<h2 id="reconstruction-inverse-projection">3. Reconstruction &amp; inverse projection<a class="anchor" aria-label="anchor" href="#reconstruction-inverse-projection"></a>
-</h2>
-<p>Since each stage typically provides a way to reverse its projection
-(often via <code><a href="../reference/inverse_projection.html">inverse_projection()</a></code>), the composed projector
-can also reconstruct the original data from the final scores.</p>
+<code class="sourceCode R"><span><span class="va">scores_pipe</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">pipe</span>, <span class="va">X</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">scores_pipe</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 30  7</span></span></code></pre></div>
+<p>The infix operator <code>%&gt;&gt;%</code> is a shorter spelling for
+the same composition.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Reconstruct original data from the final scores 'S'</span></span>
-<span><span class="va">X_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">pipe</span>, <span class="va">S</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions of reconstructed data:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">X_hat</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Dimensions of reconstructed data: 30 15</span></span>
-<span></span>
-<span><span class="co"># Check reconstruction accuracy</span></span>
-<span><span class="co"># Note: Since the pipeline involves dimensionality reduction (15 -&gt; 8 -&gt; 4),</span></span>
-<span><span class="co"># reconstruction will not be exact. The error reflects the information lost.</span></span>
-<span><span class="va">max_reconstruction_error</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">X</span> <span class="op">-</span> <span class="va">X_hat</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Maximum absolute reconstruction error:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/format.html" class="external-link">format</a></span><span class="op">(</span><span class="va">max_reconstruction_error</span>, digits<span class="op">=</span><span class="fl">3</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Maximum absolute reconstruction error: 1.47</span></span>
-<span><span class="co"># stopifnot(max_reconstruction_error &lt; 1e-5) # Removed: This check is too strict for lossy reconstruction</span></span>
-<span></span>
-<span><span class="co"># Get the overall coefficient matrix (p_orig x q_final)</span></span>
-<span><span class="va">V</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">pipe</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions of overall coefficient matrix:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">V</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Dimensions of overall coefficient matrix: 15 7</span></span>
-<span></span>
-<span><span class="co"># Get the overall pseudo-inverse matrix (q_final x p_orig)</span></span>
-<span><span class="va">Vplus</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/inverse_projection.html">inverse_projection</a></span><span class="op">(</span><span class="va">pipe</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions of overall inverse projection matrix:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">Vplus</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Dimensions of overall inverse projection matrix: 7 15</span></span></code></pre></div>
-<p>Both the forward (<code>coef</code>) and inverse
-(<code>inverse_projection</code>) matrices for the <em>entire</em>
-pipeline are calculated and potentially cached for efficiency.</p>
-<hr>
+<code class="sourceCode R"><span><span class="va">pipe_with_operator</span> <span class="op">&lt;-</span> <span class="va">p1</span> <span class="op"><a href="../reference/compose_partial_projector.html">%&gt;&gt;%</a></span> <span class="va">p2</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">pipe_with_operator</span>, <span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 30  7</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="house-keeping-helpers">4. House-keeping helpers<a class="anchor" aria-label="anchor" href="#house-keeping-helpers"></a>
+<h2 id="use-a-subset-of-original-variables">3. Use a subset of original variables<a class="anchor" aria-label="anchor" href="#use-a-subset-of-original-variables"></a>
 </h2>
-<p>Some useful helper functions:</p>
-<ul>
-<li>
-<p><strong><code>%&gt;&gt;%</code></strong>: A pipe operator
-specifically for composing projectors. It preserves stage names if the
-projectors are named.</p>
+<p><code><a href="../reference/partial_project.html">partial_project()</a></code> on a composed projector supports
+partial projection at the first stage. The <code>colind</code> vector
+names the original columns supplied to that first stage; all later
+stages receive the full output from the preceding stage.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># pipe3 &lt;- pca1 %&gt;&gt;% pca2 %&gt;&gt;% pca3</span></span></code></pre></div>
-</li>
-<li><p><strong><code>truncate(pipe, ncomp = k)</code></strong>: Safely
-reduces the number of components kept from the <em>last</em> stage of
-the pipeline.</p></li>
-<li><p><strong><code>variables_used(pipe)</code> /
-<code>vars_for_component(pipe, k)</code></strong>: (Potential future
-helpers) Intended to trace which original variables contribute to the
-final scores, especially useful if any stages perform variable
-selection.</p></li>
-</ul>
-<hr>
+<code class="sourceCode R"><span><span class="va">cols</span> <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span></span>
+<span><span class="va">scores_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial_project.html">partial_project</a></span><span class="op">(</span></span>
+<span>  <span class="va">pipe</span>,</span>
+<span>  <span class="va">X</span><span class="op">[</span>, <span class="va">cols</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>,</span>
+<span>  colind <span class="op">=</span> <span class="va">cols</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">scores_subset</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 30  7</span></span></code></pre></div>
+<p>Later-stage column subsetting is not currently implemented for
+composed projectors. Supplying a list with non-<code>NULL</code> entries
+after the first stage emits a warning and those later entries are
+ignored.</p>
 </div>
 <div class="section level2">
-<h2 id="where-next">6. Where next?<a class="anchor" aria-label="anchor" href="#where-next"></a>
+<h2 id="inspect-the-combined-linear-map">4. Inspect the combined linear map<a class="anchor" aria-label="anchor" href="#inspect-the-combined-linear-map"></a>
 </h2>
-<p>Composed projectors open up possibilities:</p>
-<ul>
-<li>Combine pre-processing (e.g., centering, scaling), dimensionality
-reduction (PCA, PLS), and perhaps an orthogonal rotation (Varimax,
-Procrustes) into a single, deployable modeling artifact.</li>
-<li>Future enhancements might allow tracing the lineage of specific
-final components back to the exact original variables that contribute
-most significantly, leveraging the internal index mapping.</li>
-</ul>
-<p>Happy composing!</p>
+<p>For linear projectors such as PCA, <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> returns the
+effective coefficient matrix for the whole chain: original variables by
+final components.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">V</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">pipe</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">V</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 15  7</span></span></code></pre></div>
+<p><code><a href="../reference/variables_used.html">variables_used()</a></code> and <code><a href="../reference/vars_for_component.html">vars_for_component()</a></code>
+inspect this combined coefficient matrix. With dense PCA stages, every
+original variable usually contributes to the final scores.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  variables_used <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="../reference/variables_used.html">variables_used</a></span><span class="op">(</span><span class="va">pipe</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  variables_for_first_component <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="fu"><a href="../reference/vars_for_component.html">vars_for_component</a></span><span class="op">(</span><span class="va">pipe</span>, <span class="fl">1</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;                variables_used variables_for_first_component </span></span>
+<span><span class="co">#&gt;                            15                            15</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="reconstruct-from-final-scores">5. Reconstruct from final scores<a class="anchor" aria-label="anchor" href="#reconstruct-from-final-scores"></a>
+</h2>
+<p><code><a href="../reference/reconstruct.html">reconstruct()</a></code> maps final scores back toward the original
+variable space using the inverse projection for each stage. Because both
+PCA stages reduce dimension, the reconstruction is a lossy
+approximation, not an exact inverse.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">X_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">pipe</span>, <span class="va">scores_pipe</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span>
+<span>  rows <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">X_hat</span><span class="op">)</span>,</span>
+<span>  columns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">X_hat</span><span class="op">)</span>,</span>
+<span>  rmse <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/mean.html" class="external-link">mean</a></span><span class="op">(</span><span class="op">(</span><span class="va">X</span> <span class="op">-</span> <span class="va">X_hat</span><span class="op">)</span><span class="op">^</span><span class="fl">2</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt;       rows    columns       rmse </span></span>
+<span><span class="co">#&gt; 30.0000000 15.0000000  0.4487182</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="truncate-the-final-stage">6. Truncate the final stage<a class="anchor" aria-label="anchor" href="#truncate-the-final-stage"></a>
+</h2>
+<p><code><a href="../reference/truncate.html">truncate()</a></code> reduces the number of components retained
+from the last stage of a composed projector. It does not refit or
+truncate intermediate stages.</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pipe4</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/truncate.html">truncate</a></span><span class="op">(</span><span class="va">pipe</span>, ncomp <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">pipe4</span><span class="op">)</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 5</span></span></span>
+<span><span class="co">#&gt;   stage name   in_dim out_dim class</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 first      15       8 pca  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 second      8       4 pca</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="../reference/project.html">project</a></span><span class="op">(</span><span class="va">pipe4</span>, <span class="va">X</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 30  4</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="practical-boundaries">7. Practical boundaries<a class="anchor" aria-label="anchor" href="#practical-boundaries"></a>
+</h2>
+<p>Composition is useful when the stages form a valid sequence of fitted
+projectors. The output dimension of each stage must match the input
+dimension of the next stage. For preprocessing, use each model’s
+preprocessing argument. For partial projection, treat
+<code>colind</code> as a first-stage feature subset; it does not target
+later stages.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

@@ -45,7 +45,7 @@ information.
 
 Crucially, many functions within `multivarious` (e.g.,
 [`pca()`](https://bbuchsbaum.github.io/multivarious/reference/pca.md),
-`pls()`,
+[`plsc()`](https://bbuchsbaum.github.io/multivarious/reference/plsc.md),
 [`cPCAplus()`](https://bbuchsbaum.github.io/multivarious/reference/cPCAplus.md),
 [`nystrom_approx()`](https://bbuchsbaum.github.io/multivarious/reference/nystrom_approx.md),
 [`regress()`](https://bbuchsbaum.github.io/multivarious/reference/regress.md))
@@ -74,7 +74,7 @@ common tasks using a consistent set of verbs:
 
 - `scores(model)`: Get the scores (latent space representation) of the
   *training* data.
-- `coef(model)` or `loadings(model)`: Get the loadings or coefficients
+- `components(model)` or `coef(model)`: Get the loadings/coefficients
   mapping variables to components.
 - `project(model, newdata)`: Project *new* samples (rows of `newdata`)
   into the latent space defined by the `model`.
@@ -93,21 +93,16 @@ it easier to swap between different dimensionality reduction methods.
 Let’s demonstrate a typical workflow using PCA on the classic `iris`
 dataset.
 
+**Fit the model.** We center the columns and keep three components. The
+pre-processor is stored inside `fit` and reused automatically whenever
+we feed it new data.
+
 ``` r
 
-# Load iris dataset and select numeric columns
-data(iris)
-X <- as.matrix(iris[, 1:4])
+X <- as.matrix(iris[, 1:4])           # 150 samples x 4 numeric variables
 
-# 1. Define a pre-processor (center the data)
-preproc <- center()
-
-# 2. Fit PCA using svd_wrapper, keeping 3 components
-#    The pre-processor is applied internally.
-fit <- pca(X, ncomp = 3, preproc = preproc)
-
-# The result 'fit' is a bi_projector
-print(fit)
+fit <- pca(X, ncomp = 3, preproc = center())
+fit
 #> PCA object  -- derived from SVD
 #> 
 #> Data: 150 observations x 4 variables
@@ -115,43 +110,56 @@ print(fit)
 #> 
 #> Variance explained (per component):
 #>  1 2 3  92.95  5.33  1.72%  (cumulative:  92.95 98.28   100%)
+```
 
-# 3. Access results
-iris_scores <- scores(fit) # Scores of the centered training data (150 x 3)
-iris_loadings <- loadings(fit) # Loadings (4 x 3)
-cat("\nDimensions of Scores:", dim(iris_scores), "\n")
-#> 
-#> Dimensions of Scores: 150 3
-cat("Dimensions of Loadings:", dim(iris_loadings), "\n")
-#> Dimensions of Loadings:
+**Access the results.** `fit` is a `bi_projector`, so the standard verbs
+apply:
+[`scores()`](https://bbuchsbaum.github.io/multivarious/reference/scores.md)
+returns the latent coordinates of the training rows and
+[`components()`](https://bbuchsbaum.github.io/multivarious/reference/components.md)
+(equivalently [`coef()`](https://rdrr.io/r/stats/coef.html)) returns the
+variable loadings.
 
-# 4. Project new data
-# Create some new iris-like samples (5 samples, 4 variables)
+``` r
+
+dim(scores(fit))       # 150 x 3 : one score row per sample
+#> [1] 150   3
+dim(components(fit))   # 4 x 3   : one loading row per variable
+#> [1] 4 3
+```
+
+**Project new data.**
+[`project()`](https://bbuchsbaum.github.io/multivarious/reference/project.md)
+maps fresh samples into the same latent space. Centering with the
+*training* means happens automatically, so you pass raw data in.
+
+``` r
+
 set.seed(123)
-new_iris_data <- matrix(rnorm(5 * 4, mean = colMeans(X), sd = apply(X, 2, sd)), 
-                        nrow = 5, byrow = TRUE)
+new_samples <- matrix(
+  rnorm(5 * 4, mean = colMeans(X), sd = apply(X, 2, sd)),
+  nrow = 5, byrow = TRUE
+)
 
-# Project the new data into the PCA space defined by 'fit'
-# Pre-processing (centering using training data means) is applied automatically.
-projected_new_scores <- project(fit, new_iris_data)
-cat("\nDimensions of Projected New Data Scores:", dim(projected_new_scores), "\n")
-#> 
-#> Dimensions of Projected New Data Scores: 5 3
-print(head(projected_new_scores))
+project(fit, new_samples)
 #>            [,1]       [,2]        [,3]
 #> [1,] -2.2172144  0.8590909 -0.44924532
 #> [2,] -0.3270495 -0.5478369  0.07965279
 #> [3,] -1.7602954  0.9106117 -0.52932939
 #> [4,]  0.2367242 -0.3204326 -0.50433574
 #> [5,] -1.1529598  0.5426518  0.85478044
+```
 
-# 5. Reconstruct approximated original data from scores
-# Reconstruct the first few original samples
-reconstructed_X_approx <- reconstruct(fit, comp=1:3) # uses scores(fit) by default
-cat("\nReconstructed Approximation of Original Data (first 5 rows):\n")
-#> 
-#> Reconstructed Approximation of Original Data (first 5 rows):
-print(head(reconstructed_X_approx))
+**Reconstruct.** Going the other way,
+[`reconstruct()`](https://bbuchsbaum.github.io/multivarious/reference/reconstruct.md)
+rebuilds an approximation of the original data from the scores and
+undoes the centering, so the result is back on the original scale.
+
+``` r
+
+approx <- reconstruct(fit)   # all 3 components, training scores
+
+head(approx)                 # reconstruction
 #>          [,1]     [,2]     [,3]      [,4]
 #> [1,] 5.099286 3.500723 1.401086 0.1982949
 #> [2,] 4.868758 3.031661 1.447517 0.1253679
@@ -159,8 +167,7 @@ print(head(reconstructed_X_approx))
 #> [4,] 4.623843 3.075837 1.463736 0.2569583
 #> [5,] 5.019326 3.580414 1.370606 0.2461680
 #> [6,] 5.407635 3.892262 1.688387 0.4182392
-
-print(head(X)) # Original data for comparison
+head(X)                      # original, for comparison
 #>      Sepal.Length Sepal.Width Petal.Length Petal.Width
 #> [1,]          5.1         3.5          1.4         0.2
 #> [2,]          4.9         3.0          1.4         0.2
@@ -170,10 +177,10 @@ print(head(X)) # Original data for comparison
 #> [6,]          5.4         3.9          1.7         0.4
 ```
 
-This example shows how fitting (`pca`), accessing results (`scores`,
-`loadings`), and applying the model to new data (`project`) follow a
-consistent pattern, regardless of whether the underlying method was PCA,
-PLS, or another technique returning a `bi_projector`.
+Fitting (`pca`), accessing results (`scores`, `components`), projecting
+new data (`project`), and reconstructing (`reconstruct`) all follow the
+same pattern, regardless of whether the underlying method was PCA, PLS,
+or another technique returning a `bi_projector`.
 
 ## Example: Mixed effect operators
 
@@ -247,9 +254,8 @@ within the package:
 - **Pre-processing Pipelines:** Define reusable pre-processing steps
   (see
   [`vignette("PreProcessing")`](https://bbuchsbaum.github.io/multivarious/articles/PreProcessing.md)).
-- **Model Composition:** Chain multiple `bi_projector` steps together
-  (e.g., pre-processing → PCA → rotation) into a single composite
-  projector (see
+- **Model Composition:** Chain one fitted projector followed by another
+  compatible fitted projector into a single composite projector (see
   [`vignette("Composing_Projectors")`](https://bbuchsbaum.github.io/multivarious/articles/Composing_Projectors.md)).
 - **Cross-Validation:** Easily perform cross-validation to select
   hyperparameters (like the number of components) using helpers that

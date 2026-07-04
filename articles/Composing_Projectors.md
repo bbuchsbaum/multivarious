@@ -1,54 +1,43 @@
 # Composing Projectors: Chaining Models
 
-The composed partial projector (`compose_partial_projector`) lets you
-snap together any number of ordinary projector objects (PCA, PLS,
-cPCA++, block projectors, …) and treat the whole chain as if it were a
-single map from the original input space to the final output space:
+[`compose_partial_projector()`](https://bbuchsbaum.github.io/multivarious/reference/compose_partial_projector.md)
+chains fitted projector objects whose dimensions line up. The output
+scores from one stage become the input data for the next stage, and the
+composed object can then be used with the same core verbs as a single
+projector:
+[`project()`](https://bbuchsbaum.github.io/multivarious/reference/project.md),
+[`partial_project()`](https://bbuchsbaum.github.io/multivarious/reference/partial_project.md),
+[`coef()`](https://rdrr.io/r/stats/coef.html),
+[`inverse_projection()`](https://bbuchsbaum.github.io/multivarious/reference/inverse_projection.md),
+and
+[`reconstruct()`](https://bbuchsbaum.github.io/multivarious/reference/reconstruct.md).
 
-``` math
- \mathbb R^{p_{\text{orig}}} \longrightarrow \mathbb R^{q_{\text{final}}} 
-```
+Composition is for fitted projectors, not for standalone preprocessing
+steps. Use a model’s `preproc` argument for centering, scaling, or other
+preprocessing that should happen inside a stage. Use composition when
+one fitted projection is itself the training data for a later fitted
+projection.
 
-**Typical Motives:**
+## 1. Fit compatible stages
 
-| Why compose? | What you get |
-|----|----|
-| Pre-whitening, centring or wavelet-decomposition before the “real” model | Keep the preparation and the model in one tidy object. |
-| Block-wise modelling (e.g. one PCA per sensor block) | Treat the concatenation of block-specific results as a single projector. |
-| Dimensionality milk-run – reduce \> filter \> reduce again | A single set of scores from the final stage to feed to a classifier. |
-
-------------------------------------------------------------------------
-
-## 1. Quick start – two PCAs in series
-
-Let’s compose two PCA steps:
+This example fits a PCA on the original variables, then fits a second
+PCA on the scores from the first PCA. The first stage maps 15 variables
+to 8 scores. The second stage maps those 8 scores to 7 final scores.
 
 ``` r
 
 set.seed(1)
 
-X  <- matrix(rnorm(30*15), 30, 15)   # raw data, 30 samples, 15 variables
-p1 <- pca(X, ncomp = 8)              # first reduction: 15 -> 8 components
-p2 <- pca(scores(p1), ncomp = 7)     # second reduction: 8 -> 4 components
+X <- matrix(rnorm(30 * 15), nrow = 30, ncol = 15)
 
-# Compose the two projectors
+p1 <- pca(X, ncomp = 8)
+p2 <- pca(scores(p1), ncomp = 7)
+
 pipe <- compose_partial_projector(
-           first  = p1,
-           second = p2)
+  first = p1,
+  second = p2
+)
 
-print(pipe)
-#> Composed projector object:
-#>   Number of projectors:  2 
-#>  Pipeline:
-#>    1. first  :   15 ->    8
-#>    2. second :    8 ->    7
-
-# Project original data through the entire pipeline
-S <- project(pipe, X)          # 30 × 4 scores – as if the two steps were one
-dim(S)
-#> [1] 30  7
-
-# Get a summary of the pipeline stages
 summary(pipe)
 #> # A tibble: 2 × 5
 #>   stage name   in_dim out_dim class
@@ -57,121 +46,131 @@ summary(pipe)
 #> 2     2 second      8       7 pca
 ```
 
-The [`summary()`](https://rdrr.io/r/base/summary.html) output provides a
-clear overview of the stages, their names, input/output dimensions, and
-underlying class.
+The summary is the first check to make: adjacent stages must have
+matching output and input dimensions.
 
-------------------------------------------------------------------------
+## 2. Project through the whole chain
 
-## 2. Partial projections – “zoom in” on selected variables
+Projecting with the composed object is equivalent to applying each stage
+in sequence.
+
+``` r
+
+scores_pipe <- project(pipe, X)
+dim(scores_pipe)
+#> [1] 30  7
+```
+
+The infix operator `%>>%` is a shorter spelling for the same
+composition.
+
+``` r
+
+pipe_with_operator <- p1 %>>% p2
+dim(project(pipe_with_operator, X))
+#> [1] 30  7
+```
+
+## 3. Use a subset of original variables
 
 [`partial_project()`](https://bbuchsbaum.github.io/multivarious/reference/partial_project.md)
-works on composed projectors, allowing you to apply projections using
-only a subset of variables at specific stages.
-
-You supply the `colind` argument as either:
-
-- A **vector**: Applies only to the *first* stage. Subsequent stages
-  receive the full output from the preceding stage.
-- A **list**: One entry per stage. Use `NULL` for a stage that should
-  receive the full input from the previous stage.
+on a composed projector supports partial projection at the first stage.
+The `colind` vector names the original columns supplied to that first
+stage; all later stages receive the full output from the preceding
+stage.
 
 ``` r
 
-# Example 1: Use only variables 1:5 for the *first* PCA stage.
-# The second PCA stage receives the full 8 components from the (partial) first stage.
-S15 <- partial_project(pipe, X[, 1:5, drop=FALSE], colind = 1:5)
-cat("Dimensions after partial projection (cols 1:5 in first stage):", dim(S15), "\n")
-#> Dimensions after partial projection (cols 1:5 in first stage): 30 7
+cols <- 1:5
+scores_subset <- partial_project(
+  pipe,
+  X[, cols, drop = FALSE],
+  colind = cols
+)
 
-# Example 2: Multi-stage pipeline (conceptual)
-# Imagine a 3-stage pipeline: wavelets -> PCA (block1) -> PCA (global)
-# pipe2 <- wavelet_projector(...) %>>% 
-#          pca(..., ncomp = 10)   %>>% 
-#          pca(..., ncomp = 3)
-
-# To focus on coefficients 12:20 *after* the wavelet step (i.e., input to stage 2):
-# S_sel <- partial_project(pipe2, X, # Assuming X is appropriate input for wavelets
-#                          colind = list(NULL, 12:20, NULL))
-# Note: The indices in the list always refer to the dimensions *entering* that specific stage.
+dim(scores_subset)
+#> [1] 30  7
 ```
 
-Behind the scenes, the composed projector manages the mapping of indices
-through the pipeline.
+Later-stage column subsetting is not currently implemented for composed
+projectors. Supplying a list with non-`NULL` entries after the first
+stage emits a warning and those later entries are ignored.
 
-------------------------------------------------------------------------
+## 4. Inspect the combined linear map
 
-## 3. Reconstruction & inverse projection
-
-Since each stage typically provides a way to reverse its projection
-(often via
-[`inverse_projection()`](https://bbuchsbaum.github.io/multivarious/reference/inverse_projection.md)),
-the composed projector can also reconstruct the original data from the
-final scores.
+For linear projectors such as PCA,
+[`coef()`](https://rdrr.io/r/stats/coef.html) returns the effective
+coefficient matrix for the whole chain: original variables by final
+components.
 
 ``` r
 
-# Reconstruct original data from the final scores 'S'
-X_hat <- reconstruct(pipe, S)
-cat("Dimensions of reconstructed data:", dim(X_hat), "\n")
-#> Dimensions of reconstructed data: 30 15
-
-# Check reconstruction accuracy
-# Note: Since the pipeline involves dimensionality reduction (15 -> 8 -> 4),
-# reconstruction will not be exact. The error reflects the information lost.
-max_reconstruction_error <- max(abs(X - X_hat))
-cat("Maximum absolute reconstruction error:", format(max_reconstruction_error, digits=3), "\n")
-#> Maximum absolute reconstruction error: 1.47
-# stopifnot(max_reconstruction_error < 1e-5) # Removed: This check is too strict for lossy reconstruction
-
-# Get the overall coefficient matrix (p_orig x q_final)
 V <- coef(pipe)
-cat("Dimensions of overall coefficient matrix:", dim(V), "\n")
-#> Dimensions of overall coefficient matrix: 15 7
-
-# Get the overall pseudo-inverse matrix (q_final x p_orig)
-Vplus <- inverse_projection(pipe)
-cat("Dimensions of overall inverse projection matrix:", dim(Vplus), "\n")
-#> Dimensions of overall inverse projection matrix: 7 15
+dim(V)
+#> [1] 15  7
 ```
 
-Both the forward (`coef`) and inverse (`inverse_projection`) matrices
-for the *entire* pipeline are calculated and potentially cached for
-efficiency.
+[`variables_used()`](https://bbuchsbaum.github.io/multivarious/reference/variables_used.md)
+and
+[`vars_for_component()`](https://bbuchsbaum.github.io/multivarious/reference/vars_for_component.md)
+inspect this combined coefficient matrix. With dense PCA stages, every
+original variable usually contributes to the final scores.
 
-------------------------------------------------------------------------
+``` r
 
-## 4. House-keeping helpers
+c(
+  variables_used = length(variables_used(pipe)),
+  variables_for_first_component = length(vars_for_component(pipe, 1))
+)
+#>                variables_used variables_for_first_component 
+#>                            15                            15
+```
 
-Some useful helper functions:
+## 5. Reconstruct from final scores
 
-- **`%>>%`**: A pipe operator specifically for composing projectors. It
-  preserves stage names if the projectors are named.
+[`reconstruct()`](https://bbuchsbaum.github.io/multivarious/reference/reconstruct.md)
+maps final scores back toward the original variable space using the
+inverse projection for each stage. Because both PCA stages reduce
+dimension, the reconstruction is a lossy approximation, not an exact
+inverse.
 
-  ``` r
+``` r
 
-  # pipe3 <- pca1 %>>% pca2 %>>% pca3
-  ```
+X_hat <- reconstruct(pipe, scores_pipe)
 
-- **`truncate(pipe, ncomp = k)`**: Safely reduces the number of
-  components kept from the *last* stage of the pipeline.
+c(
+  rows = nrow(X_hat),
+  columns = ncol(X_hat),
+  rmse = sqrt(mean((X - X_hat)^2))
+)
+#>       rows    columns       rmse 
+#> 30.0000000 15.0000000  0.4487182
+```
 
-- **`variables_used(pipe)` / `vars_for_component(pipe, k)`**: (Potential
-  future helpers) Intended to trace which original variables contribute
-  to the final scores, especially useful if any stages perform variable
-  selection.
+## 6. Truncate the final stage
 
-------------------------------------------------------------------------
+[`truncate()`](https://bbuchsbaum.github.io/multivarious/reference/truncate.md)
+reduces the number of components retained from the last stage of a
+composed projector. It does not refit or truncate intermediate stages.
 
-## 6. Where next?
+``` r
 
-Composed projectors open up possibilities:
+pipe4 <- truncate(pipe, ncomp = 4)
 
-- Combine pre-processing (e.g., centering, scaling), dimensionality
-  reduction (PCA, PLS), and perhaps an orthogonal rotation (Varimax,
-  Procrustes) into a single, deployable modeling artifact.
-- Future enhancements might allow tracing the lineage of specific final
-  components back to the exact original variables that contribute most
-  significantly, leveraging the internal index mapping.
+summary(pipe4)
+#> # A tibble: 2 × 5
+#>   stage name   in_dim out_dim class
+#>   <int> <chr>   <int>   <int> <chr>
+#> 1     1 first      15       8 pca  
+#> 2     2 second      8       4 pca
+dim(project(pipe4, X))
+#> [1] 30  4
+```
 
-Happy composing!
+## 7. Practical boundaries
+
+Composition is useful when the stages form a valid sequence of fitted
+projectors. The output dimension of each stage must match the input
+dimension of the next stage. For preprocessing, use each model’s
+preprocessing argument. For partial projection, treat `colind` as a
+first-stage feature subset; it does not target later stages.

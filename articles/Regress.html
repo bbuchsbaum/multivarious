@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
 
     
     
-<p>When you already have a known set of basis functions—such as Fourier
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><p>When you already have a known set of basis functions—such as Fourier
 components, wavelets, splines, or principal components from a reference
 dataset—the goal isn’t to discover a latent space, but rather to express
 new data in terms of that existing basis. The <code><a href="../reference/regress.html">regress()</a></code>
@@ -83,11 +83,11 @@ Reconstruct data using all or a subset of basis components.</li>
 <li>
 <code><a href="../reference/truncate.html">truncate()</a></code>: Keep only a subset of basis
 components.</li>
-<li>Plus caching, variable tracking helpers, etc.</li>
 </ul>
 <p>This vignette demonstrates a typical workflow using an orthonormal
-Fourier basis, but the <code><a href="../reference/regress.html">regress()</a></code> function works equally
-well with arbitrary, potentially non-orthogonal, basis dictionaries.</p>
+Fourier basis. The same interface also accepts non-orthogonal
+dictionaries, with the chosen regression method determining how
+coefficients are estimated.</p>
 <hr>
 <div class="section level2">
 <h2 id="build-a-design-matrix-of-basis-functions">1. Build a design matrix of basis functions<a class="anchor" aria-label="anchor" href="#build-a-design-matrix-of-basis-functions"></a>
@@ -99,7 +99,7 @@ well with arbitrary, potentially non-orthogonal, basis dictionaries.</p>
 <span><span class="va">p</span>  <span class="op">&lt;-</span> <span class="fl">32</span>                        <span class="co"># Original variables per observation (e.g., time points)</span></span>
 <span><span class="va">k</span>  <span class="op">&lt;-</span> <span class="fl">20</span>                        <span class="co"># Number of basis functions (&lt;= p often, &lt;= n for lm)</span></span>
 <span></span>
-<span><span class="co">## Create toy data: smooth signals + noise</span></span>
+<span><span class="co">## Create simulated data: smooth signals plus noise</span></span>
 <span><span class="va">t</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">1</span>, length.out <span class="op">=</span> <span class="va">p</span><span class="op">)</span></span>
 <span><span class="va">Y</span>   <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">replicate</a></span><span class="op">(</span><span class="va">n</span>,  <span class="fl">3</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">sin</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">pi</span><span class="op">*</span><span class="fl">3</span><span class="op">*</span><span class="va">t</span><span class="op">)</span> <span class="op">+</span> <span class="fl">2</span><span class="op">*</span><span class="fu"><a href="https://rdrr.io/r/base/Trig.html" class="external-link">cos</a></span><span class="op">(</span><span class="fl">2</span><span class="op">*</span><span class="va">pi</span><span class="op">*</span><span class="fl">5</span><span class="op">*</span><span class="va">t</span><span class="op">)</span> <span class="op">)</span> <span class="op">+</span> </span>
 <span>       <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="va">n</span><span class="op">*</span><span class="va">p</span>, sd <span class="op">=</span> <span class="fl">0.3</span><span class="op">)</span>, <span class="va">p</span>, <span class="va">n</span><span class="op">)</span> <span class="co"># Note: Y is p x n here</span></span>
@@ -131,9 +131,7 @@ that best represent each signal in
 using the basis
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://bbuchsbaum.github.io/multivarious/">multivarious</a></span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Fit using standard linear models (lm)</span></span>
+<code class="sourceCode R"><span><span class="co"># Fit using standard linear models (lm)</span></span>
 <span><span class="co"># Y is p x n (32 x 128): 32 time points x 128 signals</span></span>
 <span><span class="co"># B is p x k (32 x 21): 32 time points x 21 basis functions</span></span>
 <span><span class="co"># regress will fit 128 separate regressions, each with 32 observations and 21 predictors</span></span>
@@ -148,15 +146,10 @@ using the basis
 <span><span class="co"><span style="color: #00BB00; font-weight: bold;">#&gt; </span><span style="color: #BBBB00;">  Method: </span><span style="color: #00BBBB;">lm</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">  Input dimension: </span>128</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">  Output dimension: </span>21</span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">  Coefficients dimension: </span> 128 x 21</span></span>
-<span></span>
-<span><span class="co">## Conceptual mapping to bi_projector slots:</span></span>
-<span><span class="co"># fit$v : Coefficients (n x k) - Basis coefficients for each signal.</span></span>
-<span><span class="co"># fit$s : Design Matrix (p x k) - The basis matrix B.</span></span>
-<span><span class="co">#         Stored for reconstruction.</span></span></code></pre></div>
-<p>The <code>bi_projector</code> structure provides a consistent way to
-access the core components: the basis (<code>fit$s</code>) and the
-coefficients (<code>fit$v</code>).</p>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">  Coefficients dimension: </span> 128 x 21</span></span></code></pre></div>
+<p>The fitted object stores the basis matrix and the signal-by-basis
+coefficient matrix. Use <code><a href="../reference/reconstruct.html">reconstruct()</a></code> for fitted values
+rather than relying on raw slots in downstream code.</p>
 <hr>
 </div>
 <div class="section level2">
@@ -168,14 +161,14 @@ demonstrates the key operations.</p>
 <div class="section level3">
 <h3 id="inspecting-the-fitted-coefficients">3.1 Inspecting the fitted coefficients<a class="anchor" aria-label="anchor" href="#inspecting-the-fitted-coefficients"></a>
 </h3>
-<p>The coefficient matrix <code>fit$v</code> has dimensions
+<p>The coefficient matrix returned by <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> has dimensions
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">n \times k</annotation></semantics></math>
 (signals
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>×</mi><annotation encoding="application/x-tex">\times</annotation></semantics></math>
 basis functions). Each row contains the weights that express one signal
 as a linear combination of basis functions.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">coef_matrix_first3</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">v</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span></span>
+<code class="sourceCode R"><span><span class="va">coef_matrix_first3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Coefficient matrix shape (first 3 signals):"</span>,</span>
 <span>    <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">coef_matrix_first3</span><span class="op">)</span>, <span class="st">"x"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">coef_matrix_first3</span><span class="op">)</span>, <span class="st">"\n\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Coefficient matrix shape (first 3 signals): 3 x 21</span></span>
@@ -198,15 +191,14 @@ coefficients—this matches our generating function
 <div class="section level3">
 <h3 id="reconstructing-the-fitted-data">3.2 Reconstructing the fitted data<a class="anchor" aria-label="anchor" href="#reconstructing-the-fitted-data"></a>
 </h3>
-<p>Reconstruction recovers the original data from the basis
-representation. The <code>bi_projector</code> stores both the design
-matrix
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
-(in <code>fit$s</code>) and the coefficients (in <code>fit$v</code>).
-Reconstruction is simply their product:</p>
-<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mo>=</mo><mi>B</mi><mo>⋅</mo><msup><mi>C</mi><mi>T</mi></msup><mo>=</mo><mtext mathvariant="monospace">𝚏𝚒𝚝$𝚜</mtext><mo>×</mo><mtext mathvariant="monospace">𝚝(𝚏𝚒𝚝$𝚟)</mtext></mrow><annotation encoding="application/x-tex">\hat{Y} = B \cdot C^T = \texttt{fit\$s} \times \texttt{t(fit\$v)}</annotation></semantics></math></p>
+<p>Reconstruction recovers fitted values in the original data space. The
+<code><a href="../reference/reconstruct.html">reconstruct()</a></code> method applies the matrix product stored in
+the fitted <code>bi_projector</code> and returns a
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">p \times n</annotation></semantics></math>
+fitted data matrix:</p>
+<p><math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mover><mi>Y</mi><mo accent="true">̂</mo></mover><mo>≈</mo><mi>B</mi><mo>⋅</mo><mi>C</mi></mrow><annotation encoding="application/x-tex">\hat{Y} \approx B \cdot C</annotation></semantics></math></p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">Y_hat</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">s</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">v</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">Y_hat</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span>
 <span><span class="va">max_reconstruction_error</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="va">Y_hat</span> <span class="op">-</span> <span class="va">Y</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Reconstruction shape:"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">Y_hat</span><span class="op">)</span>, <span class="st">"x"</span>, <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">Y_hat</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
@@ -293,28 +285,19 @@ selection/shrinkage, simply change the <code>method</code> argument.
 <p>The <code>bi_projector</code> interface allows for flexible
 manipulation:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Truncate: Keep only the first 5 basis functions (Intercept + 2 sine + 2 cosine)</span></span>
+<code class="sourceCode R"><span><span class="co"># Truncate: keep only the first 5 basis functions (Intercept + 2 sine + 2 cosine)</span></span>
 <span><span class="va">fit5</span>   <span class="op">&lt;-</span> <span class="fu"><a href="../reference/truncate.html">truncate</a></span><span class="op">(</span><span class="va">fit</span>, ncomp <span class="op">=</span> <span class="fl">5</span><span class="op">)</span> </span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat</a></span><span class="op">(</span><span class="st">"Dimensions after truncating to 5 components:"</span>, </span>
 <span>    <span class="st">"Basis (s):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fit5</span><span class="op">$</span><span class="va">s</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">"x"</span><span class="op">)</span>, </span>
 <span>    <span class="st">", Coefs (v):"</span>, <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">fit5</span><span class="op">$</span><span class="va">v</span><span class="op">)</span>, collapse<span class="op">=</span><span class="st">"x"</span><span class="op">)</span>, <span class="st">"\n"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Dimensions after truncating to 5 components: Basis (s): 32x5 , Coefs (v): 128x5</span></span>
-<span><span class="co"># Reconstruction using only first 5 basis functions (manual)</span></span>
-<span><span class="co"># Equivalent to: scores(fit5) %*% t(coef(fit5)) for the selected components</span></span>
-<span><span class="va">Y_hat5</span> <span class="op">&lt;-</span> <span class="va">fit5</span><span class="op">$</span><span class="va">s</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">fit5</span><span class="op">$</span><span class="va">v</span><span class="op">)</span></span>
+<span><span class="co"># Reconstruction using only the first 5 basis functions</span></span>
+<span><span class="va">Y_hat5</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">fit5</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Partial inverse projection: Map only a subset of coefficients back</span></span>
-<span><span class="co"># e.g., reconstruct using only components 2 through 6 (skip intercept)</span></span>
-<span><span class="co"># Note: partial_inverse_projection is not a standard bi_projector method, </span></span>
-<span><span class="co"># this might require manual slicing of the basis matrix B (fit$s) or coefs (fit$v).</span></span>
 <span><span class="co"># Manual reconstruction example for components 2:6</span></span>
-<span><span class="va">coef_subset</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">v</span><span class="op">[</span><span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, , drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span> <span class="co"># k_sub x n</span></span>
-<span><span class="va">basis_subset</span> <span class="op">&lt;-</span> <span class="va">fit</span><span class="op">$</span><span class="va">s</span><span class="op">[</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span> <span class="co"># p x k_sub</span></span>
-<span><span class="va">Y_lowHat</span> <span class="op">&lt;-</span> <span class="va">basis_subset</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">coef_subset</span> <span class="co"># p x n reconstruction</span></span>
-<span></span>
-<span><span class="co"># Variable usage helpers (Conceptual - actual functions might differ)</span></span>
-<span><span class="co"># `variables_used(fit)` could show which basis functions have non-zero coefficients (esp. for 'enet').</span></span>
-<span><span class="co"># `vars_for_component(fit, k)` isn't directly applicable here as components are the basis functions themselves.</span></span></code></pre></div>
+<span><span class="va">coef_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">[</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span> <span class="co"># n x k_sub</span></span>
+<span><span class="va">basis_subset</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/scores.html">scores</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span><span class="op">[</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">6</span>, drop<span class="op">=</span><span class="cn">FALSE</span><span class="op">]</span> <span class="co"># p x k_sub</span></span>
+<span><span class="va">Y_lowHat</span> <span class="op">&lt;-</span> <span class="va">basis_subset</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="va">coef_subset</span><span class="op">)</span> <span class="co"># (p x k_sub) %*% (k_sub x n) = p x n</span></span></code></pre></div>
 <hr>
 </div>
 <div class="section level2">
@@ -326,10 +309,10 @@ data matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>Y</mi><annotation encoding="application/x-tex">Y</annotation></semantics></math>
 as a product of the
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">p \times k</annotation></semantics></math>
-basis matrix (stored in <code>s</code>) and the
-<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>×</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">k \times n</annotation></semantics></math>
-coefficient matrix (stored in <code>v</code>):
-<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mi>Y</mi><mo accent="true">⏟</mo></munder><mrow><mi>p</mi><mo>×</mo><mi>n</mi></mrow></munder><mo>≈</mo><munder><munder><mi>s</mi><mo accent="true">⏟</mo></munder><mrow><mi>p</mi><mo>×</mo><mi>k</mi></mrow></munder><munder><munder><mi>v</mi><mo accent="true">⏟</mo></munder><mrow><mi>k</mi><mo>×</mo><mi>n</mi></mrow></munder></mrow><annotation encoding="application/x-tex"> \underbrace{Y}_{p\times n} \approx \underbrace{s}_{p\times k} \underbrace{v}_{k\times n} </annotation></semantics></math></p>
+basis matrix and the transpose of the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">n \times k</annotation></semantics></math>
+coefficient matrix:
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><munder><munder><mi>Y</mi><mo accent="true">⏟</mo></munder><mrow><mi>p</mi><mo>×</mo><mi>n</mi></mrow></munder><mo>≈</mo><munder><munder><mi>s</mi><mo accent="true">⏟</mo></munder><mrow><mi>p</mi><mo>×</mo><mi>k</mi></mrow></munder><munder><munder><msup><mi>v</mi><mi>⊤</mi></msup><mo accent="true">⏟</mo></munder><mrow><mi>k</mi><mo>×</mo><mi>n</mi></mrow></munder></mrow><annotation encoding="application/x-tex"> \underbrace{Y}_{p\times n} \approx \underbrace{s}_{p\times k} \underbrace{v^\top}_{k\times n} </annotation></semantics></math></p>
 <p><code><a href="../reference/regress.html">regress()</a></code> estimates
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>v</mi><annotation encoding="application/x-tex">v</annotation></semantics></math>
 (coefficients) based on the chosen method:</p>
@@ -342,7 +325,7 @@ coefficient matrix (stored in <code>v</code>):
 </colgroup>
 <thead><tr class="header">
 <th><code>method</code></th>
-<th>Solver Used (Conceptual)</th>
+<th>Solver</th>
 <th>Regularisation</th>
 <th>Key Reference</th>
 </tr></thead>
@@ -378,7 +361,7 @@ coefficient matrix (stored in <code>v</code>):
 </table>
 <p>The resulting object stores: * <code>v</code>: The estimated
 coefficient matrix
-(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>k</mi><mo>×</mo><mi>n</mi></mrow><annotation encoding="application/x-tex">k \times n</annotation></semantics></math>).
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">n \times k</annotation></semantics></math>).
 * <code>s</code>: The basis/design matrix
 <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>B</mi><annotation encoding="application/x-tex">B</annotation></semantics></math>
 (<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>p</mi><mo>×</mo><mi>k</mi></mrow><annotation encoding="application/x-tex">p \times k</annotation></semantics></math>),
@@ -392,37 +375,7 @@ from these core matrices.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="internal-checks-developer-focus">7. Internal Checks (Developer Focus)<a class="anchor" aria-label="anchor" href="#internal-checks-developer-focus"></a>
-</h2>
-<p>This section contains internal consistency checks, primarily for
-package development and CI testing.</p>
-<p>The code chunk below only runs if the environment variable
-<code>_MULTIVARIOUS_DEV_COVERAGE</code> is set.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># This chunk only runs if _MULTIVARIOUS_DEV_COVERAGE is non-empty</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Running internal consistency checks for regress()..."</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Running internal consistency checks for regress()...</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/conditions.html" class="external-link">tryCatch</a></span><span class="op">(</span><span class="op">{</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/stopifnot.html" class="external-link">stopifnot</a></span><span class="op">(</span></span>
-<span>    <span class="co"># Check reconstruction fidelity for lm</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">abs</a></span><span class="op">(</span><span class="fu"><a href="../reference/reconstruct.html">reconstruct</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span> <span class="op">-</span> <span class="va">Y</span><span class="op">)</span><span class="op">)</span> <span class="op">&lt;</span> <span class="fl">1e-10</span>,</span>
-<span>    <span class="co"># Check dimensions of inverse projection matrix (n x p)</span></span>
-<span>    <span class="co"># inverse_projection maps coefficients (k x n) back to data (p x n)</span></span>
-<span>    <span class="co"># The matrix itself maps k -&gt; p implicitly. Let's check coef matrix dims.</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">v</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">B</span><span class="op">)</span>, <span class="co"># k rows</span></span>
-<span>    <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">fit</span><span class="op">$</span><span class="va">v</span><span class="op">)</span> <span class="op">==</span> <span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">ncol</a></span><span class="op">(</span><span class="va">Y</span><span class="op">)</span>  <span class="co"># n columns</span></span>
-<span>    <span class="co"># Add checks for other methods if evaluated</span></span>
-<span>  <span class="op">)</span></span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/base/message.html" class="external-link">message</a></span><span class="op">(</span><span class="st">"Regress internal checks passed."</span><span class="op">)</span></span>
-<span><span class="op">}</span>, error <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">e</span><span class="op">)</span> <span class="op">{</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/warning.html" class="external-link">warning</a></span><span class="op">(</span><span class="st">"Regress internal checks failed: "</span>, <span class="va">e</span><span class="op">$</span><span class="va">message</span><span class="op">)</span></span>
-<span><span class="op">}</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning in value[[3L]](cond): Regress internal checks failed:</span></span>
-<span><span class="co">#&gt; max(abs(reconstruct(fit) - Y)) &lt; 1e-10 is not TRUE</span></span></code></pre></div>
-<hr>
-</div>
-<div class="section level2">
-<h2 id="take-aways">8. Take-aways<a class="anchor" aria-label="anchor" href="#take-aways"></a>
+<h2 id="take-aways">7. Take-aways<a class="anchor" aria-label="anchor" href="#take-aways"></a>
 </h2>
 <ul>
 <li>
@@ -440,7 +393,6 @@ projection, reconstruction, truncation, and coefficient extraction.</li>
 <li>Can be integrated into larger analysis pipelines using composition
 (<code>%&gt;&gt;%</code>) or cross-validation helpers.</li>
 </ul>
-<p>Happy re-representing!</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

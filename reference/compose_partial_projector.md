@@ -1,8 +1,9 @@
 # Compose Multiple Partial Projectors
 
-Creates a `composed_partial_projector` object that applies partial
-projections sequentially. If multiple projectors are composed, the
-column indices (colind) used at each stage must be considered.
+Creates a `composed_partial_projector` object that applies projectors
+sequentially. For partial projection, `colind` is applied to the first
+stage only; later stages receive the full output from the preceding
+stage.
 
 This infix operator provides syntactic sugar for composing projectors
 sequentially. It is an alias for `compose_partial_projector`.

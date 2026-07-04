@@ -5,7 +5,7 @@
 - [Introduction to the multivarious
   Package](https://bbuchsbaum.github.io/multivarious/articles/Introduction.md):
 - [Pre-processing pipelines in
-  multiblock](https://bbuchsbaum.github.io/multivarious/articles/PreProcessing.md):
+  multivarious](https://bbuchsbaum.github.io/multivarious/articles/PreProcessing.md):
 - [SVD wrapper, PCA and the
   bi_projector](https://bbuchsbaum.github.io/multivarious/articles/SVD_PCA.md):
 
@@ -36,5 +36,5 @@
   Reduction](https://bbuchsbaum.github.io/multivarious/articles/CrossValidation.md):
 - [Composing Projectors: Chaining
   Models](https://bbuchsbaum.github.io/multivarious/articles/Composing_Projectors.md):
-- [Extending multiblock: CCA and glmnet
+- [Extending multivarious: CCA and glmnet
   Examples](https://bbuchsbaum.github.io/multivarious/articles/Extending.md):

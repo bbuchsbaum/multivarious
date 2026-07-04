@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<title>Extending multiblock: CCA and glmnet Examples • multivarious</title>
+<title>Extending multivarious: CCA and glmnet Examples • multivarious</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><link href="../extra.css" rel="stylesheet">
-<script src="../extra.js"></script><meta property="og:title" content="Extending multiblock: CCA and glmnet Examples">
+<script src="../extra.js"></script><meta property="og:title" content="Extending multivarious: CCA and glmnet Examples">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,7 +51,7 @@
 <div class="row">
   <main id="main" class="col-md-9"><div class="page-header">
 
-      <h1>Extending multiblock: CCA and glmnet Examples</h1>
+      <h1>Extending multivarious: CCA and glmnet Examples</h1>
             
       
 
@@ -60,10 +60,10 @@
 
     
     
-<p>This vignette demonstrates how to wrap existing statistical models
-within the <code>multiblock</code> framework, specifically using
-<code>cross_projector</code> for Canonical Correlation Analysis (CCA)
-and <code>projector</code> for <code>glmnet</code> (penalized
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><p>This vignette demonstrates how to wrap existing statistical models
+within the <code>multivarious</code> projector framework, specifically
+using <code>cross_projector</code> for Canonical Correlation Analysis
+(CCA) and <code>projector</code> for <code>glmnet</code> (penalized
 regression).</p>
 <div class="section level2">
 <h2 id="canonical-correlation-analysis-with-cross_projector">1. Canonical Correlation Analysis with
@@ -155,8 +155,9 @@ block, or vice-versa
 subset of features from X or Y (<code>partial_project</code>).</li>
 <li>
 <strong>Integration:</strong> Use standardized
-<code>multiblock</code> tools like cross-validation (<code>cv</code>)
-and permutation testing (<code>perm_test</code>).</li>
+<code>multivarious</code> tools such as cross-validation
+(<code>cv_generic</code>) and permutation testing
+(<code>perm_test</code>).</li>
 </ul>
 </div>
 <div class="section level3">
@@ -259,10 +260,10 @@ the CCA relationship is unlikely due to chance.</p>
 <li>
 <code>cross_projector</code> provides a convenient wrapper for
 two-block methods like CCA.</li>
-<li>It enables using standard <code>multiblock</code> verbs
+<li>It enables using standard <code>multivarious</code> verbs
 (<code>project</code>, <code>transfer</code>,
-<code>partial_project</code>, <code>cv</code>, <code>perm_test</code>)
-with the wrapped model.</li>
+<code>partial_project</code>, <code>cv_generic</code>,
+<code>perm_test</code>) with the wrapped model.</li>
 <li>Preprocessing is handled internally, reducing risk of data
 leakage.</li>
 <li>Other methods (PLS, O2PLS) can be integrated by providing a

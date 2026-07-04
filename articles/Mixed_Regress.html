@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
 
     
     
-<div class="section level2">
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><div class="section level2">
 <h2 id="operator-valued-anova">1. Operator-valued ANOVA<a class="anchor" aria-label="anchor" href="#operator-valued-anova"></a>
 </h2>
 <p><code><a href="../reference/mixed_regress.html">mixed_regress()</a></code> treats each named fixed-effect term as a
@@ -372,17 +372,9 @@ are normalized to the same stacked representation.</p>
 <li>grouped permutation and subject bootstrap,</li>
 <li>shared feature basis or identity basis.</li>
 </ul>
-<p>The calibration harness used for the empirical checks in this
-vignette lives in
-<code>experimental/mixed_effect_operator_calibration.R</code>. Batch
-outputs can be written to <code>experimental/results/</code> for larger
-Monte Carlo runs outside the package test suite.</p>
-<p>Still to come:</p>
-<ul>
-<li>richer exchangeability schemes for repeated-measures contrasts,</li>
-<li>broader support beyond one grouping variable,</li>
-<li>more extensive mixed-model examples across design families.</li>
-</ul>
+<p>Larger Monte Carlo calibration runs should be treated as
+source-repository diagnostics rather than part of the installed vignette
+workflow.</p>
 <hr>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

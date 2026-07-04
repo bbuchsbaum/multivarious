@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@
 
     
     
-<div class="section level2">
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><div class="section level2">
 <h2 id="the-scalability-problem">The Scalability Problem<a class="anchor" aria-label="anchor" href="#the-scalability-problem"></a>
 </h2>
 <p>When working with similarity or kernel matrices, the computational
@@ -85,8 +85,8 @@ subset of “landmark” points:</p>
 <li>Compute the N × m matrix between all points and landmarks</li>
 <li>Use these to approximate the full eigendecomposition</li>
 </ol>
-<p>This reduces complexity from O(N³) to O(Nm²) — a massive speedup when
-m is small.</p>
+<p>This reduces complexity from O(N³) to O(Nm²), a substantial reduction
+when <code>m</code> is much smaller than <code>N</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="quick-start">Quick Start<a class="anchor" aria-label="anchor" href="#quick-start"></a>
@@ -100,7 +100,6 @@ m is small.</p>
 <span><span class="co"># Nyström approximation with linear kernel (default)</span></span>
 <span><span class="co"># Uses only 100 landmarks instead of all 1000 points</span></span>
 <span><span class="va">ny_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nystrom_approx.html">nystrom_approx</a></span><span class="op">(</span></span>
-<span></span>
 <span>  <span class="va">X</span>,</span>
 <span>  ncomp <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  nlandmarks <span class="op">=</span> <span class="fl">100</span>,</span>
@@ -184,18 +183,17 @@ approximation twice, reducing complexity further:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Standard method</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
-<span></span>
 <span>  <span class="va">ny_standard</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nystrom_approx.html">nystrom_approx</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, nlandmarks <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"standard"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   0.010   0.007   0.005</span></span>
+<span><span class="co">#&gt;   0.009   0.010   0.007</span></span>
 <span></span>
 <span><span class="co"># Double Nyström (faster with intermediate rank l)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/system.time.html" class="external-link">system.time</a></span><span class="op">(</span></span>
 <span>  <span class="va">ny_double</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/nystrom_approx.html">nystrom_approx</a></span><span class="op">(</span><span class="va">X</span>, ncomp <span class="op">=</span> <span class="fl">5</span>, nlandmarks <span class="op">=</span> <span class="fl">200</span>, method <span class="op">=</span> <span class="st">"double"</span>, l <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;    user  system elapsed </span></span>
-<span><span class="co">#&gt;   0.021   0.024   0.012</span></span></code></pre></div>
+<span><span class="co">#&gt;   0.021   0.024   0.013</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="choosing-parameters">Choosing Parameters<a class="anchor" aria-label="anchor" href="#choosing-parameters"></a>

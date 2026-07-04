@@ -21,7 +21,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">multivarious</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.3.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.4.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,20 +60,21 @@
 
     
     
-<div class="section level2">
+<script>document.addEventListener("DOMContentLoaded",function(){document.body.classList.remove("palette-red","palette-lapis","palette-ochre","palette-teal","palette-green","palette-violet","preset-homage","preset-study","preset-structural","preset-adobe","preset-midnight");document.body.classList.add("palette-red","preset-homage");});</script><div class="section level2">
 <h2 id="why-partial-projection">1. Why partial projection?<a class="anchor" aria-label="anchor" href="#why-partial-projection"></a>
 </h2>
-<p>Assume you trained a dimensionality-reduction model (PCA, PLS …) on p
-variables but, at prediction time,</p>
+<p>Assume you trained a dimensionality-reduction model (PCA, PLS, or
+another projector) on p variables but, at prediction time,</p>
 <ul>
 <li>one sensor is broken,</li>
 <li>a block of variables is too expensive to measure,</li>
 <li>you need a quick first pass while the “heavy” data arrive
 later.</li>
 </ul>
-<p>You still want the latent scores in the same component space, so
-downstream models, dashboards, alarms, … keep running.</p>
-<p>That’s exactly what</p>
+<p>You still want latent scores in the same component space so
+downstream summaries, classifiers, or monitoring rules can use the same
+columns.</p>
+<p>This is the role of</p>
 <pre><code><span><span class="fu"><a href="../reference/partial_project.html">partial_project</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">new_data_subset</span>, colind <span class="op">=</span> <span class="va">which.columns</span><span class="op">)</span></span></code></pre>
 <p>does:</p>
 <p><code>new_data_subset</code> (n × q) ─► project into latent space (n
@@ -84,7 +85,7 @@ used.</p>
 <hr>
 </div>
 <div class="section level2">
-<h2 id="walk-through-with-a-toy-pca">2. Walk-through with a toy PCA<a class="anchor" aria-label="anchor" href="#walk-through-with-a-toy-pca"></a>
+<h2 id="walk-through-with-a-small-pca">2. Walk-through with a small PCA<a class="anchor" aria-label="anchor" href="#walk-through-with-a-small-pca"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span></span>
@@ -143,8 +144,12 @@ used.</p>
 <span>  <span class="fu">labs</span><span class="op">(</span>title <span class="op">=</span> <span class="st">"Component 1: full vs. partial projection"</span><span class="op">)</span> <span class="op">+</span></span>
 <span>  <span class="fu">theme_minimal</span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
 <p><img src="Partial_Projection_files/figure-html/project_partial-1.png" class="r-plt" alt="" width="672"></p>
-<p>Even with two variables missing, the ridge LS step recovers latent
-scores that lie almost on the 1:1 line.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">plot_df</span><span class="op">$</span><span class="va">full</span>, <span class="va">plot_df</span><span class="op">$</span><span class="va">part</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] 0.8573874</span></span></code></pre></div>
+<p>The correlation reports how closely the partial scores agree with the
+full-data scores for this component.</p>
 <hr>
 </div>
 </div>
@@ -153,9 +158,8 @@ scores that lie almost on the 1:1 line.</p>
 </h2>
 <p>If you expect many rows with the same subset of features, create a
 specialised projector once and reuse it:</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># Assuming partial_projector is available</span></span>
-<span><span class="va">pca_1to6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial_projector.html">partial_projector</a></span><span class="op">(</span><span class="va">pca</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>   <span class="co"># keeps a reference + cache</span></span>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pca_1to6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/partial_projector.html">partial_projector</a></span><span class="op">(</span><span class="va">pca</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span>   <span class="co"># keeps a reference + cache</span></span>
 <span></span>
 <span><span class="co"># project 1000 new observations that only have the first 6 vars</span></span>
 <span><span class="va">new_batch</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">1000</span> <span class="op">*</span> <span class="fl">6</span><span class="op">)</span>, <span class="fl">1000</span>, <span class="fl">6</span><span class="op">)</span></span>
@@ -173,7 +177,7 @@ specialised projector once and reuse it:</p>
 <p>For multiblock fits (created with
 <code><a href="../reference/multiblock_projector.html">multiblock_projector()</a></code>), <code><a href="../reference/project_block.html">project_block()</a></code>
 provides a convenient wrapper around <code><a href="../reference/partial_project.html">partial_project()</a></code>:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Create a multiblock projector from our PCA</span></span>
 <span><span class="co"># Suppose columns 1-4 are "Block A" (block 1) and columns 5-8 are "Block B" (block 2)</span></span>
 <span><span class="va">block_indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, <span class="fl">5</span><span class="op">:</span><span class="fl">8</span><span class="op">)</span></span>
@@ -216,7 +220,7 @@ anatomical region without refitting the whole PCA/PLS.</li>
 <li>
 <strong>Nested / multi-subject studies.</strong> For multi-block PCA
 (e.g. “participant × sensor”), you can ask “where would subject i lie if
-I looked at block B only?” Simply supply that block to
+I looked at block B only?” Supply that block to
 <code><a href="../reference/project_block.html">project_block()</a></code>.</li>
 <li>
 <strong>Feature probes or “what-if” analysis.</strong> Engineers
@@ -229,7 +233,7 @@ variables and zeros elsewhere.</li>
 </h3>
 <p>Assume columns 1–5 (instead of 50 for brevity) of <code>X</code> form
 our ROI.</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">roi_cols</span>   <span class="op">&lt;-</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span>                 <span class="co"># pretend these are the ROI voxels</span></span>
 <span><span class="va">X_roi</span>      <span class="op">&lt;-</span> <span class="va">X</span><span class="op">[</span>, <span class="va">roi_cols</span><span class="op">]</span>       <span class="co"># same matrix from Section 2</span></span>
 <span></span>
@@ -258,7 +262,7 @@ pattern.</p>
 </h3>
 <p>Using the multiblock projector from Section 4, we can see how
 individual observations score when viewed through just one block:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Get scores for observation 1 using only Block 1 variables (columns 1-4)</span></span>
 <span><span class="va">subject1_block1</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/project_block.html">project_block</a></span><span class="op">(</span><span class="va">mb</span>, <span class="va">X</span><span class="op">[</span><span class="fl">1</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">4</span>, drop <span class="op">=</span> <span class="cn">FALSE</span><span class="op">]</span>, block <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span></span>
@@ -302,7 +306,7 @@ different story.</p>
 <tr class="even">
 <td>Region of interest (ROI)</td>
 <td>ROI columns of the data</td>
-<td><code>partial_project(mod, X[, ROI], ROI)</code></td>
+<td><code>partial_project(mod, X[, ROI], colind = ROI)</code></td>
 </tr>
 <tr class="odd">
 <td>Block-specific latent scores</td>
@@ -320,16 +324,16 @@ different story.</p>
 </tbody>
 </table>
 <p>The component space stays identical throughout, so downstream
-analytics, classifiers, or control charts continue to work with no
-re-training.</p>
+analytics, classifiers, or control charts can continue to use the same
+score columns without retraining the projector.</p>
 <hr>
 </div>
 <div class="section level2">
 <h2 id="session-info">Session info<a class="anchor" aria-label="anchor" href="#session-info"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/sessionInfo.html" class="external-link">sessionInfo</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; R version 4.6.0 (2026-04-24)</span></span>
+<span><span class="co">#&gt; R version 4.6.1 (2026-06-24)</span></span>
 <span><span class="co">#&gt; Platform: x86_64-pc-linux-gnu</span></span>
 <span><span class="co">#&gt; Running under: Ubuntu 24.04.4 LTS</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -350,20 +354,20 @@ re-training.</p>
 <span><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; other attached packages:</span></span>
-<span><span class="co">#&gt; [1] ggplot2_4.0.3      dplyr_1.2.1        multivarious_0.3.2</span></span>
+<span><span class="co">#&gt; [1] ggplot2_4.0.3      dplyr_1.2.1        multivarious_0.4.0</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
-<span><span class="co">#&gt;  [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.0    </span></span>
+<span><span class="co">#&gt;  [1] Matrix_1.7-5       gtable_0.3.6       jsonlite_2.0.0     compiler_4.6.1    </span></span>
 <span><span class="co">#&gt;  [5] tidyselect_1.2.1   geigen_2.3         jquerylib_0.1.4    systemfonts_1.3.2 </span></span>
 <span><span class="co">#&gt;  [9] scales_1.4.0       textshaping_1.0.5  yaml_2.3.12        fastmap_1.2.0     </span></span>
 <span><span class="co">#&gt; [13] lattice_0.22-9     R6_2.6.1           labeling_0.4.3     generics_0.1.4    </span></span>
 <span><span class="co">#&gt; [17] knitr_1.51         tibble_3.3.1       desc_1.4.3         chk_0.10.0        </span></span>
 <span><span class="co">#&gt; [21] bslib_0.11.0       pillar_1.11.1      RColorBrewer_1.1-3 rlang_1.2.0       </span></span>
-<span><span class="co">#&gt; [25] cachem_1.1.0       xfun_0.58          S7_0.2.2           fs_2.1.0          </span></span>
-<span><span class="co">#&gt; [29] sass_0.4.10        otel_0.2.0         cli_3.6.6          withr_3.0.2       </span></span>
-<span><span class="co">#&gt; [33] pkgdown_2.2.0      magrittr_2.0.5     digest_0.6.39      grid_4.6.0        </span></span>
+<span><span class="co">#&gt; [25] cachem_1.1.0       xfun_0.59          S7_0.2.2           fs_2.1.0          </span></span>
+<span><span class="co">#&gt; [29] sass_0.4.10        otel_0.2.0         cli_3.6.6          withr_3.0.3       </span></span>
+<span><span class="co">#&gt; [33] pkgdown_2.2.0      magrittr_2.0.5     digest_0.6.39      grid_4.6.1        </span></span>
 <span><span class="co">#&gt; [37] lifecycle_1.0.5    vctrs_0.7.3        evaluate_1.0.5     glue_1.8.1        </span></span>
-<span><span class="co">#&gt; [41] farver_2.1.2       ragg_1.5.2         rmarkdown_2.31     tools_4.6.0       </span></span>
+<span><span class="co">#&gt; [41] farver_2.1.2       ragg_1.5.2         rmarkdown_2.31     tools_4.6.1       </span></span>
 <span><span class="co">#&gt; [45] pkgconfig_2.0.3    htmltools_0.5.9</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

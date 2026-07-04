@@ -23,13 +23,11 @@ methods for tasks like:
   coefficients.
 - [`truncate()`](https://bbuchsbaum.github.io/multivarious/reference/truncate.md):
   Keep only a subset of basis components.
-- Plus caching, variable tracking helpers, etc.
 
 This vignette demonstrates a typical workflow using an orthonormal
-Fourier basis, but the
-[`regress()`](https://bbuchsbaum.github.io/multivarious/reference/regress.md)
-function works equally well with arbitrary, potentially non-orthogonal,
-basis dictionaries.
+Fourier basis. The same interface also accepts non-orthogonal
+dictionaries, with the chosen regression method determining how
+coefficients are estimated.
 
 ------------------------------------------------------------------------
 
@@ -44,7 +42,7 @@ n  <- 128                       # Number of observations (e.g., signals)
 p  <- 32                        # Original variables per observation (e.g., time points)
 k  <- 20                        # Number of basis functions (<= p often, <= n for lm)
 
-## Create toy data: smooth signals + noise
+## Create simulated data: smooth signals plus noise
 t   <- seq(0, 1, length.out = p)
 Y   <- replicate(n,  3*sin(2*pi*3*t) + 2*cos(2*pi*5*t) ) + 
        matrix(rnorm(n*p, sd = 0.3), p, n) # Note: Y is p x n here
@@ -77,8 +75,6 @@ using the basis $`B`$.
 
 ``` r
 
-library(multivarious)
-
 # Fit using standard linear models (lm)
 # Y is p x n (32 x 128): 32 time points x 128 signals
 # B is p x k (32 x 21): 32 time points x 21 basis functions
@@ -95,15 +91,12 @@ print(fit)
 #>   Input dimension: 128
 #>   Output dimension: 21
 #>   Coefficients dimension:  128 x 21
-
-## Conceptual mapping to bi_projector slots:
-# fit$v : Coefficients (n x k) - Basis coefficients for each signal.
-# fit$s : Design Matrix (p x k) - The basis matrix B.
-#         Stored for reconstruction.
 ```
 
-The `bi_projector` structure provides a consistent way to access the
-core components: the basis (`fit$s`) and the coefficients (`fit$v`).
+The fitted object stores the basis matrix and the signal-by-basis
+coefficient matrix. Use
+[`reconstruct()`](https://bbuchsbaum.github.io/multivarious/reference/reconstruct.md)
+for fitted values rather than relying on raw slots in downstream code.
 
 ------------------------------------------------------------------------
 
@@ -115,13 +108,15 @@ the key operations.
 
 ### 3.1 Inspecting the fitted coefficients
 
-The coefficient matrix `fit$v` has dimensions $`n \times k`$ (signals
-$`\times`$ basis functions). Each row contains the weights that express
-one signal as a linear combination of basis functions.
+The coefficient matrix returned by
+[`coef()`](https://rdrr.io/r/stats/coef.html) has dimensions
+$`n \times k`$ (signals $`\times`$ basis functions). Each row contains
+the weights that express one signal as a linear combination of basis
+functions.
 
 ``` r
 
-coef_matrix_first3 <- fit$v[1:3, ]
+coef_matrix_first3 <- coef(fit)[1:3, ]
 cat("Coefficient matrix shape (first 3 signals):",
     nrow(coef_matrix_first3), "x", ncol(coef_matrix_first3), "\n\n")
 #> Coefficient matrix shape (first 3 signals): 3 x 21
@@ -144,17 +139,18 @@ our generating function $`3\sin(2\pi \cdot 3t) + 2\cos(2\pi \cdot 5t)`$.
 
 ### 3.2 Reconstructing the fitted data
 
-Reconstruction recovers the original data from the basis representation.
-The `bi_projector` stores both the design matrix $`B`$ (in `fit$s`) and
-the coefficients (in `fit$v`). Reconstruction is simply their product:
+Reconstruction recovers fitted values in the original data space. The
+[`reconstruct()`](https://bbuchsbaum.github.io/multivarious/reference/reconstruct.md)
+method applies the matrix product stored in the fitted `bi_projector`
+and returns a $`p \times n`$ fitted data matrix:
 
 ``` math
-\hat{Y} = B \cdot C^T = \texttt{fit\$s} \times \texttt{t(fit\$v)}
+\hat{Y} \approx B \cdot C
 ```
 
 ``` r
 
-Y_hat <- fit$s %*% t(fit$v)
+Y_hat <- reconstruct(fit)
 max_reconstruction_error <- max(abs(Y_hat - Y))
 
 cat("Reconstruction shape:", nrow(Y_hat), "x", ncol(Y_hat), "\n")
@@ -252,28 +248,19 @@ The `bi_projector` interface allows for flexible manipulation:
 
 ``` r
 
-# Truncate: Keep only the first 5 basis functions (Intercept + 2 sine + 2 cosine)
+# Truncate: keep only the first 5 basis functions (Intercept + 2 sine + 2 cosine)
 fit5   <- truncate(fit, ncomp = 5) 
 cat("Dimensions after truncating to 5 components:", 
     "Basis (s):", paste(dim(fit5$s), collapse="x"), 
     ", Coefs (v):", paste(dim(fit5$v), collapse="x"), "\n")
 #> Dimensions after truncating to 5 components: Basis (s): 32x5 , Coefs (v): 128x5
-# Reconstruction using only first 5 basis functions (manual)
-# Equivalent to: scores(fit5) %*% t(coef(fit5)) for the selected components
-Y_hat5 <- fit5$s %*% t(fit5$v)
+# Reconstruction using only the first 5 basis functions
+Y_hat5 <- reconstruct(fit5)
 
-# Partial inverse projection: Map only a subset of coefficients back
-# e.g., reconstruct using only components 2 through 6 (skip intercept)
-# Note: partial_inverse_projection is not a standard bi_projector method, 
-# this might require manual slicing of the basis matrix B (fit$s) or coefs (fit$v).
 # Manual reconstruction example for components 2:6
-coef_subset <- fit$v[2:6, , drop=FALSE] # k_sub x n
-basis_subset <- fit$s[, 2:6, drop=FALSE] # p x k_sub
-Y_lowHat <- basis_subset %*% coef_subset # p x n reconstruction
-
-# Variable usage helpers (Conceptual - actual functions might differ)
-# `variables_used(fit)` could show which basis functions have non-zero coefficients (esp. for 'enet').
-# `vars_for_component(fit, k)` isn't directly applicable here as components are the basis functions themselves.
+coef_subset <- coef(fit)[, 2:6, drop=FALSE] # n x k_sub
+basis_subset <- scores(fit)[, 2:6, drop=FALSE] # p x k_sub
+Y_lowHat <- basis_subset %*% t(coef_subset) # (p x k_sub) %*% (k_sub x n) = p x n
 ```
 
 ------------------------------------------------------------------------
@@ -281,16 +268,16 @@ Y_lowHat <- basis_subset %*% coef_subset # p x n reconstruction
 ## 6. Under-the-hood: Matrix View
 
 The core idea is to represent the $`p \times n`$ data matrix $`Y`$ as a
-product of the $`p \times k`$ basis matrix (stored in `s`) and the
-$`k \times n`$ coefficient matrix (stored in `v`):
+product of the $`p \times k`$ basis matrix and the transpose of the
+$`n \times k`$ coefficient matrix:
 ``` math
- \underbrace{Y}_{p\times n} \approx \underbrace{s}_{p\times k} \underbrace{v}_{k\times n} 
+ \underbrace{Y}_{p\times n} \approx \underbrace{s}_{p\times k} \underbrace{v^\top}_{k\times n} 
 ```
 
 [`regress()`](https://bbuchsbaum.github.io/multivarious/reference/regress.md)
 estimates $`v`$ (coefficients) based on the chosen method:
 
-| `method` | Solver Used (Conceptual) | Regularisation | Key Reference |
+| `method` | Solver | Regularisation | Key Reference |
 |----|----|----|----|
 | “lm” | QR decomposition (`lm.fit`) | None | Classical OLS |
 | “mridge” | `glmnet` (alpha=0) | Ridge ($`\lambda ||\beta||_2^2`$) | Hoerl & Kennard 1970 |
@@ -298,7 +285,7 @@ estimates $`v`$ (coefficients) based on the chosen method:
 | “pls” | [`pls::plsr`](https://khliland.github.io/pls/reference/mvr.html) | Latent PLS factors | Wold 1984 |
 
 The resulting object stores: \* `v`: The estimated coefficient matrix
-($`k \times n`$). \* `s`: The basis/design matrix $`B`$
+($`n \times k`$). \* `s`: The basis/design matrix $`B`$
 ($`p \times k`$), possibly centered or scaled by the underlying solver.
 \* `sdev`, `center`: Potentially stores scaling/centering info related
 to $`s`$.
@@ -308,41 +295,7 @@ All other `bi_projector` methods (`project`, `reconstruct`,
 
 ------------------------------------------------------------------------
 
-## 7. Internal Checks (Developer Focus)
-
-This section contains internal consistency checks, primarily for package
-development and CI testing.
-
-The code chunk below only runs if the environment variable
-`_MULTIVARIOUS_DEV_COVERAGE` is set.
-
-``` r
-
-# This chunk only runs if _MULTIVARIOUS_DEV_COVERAGE is non-empty
-message("Running internal consistency checks for regress()...")
-#> Running internal consistency checks for regress()...
-tryCatch({
-  stopifnot(
-    # Check reconstruction fidelity for lm
-    max(abs(reconstruct(fit) - Y)) < 1e-10,
-    # Check dimensions of inverse projection matrix (n x p)
-    # inverse_projection maps coefficients (k x n) back to data (p x n)
-    # The matrix itself maps k -> p implicitly. Let's check coef matrix dims.
-    nrow(fit$v) == ncol(B), # k rows
-    ncol(fit$v) == ncol(Y)  # n columns
-    # Add checks for other methods if evaluated
-  )
-  message("Regress internal checks passed.")
-}, error = function(e) {
-  warning("Regress internal checks failed: ", e$message)
-})
-#> Warning in value[[3L]](cond): Regress internal checks failed:
-#> max(abs(reconstruct(fit) - Y)) < 1e-10 is not TRUE
-```
-
-------------------------------------------------------------------------
-
-## 8. Take-aways
+## 7. Take-aways
 
 - [`regress()`](https://bbuchsbaum.github.io/multivarious/reference/regress.md)
   provides a convenient way to fit multiple linear models simultaneously
@@ -354,5 +307,3 @@ tryCatch({
 - Works with any basis dictionary (orthonormal or not).
 - Can be integrated into larger analysis pipelines using composition
   (`%>>%`) or cross-validation helpers.
-
-Happy re-representing!
