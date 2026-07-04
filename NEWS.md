@@ -1,3 +1,21 @@
+# multivarious 0.4.0
+
+## Sparse preprocessing
+
+* Added sparse-aware preprocessing for `Matrix` inputs. `pass()` and sparse-safe `colscale()` transformations preserve sparse storage, while `center()` and `standardize()` now use a lazy affine representation instead of materializing dense centered matrices by default.
+* Added explicit sparse preprocessing policies: `sparse = "operator"` uses the lazy representation, `sparse = "preserve"` errors before a densifying transform, and `sparse = "allow_dense"` opts into dense materialization.
+* Added matrix-like S4 classes for lazy sparse affine data and its transpose, with methods for `%*%`, `crossprod()`, `tcrossprod()`, `t()`, subsetting, dimensions, and `as.matrix()`. Downstream code can now multiply or form cross-products from transformed sparse data without first densifying it.
+* Updated `svd_wrapper()` and `pca()` sparse/lazy paths to use implicit sparse SVD backends where possible, avoiding dense centered intermediates for common sparse PCA workflows.
+* Updated projector and partial-projection paths to multiply through lazy sparse preprocessing views directly.
+
+## Behavior changes
+
+* `transform()` on a sparse input with centering or standardization may now return a `sparse_affine_matrix` object. Use regular matrix algebra methods on that object to stay lazy, or call `as.matrix()` when explicit dense materialization is desired.
+
+## Tests
+
+* Added regression coverage for sparse preprocessing policies, sparse-safe scaling, lazy centered and standardized sparse transforms, implicit sparse PCA, projector multiplication, and public algebra methods on the lazy sparse affine classes.
+
 # multivarious 0.3.2
 
 ## Dependencies

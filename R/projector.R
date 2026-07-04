@@ -197,7 +197,7 @@ project.projector <- function(x, new_data, ...) {
   
   # Reprocess
   nd_proc <- reprocess(x, new_data)
-  nd_proc %*% components(x)
+  .affine_matmul(nd_proc, components(x))
 }
 
 
@@ -223,9 +223,9 @@ partial_project.projector <- function(x,
   v_sub <- components(x)[colind, , drop = FALSE]  # subset
   if (least_squares) {
     inv_vt_v   <- robust_inv_vTv(v_sub, lambda = lambda)  # (d x d)
-    factor_scr <- nd_proc %*% v_sub %*% inv_vt_v
+    factor_scr <- .affine_matmul(nd_proc, v_sub) %*% inv_vt_v
   } else {
-    factor_scr <- nd_proc %*% v_sub
+    factor_scr <- .affine_matmul(nd_proc, v_sub)
   }
   factor_scr
 }
@@ -246,9 +246,9 @@ reconstruct_new.projector <- function(x,
     nd_proc <- reprocess(x, new_data, colind = NULL)
     if (least_squares) {
       inv_vt_v    <- robust_inv_vTv(v_full, lambda = lambda)
-      factor_scr  <- nd_proc %*% v_full %*% inv_vt_v
+      factor_scr  <- .affine_matmul(nd_proc, v_full) %*% inv_vt_v
     } else {
-      factor_scr  <- nd_proc %*% v_full
+      factor_scr  <- .affine_matmul(nd_proc, v_full)
     }
     rec_data <- factor_scr %*% t(v_full)
     

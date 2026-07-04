@@ -24,3 +24,4 @@ experimental
 ^multivarious\.Rcheck$
 ^tmp$
 ^\.omc$
+^\.ruff_cache$

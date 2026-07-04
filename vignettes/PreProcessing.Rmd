@@ -23,9 +23,6 @@ vignette: |
 ---
 
 ```{r setup, include=FALSE}
-if (requireNamespace("ragg", quietly = TRUE)) knitr::opts_chunk$set(dev = "ragg_png")
-if (requireNamespace("systemfonts", quietly = TRUE)) albersdown::albers_register_fonts()
-if (requireNamespace("ggplot2", quietly = TRUE) && requireNamespace("albersdown", quietly = TRUE)) ggplot2::theme_set(albersdown::theme_albers(family = params$family, preset = params$preset))
 knitr::opts_chunk$set(collapse = TRUE, comment = "#>", fig.width=6, fig.height=4)
 library(multivarious)
 library(dplyr) # Needed for %>% and tibble manipulation
@@ -123,7 +120,50 @@ X_rev_cols24 <- inverse_transform(pp_std, Xs_cols24, colind = c(2,4))
 all.equal(X_rev_cols24, X_cols24) # TRUE
 ```
 
-# 3. Composing preprocessing steps
+# 3. Sparse matrix inputs
+
+Preprocessing also accepts sparse matrices from the `Matrix` package. Sparse-safe
+steps such as `pass()` and column scaling preserve sparse storage. Centering and
+standardisation are different: subtracting a non-zero column mean would make the
+implicit zero entries non-zero. Instead of silently densifying, `multivarious`
+uses a lazy affine matrix view by default.
+
+```{r sparse_preprocessing}
+X_sparse <- Matrix::Matrix(X, sparse = TRUE)
+
+pp_sparse <- fit(center(), X_sparse)
+Xs_sparse <- transform(pp_sparse, X_sparse)
+
+methods::is(Xs_sparse, "sparse_affine_matrix")
+```
+
+The transformed object behaves like a matrix for the common algebra you need
+downstream. Matrix multiplication and cross-products use the sparse input plus
+the stored affine shift, without first forming a dense centered matrix.
+
+```{r sparse_affine_algebra}
+v <- matrix(c(1, -1, 0, 0), ncol = 1)
+
+head(Xs_sparse %*% v, 4)
+crossprod(Xs_sparse)[1:2, 1:2]
+```
+
+```{r sparse_affine_checks, include=FALSE}
+Xs_dense <- sweep(as.matrix(X_sparse), 2, colMeans(as.matrix(X_sparse)), "-")
+stopifnot(methods::is(Xs_sparse, "sparse_affine_matrix"))
+stopifnot(max(abs((Xs_sparse %*% v) - (Xs_dense %*% v))) < 1e-10)
+stopifnot(max(abs(crossprod(Xs_sparse) - crossprod(Xs_dense))) < 1e-10)
+```
+
+You can make the densification policy explicit when fitting:
+
+```{r sparse_policy, eval=FALSE}
+fit(center(), X_sparse, sparse = "operator")    # default: lazy affine view
+fit(center(), X_sparse, sparse = "preserve")    # error if a step would densify
+fit(center(), X_sparse, sparse = "allow_dense") # explicitly materialize dense output
+```
+
+# 4. Composing preprocessing steps
 
 Because preprocessing steps nest, you can build pipelines by composing them:
 
@@ -136,7 +176,7 @@ pp_pipe <- fit(standardize(), X)
 Xp_pipe <- transform(pp_pipe, X)
 ```
 
-## 3.1 Quick visual
+## 4.1 Quick visual
 
 ```{r plot_pipeline}
 # Compare first column before and after pipeline
@@ -149,7 +189,7 @@ ggplot(df_pipe) +
   theme_minimal()
 ```
 
-# 4. Block-wise concatenation
+# 5. Block-wise concatenation
 
 Large multiblock models often want different preprocessing per block.
 `concat_pre_processors()` glues several *already fitted* pipelines into one
@@ -206,7 +246,7 @@ knitr::kable(
 all.equal(X_combined, back_combined) # TRUE
 ```
 
-# 5. Inside the weeds (for authors & power users)
+# 6. Inside the weeds (for authors & power users)
 
 | Helper                    | Purpose                                                              |
 |---------------------------|----------------------------------------------------------------------|
@@ -218,11 +258,12 @@ all.equal(X_combined, back_combined) # TRUE
 You rarely need to interact with these helpers directly; they exist so
 model-writers (e.g. new PCA flavours) can avoid boiler-plate.
 
-# 6. Key take-aways
+# 7. Key take-aways
 
 *   **Write once**: Define a preprocessing recipe (e.g., `colscale(center())`) and reuse it safely across CV folds using `fit()` on each fold's training data.
 *   **No data leakage**: Parameters live inside the fitted preprocessor object, calculated only from training data.
 *   **Composable & reversible**: Nest preprocessing steps, extract the original recipe with `fresh()`, and back-transform whenever you need results in original units using `inverse_transform()`.
+*   **Sparse-aware**: Sparse inputs can stay sparse or lazy through centering and standardisation, with explicit control over when dense materialization is allowed.
 *   **Block-aware**: The same mechanism powers multiblock PCA, CCA, ComDim…
 
 Happy projecting!

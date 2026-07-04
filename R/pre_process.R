@@ -107,7 +107,7 @@ init_transform.pre_processor <- function(x, X,...) {
     details = "init_transform() is deprecated. Use fit_transform() for a more standard interface."
   )
   
-  chk::chk_matrix(X)
+  .check_matrix_like(X)
   res <- x$init(X)
   # After init, orig_ncol should be set, store it directly in the object? 
   # Modifying the object after creation might be tricky with environments.
@@ -124,7 +124,7 @@ apply_transform.pre_processor <- function(x, X, colind=NULL,...) {
     details = "apply_transform() is deprecated. Use transform() for a more standard interface."
   )
   
-  chk::chk_matrix(X)
+  .check_matrix_like(X)
   
   # GENERAL CHECK: Ensure preprocessor is initialized before any application
   # REMOVED: This check prevents using preprocessors with manually supplied parameters
@@ -158,7 +158,7 @@ reverse_transform.pre_processor <- function(x, X, colind=NULL,...) {
     details = "reverse_transform() is deprecated. Use inverse_transform() for a more standard interface."
   )
   
-  chk::chk_matrix(X)
+  .check_matrix_like(X)
   
   # GENERAL CHECK: Ensure preprocessor is initialized before any reversal
   # REMOVED: This check prevents using preprocessors with manually supplied parameters
@@ -272,23 +272,23 @@ center <- function(preproc = prepper(), cmeans=NULL) {
     list(
       forward = function(X) {
         if (is.null(env$cmeans)) {
-          cm <- colMeans(X)
+          cm <- .matrix_col_means(X)
           env$cmeans <- cm
         } else {
           cm <- env$cmeans
           chk::chk_equal(ncol(X), length(cm))
         }
-        sweep(X, 2, cm, "-")
+        .affine_transform_matrix(X, shift = -cm)
       },
       
       apply = function(X, colind = NULL) {
         cm <- env$cmeans
         chk::chk_not_null(cm, "Means not initialized. Run init_transform first or supply 'cmeans'.")
         if (is.null(colind)) {
-          sweep(X, 2, cm, "-")
+          .affine_transform_matrix(X, shift = -cm)
         } else {
           chk::chk_equal(ncol(X), length(colind))
-          sweep(X, 2, cm[colind], "-")
+          .affine_transform_matrix(X, shift = -cm[colind])
         }
       },
       
@@ -302,10 +302,10 @@ center <- function(preproc = prepper(), cmeans=NULL) {
                            nc, length(env$cmeans)))
           } 
           means_to_use <- env$cmeans[1:nc]
-          sweep(X, 2, means_to_use, "+")
+          .affine_transform_matrix(X, shift = means_to_use)
         } else {
           chk::chk_equal(ncol(X), length(colind))
-          sweep(X, 2, env$cmeans[colind], "+")
+          .affine_transform_matrix(X, shift = env$cmeans[colind])
         }
       }
     )
@@ -344,7 +344,7 @@ colscale <- function(preproc = prepper(),
     list(
       forward = function(X) {
         if (is.null(env$weights)) { # Compute weights only if not precomputed
-          sds <- matrixStats::colSds(as.matrix(X)) # Ensure matrix for colSds
+          sds <- .matrix_col_sds(X)
           
           # Handle zero standard deviations robustly
           zero_sd <- sds < .Machine$double.eps
@@ -372,18 +372,18 @@ colscale <- function(preproc = prepper(),
             wts <- env$weights
             chk::chk_equal(length(wts), ncol(X))
         }
-        sweep(X, 2, wts, "*")
+        .affine_transform_matrix(X, scale = wts)
       },
       
       apply = function(X, colind = NULL) {
         chk::chk_not_null(env$weights, "Weights not initialized. Run init_transform first.")
         wts <- env$weights
         if (is.null(colind)) {
-          sweep(X, 2, wts, "*")
+          .affine_transform_matrix(X, scale = wts)
         } else {
           # Ensure X matches colind length, and colind is valid (checked by caller)
           chk::chk_equal(ncol(X), length(colind))
-          sweep(X, 2, wts[colind], "*")
+          .affine_transform_matrix(X, scale = wts[colind])
         }
       },
       
@@ -402,10 +402,10 @@ colscale <- function(preproc = prepper(),
                            nc, length(wts_safe)))
            } 
           weights_to_use <- wts_safe[1:nc]
-          sweep(X, 2, weights_to_use, "/")
+          .affine_transform_matrix(X, scale = 1 / weights_to_use)
         } else {
           chk::chk_equal(ncol(X), length(colind))
-          sweep(X, 2, wts_safe[colind], "/")
+          .affine_transform_matrix(X, scale = 1 / wts_safe[colind])
         }
       }
     )
@@ -428,14 +428,14 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
     list(
       forward = function(X) {
         if (is.null(sds)) {
-          sds2 <- matrixStats::colSds(X, na.rm = TRUE)
+          sds2 <- .matrix_col_sds(X, na.rm = TRUE)
         } else {
           chk::chk_equal(length(sds), ncol(X))
           sds2 <- sds
         }
         
         if (is.null(cmeans)) {
-          cmeans2 <- colMeans(X, na.rm = TRUE)
+          cmeans2 <- .matrix_col_means(X, na.rm = TRUE)
         } else {
           chk::chk_equal(length(cmeans), ncol(X))
           cmeans2 <- cmeans
@@ -462,11 +462,7 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
         env$sds <- sds2
         env$cmeans <- cmeans2
         
-        # TODO: [INEFF] This uses two sweep() calls. For large matrices, 
-        #       consider combining into a single pass or using optimized 
-        #       functions if performance becomes critical.
-        x1 <- sweep(X, 2, cmeans2, "-")
-        sweep(x1, 2, sds2, "/")
+        .affine_transform_matrix(X, scale = 1 / sds2, shift = -cmeans2 / sds2)
       },
       
       apply = function(X, colind = NULL) {
@@ -475,14 +471,10 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
         chk::chk_not_null(sds2, "SDs not initialized. Run init_transform first or supply 'sds'.")
         chk::chk_not_null(cmeans2, "Means not initialized. Run init_transform first or supply 'cmeans'.")
         if (is.null(colind)) {
-          # TODO: [INEFF] See forward() - two sweep() calls.
-          x1 <- sweep(X, 2, cmeans2, "-")
-          sweep(x1, 2, sds2, "/")
+          .affine_transform_matrix(X, scale = 1 / sds2, shift = -cmeans2 / sds2)
         } else {
           chk::chk_equal(ncol(X), length(colind))
-          # TODO: [INEFF] See forward() - two sweep() calls.
-          x1 <- sweep(X, 2, cmeans2[colind], "-")
-          sweep(x1, 2, sds2[colind], "/")
+          .affine_transform_matrix(X, scale = 1 / sds2[colind], shift = -cmeans2[colind] / sds2[colind])
         }
       },
       
@@ -502,14 +494,10 @@ standardize <- function(preproc = prepper(), cmeans=NULL, sds=NULL) {
           sds_to_use <- sds2[1:nc]
           means_to_use <- cmeans2[1:nc]
           
-          # TODO: [INEFF] Two sweep() calls.
-          x0 <- sweep(X, 2, sds_to_use, "*")
-          sweep(x0, 2, means_to_use, "+")
+          .affine_transform_matrix(X, scale = sds_to_use, shift = means_to_use)
         } else {
           chk::chk_equal(ncol(X), length(colind))
-          # TODO: [INEFF] Two sweep() calls.
-          x0 <- sweep(X, 2, sds2[colind], "*")
-          sweep(x0, 2, cmeans2[colind], "+")
+          .affine_transform_matrix(X, scale = sds2[colind], shift = cmeans2[colind])
         }
       }
     )
@@ -729,39 +717,49 @@ print.concat_pre_processor <- function(x, ...) {
 # =============================================================================
 
 #' @export
-fit.prepper <- function(object, X, ...) {
+fit.prepper <- function(object, X, sparse = c("operator", "auto", "preserve", "allow_dense"), ...) {
+  sparse <- .sparse_policy(sparse)
   # Build and initialize a pre_processor while suppressing deprecated shim
   # warnings, but keep real preprocessing warnings visible.
   proc <- suppressWarnings(prep(object), classes = "lifecycle_warning_deprecated")
   fitted_proc <- mark_fitted(proc, TRUE)
-  suppressWarnings(
-    init_transform(fitted_proc, X),
-    classes = "lifecycle_warning_deprecated"
+  attr(fitted_proc, "sparse_policy") <- sparse
+  .with_sparse_policy(
+    sparse,
+    suppressWarnings(
+      init_transform(fitted_proc, X),
+      classes = "lifecycle_warning_deprecated"
+    )
   )
   fitted_proc
 }
 
 #' @export
-fit_transform.prepper <- function(object, X, ...) {
+fit_transform.prepper <- function(object, X, sparse = c("operator", "auto", "preserve", "allow_dense"), ...) {
+  sparse <- .sparse_policy(sparse)
   proc <- suppressWarnings(prep(object), classes = "lifecycle_warning_deprecated")
   fitted_proc <- mark_fitted(proc, TRUE)
-  transformed <- suppressWarnings(
-    init_transform(fitted_proc, X),
-    classes = "lifecycle_warning_deprecated"
+  attr(fitted_proc, "sparse_policy") <- sparse
+  transformed <- .with_sparse_policy(
+    sparse,
+    suppressWarnings(
+      init_transform(fitted_proc, X),
+      classes = "lifecycle_warning_deprecated"
+    )
   )
   list(preproc = fitted_proc, transformed = transformed)
 }
 
 #' @export
-transform.pre_processor <- function(object, X, colind = NULL, ...) {
+transform.pre_processor <- function(object, X, colind = NULL, sparse = NULL, ...) {
   check_fitted(object, "transform")
-  object$transform(X, colind)
+  .with_sparse_policy(.object_sparse_policy(object, sparse), object$transform(X, colind))
 }
 
 #' @export
-inverse_transform.pre_processor <- function(object, X, colind = NULL, ...) {
+inverse_transform.pre_processor <- function(object, X, colind = NULL, sparse = NULL, ...) {
   check_fitted(object, "inverse_transform")
-  object$reverse_transform(X, colind)
+  .with_sparse_policy(.object_sparse_policy(object, sparse), object$reverse_transform(X, colind))
 }
 
 #' @export

@@ -42,8 +42,10 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
   
   # Cap ncomp based on dimensions and method requirements
   max_k <- min(dim(Xp))
+  use_sparse_implicit <- .is_sparse_affine_matrix(Xp) ||
+    (.is_sparse_matrix(Xp) && method %in% c("fast", "irlba", "svds"))
   # RSpectra and irlba require k < min(dim), base/fast/propack/rsvd work up to min(dim)
-  safe_k <- if (method %in% c("svds", "irlba")) max_k - 1 else max_k
+  safe_k <- if (method %in% c("svds", "irlba") || (use_sparse_implicit && method == "fast")) max_k - 1 else max_k
   if (safe_k < 1) stop("Matrix dimensions too small for requested SVD method.")
   
   k <- min(ncomp, safe_k) # Final number of components to request
@@ -53,34 +55,44 @@ svd_wrapper <- function(X, ncomp=min(dim(X)),
   if (k <= 0) stop("Cannot request 0 or negative components (k).", call. = FALSE)
   
   res <- tryCatch({ # Wrap the switch in tryCatch for robustness
-    switch(method,
+    implicit_res <- NULL
+    if (use_sparse_implicit) {
+      implicit_res <- .svd_sparse_implicit(Xp, k = k, method = method, ...)
+    }
+    if (is.null(implicit_res) && (.is_sparse_affine_matrix(Xp) || inherits(Xp, "Matrix"))) {
+      Xp <- as.matrix(Xp)
+    }
+
+    if (!is.null(implicit_res)) {
+      implicit_res
+    } else switch(method,
            base = svd(Xp, nu = k, nv = k, ...),
            fast = {
-               if (!requireNamespace("corpcor", quietly = TRUE)) stop("Package 'corpcor' needed for method='fast'.", call.=FALSE)
-               corpcor::fast.svd(Xp, tol = 0) # Use tol later for relative filtering
+             if (!requireNamespace("corpcor", quietly = TRUE)) stop("Package 'corpcor' needed for method='fast'.", call.=FALSE)
+             corpcor::fast.svd(Xp, tol = 0) # Use tol later for relative filtering
            },
            rsvd = {
-               if (!requireNamespace("rsvd", quietly = TRUE)) stop("Package 'rsvd' needed for method='rsvd'.", call.=FALSE)
-               rsvd::rsvd(Xp, k = k, q = q, p = p, ...)
+             if (!requireNamespace("rsvd", quietly = TRUE)) stop("Package 'rsvd' needed for method='rsvd'.", call.=FALSE)
+             rsvd::rsvd(Xp, k = k, q = q, p = p, ...)
            },
            svds = {
-               if (!requireNamespace("RSpectra", quietly = TRUE)) stop("Package 'RSpectra' needed for method='svds'.", call.=FALSE)
-               RSpectra::svds(Xp, k = k, ...)
-            },
+             if (!requireNamespace("RSpectra", quietly = TRUE)) stop("Package 'RSpectra' needed for method='svds'.", call.=FALSE)
+             RSpectra::svds(Xp, k = k, ...)
+           },
            propack = {
-               if (!requireNamespace("svd", quietly = TRUE)) stop("Package 'svd' needed for method='propack'.", call.=FALSE)
-               # propack needs neig = number of eigenvalues = k
-               svd::propack.svd(Xp, neig = k, ...)
+             if (!requireNamespace("svd", quietly = TRUE)) stop("Package 'svd' needed for method='propack'.", call.=FALSE)
+             # propack needs neig = number of eigenvalues = k
+             svd::propack.svd(Xp, neig = k, ...)
            },
            irlba = {
-               if (!requireNamespace("irlba", quietly = TRUE)) stop("Package 'irlba' needed for method='irlba'.", call.=FALSE)
-               irlba::irlba(Xp, nu = k, nv = k, ...)
+             if (!requireNamespace("irlba", quietly = TRUE)) stop("Package 'irlba' needed for method='irlba'.", call.=FALSE)
+             irlba::irlba(Xp, nu = k, nv = k, ...)
            },
            stop("Unknown SVD method specified: ", method) # Default stop
     )
-   }, error = function(e) {
+  }, error = function(e) {
        stop(sprintf("SVD computation failed for method '%s': %s", method, e$message), call. = FALSE)
-   })
+  })
   
   # Filter based on relative tolerance
   if (length(res$d) == 0) stop("SVD returned zero singular values.")
@@ -122,7 +134,5 @@ std_scores.svd <- function(x,...) {
   # Scale U vectors to have variance ~1
   sqrt(N - 1) * x$u 
 }
-
-
 
 
