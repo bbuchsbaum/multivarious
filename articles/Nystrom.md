@@ -128,14 +128,14 @@ system.time(
   ny_standard <- nystrom_approx(X, ncomp = 5, nlandmarks = 200, method = "standard")
 )
 #>    user  system elapsed 
-#>   0.009   0.009   0.006
+#>   0.010   0.008   0.006
 
 # Double Nyström (faster with intermediate rank l)
 system.time(
   ny_double <- nystrom_approx(X, ncomp = 5, nlandmarks = 200, method = "double", l = 50)
 )
 #>    user  system elapsed 
-#>   0.015   0.025   0.012
+#>   0.016   0.024   0.011
 ```
 
 ## Choosing Parameters
