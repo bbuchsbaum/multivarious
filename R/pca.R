@@ -809,20 +809,21 @@ print.pca <- function(x, ...) {
     cum_var <- cumsum(prop_var)
 
     cat(cli::style_bold("Variance explained (per component):\n"))
-    cat(
-      formatC(seq_len(ncomp_used), width = 2), " ",
-      formatC(round(prop_var * 100, 2), width=6), "%  ",
-      "(cumulative: ",
-      formatC(round(cum_var * 100, 2), width=6), "%)\n",
-      sep = ""
-    )
+    cat(sprintf("  %4s  %9s  %9s\n", "Comp", "PropVar%", "Cumul%"))
+    for (i in seq_len(ncomp_used)) {
+      cat(sprintf("  %4d  %9.2f  %9.2f\n", i, prop_var[i] * 100, cum_var[i] * 100))
+    }
     cat("\n")
   }
 
   # If we have an explained_variance field (like from rotate), use that
   if (!is.null(x$explained_variance)) {
-    cat(cli::style_bold("Explained variance from rotation:\n"))
-    cat(paste(round(x$explained_variance * 100, 2), "%\n"), "\n\n")
+    cat(cli::style_bold("Explained variance from rotation (per rotated component):\n"))
+    ev <- x$explained_variance
+    for (i in seq_along(ev)) {
+      cat(sprintf("  Comp %d: %6.2f%%\n", i, ev[i] * 100))
+    }
+    cat("\n")
   }
 
   # Possibly show info about rotation

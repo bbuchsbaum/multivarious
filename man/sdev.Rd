@@ -2,7 +2,7 @@
 % Please edit documentation in R/all_generic.R
 \name{sdev}
 \alias{sdev}
-\title{standard deviations}
+\title{component scales (singular values)}
 \usage{
 sdev(x)
 }
@@ -10,8 +10,23 @@ sdev(x)
 \item{x}{the model fit}
 }
 \value{
-the standard deviations
+a numeric vector of singular values (one per component)
 }
 \description{
-The standard deviations of the projected data matrix
+Return the per-component scale of a fitted projection. For the SVD-based
+methods in this package (\code{svd_wrapper}, \code{pca}, \code{bi_projector}),
+this is the vector of \emph{singular values} of the pre-processed data
+matrix, i.e. the square roots of the eigenvalues of \eqn{X^\top X}. It is
+\strong{not} the sample standard deviation of the score columns: those equal
+\code{sdev(x) / sqrt(n - 1)} (the convention used by \code{stats::prcomp}).
+The two differ only by the constant factor \code{sqrt(n - 1)}, so
+variance-explained ratios (\code{sdev^2 / sum(sdev^2)}) are identical either
+way.
+}
+\note{
+The name \code{sdev} is retained for backward compatibility and
+\code{prcomp}-familiarity; the value stored is the raw singular value. A
+future major version may switch to the \code{prcomp} scaling
+(\code{d / sqrt(n - 1)}); do not rely on the absolute magnitude across
+versions -- use ratios, or rescale explicitly.
 }

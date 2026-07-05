@@ -11,7 +11,11 @@ bi_projector(v, s, sdev, preproc = prep(pass()), classes = NULL, ...)
 
 \item{s}{The score matrix}
 
-\item{sdev}{The standard deviations of the score matrix}
+\item{sdev}{The per-component scale, one per column of \code{s}. For SVD/PCA
+this is the vector of singular values (\eqn{\sqrt{\lambda}}), \emph{not} the
+sample standard deviation of the score columns (which is
+\code{sdev / sqrt(n - 1)}). See \code{\link{sdev}} for the convention and a
+forward-compatibility note.}
 
 \item{preproc}{(optional) A pre-processing pipeline, default is prep(pass())}
 

@@ -94,7 +94,7 @@ preproc_fitted <- fit(center(), X)
 pca <- bi_projector(
   v     = svd_res$v,
   s     = Xc %*% svd_res$v,
-  sdev  = svd_res$d[1:3] / sqrt(n-1), # Correct scaling for sdev
+  sdev  = svd_res$d[1:3], # raw singular values -- matches pca()/svd_wrapper()
   preproc = preproc_fitted
 )
 ```
