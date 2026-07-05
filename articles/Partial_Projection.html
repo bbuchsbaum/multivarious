@@ -104,7 +104,7 @@ used.</p>
 <span><span class="va">pca</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/bi_projector.html">bi_projector</a></span><span class="op">(</span></span>
 <span>  v     <span class="op">=</span> <span class="va">svd_res</span><span class="op">$</span><span class="va">v</span>,</span>
 <span>  s     <span class="op">=</span> <span class="va">Xc</span> <span class="op"><a href="https://rdrr.io/r/base/matmult.html" class="external-link">%*%</a></span> <span class="va">svd_res</span><span class="op">$</span><span class="va">v</span>,</span>
-<span>  sdev  <span class="op">=</span> <span class="va">svd_res</span><span class="op">$</span><span class="va">d</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">/</span> <span class="fu"><a href="https://rdrr.io/r/base/MathFun.html" class="external-link">sqrt</a></span><span class="op">(</span><span class="va">n</span><span class="op">-</span><span class="fl">1</span><span class="op">)</span>, <span class="co"># Correct scaling for sdev</span></span>
+<span>  sdev  <span class="op">=</span> <span class="va">svd_res</span><span class="op">$</span><span class="va">d</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span>, <span class="co"># raw singular values -- matches pca()/svd_wrapper()</span></span>
 <span>  preproc <span class="op">=</span> <span class="va">preproc_fitted</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">

@@ -162,7 +162,7 @@ Functions for working with model components and properties.
 - [`std_scores()`](https://bbuchsbaum.github.io/multivarious/reference/std_scores.md)
   : Compute standardized component scores
 - [`sdev()`](https://bbuchsbaum.github.io/multivarious/reference/sdev.md)
-  : standard deviations
+  : component scales (singular values)
 - [`ncomp()`](https://bbuchsbaum.github.io/multivarious/reference/ncomp.md)
   : Get the number of components
 - [`shape()`](https://bbuchsbaum.github.io/multivarious/reference/shape.md)

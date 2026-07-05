@@ -109,7 +109,10 @@ fit
 #> Components retained: 3
 #> 
 #> Variance explained (per component):
-#>  1 2 3  92.95  5.33  1.72%  (cumulative:  92.95 98.28   100%)
+#>   Comp   PropVar%     Cumul%
+#>      1      92.95      92.95
+#>      2       5.33      98.28
+#>      3       1.72     100.00
 ```
 
 **Access the results.** `fit` is a `bi_projector`, so the standard verbs

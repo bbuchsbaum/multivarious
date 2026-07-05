@@ -61,7 +61,11 @@ variable space to the d-dimensional component space. The singular value decompos
 
 
 <dt id="arg-sdev">sdev<a class="anchor" aria-label="anchor" href="#arg-sdev"></a></dt>
-<dd><p>The standard deviations of the score matrix</p></dd>
+<dd><p>The per-component scale, one per column of <code>s</code>. For SVD/PCA
+this is the vector of singular values (\(\sqrt{\lambda}\)), <em>not</em> the
+sample standard deviation of the score columns (which is
+<code>sdev / sqrt(n - 1)</code>). See <code><a href="sdev.html">sdev</a></code> for the convention and a
+forward-compatibility note.</p></dd>
 
 
 <dt id="arg-preproc">preproc<a class="anchor" aria-label="anchor" href="#arg-preproc"></a></dt>

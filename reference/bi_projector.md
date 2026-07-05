@@ -26,7 +26,12 @@ bi_projector(v, s, sdev, preproc = prep(pass()), classes = NULL, ...)
 
 - sdev:
 
-  The standard deviations of the score matrix
+  The per-component scale, one per column of `s`. For SVD/PCA this is
+  the vector of singular values (\\\sqrt{\lambda}\\), *not* the sample
+  standard deviation of the score columns (which is
+  `sdev / sqrt(n - 1)`). See
+  [`sdev`](https://bbuchsbaum.github.io/multivarious/reference/sdev.md)
+  for the convention and a forward-compatibility note.
 
 - preproc:
 

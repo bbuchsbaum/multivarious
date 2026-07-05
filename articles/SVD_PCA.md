@@ -64,7 +64,11 @@ print(pca_fit)
 #> Components retained: 4
 #> 
 #> Variance explained (per component):
-#>  1 2 3 4  92.46  5.31  1.71  0.52%  (cumulative:  92.46 97.77 99.48   100%)
+#>   Comp   PropVar%     Cumul%
+#>      1      92.46      92.46
+#>      2       5.31      97.77
+#>      3       1.71      99.48
+#>      4       0.52     100.00
 ```
 
 ### 2.1 Scree-plot and cumulative variance
@@ -162,13 +166,16 @@ print(pca_rotated)
 #> Components retained: 4
 #> 
 #> Variance explained (per component):
-#>  1 2 3 4  46.56  3.92  5.68 43.84%  (cumulative:  46.56 50.48 56.16   100%)
+#>   Comp   PropVar%     Cumul%
+#>      1      46.56      46.56
+#>      2       3.92      50.48
+#>      3       5.68      56.16
+#>      4      43.84     100.00
 #> 
-#> Explained variance from rotation:
-#> 82.9 %
-#>  6.98 %
-#>  10.12 %
-#>  
+#> Explained variance from rotation (per rotated component):
+#>   Comp 1:  82.90%
+#>   Comp 2:   6.98%
+#>   Comp 3:  10.12%
 #> 
 #> Rotation details:
 #>   Type: varimax 
