@@ -4,9 +4,10 @@
 # multivarious
 
 <!-- badges: start -->
-
-[![Codecov test
-coverage](https://codecov.io/gh/bbuchsbaum/multivarious/branch/master/graph/badge.svg)](https://app.codecov.io/gh/bbuchsbaum/multivarious?branch=master)
+[![R-CMD-check](https://github.com/bbuchsbaum/multivarious/actions/workflows/check-standard.yaml/badge.svg)](https://github.com/bbuchsbaum/multivarious/actions/workflows/check-standard.yaml)
+[![pkgdown](https://github.com/bbuchsbaum/multivarious/actions/workflows/pkgdown.yaml/badge.svg)](https://github.com/bbuchsbaum/multivarious/actions/workflows/pkgdown.yaml)
+[![test-coverage](https://github.com/bbuchsbaum/multivarious/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/bbuchsbaum/multivarious/actions/workflows/test-coverage.yaml)
+[![Codecov test coverage](https://codecov.io/gh/bbuchsbaum/multivarious/branch/master/graph/badge.svg)](https://app.codecov.io/gh/bbuchsbaum/multivarious?branch=master)
 <!-- badges: end -->
 
 This package is intended to provide some basic abstractions and default
